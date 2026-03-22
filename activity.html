@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity History - COMSATSPrepHub</title>
+    <!-- Simple, Semantic Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-surface text-on-surface">
+    <!-- TopAppBar -->
+    <header class="navbar" style="background-color: rgba(244, 244, 245, 0.5); backdrop-filter: blur(24px); border-bottom: none;">
+        <a href="home.html" class="navbar-brand">COMSATSPrepHub</a>
+        
+        <nav class="nav-links">
+            <a href="dashboard.html" class="nav-link">Dashboard</a>
+            <a href="activity.html" class="nav-link active">Activity</a>
+            <a href="quiz.html" class="nav-link">Quizzes</a>
+            <a href="subjects.html" class="nav-link">Papers</a>
+        </nav>
+        
+        <div class="nav-actions">
+            <!-- Profile Action -->
+            <button class="btn-icon">
+                <span class="material-symbols-outlined">notifications</span>
+            </button>
+            <a href="profile.html" class="btn-icon" style="color: inherit;">
+                <span class="material-symbols-outlined">account_circle</span>
+            </a>
+        </div>
+    </header>
+
+    <div class="app-layout">
+        <!-- SideNavBar -->
+        <aside class="app-sidebar">
+            <div style="margin-bottom: 32px; padding-left: 12px; padding-top: 12px;">
+                <div style="font-size: 18px; font-weight: 900; text-transform: uppercase;">COMSATSPrepHub</div>
+                <div class="section-label" style="margin: 0;">Academic Excellence</div>
+            </div>
+            
+            <a href="dashboard.html" class="sidebar-link">
+                <span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+            <a href="activity.html" class="sidebar-link active">
+                <span class="material-symbols-outlined">history</span>
+                Activity
+            </a>
+            <a href="quiz.html" class="sidebar-link">
+                <span class="material-symbols-outlined">quiz</span>
+                Quizzes
+            </a>
+            <a href="subjects.html" class="sidebar-link">
+                <span class="material-symbols-outlined">description</span>
+                Papers
+            </a>
+            <a href="subjects.html" class="sidebar-link">
+                <span class="material-symbols-outlined">menu_book</span>
+                Lessons
+            </a>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <header style="margin-bottom: 48px;">
+                <span class="section-label" style="display: block;">Curation Logs</span>
+                <h1 class="main-title text-inverse-surface" style="font-weight: 900; font-size: 36px;">Academic History</h1>
+                <p class="question-desc" style="margin-top: 16px; max-width: 600px;">A chronological archive of your academic progression, curated for precision and performance review.</p>
+            </header>
+
+            <!-- Activity Filter Row -->
+            <div class="chip-row">
+                <button class="chip active">All Activity</button>
+                <button class="chip">Quizzes</button>
+                <button class="chip">Mid-Terms</button>
+                <button class="chip">Study Sessions</button>
+            </div>
+
+            <!-- Chronological List -->
+            <div style="display: flex; flex-direction: column;">
+                
+                <!-- Date Header: Today -->
+                <div class="date-divider">
+                    <span class="section-label" style="margin: 0; color: var(--text-muted);">Today</span>
+                    <div class="date-divider-line"></div>
+                </div>
+
+                <!-- Activity Card 1 -->
+                <div class="activity-card">
+                    <div class="activity-info">
+                        <div class="activity-icon-box">
+                            <span class="material-symbols-outlined">quiz</span>
+                        </div>
+                        <div class="activity-details">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <span class="badge-dark" style="background-color: #0c0f0f; color: white;">Quiz</span>
+                                <h3 style="font-weight: 700; font-size: 16px;">Programming Fundamentals</h3>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px; font-size: 14px; color: var(--text-muted);">
+                                <span style="display: flex; align-items: center; gap: 6px;"><span class="material-symbols-outlined" style="font-size: 16px;">schedule</span> 09:42 AM</span>
+                                <span style="display: flex; align-items: center; gap: 6px; color: #005e17;"><span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span> Completed</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-score-area">
+                        <div class="score-display">
+                            <span class="section-label" style="margin: 0 0 4px 0;">Score</span>
+                            <span class="score-value text-inverse-surface">85%</span>
+                        </div>
+                        <button class="btn-icon-hover">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Activity Card 2 -->
+                <div class="activity-card">
+                    <div class="activity-info">
+                        <div class="activity-icon-box">
+                            <span class="material-symbols-outlined">description</span>
+                        </div>
+                        <div class="activity-details">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <span class="badge-dark" style="background-color: var(--primary); color: var(--surface);">Mid-Term Paper</span>
+                                <h3 style="font-weight: 700; font-size: 16px;">Discrete Mathematics</h3>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px; font-size: 14px; color: var(--text-muted);">
+                                <span style="display: flex; align-items: center; gap: 6px;"><span class="material-symbols-outlined" style="font-size: 16px;">schedule</span> 07:15 AM</span>
+                                <span style="display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-style: italic;">In Progress</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-score-area">
+                        <div class="score-display">
+                            <span class="section-label" style="margin: 0 0 4px 0;">Score</span>
+                            <span class="score-value" style="color: rgba(90, 96, 97, 0.3);">--</span>
+                        </div>
+                        <button class="btn-icon-hover">
+                            <span class="material-symbols-outlined">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Date Header: Yesterday -->
+                <div class="date-divider" style="margin-top: 16px;">
+                    <span class="section-label" style="margin: 0; color: var(--text-muted);">Yesterday</span>
+                    <div class="date-divider-line"></div>
+                </div>
+
+                <!-- Activity Card 3 -->
+                <div class="activity-card">
+                    <div class="activity-info">
+                        <div class="activity-icon-box">
+                            <span class="material-symbols-outlined">menu_book</span>
+                        </div>
+                        <div class="activity-details">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <span class="badge-dark" style="background-color: var(--text-main); color: var(--surface);">Lesson</span>
+                                <h3 style="font-weight: 700; font-size: 16px;">Digital Logic Design</h3>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px; font-size: 14px; color: var(--text-muted);">
+                                <span style="display: flex; align-items: center; gap: 6px;"><span class="material-symbols-outlined" style="font-size: 16px;">schedule</span> 04:30 PM</span>
+                                <span style="display: flex; align-items: center; gap: 6px; color: #005e17;"><span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span> Completed</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-score-area">
+                        <div class="score-display">
+                            <span class="section-label" style="margin: 0 0 4px 0;">Score</span>
+                            <span class="score-value text-inverse-surface">92%</span>
+                        </div>
+                        <button class="btn-icon-hover">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Activity Card 4 -->
+                <div class="activity-card">
+                    <div class="activity-info">
+                        <div class="activity-icon-box">
+                            <span class="material-symbols-outlined">quiz</span>
+                        </div>
+                        <div class="activity-details">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <span class="badge-dark" style="background-color: #0c0f0f; color: white;">Quiz</span>
+                                <h3 style="font-weight: 700; font-size: 16px;">English Composition</h3>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 16px; font-size: 14px; color: var(--text-muted);">
+                                <span style="display: flex; align-items: center; gap: 6px;"><span class="material-symbols-outlined" style="font-size: 16px;">schedule</span> 11:00 AM</span>
+                                <span style="display: flex; align-items: center; gap: 6px; color: #005e17;"><span class="material-symbols-outlined" style="font-size: 16px;">check_circle</span> Completed</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-score-area">
+                        <div class="score-display">
+                            <span class="section-label" style="margin: 0 0 4px 0;">Score</span>
+                            <span class="score-value text-inverse-surface">78%</span>
+                        </div>
+                        <button class="btn-icon-hover">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Empty Slot -->
+                <div class="empty-state" style="margin-top: 32px;">
+                    <span class="material-symbols-outlined empty-state-icon" style="font-size: 36px; margin-bottom: 12px;">history_edu</span>
+                    <p class="question-desc" style="font-size: 14px; margin-bottom: 16px;">Older activities are archived.</p>
+                    <button class="btn-link text-uppercase" style="font-size: 10px; letter-spacing: 2px;">Load Older Records</button>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</body>
+</html>

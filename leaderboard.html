@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenPrep | Top Students Leaderboard</title>
+    <!-- Simple, Semantic Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+    <!-- Top Navigation -->
+    <header class="navbar" style="background-color: rgba(255, 255, 255, 0.7); backdrop-filter: blur(24px);">
+        <a href="home.html" class="navbar-brand">COMSATSPrepHub</a>
+        
+        <nav class="nav-links">
+            <a href="home.html" class="nav-link">Home</a>
+            <a href="subjects.html" class="nav-link">Subjects</a>
+            <a href="quiz.html" class="nav-link">Quiz</a>
+            <a href="leaderboard.html" class="nav-link active">Leaderboard</a>
+            <a href="about-us.html" class="nav-link">Contributors</a>
+        </nav>
+        
+        <div class="nav-actions">
+            <!-- Search + Login -->
+            <div class="search-bar" style="display: none;"></div>
+            <a href="profile.html" class="btn-primary" style="padding: 8px 24px; font-size: 14px; text-decoration: none;">Profile</a>
+        </div>
+    </header>
+
+    <!-- Main Content Canvas -->
+    <main class="main-content container" style="flex-grow: 1;">
+        <!-- Header Section -->
+        <header class="page-header">
+            <div>
+                <span class="section-label" style="display: block;">Performance Ranking</span>
+                <h1 class="main-title text-inverse-surface">🏆 Top Students</h1>
+                <p class="question-desc" style="margin-top: 16px; max-width: 500px;">Celebrating the highest academic achievements across OpenPrep's curriculum this semester.</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <div class="btn-outline" style="display: flex; align-items: center; gap: 8px; font-size: 14px; background-color: var(--surface-alt); border: none;">
+                    <span class="material-symbols-outlined text-primary">calendar_today</span>
+                    <span style="font-weight: 600;">Weekly</span>
+                </div>
+                <div class="btn-outline" style="display: flex; align-items: center; gap: 8px; font-size: 14px; background-color: var(--surface);">
+                    <span class="material-symbols-outlined text-primary">filter_list</span>
+                    <span style="font-weight: 600;">Filter</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Podium / Bento Feature -->
+        <div class="podium-grid">
+            <!-- Rank 2 -->
+            <div class="podium-card order-md-1">
+                <div class="podium-rank-bg">02</div>
+                <div class="podium-avatar-wrap">
+                    <img class="table-avatar" style="width: 100%; height: 100%; border-radius: 0;" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMKXvAcQVh8XvP_qwwQIhFRfZiGsexvQHR1Xfcrgh9S4aQfIJRbRHNA6OB0xbf1OFSfmQlbOwEfSz_zRjfkLm5W8JmV_2tTnw9tYAChOJMZxIFLq-_T8ntSRh0ltiJRZ8XXhH58CybuSltI2-m1U7vRQHsLOoA4TAB8xgzTl7W_7iihsUbzCXHVHRTdyfLsbtCVD0aN5sw4u9MWULXzMOoeHck8WYI6L5SoMog_vKiki3G1zDhI72170iXidO1CCUDwZTEaJCfOKSa" alt="Ahmed">
+                </div>
+                <h3 style="font-size: 18px; font-weight: 700;">Ahmed</h3>
+                <span style="color: var(--primary); font-size: 24px; font-weight: 900;">90%</span>
+                <span class="section-label" style="margin-top: 8px; margin-bottom: 0;">Silver Medal</span>
+            </div>
+
+            <!-- Rank 1 (Champion) -->
+            <div class="podium-card podium-card-1 order-md-2">
+                <div class="champion-badge">CHAMPION</div>
+                <div class="podium-avatar-wrap">
+                    <img class="table-avatar" style="width: 100%; height: 100%; border-radius: 0;" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvua4fzc0rx_re-dwtwWQKepOzG6CzMxNK_bgB57WTmNGjvIY0Vr4mEecFXxCHHyWEITpBU8vyMGQ-akiVkDQ5IcpAhihEvwMJtSKx4BucHVeetcBhNSdxITOrL5j6US_daaMIvif2lcC2jiqlrWrRWKOgVxOTTjDn9NQiP9lPCgCkDXKE8ABZgTZzGCVx6nq5CveJRCfRQn5WmDuhX8laCBaSyP3iSb4sHTKLPjJLs2ADKaK-WNiznBGEV2Wgw2qZ8ka5yGz3NnHb" alt="Ali">
+                </div>
+                <h3 style="font-size: 24px; font-weight: 700;">Ali</h3>
+                <span style="color: #91f78e; font-size: 36px; font-weight: 900; margin-top: 4px;">95%</span>
+                <span class="section-label" style="margin-top: 16px; margin-bottom: 0; color: rgba(255,255,255,0.5);">Gold Distinction</span>
+            </div>
+
+            <!-- Rank 3 (You) -->
+            <div class="podium-card order-md-3" style="background-color: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+                <div class="podium-rank-bg" style="color: rgba(90, 96, 97, 0.05);">03</div>
+                <div class="podium-avatar-wrap">
+                    <img class="table-avatar" style="width: 100%; height: 100%; border-radius: 0;" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1CfI7f-mXqKFmwby7tELYN2fiKms32X1qakZX1daDyrjwOHIXi8P17MvWC12S0y0EE3_zdISVe8rUJfe80TX2L8s-uYAW1Af6RBjbEi9snzh73Sh_haHRiyd7RLAJHpKK-Bot09-8wZziIplBmK38oKqx9lRBB3yMglcPQ8BJ6A6bTAPaaf3CXz76g2VxuzwQ8YUy1EOqYOiCjKuY6LynYrSgFUhNcXui8VrbgCSdv_BjBH4d1L9-a92IqED8_IuYo00I6v_IPELY" alt="You">
+                </div>
+                <h3 style="font-size: 18px; font-weight: 700;">You</h3>
+                <span style="color: var(--primary); font-size: 24px; font-weight: 900;">85%</span>
+                <span class="section-label" style="margin-top: 8px; margin-bottom: 0;">Bronze Medal</span>
+            </div>
+        </div>
+
+        <!-- Leaderboard Table -->
+        <div class="leaderboard-table-wrap">
+            <div style="overflow-x: auto;">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Student</th>
+                            <th>Accuracy</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Ali Row -->
+                        <tr>
+                            <td>
+                                <span style="background-color: #0c0f0f; color: white; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 700; font-size: 14px;">1</span>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 16px;">
+                                    <img class="table-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCC2dUmn9TyeiKMfQFPdm0PeYB0wggmk3-U3FmGddYG6NcBF52Rsj6RST6F30ui1tbk6CBNso8wnrCps8f4pdqP3xJcfy4Q7c9aNrD7JRnAtjBIc8-vHO_N-wBvsuKb_ngS-LIPRBHDhbGxbqyOVVuWvSYm2BYVnrvZfi2zMCroFvxFlO5SEpcTpS4n2hfQiFBVBJ0B1zLdz4TxyN7Bs6OMgA-ibTe58y4BxA7RddXGQPN-H94ogXVYRndsfgKF3RRre9cv4f3BcnjI" alt="Ali">
+                                    <div style="display: flex; flex-direction: column;">
+                                        <span style="font-weight: 700;">Ali</span>
+                                        <span class="question-desc" style="font-size: 12px; font-weight: 500;">Computer Science</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span style="font-weight: 900; font-size: 18px;">95%</span></td>
+                            <td><span class="badge-dark" style="background-color: #91f78e; color: #006f1d;">Elite</span></td>
+                            <td style="text-align: right;">
+                                <button class="btn-icon" style="justify-content: flex-end; width: 100%;"><span class="material-symbols-outlined">more_vert</span></button>
+                            </td>
+                        </tr>
+
+                        <!-- Ahmed Row -->
+                        <tr>
+                            <td>
+                                <span style="background-color: var(--surface-alt); color: var(--text-main); width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 700; font-size: 14px;">2</span>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 16px;">
+                                    <img class="table-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOOU_1hmHUHbkObFIj_NCHWBnzv_v47WhwbrOOZuQVUllgJWz-EYRBHh0YfgKQ_p-4wVQHwAs8K-qN2lnx37rxla0xFbZMup5EWbxKf5Z4LoxVgz5gz-nmPVA8BmfnQXgzneCe3vo1q-jHavqmXsCIvHPYixcwGfwQ7rLDu9MUdqoYUFD2poyB0EGaKhXnikIeyeaD1ku4x54MN6KaLV8VmZUGbL5XthbfbxW6p0Vsru4zkUp47Fvb3xLhgdAqBtinhEQx14aJDewK" alt="Ahmed">
+                                    <div style="display: flex; flex-direction: column;">
+                                        <span style="font-weight: 700;">Ahmed</span>
+                                        <span class="question-desc" style="font-size: 12px; font-weight: 500;">Software Engineering</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span style="font-weight: 900; font-size: 18px;">90%</span></td>
+                            <td><span class="badge-dark" style="background-color: #e2e2e2; color: #505252;">Pro</span></td>
+                            <td style="text-align: right;">
+                                <button class="btn-icon" style="justify-content: flex-end; width: 100%;"><span class="material-symbols-outlined">more_vert</span></button>
+                            </td>
+                        </tr>
+
+                        <!-- You Row -->
+                        <tr class="highlight-row">
+                            <td>
+                                <span style="background-color: var(--primary); color: var(--surface); width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 700; font-size: 14px;">3</span>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 16px;">
+                                    <img class="table-avatar" style="border: 2px solid var(--primary); box-sizing: content-box;" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1CfI7f-mXqKFmwby7tELYN2fiKms32X1qakZX1daDyrjwOHIXi8P17MvWC12S0y0EE3_zdISVe8rUJfe80TX2L8s-uYAW1Af6RBjbEi9snzh73Sh_haHRiyd7RLAJHpKK-Bot09-8wZziIplBmK38oKqx9lRBB3yMglcPQ8BJ6A6bTAPaaf3CXz76g2VxuzwQ8YUy1EOqYOiCjKuY6LynYrSgFUhNcXui8VrbgCSdv_BjBH4d1L9-a92IqED8_IuYo00I6v_IPELY" alt="You">
+                                    <div style="display: flex; flex-direction: column;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="font-weight: 700;">You</span>
+                                            <span style="background-color: var(--primary); color: var(--surface); font-size: 10px; padding: 2px 8px; border-radius: 4px; font-style: italic;">Current</span>
+                                        </div>
+                                        <span class="question-desc" style="font-size: 12px; font-weight: 500;">Data Science</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span style="font-weight: 900; font-size: 18px; color: var(--primary);">85%</span></td>
+                            <td><span class="badge-dark" style="background-color: var(--border); color: var(--text-muted);">Rising Star</span></td>
+                            <td style="text-align: right;">
+                                <button class="btn-icon" style="justify-content: flex-end; width: 100%;"><span class="material-symbols-outlined">more_vert</span></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="padding: 16px 32px; text-align: center; border-top: 1px solid var(--border);">
+                <button class="btn-icon" style="margin: 0 auto; display: flex; text-transform: uppercase;">
+                    View Full Rankings <span class="material-symbols-outlined" style="font-size: 18px;">expand_more</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content border-t-0" style="padding: 48px 32px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
+                <div class="footer-brand">COMSATSPrepHub</div>
+            </div>
+            
+            <div class="footer-links">
+                <a class="footer-link text-uppercase hover-underline" href="about-us.html">About Us</a>
+                <a class="footer-link text-uppercase hover-underline" href="about-project.html">Learn More</a>
+                <a class="footer-link text-uppercase hover-underline" href="feedback.html">Feedback</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>OpenPrep - Interactive Quiz</title>
+    <!-- Simple, Semantic Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Top Navigation -->
+    <header class="navbar">
+        <a href="home.html" class="navbar-brand">COMSATSPrepHub</a>
+        
+        <nav class="nav-links">
+            <a href="home.html" class="nav-link">Home</a>
+            <a href="subjects.html" class="nav-link">Subjects</a>
+            <a href="quiz.html" class="nav-link active">Quiz</a>
+            <a href="leaderboard.html" class="nav-link">Leaderboard</a>
+            <a href="about-us.html" class="nav-link">Contributors</a>
+        </nav>
+        
+        <div class="nav-actions">
+            <div class="search-bar">
+                <span class="material-symbols-outlined search-icon">search</span>
+                <input class="search-input" placeholder="Search topics..." type="text"/>
+            </div>
+            <a href="profile.html" class="btn-primary" style="text-decoration: none;">Profile</a>
+        </div>
+    </header>
+
+    <!-- Main Content Canvas -->
+    <main class="main-content container">
+        
+        <!-- Step 1: Select Topic Section -->
+        <section class="section-header">
+            <span class="tagline">PHASE 01</span>
+            <h1 class="page-title">Select Your Topic</h1>
+            <p class="page-description">Choose a core programming concept to test your current knowledge. Each quiz is curated to highlight both strengths and architectural gaps.</p>
+        </section>
+
+        <div class="topic-grid">
+            <!-- Topic Card: Variables -->
+            <button class="topic-card">
+                <div class="topic-icon">
+                    <span class="material-symbols-outlined">data_object</span>
+                </div>
+                <h3 class="topic-title">Variables</h3>
+                <p class="topic-desc">Mastering data storage and scope.</p>
+                <div class="topic-meta">12 Questions</div>
+            </button>
+
+            <!-- Topic Card: Loops (Active) -->
+            <button class="topic-card active">
+                <div class="topic-icon">
+                    <span class="material-symbols-outlined">sync</span>
+                </div>
+                <h3 class="topic-title">Loops</h3>
+                <p class="topic-desc">Iteration, recursion, and sequence control.</p>
+                <div class="topic-meta">In Progress</div>
+                <div class="topic-status-icon">
+                    <span class="material-symbols-outlined" style='font-variation-settings: "FILL" 1;'>check_circle</span>
+                </div>
+            </button>
+
+            <!-- Topic Card: Functions -->
+            <button class="topic-card">
+                <div class="topic-icon">
+                    <span class="material-symbols-outlined">javascript</span>
+                </div>
+                <h3 class="topic-title">Functions</h3>
+                <p class="topic-desc">Functional decomposition and return types.</p>
+                <div class="topic-meta">15 Questions</div>
+            </button>
+        </div>
+
+        <!-- Step 2: Question Section -->
+        <section class="question-section">
+            <span class="bg-text">Q.01</span>
+            
+            <div class="question-meta">
+                <span class="badge">LOOPS</span>
+                <div class="divider"></div>
+                <span class="question-count">Question 1 of 10</span>
+            </div>
+            
+            <h2 class="question-title">What is a loop?</h2>
+            
+            <div class="options-list">
+                <label class="option-label">
+                    <input class="option-input" name="q1" type="radio"/>
+                    <span class="option-text">A sequence of instructions that is continually repeated until a certain condition is reached.</span>
+                </label>
+                <label class="option-label">
+                    <input class="option-input" name="q1" type="radio"/>
+                    <span class="option-text">A method of defining variables that can be accessed globally within a program structure.</span>
+                </label>
+                <label class="option-label">
+                    <input class="option-input" name="q1" type="radio"/>
+                    <span class="option-text">A specific type of data structure used to store ordered collections of unique elements.</span>
+                </label>
+            </div>
+            
+            <div class="quiz-footer">
+                <button class="btn-text">
+                    <span class="material-symbols-outlined">chevron_left</span> Previous
+                </button>
+                <button class="btn-primary btn-large">
+                    Next <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Step 3: Results Section -->
+        <section class="results-section">
+            <!-- Score Breakdown -->
+            <div class="score-panel">
+                <div class="score-title">Academic Performance</div>
+                <div class="score-circle-wrap">
+                    <svg class="score-circle">
+                        <circle class="circle-bg" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-width="8"></circle>
+                        <circle class="circle-progress" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-width="8"></circle>
+                    </svg>
+                    <div class="score-text-wrap">
+                        <span class="score-value">7/10</span>
+                        <span class="score-percent">70%</span>
+                    </div>
+                </div>
+                <div class="score-badge">GOOD PROGRESS</div>
+            </div>
+
+            <!-- Qualitative Analysis -->
+            <div class="insights-panel">
+                <h3 class="insights-title">Quiz Insights</h3>
+                <p class="insights-desc">Your logic in <span class="highlight">Variables</span> is exceptional, but your structural understanding of control flow requires attention.</p>
+                
+                <div class="weak-areas-grid">
+                    <div class="weak-card">
+                        <div class="weak-label">Weak Area</div>
+                        <h4 class="weak-title">Loops</h4>
+                        <p class="weak-desc">Focus on nested iterations and exit conditions.</p>
+                    </div>
+                    <div class="weak-card">
+                        <div class="weak-label">Weak Area</div>
+                        <h4 class="weak-title">Functions</h4>
+                        <p class="weak-desc">Review parameter scoping and closure mechanics.</p>
+                    </div>
+                </div>
+                
+                <div class="actions-row">
+                    <button class="btn-dark">Review Mistakes</button>
+                    <a href="subjects.html" class="btn-outline" style="text-decoration: none;">Return to Library</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div>
+                <div class="footer-brand">COMSATSPrepHub</div>
+                <p class="footer-copyright">© 2024 OpenPrep COMSATS. An Academic Curator Project.</p>
+            </div>
+            
+            <div class="footer-links">
+                <a class="footer-link" href="about-us.html">About Us</a>
+                <a class="footer-link" href="about-project.html">Terms</a>
+                <a class="footer-link" href="feedback.html">Contact Support</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

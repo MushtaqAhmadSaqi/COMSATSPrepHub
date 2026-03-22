@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subjects | COMSATSPrepHub</title>
+    <!-- Simple, Semantic Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+    <!-- Top Navigation -->
+    <header class="navbar" style="background-color: var(--surface);">
+        <a href="home.html" class="navbar-brand">COMSATSPrepHub</a>
+        
+        <nav class="nav-links">
+            <a href="home.html" class="nav-link">Home</a>
+            <a href="subjects.html" class="nav-link active">Subjects</a>
+            <a href="quiz.html" class="nav-link">Quiz</a>
+            <a href="leaderboard.html" class="nav-link">Leaderboard</a>
+            <a href="about-us.html" class="nav-link">Contributors</a>
+        </nav>
+        
+        <div class="nav-actions">
+            <!-- Profile Action -->
+            <a href="profile.html" class="btn-icon">
+                <span class="material-symbols-outlined" style="font-size: 24px; color: var(--primary);">account_circle</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="main-content container text-on-background">
+        <!-- Search and Filter Header -->
+        <section class="page-header" style="margin-top: 16px;">
+            <div>
+                <span class="section-label" style="display: block;">Curated Archive</span>
+                <h1 class="main-title text-inverse-surface">Academic Catalog</h1>
+                <p class="question-desc" style="margin-top: 16px; max-width: 600px;">Explore our comprehensive collection of past papers, organized by core and elective subjects for the COMSATS curriculum.</p>
+            </div>
+            
+            <div class="subject-search">
+                <span class="material-symbols-outlined subject-search-icon">search</span>
+                <input class="subject-search-input" placeholder="Search subjects..." type="text">
+            </div>
+        </section>
+
+        <!-- Subjects Bento Grid -->
+        <section class="subject-grid">
+            <!-- Featured Subject Large -->
+            <a href="paper-view.html" class="subject-card subject-card-featured col-span-8" style="text-decoration: none; color: inherit;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+                        <span class="badge-dark" style="background-color: var(--primary); color: var(--surface);">Most Popular</span>
+                        <span class="material-symbols-outlined text-outline">arrow_outward</span>
+                    </div>
+                    <h3 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">Programming Fundamentals</h3>
+                    <p class="question-desc" style="max-width: 400px; line-height: 1.6;">Master the basics of C++ and procedural programming with our extensive collection of mid and terminal exams.</p>
+                </div>
+                
+                <div style="margin-top: 32px; display: flex; align-items: center; gap: 16px;">
+                    <div style="display: flex; margin-left: 8px;">
+                        <img class="table-avatar" style="border: 2px solid var(--surface); margin-left: -8px; width: 32px; height: 32px;" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOEgIh2G4nb1Qyo5gXe4Qj3GILIgeKBWJ-H4l5h4SmMFdkQDTtrwcSBd6JWkl7xXP0cmC3FsTxjYVRlx-grczkXZqS6piCzND-SrMzShyg0GCVH5DiCJ8VVd2P_y0F_xL5mFnMPYCesOkD69HX8tl1ee8_UXwquo1M9jbK6MNcp0f5R04cOFU0iFIGqP-s-kpIfEAwzriL79TFw8aKfScW_yHQ14jLDvg37aBQkgzMnZZgVs_mp0ySqpj07Q4ti0553AIVzvcKHwgh" alt="Contributor">
+                        <div class="table-avatar" style="border: 2px solid var(--surface); margin-left: -8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">+12</div>
+                    </div>
+                    <span class="section-label" style="margin: 0; text-transform: none; letter-spacing: normal;">Contributed by the community</span>
+                </div>
+            </a>
+
+            <!-- Subject Small 1 -->
+            <a href="paper-view.html" class="subject-card col-span-4 justify-between" style="text-decoration: none; color: inherit;">
+                <div>
+                    <div class="subject-icon-box" style="background-color: #e2e2e2;">
+                        <span class="material-symbols-outlined" style="color: #64748b;">data_object</span>
+                    </div>
+                    <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">Data Structures</h3>
+                    <p class="question-desc">Lists, Stacks, Queues, and Tree algorithms.</p>
+                </div>
+                <div style="margin-top: 24px; display: flex; align-items: center; justify-content: space-between;">
+                    <span class="section-label" style="margin: 0;">42 PAPERS</span>
+                    <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
+                </div>
+            </a>
+
+            <!-- Subject Small 2 -->
+            <a href="paper-view.html" class="subject-card col-span-4 justify-between" style="text-decoration: none; color: inherit;">
+                <div>
+                    <div class="subject-icon-box" style="background-color: #91f78e;">
+                        <span class="material-symbols-outlined" style="color: #006f1d;">database</span>
+                    </div>
+                    <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">Database Systems</h3>
+                    <p class="question-desc">Relational algebra, SQL, and normalization.</p>
+                </div>
+                <div style="margin-top: 24px; display: flex; align-items: center; justify-content: space-between;">
+                    <span class="section-label" style="margin: 0;">28 PAPERS</span>
+                    <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
+                </div>
+            </a>
+
+            <!-- Subject Large Offset -->
+            <a href="paper-view.html" class="subject-card subject-card-featured flex-col col-span-4" style="text-decoration: none; color: inherit;">
+                <div>
+                    <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 16px;">Calculus &amp; Analytical Geometry</h3>
+                    <p class="question-desc">Limits, Derivatives, Integrals, and Vector analysis.</p>
+                </div>
+                <div style="margin-top: 48px; display: flex; align-items: center; justify-content: space-between;">
+                    <span class="badge-dark" style="background-color: var(--surface-alt); color: var(--primary);">NEWEST ADDITION</span>
+                    <span class="material-symbols-outlined text-primary">function</span>
+                </div>
+            </a>
+
+            <!-- Contributor Callout -->
+            <div class="subject-card subject-card-callout col-span-4">
+                <span class="section-label" style="color: rgba(255,255,255,0.5); display: block;">Join the effort</span>
+                <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 16px;">Can't find a subject?</h3>
+                <p class="question-desc" style="color: rgba(255,255,255,0.8); margin-bottom: 24px;">Be a hero and upload papers for subjects not yet listed in our archive.</p>
+                <a href="upload.html" class="btn-primary" style="background-color: var(--surface); color: var(--primary); padding: 12px 24px; text-decoration: none;">Submit Resource</a>
+            </div>
+
+            <!-- Remaining Subjects Row -->
+            <a href="paper-view.html" class="subject-card col-span-3 justify-between" style="text-decoration: none; color: inherit;">
+                <div>
+                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 4px;">Discrete Structures</h3>
+                    <p class="question-desc" style="font-size: 12px;">Logic and Set Theory.</p>
+                </div>
+                <div style="margin-top: 16px; display: flex; align-items: center; gap: 8px; color: var(--primary);">
+                    <span class="section-label" style="margin: 0; color: inherit;">Explore</span>
+                    <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                </div>
+            </a>
+
+            <a href="paper-view.html" class="subject-card col-span-3 justify-between" style="text-decoration: none; color: inherit;">
+                <div>
+                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 4px;">Psychology</h3>
+                    <p class="question-desc" style="font-size: 12px;">Social behavior studies.</p>
+                </div>
+                <div style="margin-top: 16px; display: flex; align-items: center; gap: 8px; color: var(--primary);">
+                    <span class="section-label" style="margin: 0; color: inherit;">Explore</span>
+                    <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                </div>
+            </a>
+
+            <a href="paper-view.html" class="subject-card col-span-3 justify-between" style="text-decoration: none; color: inherit;">
+                <div>
+                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 4px;">Linear Algebra</h3>
+                    <p class="question-desc" style="font-size: 12px;">Matrices and Spaces.</p>
+                </div>
+                <div style="margin-top: 16px; display: flex; align-items: center; gap: 8px; color: var(--primary);">
+                    <span class="section-label" style="margin: 0; color: inherit;">Explore</span>
+                    <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                </div>
+            </a>
+
+            <a href="paper-view.html" class="subject-card col-span-3 justify-between" style="text-decoration: none; color: inherit;">
+                <div>
+                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 4px;">Physics</h3>
+                    <p class="question-desc" style="font-size: 12px;">Mechanics and Optics.</p>
+                </div>
+                <div style="margin-top: 16px; display: flex; align-items: center; gap: 8px; color: var(--primary);">
+                    <span class="section-label" style="margin: 0; color: inherit;">Explore</span>
+                    <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                </div>
+            </a>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer" style="background-color: var(--surface-alt); margin-top: auto;">
+        <div class="footer-content" style="max-width: 1280px; padding: 48px 32px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
+                <div class="footer-brand" style="color: var(--text-main);">COMSATSPrepHub</div>
+                <div class="footer-copyright" style="text-transform: none;">Made with care by Mushtaq Ahmad Saqi</div>
+            </div>
+            
+            <div class="footer-links">
+                <a class="footer-link hover-underline" href="about-project.html">Learn More</a>
+                <a class="footer-link hover-underline" href="feedback.html">Feedback</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

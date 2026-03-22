@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenPrep - Student Dashboard</title>
+    <!-- Simple, Semantic Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Top Navigation -->
+    <header class="navbar">
+        <a href="home.html" class="navbar-brand">COMSATSPrepHub</a>
+        
+        <nav class="nav-links">
+            <a href="home.html" class="nav-link active">Home</a>
+            <a href="subjects.html" class="nav-link">Subjects</a>
+            <a href="quiz.html" class="nav-link">Quiz</a>
+            <a href="leaderboard.html" class="nav-link">Leaderboard</a>
+            <a href="about-us.html" class="nav-link">Contributors</a>
+        </nav>
+        
+        <div class="nav-actions">
+            <!-- Profile Avatar replaces Search/Login on this page -->
+            <a href="profile.html" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 1px solid var(--border); display: block;">
+                <img alt="Profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF8hllT6BznGxRqRK5mi2iAVo3qqBrJfRqOW2bzxqRIvsBoDNlf4TYE51Jn_Ln4ITe_aRY77WAfIG6QFiXxEbgMhW3_JM4u_tjix56XMijLfuP9RR59tZ1MOyHNpzCWr-fmJM_85QPURJyxNK0EXWXaepKp6GJmXQqOpaghg0z-oqs_KxDPQizP-NzSN0mGnq93wGfmfPa1cfe2ZcsCvFUAjNkirssbM7Jd-iKHYg1y06CDA4oYTSNxHt_I69wkTidDB5HeVUzpK_q" style="width: 100%; height: 100%; object-fit: cover;">
+            </a>
+        </div>
+    </header>
+
+    <main class="main-content container">
+        <!-- Welcome Header -->
+        <header class="dashboard-header">
+            <h1 class="dashboard-title">Welcome, Mushtaq</h1>
+            <p class="dashboard-subtitle">Student Dashboard &bull; Academic Year 2024</p>
+        </header>
+
+        <!-- Bento Grid Layout -->
+        <div class="bento-grid">
+            <!-- Hero Stats Card (Asymmetric 7/12) -->
+            <section class="bento-card bento-card-main">
+                <div>
+                    <span class="bento-badge">STUDENT OVERVIEW</span>
+                    <h2 class="bento-title">Your Learning Velocity</h2>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-group">
+                        <p class="stat-label">Papers Attempted</p>
+                        <div class="stat-value">
+                            <span class="stat-number">5</span>
+                            <span class="stat-extra">+2 this week</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-group">
+                        <p class="stat-label">Avg Score</p>
+                        <div class="stat-value">
+                            <span class="stat-number">78%</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 78%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Weak Areas Card (Asymmetric 5/12) -->
+            <section class="bento-card bento-card-side">
+                <div class="weak-area-header">
+                    <h3 class="weak-area-title">Weak Areas</h3>
+                    <span class="material-symbols-outlined" style="color: var(--error);">analytics</span>
+                </div>
+                
+                <div class="weak-list">
+                    <!-- Weak Area 1 -->
+                    <div class="weak-item">
+                        <div>
+                            <p class="weak-item-name">Loops</p>
+                            <p class="weak-item-desc">42% Accuracy</p>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: var(--text-muted);">keyboard_arrow_right</span>
+                    </div>
+                    
+                    <!-- Weak Area 2 -->
+                    <div class="weak-item">
+                        <div>
+                            <p class="weak-item-name">Arrays</p>
+                            <p class="weak-item-desc">51% Accuracy</p>
+                        </div>
+                        <span class="material-symbols-outlined" style="color: var(--text-muted);">keyboard_arrow_right</span>
+                    </div>
+                </div>
+                
+                <a href="quiz.html" class="btn-continue" style="text-decoration: none; text-align: center; display: flex;">
+                    Continue Practice
+                    <span class="material-symbols-outlined" style="font-size: 14px;">arrow_forward</span>
+                </a>
+            </section>
+
+            <!-- Recent Activity / Timeline Section (Full width 12/12) -->
+            <section class="bento-card bento-card-full">
+                <div class="activity-header">
+                    <h3 class="activity-title">Recent Activity</h3>
+                    <a href="activity.html" class="link-action">VIEW FULL HISTORY</a>
+                </div>
+                
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon-wrap success">
+                            <span class="material-symbols-outlined">check_circle</span>
+                        </div>
+                        <div class="activity-content">
+                            <h4 class="activity-name">Introduction to Algorithms</h4>
+                            <p class="activity-desc">Completed with 85% score &bull; 2 hours ago</p>
+                        </div>
+                        <span class="activity-time">09:42 AM</span>
+                    </div>
+                    
+                    <div class="activity-item faded">
+                        <div class="activity-icon-wrap pending">
+                            <span class="material-symbols-outlined">history</span>
+                        </div>
+                        <div class="activity-content">
+                            <h4 class="activity-name">Data Structures Quiz</h4>
+                            <p class="activity-desc">In Progress &bull; 40% complete</p>
+                        </div>
+                        <span class="activity-time">Yesterday</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-brand-group">
+                <div class="footer-brand text-uppercase">COMSATSPrepHub</div>
+                <p class="footer-copyright text-uppercase">Made with CAre by Mushtaq AHmad Saqi</p>
+            </div>
+            
+            <div class="footer-links">
+                <a class="footer-link text-uppercase hover-underline" href="about-us.html">About Us</a>
+                <a class="footer-link text-uppercase hover-underline" href="about-project.html">Learn More</a>
+                <a class="footer-link text-uppercase hover-underline" href="feedback.html">Feedback</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
