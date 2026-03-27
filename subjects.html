@@ -4,14 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subjects | COMSATSPrepHub</title>
-    <!-- Simple, Semantic Stylesheet -->
+    <meta name="description" content="Browse all COMSATS subjects and access past papers organized by course.">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-background text-on-background min-h-screen flex flex-col">
-    <!-- Top Navigation -->
-    <header class="navbar" style="background-color: var(--surface);">
+<body>
+    <!-- Navigation -->
+    <header class="navbar">
         <a href="home.html" class="navbar-brand">COMSATSPrepHub</a>
-        
         <nav class="nav-links">
             <a href="home.html" class="nav-link">Home</a>
             <a href="subjects.html" class="nav-link active">Subjects</a>
@@ -19,162 +18,189 @@
             <a href="leaderboard.html" class="nav-link">Leaderboard</a>
             <a href="about-us.html" class="nav-link">Contributors</a>
         </nav>
-        
         <div class="nav-actions">
-            <!-- Profile Action -->
-            <a href="profile.html" class="btn-icon">
-                <span class="material-symbols-outlined" style="font-size: 24px; color: var(--primary);">account_circle</span>
-            </a>
+            <a href="subjects.html" class="btn-primary" style="text-decoration:none;">Get Started</a>
         </div>
     </header>
 
-    <main class="main-content container text-on-background">
-        <!-- Search and Filter Header -->
-        <section class="page-header" style="margin-top: 16px;">
+    <main class="main-content container">
+        <!-- Header + Search -->
+        <section class="page-header" style="margin-bottom: 32px;">
             <div>
-                <span class="section-label" style="display: block;">Curated Archive</span>
-                <h1 class="main-title text-inverse-surface">Academic Catalog</h1>
-                <p class="question-desc" style="margin-top: 16px; max-width: 600px;">Explore our comprehensive collection of past papers, organized by core and elective subjects for the COMSATS curriculum.</p>
+                <span class="section-label" style="display:block;">Curated Archive</span>
+                <h1 class="main-title">Academic Catalog</h1>
+                <p class="question-desc" style="margin-top:12px; max-width:520px;">
+                    Explore our comprehensive collection of past papers, organized by core and elective subjects.
+                </p>
             </div>
-            
             <div class="subject-search">
                 <span class="material-symbols-outlined subject-search-icon">search</span>
-                <input class="subject-search-input" placeholder="Search subjects..." type="text">
+                <input id="subjectSearchInput" class="subject-search-input" placeholder="Search subjects..." type="text" oninput="filterSubjects()">
             </div>
         </section>
 
-        <!-- Subjects Bento Grid -->
-        <section class="subject-grid">
-            <!-- Featured Subject Large -->
-            <a href="paper-view.html" class="subject-card subject-card-featured col-span-8" style="text-decoration: none; color: inherit;">
-                <div>
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
-                        <span class="badge-dark" style="background-color: var(--primary); color: var(--surface);">Most Popular</span>
-                        <span class="material-symbols-outlined text-outline">arrow_outward</span>
-                    </div>
-                    <h3 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">Programming Fundamentals</h3>
-                    <p class="question-desc" style="max-width: 400px; line-height: 1.6;">Master the basics of C++ and procedural programming with our extensive collection of mid and terminal exams.</p>
+        <!-- Subjects Grid -->
+        <section class="subjects-grid" id="subjectsGrid">
+            <!-- Programming Fundamentals -->
+            <a href="subject-papers.html?subject=Programming Fundamentals" class="subject-card-uniform" data-subject="Programming Fundamentals">
+                <div class="subject-icon-box" style="background:#ccfbf1; color:#0f766e;">
+                    <span class="material-symbols-outlined">terminal</span>
                 </div>
-                
-                <div style="margin-top: 32px; display: flex; align-items: center; gap: 16px;">
-                    <div style="display: flex; margin-left: 8px;">
-                        <img class="table-avatar" style="border: 2px solid var(--surface); margin-left: -8px; width: 32px; height: 32px;" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOEgIh2G4nb1Qyo5gXe4Qj3GILIgeKBWJ-H4l5h4SmMFdkQDTtrwcSBd6JWkl7xXP0cmC3FsTxjYVRlx-grczkXZqS6piCzND-SrMzShyg0GCVH5DiCJ8VVd2P_y0F_xL5mFnMPYCesOkD69HX8tl1ee8_UXwquo1M9jbK6MNcp0f5R04cOFU0iFIGqP-s-kpIfEAwzriL79TFw8aKfScW_yHQ14jLDvg37aBQkgzMnZZgVs_mp0ySqpj07Q4ti0553AIVzvcKHwgh" alt="Contributor">
-                        <div class="table-avatar" style="border: 2px solid var(--surface); margin-left: -8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">+12</div>
-                    </div>
-                    <span class="section-label" style="margin: 0; text-transform: none; letter-spacing: normal;">Contributed by the community</span>
+                <div class="subject-card-name">Programming Fundamentals</div>
+                <div class="subject-card-desc">Master the basics of C++ and procedural programming.</div>
+                <div class="subject-card-meta">
+                    <span class="subject-paper-count">24 Papers</span>
+                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
                 </div>
             </a>
 
-            <!-- Subject Small 1 -->
-            <a href="paper-view.html" class="subject-card col-span-4 justify-between" style="text-decoration: none; color: inherit;">
-                <div>
-                    <div class="subject-icon-box" style="background-color: #e2e2e2;">
-                        <span class="material-symbols-outlined" style="color: #64748b;">data_object</span>
-                    </div>
-                    <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">Data Structures</h3>
-                    <p class="question-desc">Lists, Stacks, Queues, and Tree algorithms.</p>
+            <!-- Data Structures -->
+            <a href="subject-papers.html?subject=Data Structures" class="subject-card-uniform" data-subject="Data Structures">
+                <div class="subject-icon-box" style="background:#e0e7ff; color:#4f46e5;">
+                    <span class="material-symbols-outlined">data_object</span>
                 </div>
-                <div style="margin-top: 24px; display: flex; align-items: center; justify-content: space-between;">
-                    <span class="section-label" style="margin: 0;">42 PAPERS</span>
-                    <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
+                <div class="subject-card-name">Data Structures</div>
+                <div class="subject-card-desc">Lists, Stacks, Queues, Trees, and Graph algorithms.</div>
+                <div class="subject-card-meta">
+                    <span class="subject-paper-count">42 Papers</span>
+                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
                 </div>
             </a>
 
-            <!-- Subject Small 2 -->
-            <a href="paper-view.html" class="subject-card col-span-4 justify-between" style="text-decoration: none; color: inherit;">
-                <div>
-                    <div class="subject-icon-box" style="background-color: #91f78e;">
-                        <span class="material-symbols-outlined" style="color: #006f1d;">database</span>
-                    </div>
-                    <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">Database Systems</h3>
-                    <p class="question-desc">Relational algebra, SQL, and normalization.</p>
+            <!-- Database Systems -->
+            <a href="subject-papers.html?subject=Database Systems" class="subject-card-uniform" data-subject="Database Systems">
+                <div class="subject-icon-box" style="background:#dcfce7; color:#16a34a;">
+                    <span class="material-symbols-outlined">database</span>
                 </div>
-                <div style="margin-top: 24px; display: flex; align-items: center; justify-content: space-between;">
-                    <span class="section-label" style="margin: 0;">28 PAPERS</span>
-                    <span class="material-symbols-outlined" style="font-size: 18px;">arrow_forward</span>
+                <div class="subject-card-name">Database Systems</div>
+                <div class="subject-card-desc">Relational algebra, SQL, normalization, and ER diagrams.</div>
+                <div class="subject-card-meta">
+                    <span class="subject-paper-count">28 Papers</span>
+                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
                 </div>
             </a>
 
-            <!-- Subject Large Offset -->
-            <a href="paper-view.html" class="subject-card subject-card-featured flex-col col-span-4" style="text-decoration: none; color: inherit;">
-                <div>
-                    <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 16px;">Calculus &amp; Analytical Geometry</h3>
-                    <p class="question-desc">Limits, Derivatives, Integrals, and Vector analysis.</p>
+            <!-- Calculus -->
+            <a href="subject-papers.html?subject=Calculus" class="subject-card-uniform" data-subject="Calculus">
+                <div class="subject-icon-box" style="background:#fef3c7; color:#d97706;">
+                    <span class="material-symbols-outlined">function</span>
                 </div>
-                <div style="margin-top: 48px; display: flex; align-items: center; justify-content: space-between;">
-                    <span class="badge-dark" style="background-color: var(--surface-alt); color: var(--primary);">NEWEST ADDITION</span>
-                    <span class="material-symbols-outlined text-primary">function</span>
-                </div>
-            </a>
-
-            <!-- Contributor Callout -->
-            <div class="subject-card subject-card-callout col-span-4">
-                <span class="section-label" style="color: rgba(255,255,255,0.5); display: block;">Join the effort</span>
-                <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 16px;">Can't find a subject?</h3>
-                <p class="question-desc" style="color: rgba(255,255,255,0.8); margin-bottom: 24px;">Be a hero and upload papers for subjects not yet listed in our archive.</p>
-                <a href="upload.html" class="btn-primary" style="background-color: var(--surface); color: var(--primary); padding: 12px 24px; text-decoration: none;">Submit Resource</a>
-            </div>
-
-            <!-- Remaining Subjects Row -->
-            <a href="paper-view.html" class="subject-card col-span-3 justify-between" style="text-decoration: none; color: inherit;">
-                <div>
-                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 4px;">Discrete Structures</h3>
-                    <p class="question-desc" style="font-size: 12px;">Logic and Set Theory.</p>
-                </div>
-                <div style="margin-top: 16px; display: flex; align-items: center; gap: 8px; color: var(--primary);">
-                    <span class="section-label" style="margin: 0; color: inherit;">Explore</span>
-                    <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                <div class="subject-card-name">Calculus & Analytical Geometry</div>
+                <div class="subject-card-desc">Limits, Derivatives, Integrals, and Vector analysis.</div>
+                <div class="subject-card-meta">
+                    <span class="subject-paper-count">18 Papers</span>
+                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
                 </div>
             </a>
 
-            <a href="paper-view.html" class="subject-card col-span-3 justify-between" style="text-decoration: none; color: inherit;">
-                <div>
-                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 4px;">Psychology</h3>
-                    <p class="question-desc" style="font-size: 12px;">Social behavior studies.</p>
+            <!-- Discrete Structures -->
+            <a href="subject-papers.html?subject=Discrete Structures" class="subject-card-uniform" data-subject="Discrete Structures">
+                <div class="subject-icon-box" style="background:#f3e8ff; color:#9333ea;">
+                    <span class="material-symbols-outlined">scatter_plot</span>
                 </div>
-                <div style="margin-top: 16px; display: flex; align-items: center; gap: 8px; color: var(--primary);">
-                    <span class="section-label" style="margin: 0; color: inherit;">Explore</span>
-                    <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
-                </div>
-            </a>
-
-            <a href="paper-view.html" class="subject-card col-span-3 justify-between" style="text-decoration: none; color: inherit;">
-                <div>
-                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 4px;">Linear Algebra</h3>
-                    <p class="question-desc" style="font-size: 12px;">Matrices and Spaces.</p>
-                </div>
-                <div style="margin-top: 16px; display: flex; align-items: center; gap: 8px; color: var(--primary);">
-                    <span class="section-label" style="margin: 0; color: inherit;">Explore</span>
-                    <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                <div class="subject-card-name">Discrete Structures</div>
+                <div class="subject-card-desc">Logic, Set Theory, Relations, and Graph Theory.</div>
+                <div class="subject-card-meta">
+                    <span class="subject-paper-count">15 Papers</span>
+                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
                 </div>
             </a>
 
-            <a href="paper-view.html" class="subject-card col-span-3 justify-between" style="text-decoration: none; color: inherit;">
-                <div>
-                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 4px;">Physics</h3>
-                    <p class="question-desc" style="font-size: 12px;">Mechanics and Optics.</p>
+            <!-- Linear Algebra -->
+            <a href="subject-papers.html?subject=Linear Algebra" class="subject-card-uniform" data-subject="Linear Algebra">
+                <div class="subject-icon-box" style="background:#ccfbf1; color:#0f766e;">
+                    <span class="material-symbols-outlined">grid_on</span>
                 </div>
-                <div style="margin-top: 16px; display: flex; align-items: center; gap: 8px; color: var(--primary);">
-                    <span class="section-label" style="margin: 0; color: inherit;">Explore</span>
-                    <span class="material-symbols-outlined" style="font-size: 18px;">chevron_right</span>
+                <div class="subject-card-name">Linear Algebra</div>
+                <div class="subject-card-desc">Matrices, Vector Spaces, and Eigenvalues.</div>
+                <div class="subject-card-meta">
+                    <span class="subject-paper-count">12 Papers</span>
+                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
+                </div>
+            </a>
+
+            <!-- Physics -->
+            <a href="subject-papers.html?subject=Physics" class="subject-card-uniform" data-subject="Physics">
+                <div class="subject-icon-box" style="background:#fef3c7; color:#d97706;">
+                    <span class="material-symbols-outlined">science</span>
+                </div>
+                <div class="subject-card-name">Physics</div>
+                <div class="subject-card-desc">Classical Mechanics, Optics, and Electromagnetism.</div>
+                <div class="subject-card-meta">
+                    <span class="subject-paper-count">20 Papers</span>
+                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
+                </div>
+            </a>
+
+            <!-- Psychology -->
+            <a href="subject-papers.html?subject=Psychology" class="subject-card-uniform" data-subject="Psychology">
+                <div class="subject-icon-box" style="background:#fce7f3; color:#db2777;">
+                    <span class="material-symbols-outlined">psychology</span>
+                </div>
+                <div class="subject-card-name">Psychology</div>
+                <div class="subject-card-desc">Social behavior, cognitive processes, and mental health studies.</div>
+                <div class="subject-card-meta">
+                    <span class="subject-paper-count">10 Papers</span>
+                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
+                </div>
+            </a>
+
+            <!-- OOP -->
+            <a href="subject-papers.html?subject=Object Oriented Programming" class="subject-card-uniform" data-subject="Object Oriented Programming">
+                <div class="subject-icon-box" style="background:#e0e7ff; color:#4f46e5;">
+                    <span class="material-symbols-outlined">code</span>
+                </div>
+                <div class="subject-card-name">Object Oriented Programming</div>
+                <div class="subject-card-desc">Classes, Inheritance, Polymorphism, and Encapsulation in C++/Java.</div>
+                <div class="subject-card-meta">
+                    <span class="subject-paper-count">22 Papers</span>
+                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
                 </div>
             </a>
         </section>
+
+        <!-- No Results -->
+        <div id="noResults" class="no-results" style="display:none;">
+            <span class="material-symbols-outlined">search_off</span>
+            <p style="font-size:18px; font-weight:600;">No subjects found</p>
+            <p>Try a different search term.</p>
+        </div>
     </main>
 
     <!-- Footer -->
-    <footer class="site-footer" style="background-color: var(--surface-alt); margin-top: auto;">
+    <footer class="site-footer">
         <div class="footer-content">
-            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
-                <div class="footer-brand" style="color: var(--text-main);">COMSATSPrepHub</div>
-                <div class="footer-copyright" style="text-transform: none;">Made with care by Mushtaq Ahmad Saqi</div>
+            <div class="footer-brand-group">
+                <div class="footer-brand">COMSATSPrepHub</div>
+                <div class="footer-copyright">Made with care by Mushtaq Ahmad Saqi</div>
             </div>
-            
             <div class="footer-links">
-                <a class="footer-link hover-underline" href="about-project.html">Learn More</a>
-                <a class="footer-link hover-underline" href="feedback.html">Feedback</a>
+                <a class="footer-link" href="about-us.html">About Us</a>
+                <a class="footer-link" href="feedback.html">Feedback</a>
+                <a class="footer-link" href="about-project.html">Learn More</a>
             </div>
         </div>
     </footer>
+
+    <script>
+    function filterSubjects() {
+        const query = document.getElementById('subjectSearchInput').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.subject-card-uniform');
+        const noResults = document.getElementById('noResults');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const name = card.getAttribute('data-subject').toLowerCase();
+            if (name.includes(query)) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        noResults.style.display = visibleCount === 0 ? '' : 'none';
+    }
+    </script>
 </body>
 </html>

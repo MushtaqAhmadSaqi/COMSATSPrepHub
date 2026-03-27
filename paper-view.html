@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenPrep - Paper View</title>
+    <title>Paper View | COMSATSPrepHub</title>
+    <meta name="description" content="View past paper questions and answers.">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Top Navigation -->
+    <!-- Navigation -->
     <header class="navbar">
         <a href="home.html" class="navbar-brand">COMSATSPrepHub</a>
-        
         <nav class="nav-links">
             <a href="home.html" class="nav-link">Home</a>
             <a href="subjects.html" class="nav-link active">Subjects</a>
@@ -18,35 +18,27 @@
             <a href="leaderboard.html" class="nav-link">Leaderboard</a>
             <a href="about-us.html" class="nav-link">Contributors</a>
         </nav>
-        
         <div class="nav-actions">
-            <div class="search-bar">
-                <input class="search-input" placeholder="Search resources..." type="text">
-            </div>
-            <a href="profile.html" class="btn-primary" style="text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center;">Profile</a>
+            <a href="subjects.html" class="btn-primary" style="text-decoration:none;">Get Started</a>
         </div>
     </header>
 
     <main class="main-content container">
-        <!-- Header Actions -->
+        <!-- Header -->
         <div class="hero-header">
             <div class="hero-titles">
-                <a href="subjects.html" class="btn-icon" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px;">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                    <span>Back to Subjects</span>
+                <a href="javascript:history.back()" class="papers-back-link">
+                    <span class="material-symbols-outlined" style="font-size:20px;">arrow_back</span>
+                    Back to Papers
                 </a>
                 <div class="hero-title-group">
-                    <span class="tagline">Course Resource</span>
-                    <h1 class="page-title main-title">Programming Fundamentals - Final 2023</h1>
+                    <span class="tagline">Past Paper</span>
+                    <h1 class="page-title main-title" style="font-size:32px;">Programming Fundamentals — Final 2023</h1>
                 </div>
             </div>
-            <button class="btn-dark btn-primary-action">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">timer</span>
-                Start Full Paper Mode
-            </button>
         </div>
 
-        <!-- Academic Content Canvas -->
+        <!-- Questions & Answers -->
         <div class="question-list">
             <!-- Question 1 -->
             <section class="question-card">
@@ -55,15 +47,13 @@
                         <div class="question-number">01</div>
                     </div>
                     <div class="question-content">
-                        <div class="question-text">
+                        <div>
                             <h2 class="question-heading">What is a variable?</h2>
                             <p class="question-desc">Describe the concept in the context of memory allocation and data types. (5 Marks)</p>
                         </div>
-                        <div class="question-form">
-                            <textarea class="form-textarea" placeholder="Type your answer here..."></textarea>
-                            <div class="form-actions">
-                                <a href="feedback.html" class="btn-primary btn-submit" style="text-decoration: none; text-align: center; display: block;">Submit Answer</a>
-                            </div>
+                        <div style="background:var(--surface-alt); padding:20px; border-radius:var(--radius); border-left:3px solid var(--primary);">
+                            <p style="font-size:12px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Answer</p>
+                            <p class="question-desc">A variable is a named storage location in computer memory that holds a value. When declared, memory is allocated based on the data type (e.g., int = 4 bytes, char = 1 byte). Variables provide a way to label and access data during program execution. They have a type, name, value, and scope.</p>
                         </div>
                     </div>
                 </div>
@@ -76,29 +66,36 @@
                         <div class="question-number">02</div>
                     </div>
                     <div class="question-content">
-                        <div class="question-text">
+                        <div>
                             <h2 class="question-heading">Explain loops</h2>
                             <p class="question-desc">Compare and contrast 'while' and 'for' loops with examples of use cases. (10 Marks)</p>
                         </div>
-                        <div class="question-form">
-                            <textarea class="form-textarea" placeholder="Type your answer here..."></textarea>
-                            <div class="form-actions">
-                                <button class="btn-primary btn-submit">Submit Answer</button>
-                            </div>
+                        <div style="background:var(--surface-alt); padding:20px; border-radius:var(--radius); border-left:3px solid var(--primary);">
+                            <p style="font-size:12px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Answer</p>
+                            <p class="question-desc">A <strong>for loop</strong> is used when the number of iterations is known beforehand. Syntax: <code>for(init; condition; update)</code>. Example: printing numbers 1-10.<br><br>A <strong>while loop</strong> is used when iterations depend on a condition being met. Syntax: <code>while(condition)</code>. Example: reading user input until 'quit' is entered.<br><br>Both achieve repetition but differ in initialization and use case clarity.</p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Empty State / Contributor Placeholder -->
-            <div class="empty-state">
-                <span class="material-symbols-outlined empty-state-icon">edit_note</span>
-                <div class="empty-state-text">
-                    <h3 class="empty-state-title">Need more practice?</h3>
-                    <p class="empty-state-desc">Upload your own mock questions to this paper and help other curators.</p>
+            <!-- Question 3 -->
+            <section class="question-card">
+                <div class="question-row">
+                    <div class="question-number-wrap">
+                        <div class="question-number">03</div>
+                    </div>
+                    <div class="question-content">
+                        <div>
+                            <h2 class="question-heading">What is an array?</h2>
+                            <p class="question-desc">Define arrays and explain how they are stored in memory. Provide a code example. (8 Marks)</p>
+                        </div>
+                        <div style="background:var(--surface-alt); padding:20px; border-radius:var(--radius); border-left:3px solid var(--primary);">
+                            <p style="font-size:12px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Answer</p>
+                            <p class="question-desc">An array is a collection of elements of the same data type stored in contiguous memory locations. Each element is accessed via an index starting from 0.<br><br>Example: <code>int arr[5] = {10, 20, 30, 40, 50};</code><br>Here, arr[0] = 10, arr[4] = 50. Arrays provide O(1) access time and are fundamental for data manipulation.</p>
+                        </div>
+                    </div>
                 </div>
-                <a href="upload.html" class="btn-link" style="text-decoration: none;">Add Question</a>
-            </div>
+            </section>
         </div>
     </main>
 
@@ -106,14 +103,12 @@
     <footer class="site-footer">
         <div class="footer-content">
             <div class="footer-brand-group">
-                <div class="footer-brand text-uppercase">COMSATSPrepHub</div>
-                <p class="footer-copyright text-uppercase">Made with care by Mushtaq Ahmad saqi</p>
+                <div class="footer-brand">COMSATSPrepHub</div>
+                <div class="footer-copyright">Made with care by Mushtaq Ahmad Saqi</div>
             </div>
-            
             <div class="footer-links">
-                <a class="footer-link text-uppercase hover-underline" href="about-us.html">About Us</a>
-                <a class="footer-link text-uppercase hover-underline" href="about-project.html">Learn More</a>
-                <a class="footer-link text-uppercase hover-underline" href="feedback.html">Feedback</a>
+                <a class="footer-link" href="about-us.html">About Us</a>
+                <a class="footer-link" href="feedback.html">Feedback</a>
             </div>
         </div>
     </footer>

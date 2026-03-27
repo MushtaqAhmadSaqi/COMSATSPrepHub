@@ -1,19 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COMSATSPrepHub - Prepare Smarter</title>
-    <!-- Simple, Semantic Stylesheet -->
+    <title>COMSATSPrepHub — Prepare Smarter for COMSATS Exams</title>
+    <meta name="description" content="Access verified past papers, practice quizzes, and performance analytics for COMSATS University students.">
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <!-- Top Navigation -->
+    <!-- Navigation -->
     <header class="navbar navbar-dark">
-        <a href="#" class="navbar-brand">COMSATSPrepHub</a>
-
+        <a href="home.html" class="navbar-brand">COMSATSPrepHub</a>
         <nav class="nav-links">
             <a href="home.html" class="nav-link active">Home</a>
             <a href="subjects.html" class="nav-link">Subjects</a>
@@ -21,82 +18,86 @@
             <a href="leaderboard.html" class="nav-link">Leaderboard</a>
             <a href="about-us.html" class="nav-link">Contributors</a>
         </nav>
-
         <div class="nav-actions">
-            <!-- Profile Avatar replaces Search/Login on this page -->
-            <a href="profile.html" class="btn-icon">
-                <span class="material-symbols-outlined" style="font-size: 24px;">account_circle</span>
-            </a>
+            <a href="subjects.html" class="btn-primary" style="text-decoration:none;">Get Started</a>
         </div>
     </header>
 
     <main class="main-content" style="padding: 0;">
         <!-- Hero Section -->
         <section class="hero-banner">
-            <div style="z-index: 10; max-width: 800px;">
-                <div class="badge-dark" style="margin-bottom: 32px; background-color: #e2e2e2; color: #505252;">
-                    EXCELLENCE IN ACADEMICS</div>
+            <div style="z-index: 10; max-width: 720px;">
+                <div class="badge-dark" style="margin-bottom: 28px; background:rgba(94,234,212,0.15); color:#5eead4;">
+                    EXCELLENCE IN ACADEMICS
+                </div>
                 <h1 class="hero-main-title">
-                    Prepare Smarter for <br><span class="hero-highlight">COMSATS Exams</span>
+                    Prepare Smarter for<br><span class="hero-highlight">COMSATS Exams</span>
                 </h1>
-                <p class="profile-headline" style="margin: 0 auto 40px auto; max-width: 640px;">
-                    A curated digital ecosystem designed for students. Access verified past papers, real-time practice
-                    quizzes, and performance analytics in one authority-driven platform.
+                <p class="profile-headline" style="margin: 0 auto 36px auto; max-width: 560px;">
+                    Access verified past papers, real-time practice quizzes, and performance analytics — all in one platform built by students, for students.
                 </p>
                 <div class="hero-actions">
-                    <a href="quiz.html" class="btn-primary"
-                        style="padding: 16px 32px; font-size: 16px; text-decoration: none;">Start Practicing</a>
-                    <a href="upload.html" class="btn-outline"
-                        style="padding: 16px 32px; font-size: 16px; display: flex; align-items: center; gap: 8px; text-decoration: none;">
-                        <span class="material-symbols-outlined">upload</span> Upload Past Paper
+                    <a href="subjects.html" class="btn-primary" style="padding:14px 32px; font-size:15px; text-decoration:none;">
+                        Browse Subjects
+                    </a>
+                    <a href="quiz.html" class="btn-outline" style="padding:14px 32px; font-size:15px; color:#fff; border-color:rgba(255,255,255,0.3); text-decoration:none;">
+                        <span class="material-symbols-outlined">quiz</span> Start Quiz
                     </a>
                 </div>
             </div>
         </section>
 
-        <!-- Features Bento Grid -->
+        <!-- Stats Counter -->
+        <section class="stats-row">
+            <div class="stat-item">
+                <div class="stat-number">500+</div>
+                <div class="stat-label">Past Papers</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">50+</div>
+                <div class="stat-label">Subjects</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">1000+</div>
+                <div class="stat-label">Students</div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
         <section class="features-section">
             <div class="container">
-                <div style="margin-bottom: 64px;">
-                    <h2 class="dashboard-title" style="font-size: 32px;">Master Your Curriculum</h2>
-                    <p class="question-desc" style="max-width: 480px;">Engineered features to transform how you study
-                        for engineering and management sciences.</p>
+                <div style="margin-bottom: 48px;">
+                    <span class="section-label">Why Choose Us</span>
+                    <h2 class="dashboard-title">Master Your Curriculum</h2>
+                    <p class="question-desc" style="max-width: 480px;">Engineered features to transform how you study for engineering and management sciences.</p>
                 </div>
 
                 <div class="features-grid">
-                    <!-- Feature 1 -->
                     <div class="feature-card">
                         <div class="feature-icon bg-icon-1">
-                            <span class="material-symbols-outlined" style="font-size: 28px;">history_edu</span>
+                            <span class="material-symbols-outlined" style="font-size:26px;">history_edu</span>
                         </div>
                         <div>
-                            <h3 class="feature-title">Past Papers</h3>
-                            <p class="question-desc">The largest repository of departmental exams, sorted by semester
-                                and difficulty.</p>
+                            <h3 class="feature-title">Past Papers Archive</h3>
+                            <p class="question-desc">The largest repository of departmental exams, sorted by semester, year, and exam type.</p>
                         </div>
                     </div>
-
-                    <!-- Feature 2 -->
                     <div class="feature-card">
                         <div class="feature-icon bg-icon-2">
-                            <span class="material-symbols-outlined" style="font-size: 28px;">quiz</span>
+                            <span class="material-symbols-outlined" style="font-size:26px;">quiz</span>
                         </div>
                         <div>
-                            <h3 class="feature-title">Practice Questions</h3>
-                            <p class="question-desc">Dynamic question banks modeled after real COMSATS terminal and
-                                sessional exams.</p>
+                            <h3 class="feature-title">Practice Quizzes</h3>
+                            <p class="question-desc">Dynamic question banks modeled after real COMSATS terminal and sessional exams.</p>
                         </div>
                     </div>
-
-                    <!-- Feature 3 -->
                     <div class="feature-card">
                         <div class="feature-icon bg-icon-3">
-                            <span class="material-symbols-outlined" style="font-size: 28px;">analytics</span>
+                            <span class="material-symbols-outlined" style="font-size:26px;">analytics</span>
                         </div>
                         <div>
                             <h3 class="feature-title">Track Progress</h3>
-                            <p class="question-desc">Visualized analytics to identify your weak spots and predict your
-                                GPA trajectory.</p>
+                            <p class="question-desc">Visualized analytics to identify your weak spots and predict your GPA trajectory.</p>
                         </div>
                     </div>
                 </div>
@@ -106,13 +107,11 @@
         <!-- The Collective Section -->
         <section class="collective-section">
             <div class="collective-header">
-                <h2 class="section-label">The Collective</h2>
-                <h3 class="collective-title">Visionaries behind the hub.</h3>
+                <span class="section-label">The Collective</span>
+                <h2 class="collective-title">Visionaries behind the hub.</h2>
             </div>
-
             <div class="collective-grid">
-                <!-- Founder Card -->
-                <div class="founder-card shadow-sm">
+                <div class="founder-card">
                     <div class="founder-badge-wrap">
                         <span class="badge-dark">FOUNDER</span>
                     </div>
@@ -121,46 +120,31 @@
                     </div>
                     <div>
                         <h4 class="founder-name">Mushtaq Ahmad Saqi</h4>
-                        <p class="founder-role">Founder &amp; UI/UX Designer</p>
-                        <p class="question-desc" style="font-size: 18px; margin-bottom: 32px;">Dedicated to bridging the
-                            gap between academic pressure and digital efficiency. Mushtaq crafted the 'Academic Curator'
-                            system to ensure students have a premium, distraction-free environment.</p>
-
-                        <div style="display: flex; gap: 16px;">
-                            <button class="btn-icon"><span class="material-symbols-outlined">language</span></button>
-                            <button class="btn-icon"><span
-                                    class="material-symbols-outlined">alternate_email</span></button>
-                        </div>
+                        <p class="founder-role">Founder & UI/UX Designer</p>
+                        <p class="question-desc" style="margin-bottom: 20px;">Dedicated to bridging the gap between academic pressure and digital efficiency. Mushtaq crafted the platform to ensure students have a premium, distraction-free environment.</p>
                     </div>
                 </div>
-
-                <!-- Join Hub Card -->
                 <div class="join-hub-card">
                     <div class="join-icon-wrap">
-                        <span class="material-symbols-outlined" style="font-size: 32px;">person_add</span>
+                        <span class="material-symbols-outlined" style="font-size:28px;">person_add</span>
                     </div>
-                    <h4 class="founder-name" style="font-size: 20px;">Join the Hub</h4>
-                    <p class="question-desc" style="margin-bottom: 24px; font-size: 14px;">Want to contribute your notes
-                        or code to help fellow students?</p>
-                    <button class="btn-link text-uppercase"
-                        style="border-bottom: 2px solid var(--primary); padding-bottom: 4px; text-decoration: none;">Become
-                        a Contributor</button>
+                    <h4 style="font-size:18px; font-weight:700; margin-bottom:8px;">Join the Hub</h4>
+                    <p class="question-desc" style="margin-bottom:20px; font-size:14px;">Want to contribute your notes or papers to help fellow students?</p>
+                    <a href="upload.html" class="btn-primary" style="text-decoration:none;">Become a Contributor</a>
                 </div>
             </div>
         </section>
 
-        <!-- Contribution CTA Section -->
+        <!-- CTA Section -->
         <section class="cta-section">
-            <div class="cta-box shadow-md">
+            <div class="cta-box">
                 <div class="cta-content">
-                    <div style="max-width: 600px;">
+                    <div style="max-width: 520px;">
                         <h2 class="cta-title">Help your community. Upload a Past Paper today.</h2>
-                        <p style="font-size: 18px; color: rgba(255,255,255,0.8); line-height: 1.6;">Knowledge grows when
-                            shared. Help thousands of students by contributing verified examination resources. All
-                            contributors are credited on our leaderboard.</p>
+                        <p style="font-size:16px; color:rgba(255,255,255,0.75); line-height:1.6;">Knowledge grows when shared. Help thousands of students by contributing verified examination resources.</p>
                     </div>
                     <div>
-                        <a href="upload.html" class="btn-white" style="text-decoration: none;">
+                        <a href="upload.html" class="btn-white" style="text-decoration:none;">
                             <span class="material-symbols-outlined">cloud_upload</span> Contribute Now
                         </a>
                     </div>
@@ -172,25 +156,23 @@
 
     <!-- Footer -->
     <footer class="site-footer footer-dark">
-        <div class="footer-content" style="max-width: 1280px; padding: 0 32px;">
-            <div style="display: flex; gap: 24px; flex-direction: column;">
+        <div class="footer-content">
+            <div class="footer-brand-group">
                 <div class="footer-brand">COMSATSPrepHub</div>
-                <div style="display: flex; gap: 24px;">
-                    <div class="footer-copyright text-uppercase">Made with care by Mushtaq Ahmad Saqi</div>
-                    <a class="footer-link text-uppercase hover-underline" href="about-project.html">Learn More</a>
-                    <a class="footer-link text-uppercase hover-underline" href="feedback.html">Feedback</a>
-                </div>
+                <div class="footer-copyright">Made with care by Mushtaq Ahmad Saqi</div>
+            </div>
+            <div class="footer-links">
+                <a class="footer-link" href="about-us.html">About Us</a>
+                <a class="footer-link" href="feedback.html">Feedback</a>
+                <a class="footer-link" href="about-project.html">Learn More</a>
             </div>
         </div>
-        <!-- <p> <style></style>Build by student for student</p>
-        <p><a href="about-us.html">About US</a></p>
-        <p>Made with care by Muhstaq Ahmad Saqi</p> -->
     </footer>
 
     <!-- Mobile Nav -->
     <nav class="mobile-nav">
         <a href="home.html" class="mobile-nav-item active">
-            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">home</span>
             <span class="mobile-nav-label">Home</span>
         </a>
         <a href="subjects.html" class="mobile-nav-item">
@@ -211,5 +193,4 @@
         </a>
     </nav>
 </body>
-
 </html>
