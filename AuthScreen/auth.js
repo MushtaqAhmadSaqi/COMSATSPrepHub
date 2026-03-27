@@ -1,24 +1,24 @@
-const authWrapper = document.querySelector('.auth-wrapper');
-const loginTriggers = document.querySelectorAll('.login-trigger');
-const registerTriggers = document.querySelectorAll('.register-trigger');
+const auth = document.querySelector('.auth');
+const toIn = document.querySelectorAll('.to-in');
+const toUp = document.querySelectorAll('.to-up');
 
-// ── TOGGLE PANELS ───────────────────────────────────────────
-registerTriggers.forEach(trigger => {
-  trigger.addEventListener('click', (e) => {
+// ── TOGGLE PANELS ──
+toUp.forEach(btn => {
+  btn.addEventListener('click', (e) => {
     e.preventDefault();
-    authWrapper.classList.add('toggled');
+    auth.classList.add('toggled');
   });
 });
 
-loginTriggers.forEach(trigger => {
-  trigger.addEventListener('click', (e) => {
+toIn.forEach(btn => {
+  btn.addEventListener('click', (e) => {
     e.preventDefault();
-    authWrapper.classList.remove('toggled');
+    auth.classList.remove('toggled');
   });
 });
 
-// ── PASSWORD VISIBILITY TOGGLES ─────────────────────────────
-document.querySelectorAll('.toggle-visibility').forEach(btn => {
+// ── PASSWORD VISIBILITY ──
+document.querySelectorAll('.eye').forEach(btn => {
   btn.addEventListener('click', () => {
     const input = btn.parentElement.querySelector('input');
     const icon = btn.querySelector('.material-symbols-outlined');
@@ -34,121 +34,100 @@ document.querySelectorAll('.toggle-visibility').forEach(btn => {
 
 /* 
   Supabase Authentication Setup
-  Note: Make sure to link this file in your HTML at the very bottom of the body tag using:
-  <script type="module" src="auth.js"></script>
 */
 
-// 1. Import Supabase securely from the CDN
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-// 2. Add your project URL and Anon Key here later
-const SUPABASE_URL = ''; // <-- Paste your Supabase URL here later
-const SUPABASE_KEY = ''; // <-- Paste your Supabase Anon Key here later
+const SUPABASE_URL = ''; 
+const SUPABASE_KEY = ''; 
 
-// 3. Initialize the Supabase Connection
 let supabase = null;
 if (SUPABASE_URL && SUPABASE_KEY) {
   supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-} else {
-  console.warn("Supabase URL or Key is missing. Update them in auth.js");
 }
 
-/* ============================================================== 
-                     SIGN UP FORM LOGIC 
-   ============================================================== */
-const signupForm = document.getElementById('signupForm');
+// ── SIGN UP ──
+const sForm = document.getElementById('s-form');
 
-if (signupForm) {
-  signupForm.addEventListener('submit', async function (event) {
-    event.preventDefault();
+if (sForm) {
+  sForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
 
     if (!supabase) {
-      alert("Please update your Supabase URL and Key in auth.js first!");
+      alert("Setup Supabase first!");
       return;
     }
 
-    // Get input elements by ID
-    const name = document.getElementById('signupName').value;
-    const email = document.getElementById('signupEmail').value;
-    const password = document.getElementById('signupPassword').value;
-    const termsChecked = document.getElementById('terms').checked;
-    const submitBtn = signupForm.querySelector('button[type="submit"]');
+    const name = document.getElementById('s-name').value;
+    const email = document.getElementById('s-email').value;
+    const pass = document.getElementById('s-pass').value;
+    const acc = document.getElementById('acc-in').checked;
+    const btn = sForm.querySelector('button[type="submit"]');
 
-    // Validation
-    if (!termsChecked) {
-      alert("Please accept the Terms of Service and Privacy Policy.");
+    if (!acc) {
+      alert("Accept terms first.");
       return;
     }
 
-    if (password.length < 8) {
-      alert("Password must be at least 8 characters long.");
+    if (pass.length < 8) {
+      alert("Password too short.");
       return;
     }
 
-    // Indicate loading
-    const originalBtnText = submitBtn.textContent;
-    submitBtn.textContent = 'Creating Account...';
-    submitBtn.disabled = true;
+    const oldText = btn.textContent;
+    btn.textContent = 'Processing...';
+    btn.disabled = true;
 
-    // 4. Send the new user data to Supabase
     const { data, error } = await supabase.auth.signUp({
       email: email,
-      password: password,
-      options: {
-        data: {
-          full_name: name
-        }
-      }
+      password: pass,
+      options: { data: { full_name: name } }
     });
 
-    submitBtn.textContent = originalBtnText;
-    submitBtn.disabled = false;
+    btn.textContent = oldText;
+    btn.disabled = false;
 
     if (error) {
-      alert("Signup Error: " + error.message);
+      alert("Error: " + error.message);
     } else {
-      alert("Registration successful! Please check your email inbox to confirm your address.");
-      signupForm.reset();
+      alert("Success! Check email.");
+      sForm.reset();
     }
   });
 }
 
-/* ============================================================== 
-                      LOGIN FORM LOGIC 
-   ============================================================== */
-const loginForm = document.getElementById('loginForm');
+// ── LOGIN ──
+const lForm = document.getElementById('l-form');
 
-if (loginForm) {
-  loginForm.addEventListener('submit', async function (event) {
-    event.preventDefault();
+if (lForm) {
+  lForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
 
     if (!supabase) {
-      alert("Please update your Supabase URL and Key in auth.js first!");
+      alert("Setup Supabase first!");
       return;
     }
 
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    const submitBtn = loginForm.querySelector('button[type="submit"]');
+    const email = document.getElementById('l-email').value;
+    const pass = document.getElementById('l-pass').value;
+    const btn = lForm.querySelector('button[type="submit"]');
 
-    submitBtn.textContent = 'Logging in...';
-    submitBtn.disabled = true;
+    btn.textContent = 'Entering...';
+    btn.disabled = true;
 
-    // Call Supabase's signIn function
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
-      password: password,
+      password: pass,
     });
 
-    submitBtn.textContent = 'Login';
-    submitBtn.disabled = false;
+    btn.textContent = 'Login';
+    btn.disabled = false;
 
     if (error) {
-      alert("Login Error: " + error.message);
+      alert("Error: " + error.message);
     } else {
-      alert("Login Complete! Welcome back.");
-      // Optional: window.location.href = "../home.html"; 
-      loginForm.reset();
+      alert("Welcome back!");
+      lForm.reset();
     }
   });
 }

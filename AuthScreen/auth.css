@@ -20,14 +20,14 @@ body {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-/* ── AUTH LAYOUT ───────────────────────────── */
-.auth-main {
+/* ── LAYOUT ── */
+.panel {
   display: flex;
   min-height: 100vh;
 }
 
-/* ── LEFT PANEL (Dark branded side) ───────────────────────────── */
-.auth-brand-panel {
+/* ── SIDE PANEL (LEFT) ── */
+.side {
   display: none;
   width: 50%;
   position: relative;
@@ -37,16 +37,15 @@ body {
   padding: 48px 48px 48px 96px;
 }
 
-.auth-brand-panel.login-panel {
+.l-side {
   background: linear-gradient(135deg, #002B5B 0%, #004c8c 100%);
 }
 
-.auth-brand-panel.signup-panel {
+.s-side {
   background: linear-gradient(135deg, #0c0f0f 0%, #2d3435 100%);
 }
 
-/* Background image overlay */
-.brand-bg-image {
+.bg-img {
   position: absolute;
   top: 0;
   left: 0;
@@ -57,26 +56,23 @@ body {
   pointer-events: none;
 }
 
-/* Brand content */
-.brand-content {
+.hero {
   position: relative;
   z-index: 10;
   max-width: 480px;
 }
 
-/* Login panel layout - centered */
-.login-panel .brand-content {
+.l-side .hero {
   text-align: center;
   margin: 0 auto;
 }
 
-/* Signup panel layout - left aligned with green accent */
-.signup-panel .brand-content {
+.s-side .hero {
   display: flex;
   align-items: flex-start;
 }
 
-.brand-accent-line {
+.line {
   width: 6px;
   height: 128px;
   background: #91f78e;
@@ -85,12 +81,12 @@ body {
   flex-shrink: 0;
 }
 
-.brand-text-group {
+.stack {
   display: flex;
   flex-direction: column;
 }
 
-.brand-subtitle {
+.sub {
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.2em;
@@ -99,15 +95,15 @@ body {
   display: block;
 }
 
-.login-panel .brand-subtitle {
+.l-side .sub {
   color: rgba(255, 255, 255, 0.6);
 }
 
-.signup-panel .brand-subtitle {
+.s-side .sub {
   color: #91f78e;
 }
 
-.brand-title {
+.h1 {
   color: #fff;
   font-weight: 900;
   text-transform: uppercase;
@@ -116,54 +112,52 @@ body {
   margin-bottom: 24px;
 }
 
-.login-panel .brand-title {
+.l-side .h1 {
   font-size: 60px;
 }
 
-.signup-panel .brand-title {
+.s-side .h1 {
   font-size: 72px;
 }
 
-.brand-desc {
+.p {
   font-size: 18px;
   font-weight: 300;
   line-height: 1.65;
   max-width: 480px;
 }
 
-.login-panel .brand-desc {
+.l-side .p {
   color: rgba(255, 255, 255, 0.8);
 }
 
-.signup-panel .brand-desc {
+.s-side .p {
   color: #adb3b4;
 }
 
-/* Carousel dots (login) */
-.brand-dots {
+.dots {
   display: flex;
   justify-content: center;
   gap: 16px;
   margin-top: 32px;
 }
 
-.brand-dot {
+.dot {
   height: 4px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.2);
 }
 
-.brand-dot.active {
+.dot.active {
   width: 48px;
   background: rgba(255, 255, 255, 0.4);
 }
 
-.brand-dot:not(.active) {
+.dot:not(.active) {
   width: 16px;
 }
 
-/* Brand logo anchors */
-.brand-logo-top {
+.logo {
   position: absolute;
   top: 48px;
   left: 48px;
@@ -174,30 +168,22 @@ body {
   z-index: 10;
 }
 
-.brand-logo-bottom {
+.foot-l {
   position: absolute;
   bottom: 48px;
   left: 96px;
   z-index: 10;
 }
 
-.brand-logo-bottom-name {
+.logo-n {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.3px;
   color: #fff;
 }
 
-.brand-logo-bottom-sub {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #adb3b4;
-  margin-top: 4px;
-}
-
-/* ── RIGHT PANEL (Form side) ───────────────────────────── */
-.auth-form-panel {
+/* ── FORM PANEL (RIGHT) ── */
+.main {
   width: 100%;
   min-height: 100vh;
   background: #f9f9f9;
@@ -207,29 +193,28 @@ body {
   padding: 24px;
 }
 
-.auth-form-container {
+.wrap {
   width: 100%;
   max-width: 420px;
 }
 
-/* Mobile branding (shown only on small screens) */
-.mobile-brand {
+.m-logo {
   text-align: center;
   margin-bottom: 48px;
 }
 
-.mobile-brand-name {
+.m-name {
   font-size: 24px;
   font-weight: 900;
   letter-spacing: -0.5px;
   color: #002B5B;
 }
 
-.mobile-brand-signup .mobile-brand-name {
+.s-m-logo .m-name {
   color: #5f5e5e;
 }
 
-.mobile-brand-bar {
+.m-bar {
   width: 48px;
   height: 4px;
   background: #006f1d;
@@ -237,16 +222,15 @@ body {
   display: none;
 }
 
-.mobile-brand-signup .mobile-brand-bar {
+.s-m-logo .m-bar {
   display: block;
 }
 
-/* Form header */
-.form-header {
+.head {
   margin-bottom: 40px;
 }
 
-.form-title {
+.h2 {
   font-size: 30px;
   font-weight: 800;
   color: #2d3435;
@@ -254,25 +238,25 @@ body {
   margin-bottom: 8px;
 }
 
-.form-subtitle {
+.h2-sub {
   font-size: 14px;
   font-weight: 500;
   color: #5a6061;
 }
 
-/* ── FORM FIELDS ───────────────────────────── */
-.form-group {
+/* ── FIELDS ── */
+.item {
   margin-bottom: 24px;
 }
 
-.form-label-row {
+.label-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 4px;
 }
 
-.form-label {
+.label {
   display: block;
   font-size: 10px;
   font-weight: 700;
@@ -283,7 +267,7 @@ body {
   margin-left: 4px;
 }
 
-.form-label-link {
+.label-link {
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
@@ -293,15 +277,15 @@ body {
   transition: color 0.2s;
 }
 
-.form-label-link:hover {
+.label-link:hover {
   color: #2d3435;
 }
 
-.input-wrapper {
+.field {
   position: relative;
 }
 
-.input-icon {
+.icon {
   position: absolute;
   top: 50%;
   left: 12px;
@@ -311,7 +295,7 @@ body {
   pointer-events: none;
 }
 
-.form-input {
+.in {
   width: 100%;
   padding: 14px 16px 14px 40px;
   background: #f2f4f4;
@@ -325,21 +309,19 @@ body {
   transition: border-color 0.3s, background 0.3s;
 }
 
-.form-input:focus {
+.in:focus {
   border-bottom-color: #535252;
 }
 
-.form-input::placeholder {
+.in::placeholder {
   color: #adb3b4;
 }
 
-/* Input without icon (signup style) */
-.form-input.no-icon {
+.in.no-icon {
   padding-left: 16px;
 }
 
-/* Password visibility toggle */
-.toggle-visibility {
+.eye {
   position: absolute;
   top: 50%;
   right: 12px;
@@ -354,19 +336,19 @@ body {
   transition: color 0.2s;
 }
 
-.toggle-visibility:hover {
+.eye:hover {
   color: #2d3435;
 }
 
-/* ── CHECKBOX ───────────────────────────── */
-.checkbox-row {
+/* ── CHECKBOX ── */
+.check {
   display: flex;
   align-items: flex-start;
   gap: 12px;
   margin-bottom: 24px;
 }
 
-.checkbox-input {
+.ck-in {
   width: 16px;
   height: 16px;
   border-radius: 4px;
@@ -376,25 +358,25 @@ body {
   flex-shrink: 0;
 }
 
-.checkbox-label {
+.ck-lbl {
   font-size: 14px;
   color: #5a6061;
   line-height: 1.4;
 }
 
-.checkbox-label a {
+.ck-lbl a {
   color: #5f5e5e;
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
-.checkbox-label a:hover {
+.ck-lbl a:hover {
   color: #2d3435;
 }
 
-/* ── BUTTONS ───────────────────────────── */
-.btn-submit {
+/* ── BUTTONS ── */
+.btn {
   width: 100%;
   padding: 16px;
   border: none;
@@ -412,28 +394,27 @@ body {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
-.btn-submit:hover {
+.btn:hover {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
   transform: translateY(-1px);
 }
 
-.btn-submit:active {
+.btn:active {
   transform: scale(0.98);
 }
 
-.btn-submit.login-btn {
+.b-login {
   background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
 }
 
-.btn-submit.signup-btn {
+.b-signup {
   background: linear-gradient(90deg, #00B4D8 0%, #0077B6 100%);
   text-transform: uppercase;
   letter-spacing: 0.15em;
   font-size: 13px;
 }
 
-/* Google Sign-in button */
-.btn-google {
+.btn-g {
   width: 100%;
   padding: 14px;
   background: #ffffff;
@@ -451,36 +432,35 @@ body {
   transition: all 0.25s ease;
 }
 
-.btn-google:hover {
+.btn-g:hover {
   background: #e4e9ea;
 }
 
-.btn-google img,
-.btn-google img.google {
+.btn-g img,
+.btn-g img.google {
   width: 20px;
   height: 20px;
 }
 
-/* Signup Google button (rounded-lg instead of pill) */
-.btn-google.signup-google {
+.btn-g-up {
   border-radius: 8px;
 }
 
-/* ── DIVIDER ───────────────────────────── */
-.auth-divider {
+/* ── DIVIDER ── */
+.sep {
   display: flex;
   align-items: center;
   margin: 24px 0;
 }
 
-.auth-divider::before,
-.auth-divider::after {
+.sep::before,
+.sep::after {
   content: '';
   flex: 1;
   border-bottom: 1px solid rgba(173, 179, 180, 0.2);
 }
 
-.auth-divider span {
+.sep span {
   padding: 0 16px;
   font-size: 10px;
   font-weight: 700;
@@ -489,8 +469,8 @@ body {
   color: #adb3b4;
 }
 
-/* ── SWITCH LINK ───────────────────────────── */
-.switch-link {
+/* ── TOGGLE ── */
+.swap {
   text-align: center;
   margin-top: 48px;
   font-size: 15px;
@@ -498,7 +478,7 @@ body {
   font-weight: 500;
 }
 
-.switch-link a {
+.swap a {
   color: #5f5e5e;
   font-weight: 700;
   text-decoration: underline;
@@ -507,60 +487,19 @@ body {
   transition: color 0.2s;
 }
 
-.switch-link a:hover {
+.swap a:hover {
   color: #2d3435;
 }
 
-/* ── AUTH PAGE FOOTER ───────────────────────────── */
-.auth-footer {
-  margin-top: 80px;
-  padding-top: 32px;
-  border-top: 1px solid rgba(173, 179, 180, 0.1);
-}
-
-.auth-footer-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
-}
-
-.auth-footer-copyright {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 500;
-  color: #94a3b8;
-}
-
-.auth-footer-links {
-  display: flex;
-  gap: 24px;
-}
-
-.auth-footer-link {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 500;
-  color: #94a3b8;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.auth-footer-link:hover {
-  color: #002B5B;
-}
-
-/* Global footer (below everything) */
-.auth-global-footer {
+/* ── FOOTER ── */
+.foot {
   width: 100%;
   background: #f9f9f9;
   padding: 32px;
   border-top: 1px solid rgba(173, 179, 180, 0.1);
 }
 
-.auth-global-footer-inner {
+.foot-inner {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 32px;
@@ -570,48 +509,52 @@ body {
   align-items: center;
 }
 
-/* ── TOGGLE STATES ───────────────────────────── */
-/* By default: Login visible, Signup hidden */
-.auth-view-login { display: flex; }
-.auth-view-signup { display: none; }
+.foot-copy {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  color: #94a3b8;
+}
 
-.auth-wrapper.toggled .auth-view-login { display: none; }
-.auth-wrapper.toggled .auth-view-signup { display: flex; }
+.foot-links {
+  display: flex;
+  gap: 24px;
+}
 
-/* ── RESPONSIVE ───────────────────────────── */
+.foot-link {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.foot-link:hover {
+  color: #002B5B;
+}
+
+/* ── STATES ── */
+.login { display: flex; }
+.signup { display: none; }
+
+.auth.toggled .login { display: none; }
+.auth.toggled .signup { display: flex; }
+
+/* ── RESPONSIVE ── */
 @media (min-width: 1024px) {
-  .auth-brand-panel {
-    display: flex;
-  }
-
-  .auth-form-panel {
-    width: 50%;
-    padding: 48px 80px;
-  }
-
-  .mobile-brand {
-    display: none;
-  }
+  .side { display: flex; }
+  .main { width: 50%; padding: 48px 80px; }
+  .m-logo { display: none; }
 }
 
 @media (min-width: 768px) {
-  .auth-footer-inner {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-
-  .auth-global-footer-inner {
-    flex-direction: row;
-    justify-content: space-between;
-  }
+  .foot-inner { flex-direction: row; justify-content: space-between; }
 }
 
 @media (max-width: 1023px) {
-  .auth-brand-panel {
-    display: none !important;
-  }
-
-  .auth-form-panel {
-    width: 100%;
-  }
+  .side { display: none !important; }
+  .main { width: 100%; }
 }
