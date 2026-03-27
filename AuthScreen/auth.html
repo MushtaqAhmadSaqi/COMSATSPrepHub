@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMSATSPrepHub — Sign In</title>
+    <meta name="description"
+        content="Sign in or create an account to access past papers, quizzes, and performance analytics on COMSATSPrepHub.">
+    <link rel="stylesheet" href="auth.css">
+</head>
+
+<body>
+    <div class="auth-wrapper">
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- LOGIN VIEW                                  -->
+        <!-- ═══════════════════════════════════════════ -->
+        <main class="auth-main auth-view-login">
+            <!-- Left Panel: Dark Brand (Login) -->
+            <section class="auth-brand-panel login-panel">
+                <div class="brand-bg-image-wrap">
+                    <img class="brand-bg-image"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZDdNBglJeWrhi1y9jHIye7HIzCaIJI2VjDX-tqDH8dlDCtls8eTrLe8AHu-8QNhXA2j51OpnRpksHOCmzKaSTGRVocinZu_g6kcjHVO-KmmMDRgKY9A5bjPCbTd74_QZ_b4E0mEa3s57hV_8PV1qoIcW1W1-cvoW50XK5HDsQXs-rmyiJQ9-eKURVp0nLXuzjPsJYIuZhEC6Sd_s8ZFgrUF-tG8TeuVUml81zCmnoAmSoX-XdJWNxIPpPGlURk9DNtY--FBNPa9HA"
+                        alt="Abstract architecture">
+                </div>
+
+                <!-- Top left brand -->
+                <div class="brand-logo-top">COMSATSPrepHub</div>
+
+                <!-- Centered content -->
+                <div class="brand-content">
+                    <span class="brand-subtitle">Academic Excellence</span>
+                    <h1 class="brand-title">WELCOME BACK!</h1>
+                    <p class="brand-desc">
+                        Access your curated prep materials and continue your journey toward academic mastery at COMSATS.
+                    </p>
+                    <div class="brand-dots">
+                        <div class="brand-dot active"></div>
+                        <div class="brand-dot"></div>
+                        <div class="brand-dot"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Login Form -->
+            <section class="auth-form-panel">
+                <div class="auth-form-container">
+                    <!-- Mobile Branding -->
+                    <div class="mobile-brand">
+                        <div class="mobile-brand-name">COMSATSPrepHub</div>
+                    </div>
+
+                    <!-- Header -->
+                    <div class="form-header">
+                        <h2 class="form-title">Login</h2>
+                        <p class="form-subtitle">Welcome back to your academic curator.</p>
+                    </div>
+
+                    <form id="loginForm">
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label class="form-label" for="loginEmail">Email Address</label>
+                            <div class="input-wrapper">
+                                <span class="material-symbols-outlined input-icon">mail</span>
+                                <input class="form-input" id="loginEmail" name="email" type="email"
+                                    placeholder="name@example.com" required>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-group">
+                            <div class="form-label-row">
+                                <label class="form-label" for="loginPassword" style="margin-bottom:0;">Password</label>
+                                <a class="form-label-link" href="#">Forgot Password?</a>
+                            </div>
+                            <div class="input-wrapper">
+                                <span class="material-symbols-outlined input-icon">lock</span>
+                                <input class="form-input" id="loginPassword" name="password" type="password"
+                                    placeholder="••••••••" required>
+                                <button class="toggle-visibility" type="button" aria-label="Toggle password visibility">
+                                    <span class="material-symbols-outlined" style="font-size:20px;">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Remember me -->
+                        <div class="checkbox-row">
+                            <input class="checkbox-input" type="checkbox" id="remember">
+                            <label class="checkbox-label" for="remember">Keep me logged in</label>
+                        </div>
+
+                        <!-- Login button -->
+                        <button class="btn-submit login-btn" type="submit">
+                            <span>Login</span>
+                            <span class="material-symbols-outlined">arrow_forward</span>
+                        </button>
+
+                        <!-- Divider -->
+                        <div class="auth-divider"><span>or</span></div>
+
+                        <!-- Google Sign-in -->
+                        <button class="btn-google" type="button">
+                            <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png"
+                                alt="Google" class="google">
+                            <span>Sign in with Google</span>
+                        </button>
+                    </form>
+
+                    <!-- Switch to signup -->
+                    <div class="switch-link">
+                        Don't have an account?
+                        <a href="#" class="register-trigger">Sign Up</a>
+                    </div>
+
+                    <!-- Footer
+                    <footer class="auth-footer">
+                        <div class="auth-footer-inner">
+                            <p class="auth-footer-copyright"></p>
+                            <div class="auth-footer-links">
+                                <a class="auth-footer-link" href="#">Privacy</a>
+                                <a class="auth-footer-link" href="#">Terms</a>
+                                <a class="auth-footer-link" href="#">Support</a>
+                            </div>
+                        </div>
+                    </footer> -->
+                </div>
+            </section>
+        </main>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- SIGNUP VIEW                                 -->
+        <!-- ═══════════════════════════════════════════ -->
+        <main class="auth-main auth-view-signup">
+            <!-- Left Panel: Dark Brand (Signup) -->
+            <section class="auth-brand-panel signup-panel">
+                <div class="brand-bg-image-wrap">
+                    <img class="brand-bg-image"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk3-sOvD_tJohcdxadxtZFJ10l6HyxAbSE4RauxdmJfHf2zs_u4P38ESTUhEgJwACMcTPz6pi5NSGYVW9uobohnmF9gZ2L4ftwzuQ_IVi8C9i5F5nZgsq-49YwZihRSNuU7xyqpNU7wTUnjp265IAJ1xC08Fkzj6pMEq1juhdk208VCUWDAvkIVlKiUvZALMeyoFUi9xXkGA82r8dJkKDLwCujzX1EtT1wGN0dijfpNbSMh1cay34o_4cztvQ85r3FGObPL80zGWU9"
+                        alt="Abstract architecture">
+                </div>
+
+                <!-- Content with green accent line -->
+                <div class="brand-content">
+                    <div class="brand-accent-line"></div>
+                    <div class="brand-text-group">
+                        <span class="brand-subtitle">Academic Excellence</span>
+                        <h1 class="brand-title">WELCOME!</h1>
+                        <p class="brand-desc">
+                            Join the community of scholars at COMSATSPrepHub. Your curated journey to academic mastery
+                            starts here.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Bottom branding -->
+                <div class="brand-logo-bottom">
+                    <div class="brand-logo-bottom-name">COMSATSPrepHub</div>
+                    <!-- <div class="brand-logo-bottom-sub">Digital Curator V2.0</div> -->
+                </div>
+            </section>
+
+            <!-- Right Panel: Signup Form -->
+            <section class="auth-form-panel">
+                <div class="auth-form-container">
+                    <!-- Mobile Branding -->
+                    <div class="mobile-brand mobile-brand-signup">
+                        <div class="mobile-brand-bar"></div>
+                        <div class="mobile-brand-name">COMSATSPrepHub</div>
+                    </div>
+
+                    <!-- Header -->
+                    <div class="form-header">
+                        <h2 class="form-title">Create your account</h2>
+                        <p class="form-subtitle">Sign up to access curated study materials and tracking.</p>
+                    </div>
+
+                    <!-- Google Auth -->
+                    <button class="btn-google signup-google" type="button">
+                        <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png"
+                            alt="Google" class="google">
+                        <span>Continue with Google</span>
+                    </button>
+
+                    <!-- Divider -->
+                    <div class="auth-divider"><span>or email</span></div>
+
+                    <form id="signupForm">
+                        <!-- Full Name -->
+                        <div class="form-group">
+                            <label class="form-label" for="signupName">Full Name</label>
+                            <div class="input-wrapper">
+                                <input class="form-input no-icon" id="signupName" name="name" type="text"
+                                    placeholder="John Doe" required>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label class="form-label" for="signupEmail">Email Address</label>
+                            <div class="input-wrapper">
+                                <input class="form-input no-icon" id="signupEmail" name="email" type="email"
+                                    placeholder="student@university.edu" required>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-group">
+                            <label class="form-label" for="signupPassword">Password</label>
+                            <div class="input-wrapper">
+                                <input class="form-input no-icon" id="signupPassword" name="password" type="password"
+                                    placeholder="••••••••" required>
+                                <button class="toggle-visibility" type="button" aria-label="Toggle password visibility">
+                                    <span class="material-symbols-outlined" style="font-size:20px;">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Terms -->
+                        <div class="checkbox-row">
+                            <input class="checkbox-input" type="checkbox" id="terms">
+                            <label class="checkbox-label" for="terms">
+                                I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+                            </label>
+                        </div>
+
+                        <!-- Signup Button -->
+                        <button class="btn-submit signup-btn" type="submit">
+                            Create Account
+                        </button>
+                    </form>
+
+                    <!-- Switch to Login -->
+                    <div class="switch-link" style="margin-top:24px;">
+                        Already have an account?
+                        <a href="#" class="login-trigger">Sign In</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+    </div>
+
+    <!-- Global Footer -->
+    <footer class="auth-global-footer">
+        <div class="auth-global-footer-inner">
+            <p class="auth-footer-copyright">COMSATSPrepHub — Free for everyone.</p>
+            <div class="auth-footer-links">
+                <a class="auth-footer-link" href="#">Privacy</a>
+                <a class="auth-footer-link" href="#">Terms</a>
+                <a class="auth-footer-link" href="#">Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="auth.js"></script>
+</body>
+
+</html>

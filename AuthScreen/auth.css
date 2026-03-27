@@ -1,0 +1,617 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f9f9f9;
+  color: #2d3435;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ── AUTH LAYOUT ───────────────────────────── */
+.auth-main {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── LEFT PANEL (Dark branded side) ───────────────────────────── */
+.auth-brand-panel {
+  display: none;
+  width: 50%;
+  position: relative;
+  overflow: hidden;
+  flex-direction: column;
+  justify-content: center;
+  padding: 48px 48px 48px 96px;
+}
+
+.auth-brand-panel.login-panel {
+  background: linear-gradient(135deg, #002B5B 0%, #004c8c 100%);
+}
+
+.auth-brand-panel.signup-panel {
+  background: linear-gradient(135deg, #0c0f0f 0%, #2d3435 100%);
+}
+
+/* Background image overlay */
+.brand-bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+/* Brand content */
+.brand-content {
+  position: relative;
+  z-index: 10;
+  max-width: 480px;
+}
+
+/* Login panel layout - centered */
+.login-panel .brand-content {
+  text-align: center;
+  margin: 0 auto;
+}
+
+/* Signup panel layout - left aligned with green accent */
+.signup-panel .brand-content {
+  display: flex;
+  align-items: flex-start;
+}
+
+.brand-accent-line {
+  width: 6px;
+  height: 128px;
+  background: #91f78e;
+  border-radius: 999px;
+  margin-right: 32px;
+  flex-shrink: 0;
+}
+
+.brand-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-subtitle {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.login-panel .brand-subtitle {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.signup-panel .brand-subtitle {
+  color: #91f78e;
+}
+
+.brand-title {
+  color: #fff;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -2px;
+  line-height: 0.95;
+  margin-bottom: 24px;
+}
+
+.login-panel .brand-title {
+  font-size: 60px;
+}
+
+.signup-panel .brand-title {
+  font-size: 72px;
+}
+
+.brand-desc {
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.65;
+  max-width: 480px;
+}
+
+.login-panel .brand-desc {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.signup-panel .brand-desc {
+  color: #adb3b4;
+}
+
+/* Carousel dots (login) */
+.brand-dots {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.brand-dot {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.brand-dot.active {
+  width: 48px;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.brand-dot:not(.active) {
+  width: 16px;
+}
+
+/* Brand logo anchors */
+.brand-logo-top {
+  position: absolute;
+  top: 48px;
+  left: 48px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #fff;
+  z-index: 10;
+}
+
+.brand-logo-bottom {
+  position: absolute;
+  bottom: 48px;
+  left: 96px;
+  z-index: 10;
+}
+
+.brand-logo-bottom-name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: #fff;
+}
+
+.brand-logo-bottom-sub {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #adb3b4;
+  margin-top: 4px;
+}
+
+/* ── RIGHT PANEL (Form side) ───────────────────────────── */
+.auth-form-panel {
+  width: 100%;
+  min-height: 100vh;
+  background: #f9f9f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.auth-form-container {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* Mobile branding (shown only on small screens) */
+.mobile-brand {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.mobile-brand-name {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: #002B5B;
+}
+
+.mobile-brand-signup .mobile-brand-name {
+  color: #5f5e5e;
+}
+
+.mobile-brand-bar {
+  width: 48px;
+  height: 4px;
+  background: #006f1d;
+  margin: 0 auto 16px;
+  display: none;
+}
+
+.mobile-brand-signup .mobile-brand-bar {
+  display: block;
+}
+
+/* Form header */
+.form-header {
+  margin-bottom: 40px;
+}
+
+.form-title {
+  font-size: 30px;
+  font-weight: 800;
+  color: #2d3435;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+.form-subtitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: #5a6061;
+}
+
+/* ── FORM FIELDS ───────────────────────────── */
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.form-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #5a6061;
+  margin-bottom: 4px;
+  margin-left: 4px;
+}
+
+.form-label-link {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #5f5e5e;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.form-label-link:hover {
+  color: #2d3435;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #757c7d;
+  font-size: 20px;
+  pointer-events: none;
+}
+
+.form-input {
+  width: 100%;
+  padding: 14px 16px 14px 40px;
+  background: #f2f4f4;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 8px 8px 0 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #2d3435;
+  outline: none;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.form-input:focus {
+  border-bottom-color: #535252;
+}
+
+.form-input::placeholder {
+  color: #adb3b4;
+}
+
+/* Input without icon (signup style) */
+.form-input.no-icon {
+  padding-left: 16px;
+}
+
+/* Password visibility toggle */
+.toggle-visibility {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #757c7d;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.toggle-visibility:hover {
+  color: #2d3435;
+}
+
+/* ── CHECKBOX ───────────────────────────── */
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.checkbox-input {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid #adb3b4;
+  accent-color: #5f5e5e;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.checkbox-label {
+  font-size: 14px;
+  color: #5a6061;
+  line-height: 1.4;
+}
+
+.checkbox-label a {
+  color: #5f5e5e;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.checkbox-label a:hover {
+  color: #2d3435;
+}
+
+/* ── BUTTONS ───────────────────────────── */
+.btn-submit {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.btn-submit:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  transform: translateY(-1px);
+}
+
+.btn-submit:active {
+  transform: scale(0.98);
+}
+
+.btn-submit.login-btn {
+  background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+}
+
+.btn-submit.signup-btn {
+  background: linear-gradient(90deg, #00B4D8 0%, #0077B6 100%);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 13px;
+}
+
+/* Google Sign-in button */
+.btn-google {
+  width: 100%;
+  padding: 14px;
+  background: #ffffff;
+  border: 1px solid rgba(173, 179, 180, 0.2);
+  border-radius: 999px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #2d3435;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.25s ease;
+}
+
+.btn-google:hover {
+  background: #e4e9ea;
+}
+
+.btn-google img,
+.btn-google img.google {
+  width: 20px;
+  height: 20px;
+}
+
+/* Signup Google button (rounded-lg instead of pill) */
+.btn-google.signup-google {
+  border-radius: 8px;
+}
+
+/* ── DIVIDER ───────────────────────────── */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 24px 0;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(173, 179, 180, 0.2);
+}
+
+.auth-divider span {
+  padding: 0 16px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #adb3b4;
+}
+
+/* ── SWITCH LINK ───────────────────────────── */
+.switch-link {
+  text-align: center;
+  margin-top: 48px;
+  font-size: 15px;
+  color: #5a6061;
+  font-weight: 500;
+}
+
+.switch-link a {
+  color: #5f5e5e;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  transition: color 0.2s;
+}
+
+.switch-link a:hover {
+  color: #2d3435;
+}
+
+/* ── AUTH PAGE FOOTER ───────────────────────────── */
+.auth-footer {
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(173, 179, 180, 0.1);
+}
+
+.auth-footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.auth-footer-copyright {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.auth-footer-links {
+  display: flex;
+  gap: 24px;
+}
+
+.auth-footer-link {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.auth-footer-link:hover {
+  color: #002B5B;
+}
+
+/* Global footer (below everything) */
+.auth-global-footer {
+  width: 100%;
+  background: #f9f9f9;
+  padding: 32px;
+  border-top: 1px solid rgba(173, 179, 180, 0.1);
+}
+
+.auth-global-footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+/* ── TOGGLE STATES ───────────────────────────── */
+/* By default: Login visible, Signup hidden */
+.auth-view-login { display: flex; }
+.auth-view-signup { display: none; }
+
+.auth-wrapper.toggled .auth-view-login { display: none; }
+.auth-wrapper.toggled .auth-view-signup { display: flex; }
+
+/* ── RESPONSIVE ───────────────────────────── */
+@media (min-width: 1024px) {
+  .auth-brand-panel {
+    display: flex;
+  }
+
+  .auth-form-panel {
+    width: 50%;
+    padding: 48px 80px;
+  }
+
+  .mobile-brand {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .auth-footer-inner {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .auth-global-footer-inner {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 1023px) {
+  .auth-brand-panel {
+    display: none !important;
+  }
+
+  .auth-form-panel {
+    width: 100%;
+  }
+}
