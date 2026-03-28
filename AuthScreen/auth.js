@@ -38,8 +38,8 @@ document.querySelectorAll('.eye').forEach(btn => {
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const SUPABASE_URL = ''; 
-const SUPABASE_KEY = ''; 
+const SUPABASE_URL = 'https://xylyiscatznexduatjmg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_K0t4H7M3LU96jy8_z_TJHg_ok_u-7HC';
 
 let supabase = null;
 if (SUPABASE_URL && SUPABASE_KEY) {
