@@ -1,0 +1,540 @@
+/* ═══════════════════════════════════════════════════════════════
+   auth-modal.css
+   Styles for the Sign In / Sign Up modal overlay on home.html
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── AUTH MODAL OVERLAY ── */
+.auth-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 15, 30, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+}
+
+.auth-modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ── AUTH MODAL CARD ── */
+.auth-modal {
+    width: 100%;
+    max-width: 900px;
+    max-height: 95vh;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    transform: translateY(24px) scale(0.97);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.35s ease;
+    opacity: 0;
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.45);
+}
+
+.auth-modal-overlay.open .auth-modal {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+/* ── CLOSE BUTTON ── */
+.auth-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 200;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    font-size: 20px;
+    transition: background 0.2s;
+    backdrop-filter: blur(4px);
+}
+
+.auth-modal-close:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+/* ── PANEL LAYOUT ── */
+.am-panel {
+    display: flex;
+    min-height: 520px;
+}
+
+/* ── SIDE PANEL (LEFT BRANDED HALF) ── */
+.am-side {
+    display: none;
+    width: 42%;
+    position: relative;
+    overflow: hidden;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 40px 40px 48px;
+}
+
+@media (min-width: 768px) {
+    .am-side { display: flex; }
+}
+
+.am-l-side {
+    background: linear-gradient(135deg, #002B5B 0%, #004c8c 100%);
+}
+
+.am-s-side {
+    background: linear-gradient(135deg, #0c0f0f 0%, #2d3435 100%);
+}
+
+.am-bg-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+/* ── HERO TEXT (BRANDED SIDE) ── */
+.am-hero {
+    position: relative;
+    z-index: 10;
+    max-width: 360px;
+}
+
+.am-l-side .am-hero {
+    text-align: center;
+    margin: 0 auto;
+}
+
+.am-s-side .am-hero {
+    display: flex;
+    align-items: flex-start;
+}
+
+.am-line {
+    width: 5px;
+    height: 100px;
+    background: #91f78e;
+    border-radius: 999px;
+    margin-right: 24px;
+    flex-shrink: 0;
+}
+
+.am-stack {
+    display: flex;
+    flex-direction: column;
+}
+
+.am-sub {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.am-l-side .am-sub { color: rgba(255, 255, 255, 0.55); }
+.am-s-side .am-sub { color: #91f78e; }
+
+.am-h1 {
+    color: #fff;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -1.5px;
+    line-height: 0.95;
+    margin-bottom: 16px;
+}
+
+.am-l-side .am-h1 { font-size: 44px; }
+.am-s-side .am-h1 { font-size: 52px; }
+
+.am-p {
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.65;
+}
+
+.am-l-side .am-p { color: rgba(255, 255, 255, 0.75); }
+.am-s-side .am-p { color: #adb3b4; }
+
+/* ── BRANDING ELEMENTS ── */
+.am-logo {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: #fff;
+    z-index: 10;
+}
+
+.am-foot-l {
+    position: absolute;
+    bottom: 24px;
+    left: 48px;
+    z-index: 10;
+}
+
+.am-logo-n {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: #fff;
+}
+
+/* ── DOTS ── */
+.am-dots {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.am-dot {
+    height: 3px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.am-dot.active {
+    width: 36px;
+    background: rgba(255, 255, 255, 0.45);
+}
+
+.am-dot:not(.active) {
+    width: 12px;
+}
+
+/* ── FORM PANEL (RIGHT HALF) ── */
+.am-form-panel {
+    flex: 1;
+    background: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    overflow-y: auto;
+}
+
+.am-wrap {
+    width: 100%;
+    max-width: 360px;
+}
+
+/* ── MOBILE LOGO ── */
+.am-m-logo {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.am-m-name {
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    color: #002B5B;
+}
+
+/* ── FORM HEADER ── */
+.am-head {
+    margin-bottom: 28px;
+}
+
+.am-h2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #2d3435;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+}
+
+.am-h2-sub {
+    font-size: 13px;
+    font-weight: 500;
+    color: #5a6061;
+}
+
+/* ── FORM FIELDS ── */
+.am-item {
+    margin-bottom: 18px;
+}
+
+.am-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.am-label {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #5a6061;
+    margin-bottom: 4px;
+    margin-left: 4px;
+}
+
+.am-label-link {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #5f5e5e;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.am-label-link:hover { color: #2d3435; }
+
+.am-field {
+    position: relative;
+}
+
+.am-icon {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    color: #757c7d;
+    font-size: 18px;
+    pointer-events: none;
+}
+
+.am-in {
+    width: 100%;
+    padding: 12px 14px 12px 36px;
+    background: #f2f4f4;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 8px 8px 0 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #2d3435;
+    outline: none;
+    transition: border-color 0.3s, background 0.3s;
+}
+
+.am-in:focus { border-bottom-color: #535252; }
+.am-in::placeholder { color: #adb3b4; }
+.am-in.no-icon { padding-left: 14px; }
+
+.am-eye {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #757c7d;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.am-eye:hover { color: #2d3435; }
+
+/* ── CHECKBOX ── */
+.am-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.am-ck-in {
+    width: 15px;
+    height: 15px;
+    border-radius: 4px;
+    border: 1.5px solid #adb3b4;
+    accent-color: #5f5e5e;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.am-ck-lbl {
+    font-size: 12px;
+    color: #5a6061;
+    line-height: 1.4;
+}
+
+.am-ck-lbl a {
+    color: #5f5e5e;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.am-ck-lbl a:hover { color: #2d3435; }
+
+/* ── BUTTONS ── */
+.am-btn {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 999px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.am-btn:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    transform: translateY(-1px);
+}
+
+.am-btn:active {
+    transform: scale(0.98);
+}
+
+.am-b-login {
+    background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+}
+
+.am-b-signup {
+    background: linear-gradient(90deg, #00B4D8 0%, #0077B6 100%);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 12px;
+}
+
+/* ── GOOGLE BUTTON ── */
+.am-btn-g {
+    width: 100%;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid rgba(173, 179, 180, 0.35);
+    border-radius: 999px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: #2d3435;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.25s ease;
+}
+
+.am-btn-g:hover { background: #e4e9ea; }
+
+.am-btn-g img {
+    width: 18px;
+    height: 18px;
+}
+
+.am-btn-g-up {
+    border-radius: 8px;
+}
+
+/* ── DIVIDER ── */
+.am-sep {
+    display: flex;
+    align-items: center;
+    margin: 18px 0;
+}
+
+.am-sep::before,
+.am-sep::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(173, 179, 180, 0.25);
+}
+
+.am-sep span {
+    padding: 0 12px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #adb3b4;
+}
+
+/* ── SWAP / TOGGLE LINK ── */
+.am-swap {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 13px;
+    color: #5a6061;
+    font-weight: 500;
+}
+
+/* Make swap links visible & override any inherited dark-link styles */
+.am-swap a,
+.am-swap a:link,
+.am-swap a:visited {
+    color: #1a73e8 !important;
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+    transition: color 0.2s;
+}
+
+.am-swap a:hover {
+    color: #002B5B !important;
+}
+
+/* ── PANEL TOGGLE STATE ── */
+.am-login  { display: flex; }
+.am-signup { display: none; }
+
+.am-auth.toggled .am-login  { display: none; }
+.am-auth.toggled .am-signup { display: flex; }
+
+/* ── SCROLLBAR HIDE ── */
+.auth-modal::-webkit-scrollbar { width: 0; }
+
+/* ── SIGN IN NAV BUTTON ── */
+.btn-signin-nav {
+    background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+    color: #fff;
+    padding: 9px 22px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(58, 123, 213, 0.35);
+    letter-spacing: 0.02em;
+}
+
+.btn-signin-nav:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(58, 123, 213, 0.45);
+}
