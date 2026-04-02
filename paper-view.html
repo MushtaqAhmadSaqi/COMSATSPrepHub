@@ -1,12 +1,346 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paper View | COMSATSPrepHub</title>
-    <meta name="description" content="View past paper questions and answers.">
+    <meta name="description"
+        content="View past paper questions and write your answers to compare with model solutions.">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* ── Loading State ── */
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            gap: 16px;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── Paper Header ── */
+        .paper-meta-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .meta-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface-alt, #f4f4f5);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .meta-chip .material-symbols-outlined {
+            font-size: 16px;
+        }
+
+        /* ── Progress Bar ── */
+        .progress-bar-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg, 16px);
+            padding: 20px 24px;
+            margin-bottom: 28px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .progress-track {
+            height: 6px;
+            background: var(--border);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 999px;
+            transition: width 0.5s ease;
+        }
+
+        /* ── Question Card ── */
+        .question-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg, 16px);
+            overflow: hidden;
+            margin-bottom: 24px;
+            transition: box-shadow 0.2s;
+        }
+
+        .question-card.answered {
+            border-color: #86efac;
+        }
+
+        .question-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 28px 28px 24px;
+        }
+
+        .q-num-badge {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .q-body {
+            flex: 1;
+        }
+
+        .q-header-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .q-clo-badge {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            background: color-mix(in srgb, var(--primary) 10%, transparent);
+            border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+            padding: 3px 10px;
+            border-radius: 999px;
+        }
+
+        .q-marks-badge {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #b45309;
+            background: #fef3c7;
+            border: 1px solid #fde68a;
+            padding: 3px 10px;
+            border-radius: 999px;
+        }
+
+        .q-text {
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--text-main);
+            white-space: pre-wrap;
+        }
+
+        /* ── Answer Section ── */
+        .answer-section {
+            padding: 0 28px 28px;
+        }
+
+        .answer-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .user-answer-box {
+            width: 100%;
+            min-height: 140px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.65;
+            background: var(--surface-alt, #f9fafb);
+            color: var(--text-main);
+            resize: vertical;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .user-answer-box:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .submit-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .btn-submit {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 999px;
+            padding: 12px 28px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.88;
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ── Model Answer Reveal ── */
+        .model-answer-panel {
+            display: none;
+            margin-top: 20px;
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: 12px;
+            overflow: hidden;
+            animation: fadeSlideIn 0.4s ease;
+        }
+
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .model-answer-panel.show {
+            display: block;
+        }
+
+        .model-answer-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 20px;
+            background: #dcfce7;
+            border-bottom: 1px solid #86efac;
+        }
+
+        .model-answer-header .icon {
+            color: #16a34a;
+            font-size: 20px;
+        }
+
+        .model-answer-header span {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #15803d;
+        }
+
+        .model-answer-content {
+            padding: 20px;
+            font-size: 13.5px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.75;
+            color: #1a2e1a;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        /* ── All Done Banner ── */
+        .done-banner {
+            display: none;
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            color: white;
+            border-radius: var(--radius-lg, 16px);
+            padding: 40px;
+            text-align: center;
+            margin-top: 32px;
+            animation: fadeSlideIn 0.5s ease;
+        }
+
+        .done-banner.show {
+            display: block;
+        }
+
+        .done-banner h2 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .done-banner p {
+            opacity: 0.85;
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        /* ── Error State ── */
+        .error-state {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            border-radius: 12px;
+            padding: 24px;
+            color: #b91c1c;
+            font-size: 14px;
+        }
+    </style>
 </head>
+
 <body>
     <!-- Navigation -->
     <header class="navbar">
@@ -23,83 +357,66 @@
     </header>
 
     <main class="main-content container">
-        <!-- Header -->
-        <div class="hero-header">
+        <!-- Back link + paper title (populated by JS) -->
+        <div class="hero-header"
+            style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
             <div class="hero-titles">
-                <a href="javascript:history.back()" class="papers-back-link">
+                <a href="javascript:history.back()" class="papers-back-link"
+                    style="display:inline-flex; align-items:center; gap:6px; color:var(--text-muted); text-decoration:none; font-weight:600; font-size:14px;">
                     <span class="material-symbols-outlined" style="font-size:20px;">arrow_back</span>
                     Back to Papers
                 </a>
-                <div class="hero-title-group">
-                    <span class="tagline">Past Paper</span>
-                    <h1 class="page-title main-title" style="font-size:32px;">Programming Fundamentals — Final 2023</h1>
+                <div class="hero-title-group" style="margin-top:12px;">
+                    <span class="tagline" id="paperTagline"
+                        style="font-size:12px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:4px;">Past
+                        Paper</span>
+                    <h1 class="page-title main-title" style="font-size:30px; margin-bottom:8px;" id="paperTitle">
+                        Loading...</h1>
                 </div>
+                <div class="paper-meta-bar" id="paperMetaBar"></div>
+            </div>
+
+            <!-- Download Action -->
+            <div class="hero-actions" style="margin-bottom: 8px;">
+                <button id="downloadBtn" class="btn-primary" style="display:none; align-items:center; gap:8px;"
+                    onclick="handleDownload()">
+                    <span class="material-symbols-outlined" style="font-size:20px;">download</span>
+                    Download as Word
+                </button>
             </div>
         </div>
 
-        <!-- Questions & Answers -->
-        <div class="question-list">
-            <!-- Question 1 -->
-            <section class="question-card">
-                <div class="question-row">
-                    <div class="question-number-wrap">
-                        <div class="question-number">01</div>
-                    </div>
-                    <div class="question-content">
-                        <div>
-                            <h2 class="question-heading">What is a variable?</h2>
-                            <p class="question-desc">Describe the concept in the context of memory allocation and data types. (5 Marks)</p>
-                        </div>
-                        <div style="background:var(--surface-alt); padding:20px; border-radius:var(--radius); border-left:3px solid var(--primary);">
-                            <p style="font-size:12px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Answer</p>
-                            <p class="question-desc">A variable is a named storage location in computer memory that holds a value. When declared, memory is allocated based on the data type (e.g., int = 4 bytes, char = 1 byte). Variables provide a way to label and access data during program execution. They have a type, name, value, and scope.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+        <!-- Progress Bar -->
+        <div class="progress-bar-wrap" id="progressWrap" style="display:none;">
+            <div class="progress-label">
+                <span>Your Progress</span>
+                <span id="progressText">0 / 0 answered</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
+        </div>
 
-            <!-- Question 2 -->
-            <section class="question-card">
-                <div class="question-row">
-                    <div class="question-number-wrap">
-                        <div class="question-number">02</div>
-                    </div>
-                    <div class="question-content">
-                        <div>
-                            <h2 class="question-heading">Explain loops</h2>
-                            <p class="question-desc">Compare and contrast 'while' and 'for' loops with examples of use cases. (10 Marks)</p>
-                        </div>
-                        <div style="background:var(--surface-alt); padding:20px; border-radius:var(--radius); border-left:3px solid var(--primary);">
-                            <p style="font-size:12px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Answer</p>
-                            <p class="question-desc">A <strong>for loop</strong> is used when the number of iterations is known beforehand. Syntax: <code>for(init; condition; update)</code>. Example: printing numbers 1-10.<br><br>A <strong>while loop</strong> is used when iterations depend on a condition being met. Syntax: <code>while(condition)</code>. Example: reading user input until 'quit' is entered.<br><br>Both achieve repetition but differ in initialization and use case clarity.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+        <!-- Loading / Error / Questions -->
+        <div id="loadingState" class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading questions from database...</p>
+        </div>
+        <div id="errorState" class="error-state" style="display:none;"></div>
+        <div id="questionsContainer" class="question-list" style="display:none;"></div>
 
-            <!-- Question 3 -->
-            <section class="question-card">
-                <div class="question-row">
-                    <div class="question-number-wrap">
-                        <div class="question-number">03</div>
-                    </div>
-                    <div class="question-content">
-                        <div>
-                            <h2 class="question-heading">What is an array?</h2>
-                            <p class="question-desc">Define arrays and explain how they are stored in memory. Provide a code example. (8 Marks)</p>
-                        </div>
-                        <div style="background:var(--surface-alt); padding:20px; border-radius:var(--radius); border-left:3px solid var(--primary);">
-                            <p style="font-size:12px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Answer</p>
-                            <p class="question-desc">An array is a collection of elements of the same data type stored in contiguous memory locations. Each element is accessed via an index starting from 0.<br><br>Example: <code>int arr[5] = {10, 20, 30, 40, 50};</code><br>Here, arr[0] = 10, arr[4] = 50. Arrays provide O(1) access time and are fundamental for data manipulation.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+        <!-- All Done Banner -->
+        <div class="done-banner" id="doneBanner">
+            <h2>🎓 Well Done!</h2>
+            <p>You've attempted all questions. Review the model answers above to check your understanding.</p>
+            <a href="subjects.html" class="btn-primary" style="text-decoration:none; display:inline-block;">
+                Browse More Papers
+            </a>
         </div>
     </main>
 
     <!-- Footer -->
-        <footer class="site-footer">
+    <footer class="site-footer">
         <div class="footer-content">
             <div class="footer-left">
                 <div class="footer-copyright" style="text-transform: uppercase;">COMSATSPrepHub</div>
@@ -113,5 +430,273 @@
             </div>
         </div>
     </footer>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+        const SUPABASE_URL = 'https://xylyiscatznexduatjmg.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_K0t4H7M3LU96jy8_z_TJHg_ok_u-7HC';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Read URL params
+        const params = new URLSearchParams(window.location.search);
+        const paperId = params.get('id');
+        const subjectCode = params.get('subject');
+        const year = parseInt(params.get('year'));
+        const examType = params.get('exam');
+
+        let totalQuestions = 0;
+        let answeredCount = 0;
+        let globalPaper = null;
+        let globalQuestions = [];
+
+        async function loadPaper() {
+            try {
+                // 1. Fetch paper record
+                let query = supabase.from('past_papers').select('*');
+
+                if (paperId) {
+                    query = query.eq('id', paperId);
+                } else if (subjectCode && year && examType) {
+                    query = query.eq('subject_code', subjectCode).eq('year', year).eq('exam_type', examType);
+                } else {
+                    // Fallback for debugging if no params provided
+                    query = query.eq('subject_code', 'CSC211').eq('year', 2024).eq('exam_type', 'Mid Term');
+                }
+
+                const { data: paper, error: paperError } = await query.single();
+
+                if (paperError || !paper) {
+                    throw new Error(paperError?.message || 'Paper not found in the database.');
+                }
+
+                // 2. Update page title & meta
+                const titleEl = document.getElementById('paperTitle');
+                titleEl.textContent = `${paper.subject_name} — ${paper.exam_type} ${paper.year}`;
+                document.title = `${paper.subject_name} ${paper.exam_type} ${paper.year} | COMSATSPrepHub`;
+
+                document.getElementById('paperMetaBar').innerHTML = `
+                    <div class="meta-chip">
+                        <span class="material-symbols-outlined">school</span>
+                        ${paper.subject_code}
+                    </div>
+                    <div class="meta-chip">
+                        <span class="material-symbols-outlined">calendar_today</span>
+                        ${paper.semester || ''} ${paper.year}
+                    </div>
+                    <div class="meta-chip">
+                        <span class="material-symbols-outlined">grade</span>
+                        ${paper.total_marks} Total Marks
+                    </div>
+                    <div class="meta-chip">
+                        <span class="material-symbols-outlined">description</span>
+                        ${paper.exam_type}
+                    </div>
+                `;
+
+                // 3. Fetch questions
+                const { data: questions, error: qError } = await supabase
+                    .from('questions')
+                    .select('*')
+                    .eq('paper_id', paper.id)
+                    .order('question_number', { ascending: true });
+
+                if (qError) throw qError;
+                if (!questions || questions.length === 0) {
+                    throw new Error('No questions found for this paper.');
+                }
+
+                globalPaper = paper;
+                globalQuestions = questions;
+                document.getElementById('downloadBtn').style.display = 'inline-flex';
+
+                totalQuestions = questions.length;
+                renderQuestions(questions);
+
+            } catch (err) {
+                document.getElementById('loadingState').style.display = 'none';
+                const errEl = document.getElementById('errorState');
+                errEl.style.display = 'block';
+                errEl.innerHTML = `
+                    <strong>❌ Failed to load paper</strong><br><br>
+                    ${err.message}<br><br>
+                    <small>Make sure you have uploaded this paper using <a href="admin-insert.html">admin-insert.html</a> first.</small>
+                `;
+            }
+        }
+
+        function renderQuestions(questions) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('progressWrap').style.display = 'block';
+            updateProgress();
+
+            const container = document.getElementById('questionsContainer');
+            container.style.display = 'block';
+
+            questions.forEach((q, idx) => {
+                const card = document.createElement('section');
+                card.className = 'question-card';
+                card.id = `q-card-${q.id}`;
+
+                card.innerHTML = `
+                    <div class="question-card-header">
+                        <div class="q-num-badge">0${q.question_number}</div>
+                        <div class="q-body">
+                            <div class="q-header-row">
+                                ${q.clo ? `<span class="q-clo-badge">${q.clo}</span>` : ''}
+                                <span class="q-marks-badge">${q.marks} Marks</span>
+                            </div>
+                            <div class="q-text">${escapeHtml(q.question_text)}</div>
+                        </div>
+                    </div>
+
+                    <div class="answer-section">
+                        <div class="answer-label">✍️ Your Answer</div>
+                        <textarea
+                            class="user-answer-box"
+                            id="answer-${q.id}"
+                            placeholder="Write your C/C++ code or explanation here..."
+                        ></textarea>
+                        <div class="submit-row">
+                            <button class="btn-submit" id="btn-${q.id}" onclick="submitAnswer('${q.id}')">
+                                <span class="material-symbols-outlined" style="font-size:18px;">check_circle</span>
+                                Submit & See Model Answer
+                            </button>
+                            <span class="submit-hint">Your answer won't be saved — this is for self-study</span>
+                        </div>
+
+                        <!-- Model Answer (hidden until submit) -->
+                        <div class="model-answer-panel" id="model-${q.id}">
+                            <div class="model-answer-header">
+                                <span class="material-symbols-outlined icon">auto_awesome</span>
+                                <span>Model Answer</span>
+                            </div>
+                            <div class="model-answer-content">${escapeHtml(q.model_answer)}</div>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        window.submitAnswer = function (qId) {
+            const textarea = document.getElementById(`answer-${qId}`);
+            const btn = document.getElementById(`btn-${qId}`);
+            const model = document.getElementById(`model-${qId}`);
+            const card = document.getElementById(`q-card-${qId}`);
+
+            // Mark card as answered
+            card.classList.add('answered');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:18px;">check_circle</span> Submitted`;
+
+            // Lock the textarea
+            textarea.readOnly = true;
+            textarea.style.background = '#f0fdf4';
+            textarea.style.borderColor = '#86efac';
+
+            // Show model answer
+            model.classList.add('show');
+            model.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            // Update progress
+            answeredCount++;
+            updateProgress();
+
+            // Show done banner if all answered
+            if (answeredCount === totalQuestions) {
+                document.getElementById('doneBanner').classList.add('show');
+                document.getElementById('doneBanner').scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+
+        function updateProgress() {
+            const pct = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
+            document.getElementById('progressFill').style.width = pct + '%';
+            document.getElementById('progressText').textContent = `${answeredCount} / ${totalQuestions} answered`;
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        window.handleDownload = async function () {
+            try {
+                // 1. Check if user is logged in
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error || !session) {
+                    alert("🔒 You must be signed in to download past papers.\n\nPlease go to the Home page and log in or create an account to unlock downloads.");
+                    return;
+                }
+
+                if (!globalPaper || globalQuestions.length === 0) return;
+
+                // 2. Build HTML content for Word Doc
+                let html = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head>
+                    <meta charset='utf-8'>
+                    <title>${escapeHtml(globalPaper.subject_name)}</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #1a1a2e; }
+                        .header { text-align: center; border-bottom: 2px solid #0f766e; padding-bottom: 12px; margin-bottom: 24px; }
+                        .q-box { margin-bottom: 24px; page-break-inside: avoid; }
+                        .q-meta { font-weight: bold; color: #0f766e; }
+                        .model-ans { background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px; margin-top: 10px; }
+                        h1 { color: #0f766e; margin-bottom: 4px; }
+                        h3 { color: #4b5563; margin-top: 0; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>${escapeHtml(globalPaper.subject_name)}</h1>
+                        <h3>${escapeHtml(globalPaper.exam_type)} ${globalPaper.year}</h3>
+                        <p><b>Course Code:</b> ${escapeHtml(globalPaper.subject_code)} &nbsp;|&nbsp; <b>Total Marks:</b> ${globalPaper.total_marks}</p>
+                    </div>
+                `;
+
+                globalQuestions.forEach(q => {
+                    const cloText = q.clo ? `<i>(${escapeHtml(q.clo)})</i>` : '';
+                    html += `
+                        <div class="q-box">
+                            <p class="q-meta">Q${q.question_number} [${q.marks} Marks] ${cloText}</p>
+                            <p>${escapeHtml(q.question_text).replace(/\\n/g, '<br>')}</p>
+                            <div class="model-ans">
+                                <p style="margin-top:0;"><b>Model Answer:</b></p>
+                                <p style="margin-bottom:0; font-family: 'Courier New', Courier, monospace;">
+                                    ${escapeHtml(q.model_answer).replace(/\\n/g, '<br>')}
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</bo' + 'dy></html>';
+
+                // 3. Create Blob and Trigger Download
+                const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${globalPaper.subject_code}_${globalPaper.exam_type.replace(/\s+/g, '')}_${globalPaper.year}.doc`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+            } catch (err) {
+                alert("Could not start download: " + err.message);
+            }
+        };
+
+        // Start loading
+        loadPaper();
+    </script>
 </body>
+
 </html>

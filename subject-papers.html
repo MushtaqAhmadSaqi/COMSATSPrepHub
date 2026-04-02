@@ -6,6 +6,34 @@
     <title>Subject Papers | COMSATSPrepHub</title>
     <meta name="description" content="Browse past papers organized by year and exam type.">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* ── Skeleton ── */
+        .skeleton-year { height: 28px; width: 80px; border-radius: 8px; background: var(--border); margin-bottom: 16px; animation: pulse 1.5s ease-in-out infinite; }
+        .skeleton-paper { height: 72px; border-radius: 12px; background: var(--border); margin-bottom: 12px; animation: pulse 1.5s ease-in-out infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+        /* ── Stat pills ── */
+        .stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; margin-bottom: 32px; }
+        .stat-pill {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .stat-pill strong { color: var(--text-main); }
+
+        /* ── Error / empty ── */
+        .error-banner { background:#fee2e2; border:1px solid #fca5a5; color:#b91c1c; border-radius:10px; padding:14px 18px; font-size:14px; margin-bottom:24px; }
+        .empty-state { text-align:center; padding:80px 24px; color:var(--text-muted); }
+        .empty-state h3 { font-size:20px; font-weight:700; margin-bottom:8px; color:var(--text-main); }
+        .empty-state .empty-icon { font-size:52px; opacity:.4; margin-bottom:16px; }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -29,119 +57,44 @@
                 <span class="material-symbols-outlined" style="font-size:20px;">arrow_back</span>
                 Back to Subjects
             </a>
-            <span class="section-label" style="display:block;" id="subjectLabel">Subject</span>
-            <h1 class="main-title" id="subjectTitle">Subject Name</h1>
-            <p class="question-desc" style="margin-top:12px;">Browse all past papers organized by year. Click any paper to view questions and answers.</p>
+            <span class="section-label" style="display:block;">Past Papers</span>
+            <h1 class="main-title" id="subjectTitle">Loading...</h1>
+            <p class="question-desc" style="margin-top:12px;">
+                Browse all past papers organized by year. Click any paper to view its questions and model answers.
+            </p>
+            <!-- Stats -->
+            <div class="stats-row" id="statsRow" style="display:none;">
+                <div class="stat-pill">📄 <strong id="statPapers">0</strong> Papers</div>
+                <div class="stat-pill">📝 <strong id="statQuestions">0</strong> Questions</div>
+                <div class="stat-pill">🗓️ <strong id="statYears">—</strong> Years</div>
+            </div>
         </div>
 
-        <!-- Papers by Year -->
-        <div id="papersContainer">
-            <!-- 2025 -->
-            <div class="year-group">
-                <div class="year-label">
-                    <span class="material-symbols-outlined" style="color:var(--primary);">calendar_today</span>
-                    2025
-                </div>
-                <div class="papers-row">
-                    <a href="paper-view.html" target="_blank" class="paper-card">
-                        <div class="paper-card-info">
-                            <div class="paper-card-icon">
-                                <span class="material-symbols-outlined">description</span>
-                            </div>
-                            <div>
-                                <div class="paper-card-title">Mid Term Exam</div>
-                                <div class="paper-card-sub">Spring 2025 · Questions & Answers</div>
-                            </div>
-                        </div>
-                        <span class="material-symbols-outlined" style="color:var(--text-muted); font-size:20px;">open_in_new</span>
-                    </a>
-                    <a href="paper-view.html" target="_blank" class="paper-card">
-                        <div class="paper-card-info">
-                            <div class="paper-card-icon">
-                                <span class="material-symbols-outlined">description</span>
-                            </div>
-                            <div>
-                                <div class="paper-card-title">Final Term Exam</div>
-                                <div class="paper-card-sub">Spring 2025 · Questions & Answers</div>
-                            </div>
-                        </div>
-                        <span class="material-symbols-outlined" style="color:var(--text-muted); font-size:20px;">open_in_new</span>
-                    </a>
-                </div>
-            </div>
+        <!-- Error -->
+        <div id="errorBanner" class="error-banner" style="display:none;"></div>
 
-            <!-- 2024 -->
-            <div class="year-group">
-                <div class="year-label">
-                    <span class="material-symbols-outlined" style="color:var(--primary);">calendar_today</span>
-                    2024
-                </div>
-                <div class="papers-row">
-                    <a href="paper-view.html" target="_blank" class="paper-card">
-                        <div class="paper-card-info">
-                            <div class="paper-card-icon">
-                                <span class="material-symbols-outlined">description</span>
-                            </div>
-                            <div>
-                                <div class="paper-card-title">Mid Term Exam</div>
-                                <div class="paper-card-sub">Spring 2024 · Questions & Answers</div>
-                            </div>
-                        </div>
-                        <span class="material-symbols-outlined" style="color:var(--text-muted); font-size:20px;">open_in_new</span>
-                    </a>
-                    <a href="paper-view.html" target="_blank" class="paper-card">
-                        <div class="paper-card-info">
-                            <div class="paper-card-icon">
-                                <span class="material-symbols-outlined">description</span>
-                            </div>
-                            <div>
-                                <div class="paper-card-title">Final Term Exam</div>
-                                <div class="paper-card-sub">Fall 2024 · Questions & Answers</div>
-                            </div>
-                        </div>
-                        <span class="material-symbols-outlined" style="color:var(--text-muted); font-size:20px;">open_in_new</span>
-                    </a>
-                </div>
-            </div>
+        <!-- Skeleton loading -->
+        <div id="loadingSkeleton">
+            <div class="skeleton-year"></div>
+            <div class="skeleton-paper"></div>
+            <div class="skeleton-paper"></div>
+            <div class="skeleton-year" style="margin-top:24px;"></div>
+            <div class="skeleton-paper"></div>
+        </div>
 
-            <!-- 2023 -->
-            <div class="year-group">
-                <div class="year-label">
-                    <span class="material-symbols-outlined" style="color:var(--primary);">calendar_today</span>
-                    2023
-                </div>
-                <div class="papers-row">
-                    <a href="paper-view.html" target="_blank" class="paper-card">
-                        <div class="paper-card-info">
-                            <div class="paper-card-icon">
-                                <span class="material-symbols-outlined">description</span>
-                            </div>
-                            <div>
-                                <div class="paper-card-title">Mid Term Exam</div>
-                                <div class="paper-card-sub">Spring 2023 · Questions & Answers</div>
-                            </div>
-                        </div>
-                        <span class="material-symbols-outlined" style="color:var(--text-muted); font-size:20px;">open_in_new</span>
-                    </a>
-                    <a href="paper-view.html" target="_blank" class="paper-card">
-                        <div class="paper-card-info">
-                            <div class="paper-card-icon">
-                                <span class="material-symbols-outlined">description</span>
-                            </div>
-                            <div>
-                                <div class="paper-card-title">Final Term Exam</div>
-                                <div class="paper-card-sub">Fall 2023 · Questions & Answers</div>
-                            </div>
-                        </div>
-                        <span class="material-symbols-outlined" style="color:var(--text-muted); font-size:20px;">open_in_new</span>
-                    </a>
-                </div>
-            </div>
+        <!-- Papers container (populated dynamically) -->
+        <div id="papersContainer" style="display:none;"></div>
+
+        <!-- Empty state -->
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <div class="empty-icon">📂</div>
+            <h3>No papers yet</h3>
+            <p>No past papers have been uploaded for this subject yet.<br>Use the Admin Panel to upload the first one.</p>
         </div>
     </main>
 
     <!-- Footer -->
-        <footer class="site-footer">
+    <footer class="site-footer">
         <div class="footer-content">
             <div class="footer-left">
                 <div class="footer-copyright" style="text-transform: uppercase;">COMSATSPrepHub</div>
@@ -156,13 +109,121 @@
         </div>
     </footer>
 
-    <script>
-    // Read subject name from URL
-    const params = new URLSearchParams(window.location.search);
-    const subject = params.get('subject') || 'Programming Fundamentals';
-    document.getElementById('subjectTitle').textContent = subject;
-    document.getElementById('subjectLabel').textContent = 'Past Papers';
-    document.title = subject + ' — Papers | COMSATSPrepHub';
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+        const SUPABASE_URL = 'https://xylyiscatznexduatjmg.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_K0t4H7M3LU96jy8_z_TJHg_ok_u-7HC';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Read subject from URL
+        const params      = new URLSearchParams(window.location.search);
+        const subjectName = params.get('subject') || '';
+        const subjectCode = params.get('code')    || '';
+
+        // Set page title
+        document.getElementById('subjectTitle').textContent = subjectName || 'Unknown Subject';
+        document.title = `${subjectName} — Papers | COMSATSPrepHub`;
+
+        async function loadPapers() {
+            try {
+                // ── Query 1: Fetch papers for this subject (simple, no nested join) ──
+                const { data: papers, error: papersError } = await supabase
+                    .from('past_papers')
+                    .select('id, subject_code, subject_name, year, exam_type, semester, total_marks')
+                    .eq('subject_name', subjectName)
+                    .order('year', { ascending: false });
+
+                if (papersError) throw papersError;
+
+                document.getElementById('loadingSkeleton').style.display = 'none';
+
+                if (!papers || papers.length === 0) {
+                    document.getElementById('emptyState').style.display = 'block';
+                    return;
+                }
+
+                // ── Query 2: Get question counts separately (avoids needing FK relationship) ──
+                const paperIds = papers.map(p => p.id);
+                const { data: questions } = await supabase
+                    .from('questions')
+                    .select('id, paper_id')
+                    .in('paper_id', paperIds);
+
+                // Build count map: paper_id → count
+                const qCountMap = {};
+                if (questions) {
+                    for (const q of questions) {
+                        qCountMap[q.paper_id] = (qCountMap[q.paper_id] || 0) + 1;
+                    }
+                }
+
+                // ── Stats ──
+                const totalQuestions = Object.values(qCountMap).reduce((s, c) => s + c, 0);
+                const years = [...new Set(papers.map(p => p.year))];
+                document.getElementById('statPapers').textContent   = papers.length;
+                document.getElementById('statQuestions').textContent = totalQuestions;
+                document.getElementById('statYears').textContent     = years.length > 1
+                    ? `${Math.min(...years)}–${Math.max(...years)}`
+                    : years[0];
+                document.getElementById('statsRow').style.display = 'flex';
+
+                // ── Group papers by year ──
+                const byYear = {};
+                for (const p of papers) {
+                    if (!byYear[p.year]) byYear[p.year] = [];
+                    byYear[p.year].push(p);
+                }
+
+                const sortedYears = Object.keys(byYear).sort((a, b) => b - a);
+
+                const container = document.getElementById('papersContainer');
+                container.innerHTML = sortedYears.map(year => {
+                    const yearPapers = byYear[year];
+                    const cardsHtml = yearPapers.map(p => {
+                        const qCount = qCountMap[p.id] || 0;
+                        const url = `paper-view.html?id=${p.id}`;
+                        return `
+                            <a href="${url}" class="paper-card">
+                                <div class="paper-card-info">
+                                    <div class="paper-card-icon">
+                                        <span class="material-symbols-outlined">description</span>
+                                    </div>
+                                    <div>
+                                        <div class="paper-card-title">${escHtml(p.exam_type)}</div>
+                                        <div class="paper-card-sub">${escHtml(p.semester)} ${p.year} · ${qCount} Question${qCount !== 1 ? 's' : ''} · ${p.total_marks} Marks</div>
+                                    </div>
+                                </div>
+                                <span class="material-symbols-outlined" style="color:var(--text-muted);font-size:20px;">open_in_new</span>
+                            </a>`;
+                    }).join('');
+
+                    return `
+                        <div class="year-group">
+                            <div class="year-label">
+                                <span class="material-symbols-outlined" style="color:var(--primary);">calendar_today</span>
+                                ${year}
+                            </div>
+                            <div class="papers-row">${cardsHtml}</div>
+                        </div>`;
+                }).join('');
+
+                container.style.display = 'block';
+
+            } catch (err) {
+                document.getElementById('loadingSkeleton').style.display = 'none';
+                const banner = document.getElementById('errorBanner');
+                banner.style.display = 'block';
+                banner.innerHTML = `⚠️ Could not load papers: <strong>${err.message}</strong><br>
+                    <small style="opacity:.8;">Searching for subject: "<strong>${escHtml(subjectName)}</strong>"</small>`;
+            }
+        }
+
+        function escHtml(str) {
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        loadPapers();
     </script>
 </body>
 </html>

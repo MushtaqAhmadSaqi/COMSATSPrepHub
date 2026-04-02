@@ -1,12 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subjects | COMSATSPrepHub</title>
     <meta name="description" content="Browse all COMSATS subjects and access past papers organized by course.">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* ── Loading skeleton ── */
+        .skeleton-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .skeleton-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .skeleton-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            background: var(--border);
+            margin-bottom: 16px;
+        }
+
+        .skeleton-line {
+            height: 14px;
+            border-radius: 6px;
+            background: var(--border);
+            margin-bottom: 10px;
+        }
+
+        .skeleton-line.short {
+            width: 60%;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .45;
+            }
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center;
+            padding: 80px 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+            opacity: .4;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .empty-state p {
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* ── Error banner ── */
+        .error-banner {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #b91c1c;
+            border-radius: 10px;
+            padding: 14px 18px;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        /* ── Subject count badge ── */
+        .subject-count-badge {
+            display: inline-block;
+            background: var(--primary-light, #eff6ff);
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 999px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
+
 <body>
     <!-- Navigation -->
     <header class="navbar">
@@ -29,145 +126,74 @@
                 <span class="section-label" style="display:block;">Curated Archive</span>
                 <h1 class="main-title">Academic Catalog</h1>
                 <p class="question-desc" style="margin-top:12px; max-width:520px;">
-                    Explore our comprehensive collection of past papers, organized by core and elective subjects.
+                    Explore past papers organized by subject. Subjects appear automatically when papers are uploaded.
                 </p>
+                <span class="subject-count-badge" id="subjectCountBadge" style="display:none;"></span>
             </div>
             <div class="subject-search">
                 <span class="material-symbols-outlined subject-search-icon">search</span>
-                <input id="subjectSearchInput" class="subject-search-input" placeholder="Search subjects..." type="text" oninput="filterSubjects()">
+                <input id="subjectSearchInput" class="subject-search-input" placeholder="Search subjects..." type="text"
+                    oninput="filterSubjects()">
             </div>
         </section>
 
-        <!-- Subjects Grid -->
-        <section class="subjects-grid" id="subjectsGrid">
-            <!-- Programming Fundamentals -->
-            <a href="subject-papers.html?subject=Programming Fundamentals" class="subject-card-uniform" data-subject="Programming Fundamentals">
-                <div class="subject-icon-box" style="background:#ccfbf1; color:#0f766e;">
-                    <span class="material-symbols-outlined">terminal</span>
-                </div>
-                <div class="subject-card-name">Programming Fundamentals</div>
-                <div class="subject-card-desc">Master the basics of C++ and procedural programming.</div>
-                <div class="subject-card-meta">
-                    <span class="subject-paper-count">24 Papers</span>
-                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
-                </div>
-            </a>
+        <!-- Error -->
+        <div id="errorBanner" class="error-banner" style="display:none;"></div>
 
-            <!-- Data Structures -->
-            <a href="subject-papers.html?subject=Data Structures" class="subject-card-uniform" data-subject="Data Structures">
-                <div class="subject-icon-box" style="background:#e0e7ff; color:#4f46e5;">
-                    <span class="material-symbols-outlined">data_object</span>
-                </div>
-                <div class="subject-card-name">Data Structures</div>
-                <div class="subject-card-desc">Lists, Stacks, Queues, Trees, and Graph algorithms.</div>
-                <div class="subject-card-meta">
-                    <span class="subject-paper-count">42 Papers</span>
-                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
-                </div>
-            </a>
+        <!-- Loading skeletons -->
+        <div id="loadingGrid" class="skeleton-grid">
+            <div class="skeleton-card">
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+            </div>
+        </div>
 
-            <!-- Database Systems -->
-            <a href="subject-papers.html?subject=Database Systems" class="subject-card-uniform" data-subject="Database Systems">
-                <div class="subject-icon-box" style="background:#dcfce7; color:#16a34a;">
-                    <span class="material-symbols-outlined">database</span>
-                </div>
-                <div class="subject-card-name">Database Systems</div>
-                <div class="subject-card-desc">Relational algebra, SQL, normalization, and ER diagrams.</div>
-                <div class="subject-card-meta">
-                    <span class="subject-paper-count">28 Papers</span>
-                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
-                </div>
-            </a>
+        <!-- Subjects Grid (populated dynamically) -->
+        <section class="subjects-grid" id="subjectsGrid" style="display:none;"></section>
 
-            <!-- Calculus -->
-            <a href="subject-papers.html?subject=Calculus" class="subject-card-uniform" data-subject="Calculus">
-                <div class="subject-icon-box" style="background:#fef3c7; color:#d97706;">
-                    <span class="material-symbols-outlined">function</span>
-                </div>
-                <div class="subject-card-name">Calculus & Analytical Geometry</div>
-                <div class="subject-card-desc">Limits, Derivatives, Integrals, and Vector analysis.</div>
-                <div class="subject-card-meta">
-                    <span class="subject-paper-count">18 Papers</span>
-                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
-                </div>
-            </a>
-
-            <!-- Discrete Structures -->
-            <a href="subject-papers.html?subject=Discrete Structures" class="subject-card-uniform" data-subject="Discrete Structures">
-                <div class="subject-icon-box" style="background:#f3e8ff; color:#9333ea;">
-                    <span class="material-symbols-outlined">scatter_plot</span>
-                </div>
-                <div class="subject-card-name">Discrete Structures</div>
-                <div class="subject-card-desc">Logic, Set Theory, Relations, and Graph Theory.</div>
-                <div class="subject-card-meta">
-                    <span class="subject-paper-count">15 Papers</span>
-                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
-                </div>
-            </a>
-
-            <!-- Linear Algebra -->
-            <a href="subject-papers.html?subject=Linear Algebra" class="subject-card-uniform" data-subject="Linear Algebra">
-                <div class="subject-icon-box" style="background:#ccfbf1; color:#0f766e;">
-                    <span class="material-symbols-outlined">grid_on</span>
-                </div>
-                <div class="subject-card-name">Linear Algebra</div>
-                <div class="subject-card-desc">Matrices, Vector Spaces, and Eigenvalues.</div>
-                <div class="subject-card-meta">
-                    <span class="subject-paper-count">12 Papers</span>
-                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
-                </div>
-            </a>
-
-            <!-- Physics -->
-            <a href="subject-papers.html?subject=Physics" class="subject-card-uniform" data-subject="Physics">
-                <div class="subject-icon-box" style="background:#fef3c7; color:#d97706;">
-                    <span class="material-symbols-outlined">science</span>
-                </div>
-                <div class="subject-card-name">Physics</div>
-                <div class="subject-card-desc">Classical Mechanics, Optics, and Electromagnetism.</div>
-                <div class="subject-card-meta">
-                    <span class="subject-paper-count">20 Papers</span>
-                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
-                </div>
-            </a>
-
-            <!-- Psychology -->
-            <a href="subject-papers.html?subject=Psychology" class="subject-card-uniform" data-subject="Psychology">
-                <div class="subject-icon-box" style="background:#fce7f3; color:#db2777;">
-                    <span class="material-symbols-outlined">psychology</span>
-                </div>
-                <div class="subject-card-name">Psychology</div>
-                <div class="subject-card-desc">Social behavior, cognitive processes, and mental health studies.</div>
-                <div class="subject-card-meta">
-                    <span class="subject-paper-count">10 Papers</span>
-                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
-                </div>
-            </a>
-
-            <!-- OOP -->
-            <a href="subject-papers.html?subject=Object Oriented Programming" class="subject-card-uniform" data-subject="Object Oriented Programming">
-                <div class="subject-icon-box" style="background:#e0e7ff; color:#4f46e5;">
-                    <span class="material-symbols-outlined">code</span>
-                </div>
-                <div class="subject-card-name">Object Oriented Programming</div>
-                <div class="subject-card-desc">Classes, Inheritance, Polymorphism, and Encapsulation in C++/Java.</div>
-                <div class="subject-card-meta">
-                    <span class="subject-paper-count">22 Papers</span>
-                    <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
-                </div>
-            </a>
-        </section>
-
-        <!-- No Results -->
+        <!-- No search results -->
         <div id="noResults" class="no-results" style="display:none;">
             <span class="material-symbols-outlined">search_off</span>
             <p style="font-size:18px; font-weight:600;">No subjects found</p>
             <p>Try a different search term.</p>
         </div>
+
+        <!-- Empty state (no papers at all) -->
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <div class="empty-icon">📂</div>
+            <h3>No subjects yet</h3>
+            <p>Upload a past paper using the Admin Panel and its subject will appear here automatically.</p>
+        </div>
     </main>
 
     <!-- Footer -->
-        <footer class="site-footer">
+    <footer class="site-footer">
         <div class="footer-content">
             <div class="footer-left">
                 <div class="footer-copyright" style="text-transform: uppercase;">COMSATSPrepHub</div>
@@ -182,25 +208,109 @@
         </div>
     </footer>
 
-    <script>
-    function filterSubjects() {
-        const query = document.getElementById('subjectSearchInput').value.toLowerCase().trim();
-        const cards = document.querySelectorAll('.subject-card-uniform');
-        const noResults = document.getElementById('noResults');
-        let visibleCount = 0;
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-        cards.forEach(card => {
-            const name = card.getAttribute('data-subject').toLowerCase();
-            if (name.includes(query)) {
-                card.style.display = '';
-                visibleCount++;
-            } else {
-                card.style.display = 'none';
+        const SUPABASE_URL = 'https://xylyiscatznexduatjmg.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_K0t4H7M3LU96jy8_z_TJHg_ok_u-7HC';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Icon + colour palette — cycles if more subjects than palette size
+        const palette = [
+            { bg: '#e0e7ff', color: '#4f46e5', icon: 'data_object' },
+            { bg: '#dcfce7', color: '#16a34a', icon: 'database' },
+            { bg: '#fef3c7', color: '#d97706', icon: 'function' },
+            { bg: '#f3e8ff', color: '#9333ea', icon: 'scatter_plot' },
+            { bg: '#ccfbf1', color: '#0f766e', icon: 'terminal' },
+            { bg: '#fce7f3', color: '#db2777', icon: 'psychology' },
+            { bg: '#fee2e2', color: '#dc2626', icon: 'science' },
+            { bg: '#e0f2fe', color: '#0284c7', icon: 'code' },
+            { bg: '#fdf4ff', color: '#a21caf', icon: 'calculate' },
+            { bg: '#ecfdf5', color: '#059669', icon: 'grid_on' },
+        ];
+
+        async function loadSubjects() {
+            try {
+                // Fetch all papers, group by subject_name in JS
+                const { data: papers, error } = await supabase
+                    .from('past_papers')
+                    .select('id, subject_code, subject_name')
+                    .order('subject_name', { ascending: true });
+
+                if (error) throw error;
+
+                document.getElementById('loadingGrid').style.display = 'none';
+
+                if (!papers || papers.length === 0) {
+                    document.getElementById('emptyState').style.display = 'block';
+                    return;
+                }
+
+                // Group by subject_name → count papers
+                const subjectMap = {};
+                for (const p of papers) {
+                    const key = p.subject_name;
+                    if (!subjectMap[key]) {
+                        subjectMap[key] = { subject_name: p.subject_name, subject_code: p.subject_code, count: 0 };
+                    }
+                    subjectMap[key].count++;
+                }
+
+                const subjects = Object.values(subjectMap).sort((a, b) => a.subject_name.localeCompare(b.subject_name));
+
+                // Badge
+                const badge = document.getElementById('subjectCountBadge');
+                badge.textContent = `${subjects.length} Subject${subjects.length !== 1 ? 's' : ''}`;
+                badge.style.display = 'inline-block';
+
+                // Render cards
+                const grid = document.getElementById('subjectsGrid');
+                grid.innerHTML = subjects.map((s, i) => {
+                    const p = palette[i % palette.length];
+                    const url = `subject-papers.html?subject=${encodeURIComponent(s.subject_name)}&code=${encodeURIComponent(s.subject_code)}`;
+                    return `
+                        <a href="${url}" class="subject-card-uniform" data-subject="${s.subject_name}">
+                            <div class="subject-icon-box" style="background:${p.bg}; color:${p.color};">
+                                <span class="material-symbols-outlined">${p.icon}</span>
+                            </div>
+                            <div class="subject-card-name">${escHtml(s.subject_name)}</div>
+                            <div class="subject-card-desc">${escHtml(s.subject_code)}</div>
+                            <div class="subject-card-meta">
+                                <span class="subject-paper-count">${s.count} Paper${s.count !== 1 ? 's' : ''}</span>
+                                <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
+                            </div>
+                        </a>`;
+                }).join('');
+
+                grid.style.display = '';
+
+            } catch (err) {
+                document.getElementById('loadingGrid').style.display = 'none';
+                const banner = document.getElementById('errorBanner');
+                banner.style.display = 'block';
+                banner.textContent = '⚠️ Could not load subjects: ' + err.message;
             }
-        });
+        }
 
-        noResults.style.display = visibleCount === 0 ? '' : 'none';
-    }
+        function escHtml(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        window.filterSubjects = function () {
+            const query = document.getElementById('subjectSearchInput').value.toLowerCase().trim();
+            const cards = document.querySelectorAll('.subject-card-uniform');
+            let visible = 0;
+            cards.forEach(card => {
+                const name = card.getAttribute('data-subject').toLowerCase();
+                const show = name.includes(query);
+                card.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            document.getElementById('noResults').style.display = (visible === 0 && cards.length > 0) ? '' : 'none';
+        };
+
+        loadSubjects();
     </script>
 </body>
+
 </html>
