@@ -349,10 +349,14 @@
             <a href="home.html" class="nav-link">Home</a>
             <a href="subjects.html" class="nav-link active">Subjects</a>
             <a href="quiz.html" class="nav-link">Quiz</a>
-            <a href="leaderboard.html" class="nav-link">Leaderboard</a>
+            <!-- <a href="leaderboard.html" class="nav-link">Leaderboard</a> -->
         </nav>
         <div class="nav-actions">
-            <a href="subjects.html" class="btn-primary" style="text-decoration:none;">Get Started</a>
+            <a href="subjects.html" class="btn-primary" style="text-decoration:none;">
+                <span class="material-symbols-outlined"
+                    style="font-size:20px; vertical-align:middle; margin-right:4px;">arrow_back</span>
+                Back to Subjects
+            </a>
         </div>
     </header>
 
@@ -361,12 +365,7 @@
         <div class="hero-header"
             style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
             <div class="hero-titles">
-                <a href="javascript:history.back()" class="papers-back-link"
-                    style="display:inline-flex; align-items:center; gap:6px; color:var(--text-muted); text-decoration:none; font-weight:600; font-size:14px;">
-                    <span class="material-symbols-outlined" style="font-size:20px;">arrow_back</span>
-                    Back to Papers
-                </a>
-                <div class="hero-title-group" style="margin-top:12px;">
+                <div class="hero-title-group">
                     <span class="tagline" id="paperTagline"
                         style="font-size:12px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:4px;">Past
                         Paper</span>
@@ -555,7 +554,7 @@
                         <textarea
                             class="user-answer-box"
                             id="answer-${q.id}"
-                            placeholder="Write your C/C++ code or explanation here..."
+                            placeholder="Write your answer or explanation here..."
                         ></textarea>
                         <div class="submit-row">
                             <button class="btn-submit" id="btn-${q.id}" onclick="submitAnswer('${q.id}')">
