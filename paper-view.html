@@ -134,7 +134,7 @@
             line-height: 1.8;
             color: var(--text-main);
             white-space: pre-wrap;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         /* ── Answer Section ── */
@@ -241,18 +241,6 @@
             display: block;
         }
 
-        .model-answer-simple {
-            display: none;
-            margin-top: 32px;
-            padding: 28px;
-            background: #f9fbfb; 
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            border-left: 5px solid var(--primary);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-            animation: fadeIn 0.5s ease forwards;
-        }
-
         .model-answer-header {
             display: flex;
             align-items: center;
@@ -274,24 +262,10 @@
         }
 
         .model-answer-content {
-            font-size: 16px;
-            line-height: 2; /* increased for math fractions */
-            color: #374151; /* slightly softer black */
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text-main);
             white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-
-        /* Ensure math blocks have ample breathing room */
-        .model-answer-content .mjx-chtml.mjx-display,
-        .model-answer-content .MathJax_Display {
-            margin: 2em 0 !important;
-            padding: 10px 0;
-            display: block;
-        }
-        
-        /* Force display math to be centered smoothly */
-        mjx-container[display="true"] {
-            margin: 1.5rem 0 !important;
         }
 
         /* ── All Done Banner ── */
