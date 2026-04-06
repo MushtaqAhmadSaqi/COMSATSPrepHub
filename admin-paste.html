@@ -217,17 +217,23 @@
         }
 
         .q-preview-answer {
-            margin-top: 8px;
-            background: var(--surface-alt, #f9fafb);
+            margin-top: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            /* border-left: 4px solid var(--primary); Professional left accent line */
             border-radius: 8px;
-            padding: 10px 12px;
-            font-size: 13px;
-            font-family: 'Menlo', 'Consolas', monospace;
-            color: var(--text-muted);
+            padding: 16px 20px;
+            font-size: 15px;
+            font-family: system-ui, -apple-system, sans-serif;
+            /* Clean, readable font */
+            color: var(--text-main);
+            line-height: 2.0;
+            /* Plenty of breathing room between steps */
             white-space: pre-wrap;
+            /* Respects line breaks from ChatGPT */
             word-break: break-word;
-            max-height: 120px;
-            overflow-y: auto;
+            overflow-x: auto;
+            /* Lets long equations scroll instead of breaking awkwardly */
         }
 
         /* ── Status ── */
@@ -349,11 +355,13 @@
                         }
 
                         CRITICAL MATH INSTRUCTION:
-                        If the paper contains ANY mathematical formulas or equations, you MUST wrap them in LaTeX
-                        delimiters: \\( ... \\) for inline math, and \\[ ... \\] for display math.
-                        Because you are generating JSON, you MUST double-escape all backslashes in your LaTeX.
-                        Example: Write \\\\frac{1}{2} instead of \\frac{1}{2}.
-                        Example: Write \\\\ln x instead of \\ln x.
+                        1. You MUST double-escape all backslashes in your LaTeX (e.g., write \\\\frac{1}{2} instead of
+                        \\frac{1}{2}).
+                        2. Formatting Derivations: For the `model_answer`, NEVER write a messy, single-paragraph block
+                        of math.
+                        3. Break derivations down step-by-step. Use double newlines (\\n\\n) to separate each step.
+                        4. For large or main equations, use Display Math \\\\[ ... \\\\] so they stand on their own
+                        line. Only use inline math \\\\( ... \\\\) for small variables inside the text.
 
                         Replace all the values with the actual paper content. Keep the exact same keys. Here is the
                         paper:
