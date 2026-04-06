@@ -161,9 +161,10 @@
             border-color: var(--primary);
             background: var(--surface);
         }
-        
+
         .user-answer-box.submitted {
-            background: #f0fdfa; /* subtle teal */
+            background: #f0fdfa;
+            /* subtle teal */
             border-color: #ccfbf1;
             color: var(--text-main);
         }
@@ -200,7 +201,7 @@
             border-color: #bae6fd;
             cursor: default;
         }
-        
+
         .btn-submit-small.is-submitted {
             background: #f0fdfa;
             color: #0f766e;
@@ -224,8 +225,13 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         .model-answer-simple.show {
@@ -296,6 +302,43 @@
             color: #b91c1c;
             font-size: 14px;
         }
+
+        /* ── Header Back Button ── */
+        .header-back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: var(--surface-alt, #f9fafb);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .header-back-btn:hover {
+            background: var(--border);
+        }
+
+        .header-back-btn .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .header-back-btn {
+                padding: 6px;
+                background: transparent;
+                border: none;
+                color: var(--text-muted);
+            }
+
+            .header-back-btn .btn-text-content {
+                display: none;
+            }
+        }
     </style>
 </head>
 
@@ -310,10 +353,9 @@
             <!-- <a href="leaderboard.html" class="nav-link">Leaderboard</a> -->
         </nav>
         <div class="nav-actions">
-            <a href="subjects.html" class="btn-primary" style="text-decoration:none;">
-                <span class="material-symbols-outlined"
-                    style="font-size:20px; vertical-align:middle; margin-right:4px;">arrow_back</span>
-                Back to Subjects
+            <a href="subjects.html" class="header-back-btn">
+                <span class="material-symbols-outlined">arrow_back</span>
+                <span class="btn-text-content">Back</span>
             </a>
         </div>
     </header>
