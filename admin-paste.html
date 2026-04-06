@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin — Paste & Upload | COMSATSPrepHub</title>
     <link rel="stylesheet" href="style.css">
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <style>
         .admin-wrap {
             max-width: 900px;
@@ -313,7 +317,6 @@
                     gives you → paste it here → click Upload. <strong>One go. No manual filling.</strong>
                 </div>
 
-                <!-- ─── Step 1: ChatGPT prompt ─── -->
                 <div class="prompt-box">
                     <div class="prompt-box-title">📋 Step 1 — Copy this prompt and send it to ChatGPT (with your paper)
                     </div>
@@ -345,6 +348,13 @@
                         ]
                         }
 
+                        CRITICAL MATH INSTRUCTION:
+                        If the paper contains ANY mathematical formulas or equations, you MUST wrap them in LaTeX
+                        delimiters: \\( ... \\) for inline math, and \\[ ... \\] for display math.
+                        Because you are generating JSON, you MUST double-escape all backslashes in your LaTeX.
+                        Example: Write \\\\frac{1}{2} instead of \\frac{1}{2}.
+                        Example: Write \\\\ln x instead of \\ln x.
+
                         Replace all the values with the actual paper content. Keep the exact same keys. Here is the
                         paper:
 
@@ -352,25 +362,14 @@
                     <button class="copy-btn" onclick="copyPrompt()">📋 Copy Prompt</button>
                 </div>
 
-                <!-- ─── Step 2: Paste JSON ─── -->
                 <label class="section-label">📥 Step 2 — Paste the JSON from ChatGPT here</label>
-                <textarea id="jsonPaste" placeholder='Paste the JSON here, e.g.:
-{
-  "subject_code": "CSC301",
-  "subject_name": "Operating Systems",
-  "year": 2024,
-  "exam_type": "Mid Term",
-  "semester": "Fall",
-  "total_marks": 30,
-  "questions": [ ... ]
-}'></textarea>
+                <textarea id="jsonPaste" placeholder='Paste the JSON here...'></textarea>
 
                 <div class="btn-row">
                     <button class="btn-parse" onclick="parsePaper()">🔍 Parse & Preview</button>
                     <button id="uploadBtn" class="btn-primary" onclick="uploadPaper()">🚀 Upload to Database</button>
                 </div>
 
-                <!-- ─── Preview ─── -->
                 <div id="preview">
                     <div class="preview-title">📄 Paper Preview — Check and confirm before uploading</div>
                     <div class="paper-meta-grid" id="metaGrid"></div>
@@ -420,7 +419,7 @@
             try {
                 data = JSON.parse(cleaned);
             } catch (e) {
-                showStatus('error', `❌ <strong>Invalid JSON.</strong> ChatGPT may have added extra text. Make sure you copy only the JSON part.<br><br><small>Parse error: ${e.message}</small>`);
+                showStatus('error', `❌ <strong>Invalid JSON.</strong> ChatGPT may have messed up the formatting. Ensure no trailing commas and proper backslashes.<br><br><small>Parse error: ${e.message}</small>`);
                 return;
             }
 
@@ -470,6 +469,13 @@
             document.getElementById('preview').style.display = 'block';
             document.getElementById('uploadBtn').style.display = 'block';
             document.getElementById('preview').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // NEW: Tell MathJax to scan the preview and turn the LaTeX into actual visual math
+            if (window.MathJax) {
+                MathJax.typesetPromise([document.getElementById('qList')]).catch(function (err) {
+                    console.error('MathJax error:', err.message);
+                });
+            }
         }
 
         function escHtml(str) {

@@ -8,6 +8,9 @@
     <meta name="description"
         content="View past paper questions and write your answers to compare with model solutions.">
     <link rel="stylesheet" href="style.css">
+    <!-- MathJax for LaTeX rendering -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         /* ── Loading State ── */
         .loading-state {
@@ -571,6 +574,11 @@
 
                 container.appendChild(card);
             });
+
+            // Trigger MathJax to render the newly added questions
+            if (window.MathJax) {
+                MathJax.typesetPromise([container]).catch(err => console.error('MathJax error:', err));
+            }
         }
 
         window.submitAnswer = function (qId) {
@@ -590,6 +598,11 @@
 
             // Show model answer
             model.classList.add('show');
+
+            // Trigger MathJax to render the newly shown model answer
+            if (window.MathJax) {
+                MathJax.typesetPromise([model]).catch(err => console.error('MathJax error:', err));
+            }
 
             // Update progress
             answeredCount++;
