@@ -688,7 +688,7 @@
                     const formatContent = (text) => {
                         if (!text) return '';
                         let res = escapeHtml(text).replace(/\\n/g, '<br>');
-                        
+
                         // Replace block math \[ ... \] with image
                         res = res.replace(/\\\[([\s\S]*?)\\\]/g, (match, eq) => {
                             let latex = eq.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').trim();
@@ -697,7 +697,7 @@
                             const url = `https://latex.codecogs.com/png.latex?${encodeURIComponent(query)}`;
                             return `<div style="text-align: center; margin: 15px 0;"><img src="${url}" alt="Equation" /></div>`;
                         });
-                        
+
                         // Replace inline math \( ... \) with image
                         res = res.replace(/\\\(([\s\S]*?)\\\)/g, (match, eq) => {
                             let latex = eq.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').trim();
@@ -705,7 +705,7 @@
                             const url = `https://latex.codecogs.com/png.latex?${encodeURIComponent(query)}`;
                             return `<img src="${url}" style="vertical-align: middle; margin: 0 2px;" alt="Formula" />`;
                         });
-                        
+
                         return res;
                     };
 
