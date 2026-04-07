@@ -684,14 +684,37 @@
 
                 globalQuestions.forEach(q => {
                     const cloText = q.clo ? `<i>(${escapeHtml(q.clo)})</i>` : '';
+
+                    const formatContent = (text) => {
+                        if (!text) return '';
+                        let res = escapeHtml(text).replace(/\\n/g, '<br>');
+
+                        // Replace block math \[ ... \] with image
+                        res = res.replace(/\\\[([\s\S]*?)\\\]/g, (match, eq) => {
+                            // Unescape HTML entities for LaTeX processing
+                            let latex = eq.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+                            let url = 'https://latex.codecogs.com/png.image?\\dpi{200}\\bg_white\\space ' + encodeURIComponent(latex.trim());
+                            return `<div style="text-align: center; margin: 12px 0;"><img src="${url}" /></div>`;
+                        });
+
+                        // Replace inline math \( ... \) with image
+                        res = res.replace(/\\\(([\s\S]*?)\\\)/g, (match, eq) => {
+                            let latex = eq.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+                            let url = 'https://latex.codecogs.com/png.image?\\dpi{200}\\bg_white\\space ' + encodeURIComponent(latex.trim());
+                            return `<img src="${url}" style="vertical-align: middle;" />`;
+                        });
+
+                        return res;
+                    };
+
                     html += `
                         <div class="q-box">
                             <p class="q-meta">Q${q.question_number} [${q.marks} Marks] ${cloText}</p>
-                            <p>${escapeHtml(q.question_text).replace(/\\n/g, '<br>')}</p>
+                            <p>${formatContent(q.question_text)}</p>
                             <div class="model-ans">
                                 <p style="margin-top:0;"><b>Model Answer:</b></p>
-                                <p style="margin-bottom:0; font-family: 'Courier New', Courier, monospace;">
-                                    ${escapeHtml(q.model_answer).replace(/\\n/g, '<br>')}
+                                <p style="margin-bottom:0; font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.8;">
+                                    ${formatContent(q.model_answer)}
                                 </p>
                             </div>
                         </div>
