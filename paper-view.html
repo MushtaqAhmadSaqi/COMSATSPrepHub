@@ -688,22 +688,24 @@
                     const formatContent = (text) => {
                         if (!text) return '';
                         let res = escapeHtml(text).replace(/\\n/g, '<br>');
-
+                        
                         // Replace block math \[ ... \] with image
                         res = res.replace(/\\\[([\s\S]*?)\\\]/g, (match, eq) => {
-                            // Unescape HTML entities for LaTeX processing
-                            let latex = eq.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
-                            let url = 'https://latex.codecogs.com/png.image?\\dpi{200}\\bg_white\\space ' + encodeURIComponent(latex.trim());
-                            return `<div style="text-align: center; margin: 12px 0;"><img src="${url}" /></div>`;
+                            let latex = eq.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').trim();
+                            // Correctly encode the entire LaTeX expression including formatting commands
+                            const query = `\\dpi{150} \\bg_white ${latex}`;
+                            const url = `https://latex.codecogs.com/png.latex?${encodeURIComponent(query)}`;
+                            return `<div style="text-align: center; margin: 15px 0;"><img src="${url}" alt="Equation" /></div>`;
                         });
-
+                        
                         // Replace inline math \( ... \) with image
                         res = res.replace(/\\\(([\s\S]*?)\\\)/g, (match, eq) => {
-                            let latex = eq.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
-                            let url = 'https://latex.codecogs.com/png.image?\\dpi{200}\\bg_white\\space ' + encodeURIComponent(latex.trim());
-                            return `<img src="${url}" style="vertical-align: middle;" />`;
+                            let latex = eq.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').trim();
+                            const query = `\\dpi{150} \\bg_white ${latex}`;
+                            const url = `https://latex.codecogs.com/png.latex?${encodeURIComponent(query)}`;
+                            return `<img src="${url}" style="vertical-align: middle; margin: 0 2px;" alt="Formula" />`;
                         });
-
+                        
                         return res;
                     };
 
