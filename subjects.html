@@ -209,11 +209,7 @@
     </footer>
 
     <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-        const SUPABASE_URL = 'https://xylyiscatznexduatjmg.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_K0t4H7M3LU96jy8_z_TJHg_ok_u-7HC';
-        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        import { supabase, escapeHtml as escHtml } from './utils.js';
 
         // Icon + colour palette — cycles if more subjects than palette size
         const palette = [
@@ -292,9 +288,7 @@
             }
         }
 
-        function escHtml(str) {
-            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        }
+
 
         window.filterSubjects = function () {
             const query = document.getElementById('subjectSearchInput').value.toLowerCase().trim();

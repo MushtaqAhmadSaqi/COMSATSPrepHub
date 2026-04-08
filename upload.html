@@ -44,7 +44,7 @@
             <!-- Form Section -->
             <div class="upload-main">
                 <div class="upload-form-card">
-                    <form>
+                    <form id="uploadForm">
                         <div class="upload-form-grid">
                             <!-- Subject Name -->
                             <div class="form-group">
@@ -96,7 +96,7 @@
                         <div class="form-group">
                             <label class="form-label">Upload Document (PDF/Image)</label>
                             <div class="upload-zone text-on-surface">
-                                <input class="upload-input" type="file">
+                                <input class="upload-input" type="file" id="fileInput" accept=".pdf,image/*">
                                 <span class="material-symbols-outlined"
                                     style="font-size: 36px; color: var(--primary); margin-bottom: 16px;">upload_file</span>
                                 <p style="font-weight: 500;">Drag and drop file here, or <span
@@ -183,6 +183,40 @@
             </div>
         </div>
     </footer>
+
+    <script type="module">
+        import { escapeHtml } from './utils.js';
+        
+        const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Please select a file to upload.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const maxSize = 5 * 1024 * 1024; // 5MB
+
+            if (file.size > maxSize) {
+                alert('Security Error: File is too large. Maximum allowed size is 5MB.');
+                return;
+            }
+
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Security Error: Invalid file type completely rejected.\nOnly PDF and images (JPEG, PNG, WEBP) are allowed.');
+                return;
+            }
+
+            // Safe to proceed to upload payload prep
+            alert('File strictly validated! Ready for secure server transmission.');
+            form.reset();
+        });
+    </script>
 </body>
 
 </html>

@@ -36,15 +36,7 @@ document.querySelectorAll('.eye').forEach(btn => {
   Supabase Authentication Setup
 */
 
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
-const SUPABASE_URL = 'https://xylyiscatznexduatjmg.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_K0t4H7M3LU96jy8_z_TJHg_ok_u-7HC';
-
-let supabase = null;
-if (SUPABASE_URL && SUPABASE_KEY) {
-  supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-}
+import { supabase } from '../utils.js';
 
 // ── SIGN UP ──
 const sForm = document.getElementById('s-form');
