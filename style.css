@@ -16,11 +16,11 @@
   --success: #16a34a;
   --accent: #0f9690;
   --dark: #1a1a2e;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 2px 8px rgba(15, 118, 110, 0.08);
+  --shadow-md: 0 8px 24px rgba(15, 118, 110, 0.12);
+  --shadow-lg: 0 16px 48px rgba(15, 118, 110, 0.16);
   --font-family: 'Inter', sans-serif;
-  --transition: all 0.25s ease;
+  --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   --radius: 12px;
   --radius-lg: 16px;
   --hero-mx: 70%;
@@ -69,14 +69,16 @@ img {
   top: 0;
   width: 100%;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
   height: 72px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 32px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
 }
 
 .navbar-brand {
@@ -166,12 +168,13 @@ img {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover {
   background: var(--primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(15, 118, 110, 0.25);
 }
 
 .btn-outline {

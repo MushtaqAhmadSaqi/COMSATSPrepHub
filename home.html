@@ -9,6 +9,7 @@
         content="Access verified past papers, practice quizzes, and performance analytics for COMSATS University students.">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="auth-modal.css">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 
 <body>
@@ -31,8 +32,8 @@
 
     <main class="main-content" style="padding: 0;">
         <!-- Hero Section -->
-        <section class="hero-banner">
-            <div style="z-index: 10; max-width: 720px;">
+        <section class="hero-banner" data-aos="fade-in">
+            <div style="z-index: 10; max-width: 720px;" data-aos="zoom-in" data-aos-delay="100">
                 <div class="badge-dark" style="margin-bottom: 28px; background:rgba(26,115,232,0.12); color:#1a73e8;">
                     EXCELLENCE IN ACADEMICS
                 </div>
@@ -57,7 +58,7 @@
         </section>
 
         <!-- Stats Counter -->
-        <section class="stats-row">
+        <section class="stats-row" data-aos="fade-up" data-aos-delay="200">
             <div class="stat-item">
                 <div class="stat-number">500+</div>
                 <div class="stat-label">Past Papers</div>
@@ -75,7 +76,7 @@
         <!-- Features Section -->
         <section class="features-section">
             <div class="container">
-                <div style="margin-bottom: 48px;">
+                <div style="margin-bottom: 48px;" data-aos="fade-up">
                     <span class="section-label">Why Choose Us</span>
                     <h2 class="dashboard-title">Master Your Curriculum</h2>
                     <p class="question-desc" style="max-width: 480px;">Engineered features to transform how you study
@@ -83,7 +84,7 @@
                 </div>
 
                 <div class="features-grid">
-                    <div class="feature-card">
+                    <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
                         <div class="feature-icon bg-icon-1">
                             <span class="material-symbols-outlined" style="font-size:26px;">history_edu</span>
                         </div>
@@ -93,7 +94,7 @@
                                 year, and exam type.</p>
                         </div>
                     </div>
-                    <div class="feature-card">
+                    <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
                         <div class="feature-icon bg-icon-2">
                             <span class="material-symbols-outlined" style="font-size:26px;">quiz</span>
                         </div>
@@ -103,7 +104,7 @@
                                 sessional exams.</p>
                         </div>
                     </div>
-                    <div class="feature-card">
+                    <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
                         <div class="feature-icon bg-icon-3">
                             <span class="material-symbols-outlined" style="font-size:26px;">analytics</span>
                         </div>
@@ -119,12 +120,12 @@
 
         <!-- The Collective Section -->
         <section class="collective-section">
-            <div class="collective-header">
+            <div class="collective-header" data-aos="fade-right">
                 <span class="section-label">The Collective</span>
                 <h2 class="collective-title">Visionaries behind the hub.</h2>
             </div>
             <div class="collective-grid">
-                <div class="founder-card">
+                <div class="founder-card" data-aos="fade-up">
                     <div class="founder-badge-wrap">
                         <span class="badge-dark">FOUNDER</span>
                     </div>
@@ -152,7 +153,7 @@
         </section>
 
         <!-- CTA Section -->
-        <section class="cta-section">
+        <section class="cta-section" data-aos="zoom-in" data-aos-delay="100">
             <div class="cta-box">
                 <div class="cta-content">
                     <div style="max-width: 520px;">
@@ -467,21 +468,21 @@
         if (amSForm) {
             amSForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                if (!supabase) { alert('Supabase not configured yet.'); return; }
+                if (!supabase) { Swal.fire('Error', 'Supabase not configured yet.', 'error'); return; }
                 const name = document.getElementById('am-s-name').value;
                 const email = document.getElementById('am-s-email').value;
                 const pass = document.getElementById('am-s-pass').value;
                 const acc = document.getElementById('am-acc-in').checked;
-                if (!acc) { alert('Please accept the terms first.'); return; }
-                if (pass.length < 8) { alert('Password must be at least 8 characters.'); return; }
+                if (!acc) { Swal.fire('Notice', 'Please accept the terms first.', 'warning'); return; }
+                if (pass.length < 8) { Swal.fire('Notice', 'Password must be at least 8 characters.', 'warning'); return; }
                 const btn = amSForm.querySelector('button[type="submit"]');
                 btn.textContent = 'Processing...';
                 btn.disabled = true;
                 const { error } = await supabase.auth.signUp({ email, password: pass, options: { data: { full_name: name } } });
                 btn.textContent = 'Create Account';
                 btn.disabled = false;
-                if (error) { alert('Error: ' + error.message); }
-                else { alert('Success! Check your email to confirm.'); amSForm.reset(); closeModal(); }
+                if (error) { Swal.fire('Error', error.message, 'error'); }
+                else { Swal.fire('Success!', 'Check your email to confirm.', 'success'); amSForm.reset(); closeModal(); }
             });
         }
 
@@ -490,7 +491,7 @@
         if (amLForm) {
             amLForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                if (!supabase) { alert('Supabase not configured yet.'); return; }
+                if (!supabase) { Swal.fire('Error', 'Supabase not configured yet.', 'error'); return; }
                 const email = document.getElementById('am-l-email').value;
                 const pass = document.getElementById('am-l-pass').value;
                 const btn = amLForm.querySelector('button[type="submit"]');
@@ -499,10 +500,15 @@
                 const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
                 btn.querySelector('span:first-child').textContent = 'Login';
                 btn.disabled = false;
-                if (error) { alert('Error: ' + error.message); }
-                else { alert('Welcome back!'); amLForm.reset(); closeModal(); }
+                if (error) { Swal.fire('Error', error.message, 'error'); }
+                else { Swal.fire('Welcome back!', 'Successfully logged in.', 'success'); amLForm.reset(); closeModal(); }
             });
         }
+    </script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        AOS.init({ once: true, offset: 50, duration: 800 });
     </script>
 </body>
 
