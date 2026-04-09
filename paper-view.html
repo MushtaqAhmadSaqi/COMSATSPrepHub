@@ -1,512 +1,296 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paper View | COMSATSPrepHub</title>
-    <meta name="description"
-        content="View past paper questions and write your answers to compare with model solutions.">
-    <link rel="stylesheet" href="style.css">
-    <!-- MathJax for LaTeX rendering -->
+    <meta name="description" content="View past paper questions, write your answers, and compare with model solutions on COMSATSPrepHub.">
+
+    <!-- Tailwind CSS with Typography plugin -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <!-- MathJax -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <!-- Marked.js for Markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <style>
-        /* ── Loading State ── */
-        .loading-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 300px;
-            gap: 16px;
-            color: var(--text-muted);
-        }
 
-        .spinner {
-            width: 44px;
-            height: 44px;
-            border: 3px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Lora', 'Georgia', 'serif'],
+                    },
+                    colors: {
+                        brand: { 50:'#f0f9ff', 100:'#e0f2fe', 400:'#38bdf8', 500:'#0ea5e9', 600:'#0284c7', 700:'#0369a1' },
+                        teal:  { 50:'#f0fdfa', 100:'#ccfbf1', 500:'#14b8a6', 600:'#0d9488', 700:'#0f766e' },
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.4s ease both',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16,1,0.3,1) both',
+                        'spin': 'spin 0.8s linear infinite',
+                    },
+                    keyframes: {
+                        fadeIn: { from:{ opacity:0 }, to:{ opacity:1 } },
+                        slideUp: { from:{ opacity:0, transform:'translateY(16px)' }, to:{ opacity:1, transform:'translateY(0)' } },
+                        spin: { to:{ transform:'rotate(360deg)' } },
+                    }
+                }
             }
         }
-
-        /* ── Paper Header ── */
-        .paper-meta-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 16px;
-        }
-
-        .meta-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--surface-alt, #f4f4f5);
-            border: 1px solid var(--border);
-            border-radius: 999px;
-            padding: 6px 14px;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .meta-chip .material-symbols-outlined {
-            font-size: 16px;
-        }
-
-        /* ── Progress Bar ── */
-        .progress-bar-wrap {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg, 16px);
-            padding: 20px 24px;
-            margin-bottom: 28px;
-        }
-
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-        }
-
-        .progress-track {
-            height: 6px;
-            background: var(--border);
-            border-radius: 999px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--primary);
-            border-radius: 999px;
-            transition: width 0.5s ease;
-        }
-
-        /* ── Question Block ── */
-        .question-card {
-            margin-bottom: 40px;
-            padding-bottom: 30px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .question-card:last-child {
-            border-bottom: none;
-        }
-
-        .q-header-simple {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-
-        .q-num {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .q-meta-tag {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            background: var(--surface-alt, #f4f4f5);
-            padding: 4px 10px;
-            border-radius: 999px;
-            border: 1px solid var(--border);
-        }
-
-        .q-text {
-            font-size: 16px;
-            line-height: 1.8;
-            color: var(--text-main);
-            white-space: pre-wrap;
-            margin-bottom: 20px;
-        }
-
-        /* ── Answer Section ── */
-        .answer-section {
-            margin-top: 16px;
-        }
-
-        .user-answer-box {
-            width: 100%;
-            min-height: 100px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 14px 16px;
-            font-size: 15px;
-            font-family: inherit;
-            line-height: 1.6;
-            background: var(--surface-alt, #f9fafb);
-            color: var(--text-main);
-            resize: vertical;
-            box-sizing: border-box;
-            transition: all 0.2s;
-            margin-bottom: 12px;
-        }
-
-        .user-answer-box:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: var(--surface);
-        }
-
-        .user-answer-box.submitted {
-            background: #f0fdfa;
-            /* subtle teal */
-            border-color: #ccfbf1;
-            color: var(--text-main);
-        }
-
-        .submit-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn-submit-small {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--surface-alt, #f4f4f5);
-            color: var(--text-main);
-            border: 1px solid var(--border);
-            border-radius: 999px;
-            padding: 6px 16px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-submit-small:hover {
-            background: var(--border);
-        }
-
-        .btn-submit-small:disabled {
-            background: #e0f2fe;
-            color: #0369a1;
-            border-color: #bae6fd;
-            cursor: default;
-        }
-
-        .btn-submit-small.is-submitted {
-            background: #f0fdfa;
-            color: #0f766e;
-            border-color: #ccfbf1;
-            cursor: default;
-        }
-
-        .submit-hint {
-            font-size: 12px;
-            color: var(--text-muted);
-            font-style: italic;
-        }
-
-        /* ── Model Answer Reveal ── */
-        .model-answer-simple {
-            display: none;
-            margin-top: 30px;
-            /* Removed box styling for direct answer display */
-            animation: fadeIn 0.4s ease;
-        }
-
-        .model-answer-simple.show {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        .model-answer-simple.show {
-            display: block;
-        }
-
-        .model-answer-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .model-answer-header .icon {
-            color: #0d9488;
-            font-size: 18px;
-        }
-
-        .model-answer-header span {
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-        }
-
-        .model-answer-content {
-            font-size: 16px;
-            /* line-height: 2.0; */
-            /* Matches requested professional spacing */
-            color: var(--text-main);
-            /* white-space: pre-wrap; */
-            word-break: break-word;
-            overflow-x: auto;
-            /* Protects long equations */
-        }
-
-        /* Essential: Breathe room for MathJax display formulas */
-        mjx-container[display="true"] {
-            margin: 1.5rem 0 !important;
-        }
-
-        /* ── All Done Banner ── */
-        .done-banner {
-            display: none;
-            background: linear-gradient(135deg, var(--primary), #6366f1);
-            color: white;
-            border-radius: var(--radius-lg, 16px);
-            padding: 40px;
-            text-align: center;
-            margin-top: 32px;
-            animation: fadeSlideIn 0.5s ease;
-        }
-
-        .done-banner.show {
-            display: block;
-        }
-
-        .done-banner h2 {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 12px;
-        }
-
-        .done-banner p {
-            opacity: 0.85;
-            font-size: 16px;
-            margin-bottom: 24px;
-        }
-
-        /* ── Error State ── */
-        .error-state {
-            background: #fee2e2;
-            border: 1px solid #fca5a5;
-            border-radius: 12px;
-            padding: 24px;
-            color: #b91c1c;
-            font-size: 14px;
-        }
-
-        /* ── Header Back Button ── */
-        .header-back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--text-main);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-            padding: 6px 14px;
-            border-radius: 999px;
-            background: var(--surface-alt, #f9fafb);
-            border: 1px solid var(--border);
-            transition: all 0.2s;
-        }
-
-        .header-back-btn:hover {
-            background: var(--border);
-        }
-
-        .header-back-btn .material-symbols-outlined {
-            font-size: 18px;
-        }
-
-        @media (max-width: 768px) {
-            .header-back-btn {
-                padding: 6px;
-                background: transparent;
-                border: none;
-                color: var(--text-muted);
-            }
-
-            .header-back-btn .btn-text-content {
-                display: none;
-            }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glass { @apply bg-white/80 backdrop-blur-xl border border-slate-200/80; }
+            /* Ensure marked.js prose tables render nicely */
+            .question-prose table { @apply w-full border-collapse text-sm my-4; }
+            .question-prose th { @apply bg-slate-100 text-slate-700 font-semibold text-left px-3 py-2 border border-slate-200; }
+            .question-prose td { @apply px-3 py-2 border border-slate-200 text-slate-700; }
+            .question-prose tr:nth-child(even) td { @apply bg-slate-50/70; }
+            .question-prose p { @apply leading-[1.9] mb-3; }
+            .question-prose ol { @apply list-decimal ml-5 space-y-1.5; }
+            .question-prose ul { @apply list-disc ml-5 space-y-1.5; }
+            .question-prose li { @apply leading-relaxed; }
+            .question-prose strong { @apply font-semibold text-slate-900; }
+            .question-prose code { @apply font-mono text-[13px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded; }
+            /* MathJax spacing */
+            mjx-container[display="true"] { @apply my-5 block; }
         }
     </style>
 </head>
 
-<body>
-    <!-- Navigation -->
-    <header class="navbar">
-        <a href="home.html" class="navbar-brand">COMSATSPrepHub</a>
-        <nav class="nav-links">
-            <a href="home.html" class="nav-link">Home</a>
-            <a href="subjects.html" class="nav-link active">Subjects</a>
-            <a href="quiz.html" class="nav-link">Quiz</a>
-            <!-- <a href="leaderboard.html" class="nav-link">Leaderboard</a> -->
-        </nav>
-        <div class="nav-actions">
-            <a href="subjects.html" class="header-back-btn">
-                <span class="material-symbols-outlined">arrow_back</span>
-                <span class="btn-text-content">Back</span>
-            </a>
+<body class="bg-slate-50 text-slate-700 font-sans antialiased min-h-screen">
+
+    <!-- ═══════════════════════════════════════════════
+         STICKY TOP NAV
+    ═══════════════════════════════════════════════ -->
+    <header class="sticky top-0 z-50 glass shadow-sm border-t-0 border-l-0 border-r-0">
+        <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
+            <!-- Left: Logo + Back -->
+            <div class="flex items-center gap-3 min-w-0">
+                <a href="subjects.html" class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all group" title="Back to Subjects">
+                    <span class="material-symbols-outlined text-[20px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+                </a>
+                <a href="home.html" class="flex items-center gap-2 min-w-0 group">
+                    <div class="w-7 h-7 flex-shrink-0 rounded-lg bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow">C</div>
+                    <span class="hidden sm:block font-bold text-slate-900 text-[15px] tracking-tight truncate group-hover:text-brand-600 transition-colors">COMSATSPrepHub</span>
+                </a>
+            </div>
+
+            <!-- Center: Paper title (populated by JS) -->
+            <div class="flex-1 text-center min-w-0 hidden md:block">
+                <p id="navPaperTitle" class="text-sm font-semibold text-slate-700 truncate"></p>
+            </div>
+
+            <!-- Right: Actions -->
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <button id="downloadBtn" onclick="handleDownload()" style="display:none;"
+                    class="hidden sm:inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm hover:shadow-md transition-all">
+                    <span class="material-symbols-outlined text-[18px]">download</span>
+                    <span>Word</span>
+                </button>
+                <!-- Mobile download icon only -->
+                <button id="downloadBtnMobile" onclick="handleDownload()" style="display:none;"
+                    class="sm:hidden flex items-center justify-center w-9 h-9 rounded-xl bg-brand-600 text-white shadow-sm">
+                    <span class="material-symbols-outlined text-[20px]">download</span>
+                </button>
+                <a href="subjects.html" class="hidden sm:flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100 transition-all">
+                    Subjects
+                </a>
+            </div>
         </div>
     </header>
 
-    <main class="main-content container">
-        <!-- Back link + paper title (populated by JS) -->
-        <div class="hero-header"
-            style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
-            <div class="hero-titles">
-                <div class="hero-title-group">
-                    <span class="tagline" id="paperTagline"
-                        style="font-size:12px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:4px;">Past
-                        Paper</span>
-                    <h1 class="page-title main-title" style="font-size:30px; margin-bottom:8px;" id="paperTitle">
-                        Loading...</h1>
+    <!-- ═══════════════════════════════════════════════
+         STICKY PROGRESS BAR (below nav, full width)
+    ═══════════════════════════════════════════════ -->
+    <div id="progressWrap" class="sticky top-[57px] z-40 bg-white/90 backdrop-blur-sm border-b border-slate-200 transition-all" style="display:none;">
+        <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-2.5 flex items-center gap-4">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Progress</span>
+            <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div id="progressFill" class="h-full bg-gradient-to-r from-brand-500 to-teal-500 rounded-full transition-all duration-500 ease-out" style="width:0%"></div>
+            </div>
+            <span id="progressText" class="text-xs font-bold text-slate-500 whitespace-nowrap">0 / 0</span>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         MAIN LAYOUT
+    ═══════════════════════════════════════════════ -->
+    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-8 lg:py-12">
+        <div class="flex gap-8 xl:gap-12 items-start">
+
+            <!-- ── LEFT SIDEBAR (desktop only) ── -->
+            <aside class="hidden lg:block w-64 xl:w-72 flex-shrink-0 sticky top-[100px]">
+                <!-- Paper info card -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-4">
+                    <p class="text-[11px] font-bold text-brand-600 uppercase tracking-widest mb-3">Paper Details</p>
+                    <div id="sidebarMeta" class="space-y-3"></div>
                 </div>
-                <div class="paper-meta-bar" id="paperMetaBar"></div>
-            </div>
+                <!-- Quick nav -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Questions</p>
+                    <div id="qNav" class="flex flex-col gap-1"></div>
+                </div>
+            </aside>
 
-            <!-- Download Action -->
-            <div class="hero-actions" style="margin-bottom: 8px;">
-                <button id="downloadBtn" class="btn-primary" style="display:none; align-items:center; gap:8px;"
-                    onclick="handleDownload()">
-                    <span class="material-symbols-outlined" style="font-size:20px;">download</span>
-                    Download as Word
-                </button>
-            </div>
+            <!-- ── MAIN CONTENT ── -->
+            <main class="flex-1 min-w-0">
+
+                <!-- Paper Header Card -->
+                <div id="paperHeader" class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm mb-6 animate-fade-in">
+
+                    <!-- Loading state -->
+                    <div id="loadingState" class="flex flex-col items-center justify-center py-16 gap-4 text-slate-400">
+                        <div class="w-10 h-10 rounded-full border-[3px] border-slate-200 border-t-brand-500 animate-spin"></div>
+                        <p class="text-sm font-medium">Loading paper from database...</p>
+                    </div>
+
+                    <!-- Paper title (hidden until loaded) -->
+                    <div id="paperTitleBlock" class="hidden">
+                        <div class="flex flex-col sm:flex-row sm:items-start gap-4 justify-between">
+                            <div class="flex-1 min-w-0">
+                                <p id="paperTagline" class="text-[11px] font-bold text-brand-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[14px]">description</span> Past Paper
+                                </p>
+                                <h1 id="paperTitle" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight mb-4"></h1>
+                                <div id="paperChips" class="flex flex-wrap gap-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error State -->
+                <div id="errorState" class="hidden bg-red-50 border border-red-200 rounded-2xl p-6 text-red-700 text-sm shadow-sm animate-fade-in">
+                    <p class="font-bold text-red-800 flex items-center gap-2 mb-2"><span class="material-symbols-outlined text-[18px]">error</span> Failed to load paper</p>
+                    <p id="errorMsg" class="text-red-700"></p>
+                </div>
+
+                <!-- Questions Container -->
+                <div id="questionsContainer" class="hidden space-y-6">
+                    <!-- JS will inject .question-card elements here -->
+                </div>
+
+                <!-- All Done Banner -->
+                <div id="doneBanner" class="hidden mt-8 animate-slide-up">
+                    <div class="relative overflow-hidden bg-gradient-to-br from-teal-600 to-brand-600 text-white rounded-2xl p-8 sm:p-10 text-center shadow-xl">
+                        <!-- Decorative blobs -->
+                        <div class="absolute -top-10 -right-10 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                        <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                        <div class="relative">
+                            <div class="w-16 h-16 mx-auto mb-5 rounded-2xl bg-white/20 flex items-center justify-center text-3xl shadow-inner">🎓</div>
+                            <h2 class="text-2xl sm:text-3xl font-extrabold mb-3 tracking-tight">All Done! Well Played.</h2>
+                            <p class="text-white/80 text-base max-w-md mx-auto mb-6 leading-relaxed">You've attempted every question. Review the model answers above to assess your understanding and pinpoint areas for improvement.</p>
+                            <a href="subjects.html" class="inline-flex items-center gap-2 bg-white text-teal-700 font-bold px-6 py-3 rounded-xl hover:bg-teal-50 transition-all shadow-sm text-sm">
+                                <span class="material-symbols-outlined text-[18px]">library_books</span>
+                                Browse More Papers
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
         </div>
+    </div>
 
-        <!-- Progress Bar -->
-        <div class="progress-bar-wrap" id="progressWrap" style="display:none;">
-            <div class="progress-label">
-                <span>Your Progress</span>
-                <span id="progressText">0 / 0 answered</span>
+    <!-- ═══════════════════════════════════════════════
+         FOOTER
+    ═══════════════════════════════════════════════ -->
+    <footer class="mt-16 border-t border-slate-200 bg-white">
+        <div class="max-w-screen-xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="font-bold text-brand-600 text-sm uppercase tracking-widest">COMSATSPrepHub</div>
+            <div class="flex gap-6 text-sm text-slate-500">
+                <a href="about-us.html" class="hover:text-slate-900 transition-colors">About Us</a>
+                <a href="feedback.html" class="hover:text-slate-900 transition-colors">Feedback</a>
             </div>
-            <div class="progress-track">
-                <div class="progress-fill" id="progressFill" style="width:0%"></div>
-            </div>
-        </div>
-
-        <!-- Loading / Error / Questions -->
-        <div id="loadingState" class="loading-state">
-            <div class="spinner"></div>
-            <p>Loading questions from database...</p>
-        </div>
-        <div id="errorState" class="error-state" style="display:none;"></div>
-        <div id="questionsContainer" class="question-list" style="display:none;"></div>
-
-        <!-- All Done Banner -->
-        <div class="done-banner" id="doneBanner">
-            <h2>🎓 Well Done!</h2>
-            <p>You've attempted all questions. Review the model answers above to check your understanding.</p>
-            <a href="subjects.html" class="btn-primary" style="text-decoration:none; display:inline-block;">
-                Browse More Papers
-            </a>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="site-footer">
-        <div class="footer-content">
-            <div class="footer-left">
-                <div class="footer-copyright" style="text-transform: uppercase;">COMSATSPrepHub</div>
-            </div>
-            <div class="footer-center">
-                <a class="footer-link" href="about-us.html">About Us</a>
-                <a class="footer-link" href="feedback.html">Feedback</a>
-            </div>
-            <div class="footer-right">
-                <div class="footer-copyright" style="font-style: italic;">Made with care by Mushtaq Ahmad Saqi</div>
-            </div>
+            <div class="text-sm text-slate-400 italic">Made with ❤️ by Mushtaq Ahmad Saqi</div>
         </div>
     </footer>
 
+
+    <!-- ═══════════════════════════════════════════════
+         SCRIPTS
+    ═══════════════════════════════════════════════ -->
     <script type="module">
         import { supabase, escapeHtml } from './utils.js';
 
-        // Read URL params
-        const params = new URLSearchParams(window.location.search);
-        const paperId = params.get('id');
+        // ── State ───────────────────────────────────
+        const params      = new URLSearchParams(window.location.search);
+        const paperId     = params.get('id');
         const subjectCode = params.get('subject');
-        const year = parseInt(params.get('year'));
-        const examType = params.get('exam');
+        const year        = parseInt(params.get('year'));
+        const examType    = params.get('exam');
 
         let totalQuestions = 0;
-        let answeredCount = 0;
-        let globalPaper = null;
+        let answeredCount  = 0;
+        let globalPaper    = null;
         let globalQuestions = [];
 
+        // ── Load Paper ───────────────────────────────
         async function loadPaper() {
             try {
-                // 1. Fetch paper record
                 let query = supabase.from('past_papers').select('*');
-
                 if (paperId) {
                     query = query.eq('id', paperId);
                 } else if (subjectCode && year && examType) {
                     query = query.eq('subject_code', subjectCode).eq('year', year).eq('exam_type', examType);
                 } else {
-                    // Fallback for debugging if no params provided
                     query = query.eq('subject_code', 'CSC211').eq('year', 2024).eq('exam_type', 'Mid Term');
                 }
 
                 const { data: paper, error: paperError } = await query.single();
+                if (paperError || !paper) throw new Error(paperError?.message || 'Paper not found.');
 
-                if (paperError || !paper) {
-                    throw new Error(paperError?.message || 'Paper not found in the database.');
-                }
+                globalPaper = paper;
 
-                // 2. Update page title & meta
-                const titleEl = document.getElementById('paperTitle');
-                titleEl.textContent = `${paper.subject_name} — ${paper.exam_type} ${paper.year}`;
-                document.title = `${paper.subject_name} ${paper.exam_type} ${paper.year} | COMSATSPrepHub`;
+                // ── Update page metadata ──────────────
+                const fullTitle = `${paper.subject_name} — ${paper.exam_type} ${paper.year}`;
+                document.title = `${fullTitle} | COMSATSPrepHub`;
+                document.getElementById('paperTitle').textContent = fullTitle;
+                document.getElementById('navPaperTitle').textContent = fullTitle;
 
-                document.getElementById('paperMetaBar').innerHTML = `
-                    <div class="meta-chip">
-                        <span class="material-symbols-outlined">school</span>
-                        ${paper.subject_code}
-                    </div>
-                    <div class="meta-chip">
-                        <span class="material-symbols-outlined">calendar_today</span>
-                        ${paper.semester || ''} ${paper.year}
-                    </div>
-                    <div class="meta-chip">
-                        <span class="material-symbols-outlined">grade</span>
-                        ${paper.total_marks} Total Marks
-                    </div>
-                    <div class="meta-chip">
-                        <span class="material-symbols-outlined">description</span>
-                        ${paper.exam_type}
-                    </div>
-                `;
+                // Chips in header
+                document.getElementById('paperChips').innerHTML = [
+                    ['school', paper.subject_code],
+                    ['calendar_today', `${paper.semester || ''} ${paper.year}`.trim()],
+                    ['assignment', paper.exam_type],
+                    ['grade', `${paper.total_marks} Marks`],
+                ].map(([icon, label]) => `
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-full text-xs font-semibold text-slate-600">
+                        <span class="material-symbols-outlined text-[14px] text-slate-400">${icon}</span>${label}
+                    </span>
+                `).join('');
 
-                // 3. Fetch questions
+                // Sidebar meta
+                document.getElementById('sidebarMeta').innerHTML = [
+                    ['school', 'Subject', paper.subject_name],
+                    ['tag', 'Code', paper.subject_code],
+                    ['calendar_today', 'Year', paper.year],
+                    ['assignment', 'Exam', paper.exam_type],
+                    ['auto_stories', 'Semester', paper.semester || '—'],
+                    ['grade', 'Total Marks', paper.total_marks],
+                ].map(([icon, label, val]) => `
+                    <div class="flex items-start gap-2.5">
+                        <span class="material-symbols-outlined text-[16px] text-slate-400 mt-0.5 flex-shrink-0">${icon}</span>
+                        <div class="min-w-0">
+                            <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400">${label}</p>
+                            <p class="text-sm font-semibold text-slate-800 truncate">${val}</p>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Show download
+                ['downloadBtn', 'downloadBtnMobile'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) el.style.display = '';
+                });
+
+                // ── Fetch Questions ───────────────────
                 const { data: questions, error: qError } = await supabase
                     .from('questions')
                     .select('*')
@@ -514,70 +298,111 @@
                     .order('question_number', { ascending: true });
 
                 if (qError) throw qError;
-                if (!questions || questions.length === 0) {
-                    throw new Error('No questions found for this paper.');
-                }
+                if (!questions?.length) throw new Error('No questions found for this paper.');
 
-                globalPaper = paper;
                 globalQuestions = questions;
-                document.getElementById('downloadBtn').style.display = 'inline-flex';
+                totalQuestions  = questions.length;
 
-                totalQuestions = questions.length;
+                // Reveal header, hide loader
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('paperTitleBlock').classList.remove('hidden');
+                document.getElementById('progressWrap').style.display = '';
+                updateProgress();
+
                 renderQuestions(questions);
 
             } catch (err) {
                 document.getElementById('loadingState').style.display = 'none';
-                const errEl = document.getElementById('errorState');
-                errEl.style.display = 'block';
-                errEl.innerHTML = `
-                    <strong>❌ Failed to load paper</strong><br><br>
-                    ${err.message}<br><br>
-                    <small>Make sure you have uploaded this paper using <a href="admin-insert.html">admin-insert.html</a> first.</small>
-                `;
+                document.getElementById('errorState').classList.remove('hidden');
+                document.getElementById('errorMsg').textContent = err.message;
             }
         }
 
+        // ── Render Questions ──────────────────────────
         function renderQuestions(questions) {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('progressWrap').style.display = 'block';
-            updateProgress();
-
             const container = document.getElementById('questionsContainer');
-            container.style.display = 'block';
+            container.classList.remove('hidden');
+            const qNav = document.getElementById('qNav');
 
-            questions.forEach((q, idx) => {
+            questions.forEach((q) => {
+                // ── Sidebar question nav link ──
+                const navLink = document.createElement('a');
+                navLink.href = `#q-card-${q.id}`;
+                navLink.id   = `qnav-${q.id}`;
+                navLink.className = 'flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all group';
+                navLink.innerHTML = `
+                    <span id="qnav-dot-${q.id}" class="w-2 h-2 flex-shrink-0 rounded-full bg-slate-200 group-hover:bg-brand-400 transition-colors"></span>
+                    <span class="font-medium">Q<span class="font-bold">${q.question_number}</span></span>
+                    ${q.marks ? `<span class="ml-auto text-[11px] font-bold text-slate-400">${q.marks}m</span>` : ''}
+                `;
+                qNav.appendChild(navLink);
+
+                // ── Question card ──
                 const card = document.createElement('section');
-                card.className = 'question-card';
-                card.id = `q-card-${q.id}`;
+                card.id        = `q-card-${q.id}`;
+                card.className = 'bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden animate-fade-in scroll-mt-32 transition-shadow hover:shadow-md';
 
                 card.innerHTML = `
-                    <div class="q-header-simple">
-                        <span class="q-num">Q${q.question_number}.</span>
-                        ${q.clo ? `<span class="q-meta-tag">${q.clo}</span>` : ''}
-                        <span class="q-meta-tag">${q.marks} Marks</span>
+                    <!-- Question Header stripe -->
+                    <div class="flex items-center justify-between gap-3 px-5 sm:px-7 py-4 border-b border-slate-100 bg-slate-50/70">
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-xl bg-brand-600 text-white text-sm font-bold shadow-sm flex-shrink-0">${q.question_number}</span>
+                            ${q.clo ? `<span class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-full">${q.clo}</span>` : ''}
+                        </div>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            ${q.marks ? `<span class="text-[12px] font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-full shadow-sm">${q.marks} Marks</span>` : ''}
+                            <span id="status-badge-${q.id}" class="hidden text-[11px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-full flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">check_circle</span> Answered
+                            </span>
+                        </div>
                     </div>
-                    <div class="q-text text-[15px] prose max-w-none prose-table:border-collapse prose-th:border prose-th:bg-slate-100 prose-td:border prose-th:p-2 prose-td:p-2">${marked.parse(q.question_text || '')}</div>
 
-                    <div class="answer-section">
-                        <textarea
-                            class="user-answer-box"
-                            id="answer-${q.id}"
-                            placeholder="Write your answer or explanation here..."
-                        ></textarea>
-                        <div class="submit-row">
-                            <button class="btn-submit-small" id="btn-${q.id}" onclick="submitAnswer('${q.id}')">
-                                Submit
-                            </button>
-                            <span class="submit-hint">Not saved — self-study only</span>
+                    <!-- Question text -->
+                    <div class="px-5 sm:px-7 py-6 border-b border-slate-100">
+                        <div class="question-prose text-slate-800 text-[15.5px] leading-[1.9]">${marked.parse(q.question_text || '')}</div>
+                    </div>
+
+                    <!-- Answer area -->
+                    <div class="px-5 sm:px-7 py-6 space-y-4">
+                        <!-- Textarea -->
+                        <div>
+                            <label class="block text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2">Your Answer</label>
+                            <textarea
+                                id="answer-${q.id}"
+                                rows="4"
+                                placeholder="Write your explanation or solution here before revealing the model answer..."
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[15px] leading-relaxed text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-400/20 focus:bg-white resize-y transition-all font-serif"
+                            ></textarea>
                         </div>
 
-                        <!-- Model Answer (hidden until submit) -->
-                        <div class="model-answer-simple" id="model-${q.id}">
-                            <div class="model-answer-header">
-                                <span class="material-symbols-outlined icon">auto_awesome</span>
-                                <span>Model Answer</span>
+                        <!-- Submit row -->
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <button id="btn-${q.id}" onclick="submitAnswer('${q.id}')"
+                                class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-semibold px-5 py-2.5 rounded-xl text-sm shadow-sm hover:shadow-md transition-all">
+                                <span class="material-symbols-outlined text-[16px]">visibility</span>
+                                Submit & Reveal Answer
+                            </button>
+                            <p class="text-xs text-slate-400 font-medium flex items-center gap-1.5 italic">
+                                <span class="material-symbols-outlined text-[14px]">info</span>
+                                Not saved · Self-study only
+                            </p>
+                        </div>
+
+                        <!-- Model answer (hidden until submit) -->
+                        <div id="model-${q.id}" class="hidden">
+                            <div class="relative mt-2 bg-gradient-to-br from-teal-50 to-slate-50 border border-teal-200/70 rounded-xl overflow-hidden animate-slide-up">
+                                <!-- Accent bar -->
+                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-teal-400 to-brand-400"></div>
+                                <div class="pl-5 pr-5 sm:pr-7 pt-5 pb-6">
+                                    <div class="flex items-center gap-2 mb-4">
+                                        <span class="material-symbols-outlined text-[18px] text-teal-600">auto_awesome</span>
+                                        <p class="text-[11px] font-bold uppercase tracking-widest text-teal-700">Model Answer</p>
+                                    </div>
+                                    <div id="model-content-${q.id}" class="question-prose text-slate-800 text-[15px] leading-[1.9]">
+                                        ${q.model_answer ? marked.parse(q.model_answer) : '<em class="text-slate-400">No model answer provided.</em>'}
+                                    </div>
+                                </div>
                             </div>
-                            <div class="model-answer-content prose max-w-none prose-table:border-collapse prose-th:border prose-th:bg-slate-100 prose-td:border prose-th:p-2 prose-td:p-2">${q.model_answer ? marked.parse(q.model_answer) : ''}</div>
                         </div>
                     </div>
                 `;
@@ -585,151 +410,124 @@
                 container.appendChild(card);
             });
 
-            // Trigger MathJax to render the newly added questions
-            if (window.MathJax) {
-                MathJax.typesetPromise([container]).catch(err => console.error('MathJax error:', err));
-            }
+            // Trigger MathJax on everything
+            if (window.MathJax) MathJax.typesetPromise([container]).catch(console.error);
         }
 
+        // ── Submit Answer ─────────────────────────────
         window.submitAnswer = function (qId) {
+            const btn     = document.getElementById(`btn-${qId}`);
             const textarea = document.getElementById(`answer-${qId}`);
-            const btn = document.getElementById(`btn-${qId}`);
-            const model = document.getElementById(`model-${qId}`);
-            const card = document.getElementById(`q-card-${qId}`);
+            const model   = document.getElementById(`model-${qId}`);
+            const badge   = document.getElementById(`status-badge-${qId}`);
+            const dot     = document.getElementById(`qnav-dot-${qId}`);
 
-            // Update button
-            btn.disabled = true;
-            btn.classList.add('is-submitted');
-            btn.innerHTML = `<span class="material-symbols-outlined" style="font-size:14px;">check</span> Submitted`;
+            // Update button state
+            btn.disabled  = true;
+            btn.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span> Revealing…`;
+            btn.className = btn.className.replace('bg-brand-600 hover:bg-brand-700', 'bg-slate-200 text-slate-500 cursor-default');
 
-            // Lock the textarea
+            // Update textarea
             textarea.readOnly = true;
-            textarea.classList.add('submitted');
+            textarea.className += ' opacity-60 cursor-not-allowed bg-white';
 
-            // Show model answer
-            model.classList.add('show');
+            // Show answer
+            setTimeout(() => {
+                model.classList.remove('hidden');
+                badge.classList.remove('hidden');
+                if (dot) { dot.classList.remove('bg-slate-200'); dot.classList.add('bg-teal-500'); }
+                btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">check_circle</span> Submitted`;
 
-            // Trigger MathJax to render the newly shown model answer
-            if (window.MathJax) {
-                MathJax.typesetPromise([model]).catch(err => console.error('MathJax error:', err));
-            }
+                // Trigger MathJax on newly visible model answer
+                if (window.MathJax) MathJax.typesetPromise([model]).catch(console.error);
 
-            // Update progress
+                // Smooth scroll to model answer
+                model.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 350);
+
+            // Progress
             answeredCount++;
             updateProgress();
 
-            // Show done banner if all answered
             if (answeredCount === totalQuestions) {
-                document.getElementById('doneBanner').classList.add('show');
-                document.getElementById('doneBanner').scrollIntoView({ behavior: 'smooth' });
+                setTimeout(() => {
+                    const done = document.getElementById('doneBanner');
+                    done.classList.remove('hidden');
+                    done.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 600);
             }
         };
 
+        // ── Progress ──────────────────────────────────
         function updateProgress() {
             const pct = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
             document.getElementById('progressFill').style.width = pct + '%';
-            document.getElementById('progressText').textContent = `${answeredCount} / ${totalQuestions} answered`;
+            document.getElementById('progressText').textContent = `${answeredCount} / ${totalQuestions}`;
         }
 
-
-
+        // ── Download as Word ──────────────────────────
         window.handleDownload = async function () {
             try {
-                // 1. Check if user is logged in
-                const { data: { session }, error } = await supabase.auth.getSession();
-                if (error || !session) {
-                    alert("🔒 You must be signed in to download past papers.\n\nPlease go to the Home page and log in or create an account to unlock downloads.");
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    alert('🔒 You must be signed in to download past papers.\n\nPlease go to the Home page and log in.');
                     return;
                 }
+                if (!globalPaper || !globalQuestions.length) return;
 
-                if (!globalPaper || globalQuestions.length === 0) return;
+                const formatContent = (text) => {
+                    if (!text) return '';
+                    let res = escapeHtml(text).replace(/\\n/g, '<br>');
+                    res = res.replace(/\\\[([\s\S]*?)\\\]/g, (_, eq) => {
+                        const latex = eq.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
+                        const url = `https://latex.codecogs.com/png.latex?${encodeURIComponent(`\\dpi{150} \\bg_white ${latex}`)}`;
+                        return `<div style="text-align:center;margin:15px 0"><img src="${url}" alt="Equation"/></div>`;
+                    });
+                    res = res.replace(/\\\(([\s\S]*?)\\\)/g, (_, eq) => {
+                        const latex = eq.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
+                        const url = `https://latex.codecogs.com/png.latex?${encodeURIComponent(`\\dpi{150} \\bg_white ${latex}`)}`;
+                        return `<img src="${url}" style="vertical-align:middle;margin:0 2px" alt="Formula"/>`;
+                    });
+                    return res;
+                };
 
-                // 2. Build HTML content for Word Doc
                 let html = `
-                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                <head>
-                    <meta charset='utf-8'>
-                    <title>${escapeHtml(globalPaper.subject_name)}</title>
-                    <style>
-                        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #1a1a2e; }
-                        .header { text-align: center; border-bottom: 2px solid #0f766e; padding-bottom: 12px; margin-bottom: 24px; }
-                        .q-box { margin-bottom: 24px; page-break-inside: avoid; }
-                        .q-meta { font-weight: bold; color: #0f766e; }
-                        .model-ans { background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 12px; margin-top: 10px; }
-                        h1 { color: #0f766e; margin-bottom: 4px; }
-                        h3 { color: #4b5563; margin-top: 0; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>${escapeHtml(globalPaper.subject_name)}</h1>
-                        <h3>${escapeHtml(globalPaper.exam_type)} ${globalPaper.year}</h3>
-                        <p><b>Course Code:</b> ${escapeHtml(globalPaper.subject_code)} &nbsp;|&nbsp; <b>Total Marks:</b> ${globalPaper.total_marks}</p>
-                    </div>
-                `;
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+                <head><meta charset="utf-8"><title>${escapeHtml(globalPaper.subject_name)}</title>
+                <style>body{font-family:'Segoe UI',Arial,sans-serif;line-height:1.7;color:#1a1a2e;max-width:800px;margin:0 auto;}h1{color:#0369a1;}h3{color:#475569;margin-top:0}.q-meta{font-weight:bold;color:#0369a1;margin-bottom:6px}.q-box{margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid #e2e8f0}.model-ans{background:#f0fdfa;border-left:4px solid #14b8a6;padding:14px 18px;margin-top:10px;border-radius:4px}</style>
+                <` + `/head><body>
+                <div style="text-align:center;border-bottom:2px solid #0369a1;padding-bottom:14px;margin-bottom:28px">
+                  <h1>${escapeHtml(globalPaper.subject_name)}</h1>
+                  <h3>${escapeHtml(globalPaper.exam_type)} ${globalPaper.year}</h3>
+                  <p><b>Code:</b> ${escapeHtml(globalPaper.subject_code)} &nbsp;|&nbsp; <b>Total Marks:</b> ${globalPaper.total_marks}</p>
+                </div>`;
 
                 globalQuestions.forEach(q => {
-                    const cloText = q.clo ? `<i>(${escapeHtml(q.clo)})</i>` : '';
-
-                    const formatContent = (text) => {
-                        if (!text) return '';
-                        let res = escapeHtml(text).replace(/\\n/g, '<br>');
-
-                        // Replace block math \[ ... \] with image
-                        res = res.replace(/\\\[([\s\S]*?)\\\]/g, (match, eq) => {
-                            let latex = eq.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').trim();
-                            // Correctly encode the entire LaTeX expression including formatting commands
-                            const query = `\\dpi{150} \\bg_white ${latex}`;
-                            const url = `https://latex.codecogs.com/png.latex?${encodeURIComponent(query)}`;
-                            return `<div style="text-align: center; margin: 15px 0;"><img src="${url}" alt="Equation" /></div>`;
-                        });
-
-                        // Replace inline math \( ... \) with image
-                        res = res.replace(/\\\(([\s\S]*?)\\\)/g, (match, eq) => {
-                            let latex = eq.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').trim();
-                            const query = `\\dpi{150} \\bg_white ${latex}`;
-                            const url = `https://latex.codecogs.com/png.latex?${encodeURIComponent(query)}`;
-                            return `<img src="${url}" style="vertical-align: middle; margin: 0 2px;" alt="Formula" />`;
-                        });
-
-                        return res;
-                    };
-
-                    html += `
-                        <div class="q-box">
-                            <p class="q-meta">Q${q.question_number} [${q.marks} Marks] ${cloText}</p>
-                            <p>${formatContent(q.question_text)}</p>
-                            <div class="model-ans">
-                                <p style="margin-top:0;"><b>Model Answer:</b></p>
-                                <p style="margin-bottom:0; font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.8;">
-                                    ${formatContent(q.model_answer)}
-                                </p>
-                            </div>
-                        </div>
-                    `;
+                    html += `<div class="q-box">
+                        <p class="q-meta">Q${q.question_number}. ${q.clo ? `(${escapeHtml(q.clo)})` : ''} [${q.marks} Marks]</p>
+                        <p>${formatContent(q.question_text)}</p>
+                        <div class="model-ans"><p style="margin-top:0"><b>Model Answer:</b></p><p style="margin-bottom:0">${formatContent(q.model_answer)}</p></div>
+                    </div>`;
                 });
 
-                html += '</bo' + 'dy></html>';
+                html += '<' + '/body><' + '/html>';
 
-                // 3. Create Blob and Trigger Download
                 const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-                const url = URL.createObjectURL(blob);
+                const url  = URL.createObjectURL(blob);
                 const link = document.createElement('a');
-                link.href = url;
-                link.download = `${globalPaper.subject_code}_${globalPaper.exam_type.replace(/\s+/g, '')}_${globalPaper.year}.doc`;
+                link.href     = url;
+                link.download = `${globalPaper.subject_code}_${globalPaper.exam_type.replace(/\s+/g,'')}_${globalPaper.year}.doc`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
                 URL.revokeObjectURL(url);
-
             } catch (err) {
-                alert("Could not start download: " + err.message);
+                alert('Could not start download: ' + err.message);
             }
         };
 
-        // Start loading
+        // ── Boot ─────────────────────────────────────
         loadPaper();
     </script>
 </body>
-
 </html>
