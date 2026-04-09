@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paper View | COMSATSPrepHub</title>
-    <meta name="description" content="View past paper questions, write your answers, and compare with model solutions on COMSATSPrepHub.">
+    <title>Paper View | OpenPrep</title>
+    <meta name="description" content="View past paper questions, write your answers, and compare with model solutions on OpenPrep.">
 
     <!-- Tailwind CSS with Typography plugin -->
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
@@ -78,7 +78,7 @@
                 </a>
                 <a href="home.html" class="flex items-center gap-2 min-w-0 group">
                     <div class="w-7 h-7 flex-shrink-0 rounded-lg bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow">C</div>
-                    <span class="hidden sm:block font-bold text-slate-900 text-[15px] tracking-tight truncate group-hover:text-brand-600 transition-colors">COMSATSPrepHub</span>
+                    <span class="hidden sm:block font-bold text-slate-900 text-[15px] tracking-tight truncate group-hover:text-brand-600 transition-colors"><img src="logo.png" alt="OpenPrep" style="height: 24px; width: auto;" class="logo-img"></span>
                 </a>
             </div>
 
@@ -203,7 +203,7 @@
     ═══════════════════════════════════════════════ -->
     <footer class="mt-16 border-t border-slate-200 bg-white">
         <div class="max-w-screen-xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="font-bold text-brand-600 text-sm uppercase tracking-widest">COMSATSPrepHub</div>
+            <div class="font-bold text-brand-600 text-sm uppercase tracking-widest"><img src="logo.png" alt="OpenPrep" style="height: 24px; width: auto;" class="logo-img"></div>
             <div class="flex gap-6 text-sm text-slate-500">
                 <a href="about-us.html" class="hover:text-slate-900 transition-colors">About Us</a>
                 <a href="feedback.html" class="hover:text-slate-900 transition-colors">Feedback</a>
@@ -250,7 +250,7 @@
 
                 // ── Update page metadata ──────────────
                 const fullTitle = `${paper.subject_name} — ${paper.exam_type} ${paper.year}`;
-                document.title = `${fullTitle} | COMSATSPrepHub`;
+                document.title = `${fullTitle} | OpenPrep`;
                 document.getElementById('paperTitle').textContent = fullTitle;
                 document.getElementById('navPaperTitle').textContent = fullTitle;
 
