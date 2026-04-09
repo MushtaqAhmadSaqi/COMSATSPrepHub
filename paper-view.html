@@ -475,15 +475,58 @@
                 }
                 if (!globalPaper || !globalQuestions.length) return;
 
-                const formatContent = (text) => {
+                const formatContentAsync = async (text) => {
                     if (!text) return '';
                     
                     // Fix literal '\n' which might be present in db entries
                     let processed = text.replace(/\\n/g, '\n');
                     
+                    // Extract math blocks to avoid Markdown parser messing them up
+                    const blockRegex = /\\\[([\s\S]*?)\\\]/g;
+                    const inlineRegex = /\\\(([\s\S]*?)\\\)/g;
+                    
+                    let mathBlocks = [];
+                    
+                    processed = processed.replace(blockRegex, (_, eq) => {
+                        let id = mathBlocks.length;
+                        mathBlocks.push({ eq: eq.trim(), display: true });
+                        return `__MATH_${id}__`;
+                    });
+                    
+                    processed = processed.replace(inlineRegex, (_, eq) => {
+                        let id = mathBlocks.length;
+                        mathBlocks.push({ eq: eq.trim(), display: false });
+                        return `__MATH_${id}__`;
+                    });
+                    
                     // Parse markdown to HTML using marked.js
-                    // This fixes tables, lists, bold, and other formatting which were previously missing
                     let html = marked.parse(processed);
+                    
+                    // Re-insert math as MathML which MS Word natively converts to Equations!
+                    for (let i = 0; i < mathBlocks.length; i++) {
+                        let mml = '';
+                        try {
+                            if (window.MathJax) {
+                                if (MathJax.tex2mmlPromise) {
+                                    mml = await MathJax.tex2mmlPromise(mathBlocks[i].eq, {display: mathBlocks[i].display});
+                                } else if (MathJax.tex2mml) {
+                                    mml = MathJax.tex2mml(mathBlocks[i].eq, {display: mathBlocks[i].display});
+                                } else {
+                                    mml = escapeHtml('\\(' + mathBlocks[i].eq + '\\)');
+                                }
+                                
+                                // Ensure xmlns is present so Word recognizes it as MathML
+                                if (mml.startsWith('<math') && !mml.includes('xmlns=')) {
+                                    mml = mml.replace('<math', '<math xmlns="http://www.w3.org/1998/Math/MathML"');
+                                }
+                            } else {
+                                mml = escapeHtml('\\(' + mathBlocks[i].eq + '\\)');
+                            }
+                        } catch (err) {
+                            mml = escapeHtml('\\(' + mathBlocks[i].eq + '\\)');
+                        }
+                        html = html.replace(`__MATH_${i}__`, mml);
+                    }
                     
                     // Inject inline CSS so MS Word renders tables and code blocks correctly
                     html = html.replace(/<table/g, '<table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%; margin: 15px 0; border: 1px solid #cbd5e1;"');
@@ -494,13 +537,11 @@
                     html = html.replace(/<li/g, '<li style="margin-bottom: 5px;"');
                     html = html.replace(/<pre><code/g, '<pre style="background-color: #f1f5f9; padding: 12px; border: 1px solid #e2e8f0; font-family: Consolas, monospace; white-space: pre-wrap;"><code');
                     
-                    // Equations like \[ ... \] and \( ... \) will naturally remain as readable LaTeX text 
-                    // since marked.js ignores them, guaranteeing NO "weird box of cross" (broken img tags)
                     return html;
                 };
 
                 let html = `
-                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns:m="http://schemas.microsoft.com/office/2004/12/omml" xmlns="http://www.w3.org/TR/REC-html40">
                 <head><meta charset="utf-8"><title>${escapeHtml(globalPaper.subject_name)}</title>
                 <style>body{font-family:'Segoe UI',Arial,sans-serif;line-height:1.7;color:#1a1a2e;max-width:800px;margin:0 auto;}h1{color:#0369a1;}h3{color:#475569;margin-top:0}.q-meta{font-weight:bold;color:#0369a1;margin-bottom:6px}.q-box{margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid #e2e8f0}.model-ans{background:#f0fdfa;border-left:4px solid #14b8a6;padding:14px 18px;margin-top:10px;border-radius:4px}</style>
                 <` + `/head><body>
@@ -510,13 +551,18 @@
                   <p><b>Code:</b> ${escapeHtml(globalPaper.subject_code)} &nbsp;|&nbsp; <b>Total Marks:</b> ${globalPaper.total_marks}</p>
                 </div>`;
 
-                globalQuestions.forEach(q => {
+                // Await processing linearly
+                for (const q of globalQuestions) {
+                    const qText = await formatContentAsync(q.question_text);
+                    const mAns = await formatContentAsync(q.model_answer);
+                    
                     html += `<div class="q-box">
                         <p class="q-meta">Q${q.question_number}. ${q.clo ? `(${escapeHtml(q.clo)})` : ''} [${q.marks} Marks]</p>
-                        <p>${formatContent(q.question_text)}</p>
-                        <div class="model-ans"><p style="margin-top:0"><b>Model Answer:</b></p><p style="margin-bottom:0">${formatContent(q.model_answer)}</p></div>
+                        ${qText}
+                        <div class="model-ans"><p style="margin-top:0"><b>Model Answer:</b></p>
+                        ${mAns ? mAns : '<p><i>No model answer provided.</i></p>'}</div>
                     </div>`;
-                });
+                }
 
                 html += '<' + '/body><' + '/html>';
 
