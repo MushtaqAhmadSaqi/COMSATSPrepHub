@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div id="output"></div>
+    <script>
+        window.onload = () => {
+            setTimeout(() => {
+                try {
+                    const mml = MathJax.tex2mml('\\sim q \\rightarrow \\sim p');
+                    document.getElementById('output').innerText = mml;
+                    console.log('SYNC SUCCESS');
+                } catch (e) {
+                    try {
+                        MathJax.tex2mmlPromise('\\sim q \\rightarrow \\sim p').then(mml => {
+                            document.getElementById('output').innerText = mml;
+                            console.log('ASYNC SUCCESS');
+                        }).catch(err => {
+                            document.getElementById('output').innerText = err.toString();
+                        });
+                    } catch (e2) {
+                        document.getElementById('output').innerText = e2.toString();
+                    }
+                }
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
