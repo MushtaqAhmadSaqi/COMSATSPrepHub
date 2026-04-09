@@ -477,18 +477,26 @@
 
                 const formatContent = (text) => {
                     if (!text) return '';
-                    let res = escapeHtml(text).replace(/\\n/g, '<br>');
-                    res = res.replace(/\\\[([\s\S]*?)\\\]/g, (_, eq) => {
-                        const latex = eq.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
-                        const url = `https://latex.codecogs.com/png.latex?${encodeURIComponent(`\\dpi{150} \\bg_white ${latex}`)}`;
-                        return `<div style="text-align:center;margin:15px 0"><img src="${url}" alt="Equation"/></div>`;
-                    });
-                    res = res.replace(/\\\(([\s\S]*?)\\\)/g, (_, eq) => {
-                        const latex = eq.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();
-                        const url = `https://latex.codecogs.com/png.latex?${encodeURIComponent(`\\dpi{150} \\bg_white ${latex}`)}`;
-                        return `<img src="${url}" style="vertical-align:middle;margin:0 2px" alt="Formula"/>`;
-                    });
-                    return res;
+                    
+                    // Fix literal '\n' which might be present in db entries
+                    let processed = text.replace(/\\n/g, '\n');
+                    
+                    // Parse markdown to HTML using marked.js
+                    // This fixes tables, lists, bold, and other formatting which were previously missing
+                    let html = marked.parse(processed);
+                    
+                    // Inject inline CSS so MS Word renders tables and code blocks correctly
+                    html = html.replace(/<table/g, '<table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%; margin: 15px 0; border: 1px solid #cbd5e1;"');
+                    html = html.replace(/<th([^>]*)>/g, '<th$1 style="background-color: #f8fafc; font-weight: bold; text-align: left; border: 1px solid #cbd5e1;">');
+                    html = html.replace(/<td([^>]*)>/g, '<td$1 style="border: 1px solid #cbd5e1;">');
+                    html = html.replace(/<ul/g, '<ul style="margin-left: 20px;"');
+                    html = html.replace(/<ol/g, '<ol style="margin-left: 20px;"');
+                    html = html.replace(/<li/g, '<li style="margin-bottom: 5px;"');
+                    html = html.replace(/<pre><code/g, '<pre style="background-color: #f1f5f9; padding: 12px; border: 1px solid #e2e8f0; font-family: Consolas, monospace; white-space: pre-wrap;"><code');
+                    
+                    // Equations like \[ ... \] and \( ... \) will naturally remain as readable LaTeX text 
+                    // since marked.js ignores them, guaranteeing NO "weird box of cross" (broken img tags)
+                    return html;
                 };
 
                 let html = `
