@@ -11,6 +11,8 @@
     <!-- MathJax for LaTeX rendering -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         /* ── Loading State ── */
         .loading-state {
@@ -554,7 +556,7 @@
                         ${q.clo ? `<span class="q-meta-tag">${q.clo}</span>` : ''}
                         <span class="q-meta-tag">${q.marks} Marks</span>
                     </div>
-                    <div class="q-text">${escapeHtml(q.question_text)}</div>
+                    <div class="q-text text-[15px] prose max-w-none prose-table:border-collapse prose-th:border prose-th:bg-slate-100 prose-td:border prose-th:p-2 prose-td:p-2">${marked.parse(q.question_text || '')}</div>
 
                     <div class="answer-section">
                         <textarea
@@ -575,7 +577,7 @@
                                 <span class="material-symbols-outlined icon">auto_awesome</span>
                                 <span>Model Answer</span>
                             </div>
-                            <div class="model-answer-content">${escapeHtml(q.model_answer)}</div>
+                            <div class="model-answer-content prose max-w-none prose-table:border-collapse prose-th:border prose-th:bg-slate-100 prose-td:border prose-th:p-2 prose-td:p-2">${q.model_answer ? marked.parse(q.model_answer) : ''}</div>
                         </div>
                     </div>
                 `;
