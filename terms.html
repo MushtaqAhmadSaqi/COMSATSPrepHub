@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms and Conditions | COMSATSPrepHub</title>
+    <meta name="description" content="Terms of Service and Conditions for using COMSATSPrepHub.">
+    
+    <!-- Load Existing Styles for Navbar & Footer -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Load Tailwind CSS via CDN as requested by user -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: {
+                preflight: false, // Prevents Tailwind from resetting standard styles, keeping navbar/footer safe
+            },
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0f766e',
+                        surface: '#ffffff',
+                        'surface-alt': '#f8f9fb',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-[#f0f2f5] text-[#1a1a2e] min-h-screen flex flex-col font-sans">
+    
+    <!-- Reusable Navbar from style.css -->
+    <header class="navbar">
+        <a href="home.html" class="navbar-brand">COMSATSPrepHub</a>
+        <nav class="nav-links">
+            <a href="home.html" class="nav-link">Home</a>
+            <a href="subjects.html" class="nav-link">Subjects</a>
+            <a href="quiz.html" class="nav-link">Quiz</a>
+        </nav>
+        <div class="nav-actions">
+            <!-- Profile Action -->
+            <a href="profile.html" class="btn-icon" style="color: var(--text-main);">
+                <span class="material-symbols-outlined">account_circle</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content utilizing Tailwind for Responsive Layout -->
+    <!-- pt-32 prevents overlap with fixed navbar, flex-grow pushes footer down -->
+    <main class="flex-grow pt-32 pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
+        
+        <div class="bg-white shadow-sm ring-1 ring-slate-200 rounded-2xl p-6 sm:p-10 md:p-12">
+            
+            <header class="mb-10 text-center sm:text-left border-b border-slate-100 pb-8">
+                <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
+                    Terms of Service
+                </h1>
+                <p class="text-base sm:text-lg text-slate-500">
+                    Effective: April 10, 2026
+                </p>
+            </header>
+
+            <div class="space-y-10 text-slate-600 leading-relaxed text-sm sm:text-base">
+                
+                <!-- Section 1 -->
+                <section>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <span class="text-primary material-symbols-outlined">description</span>
+                        Welcome to COMSATSPrepHub!
+                    </h2>
+                    <p class="mb-4">
+                        Thanks for using our platform. The Services are provided by the COMSATSPrepHub team ("us", "we", or "our"), dedicated to curating past papers and study materials for students.
+                    </p>
+                    <p>
+                        By using our Services, you are agreeing to these terms. Please read them carefully. Because we offer a wide range of academic materials, additional terms or product requirements may apply.
+                    </p>
+                </section>
+
+                <!-- Section 2 -->
+                <section>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-4">Using our Services</h2>
+                    <p class="mb-4">
+                        You must follow any policies made available to you within the Services. Do not misuse our Services. For example, do not interfere with our Services or try to access them using a method other than the interface and the instructions that we provide.
+                    </p>
+                    <ul class="list-disc pl-6 space-y-2 mt-4">
+                        <li>You may use our platform for personal, non-commercial academic study purposes only.</li>
+                        <li>Do not scrape, data-mine, or deploy bots to extract the questions or model answers.</li>
+                        <li>Do not use the platform to cheat on active assignments or live examinations.</li>
+                    </ul>
+                </section>
+
+                <!-- Section 3 -->
+                <section>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-4">Your Content in our Services</h2>
+                    <p class="mb-4">
+                        Some of our Services allow you to upload, submit, store, send or receive content (such as past papers from your exams). You retain ownership of any intellectual property rights that you hold in that content. In short, what belongs to you stays yours.
+                    </p>
+                    <p class="p-4 bg-slate-50 rounded-lg border border-slate-100 text-slate-700 italic">
+                        When you upload or otherwise submit content to our Services, you give COMSATSPrepHub a worldwide license to use, host, store, reproduce, modify, create derivative works (such as model answers), and distribute such content for the academic benefit of the community.
+                    </p>
+                </section>
+
+                <!-- Section 4 -->
+                <section>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-4">Privacy and Copyright Protection</h2>
+                    <p class="mb-4">
+                        COMSATSPrepHub’s privacy policies explain how we treat your personal data and protect your privacy when you use our Services. By using our Services, you agree that we can use such data in accordance with our privacy policies.
+                    </p>
+                    <p>
+                        We respond to notices of alleged copyright infringement. If you believe your copyrighted material is being infringed, you can notify our administration.
+                    </p>
+                </section>
+
+                <!-- Section 5 -->
+                <section>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-4">Warranties and Disclaimers</h2>
+                    <p class="mb-4">
+                        We provide our Services using a commercially reasonable level of skill and care and we hope that you will enjoy using them. However, there are certain things that we don’t promise about our Services.
+                    </p>
+                    <p class="uppercase font-bold tracking-wide text-xs mb-2 text-slate-800">Disclaimer of Warranty</p>
+                    <p class="mb-4">
+                        Other than as expressly set out in these terms or additional terms, neither COMSATSPrepHub nor its contributors make any specific promises about the Services. For example, we don’t make any commitments about the exact accuracy of the "Model Answers", the reliability of the system, or its ability to guarantee your exam grades. We provide the Services "AS IS".
+                    </p>
+                </section>
+
+                <!-- Section 6 -->
+                <section>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-4">Liability for our Services</h2>
+                    <p class="mb-4">
+                        When permitted by law, COMSATSPrepHub and its contributors will not be responsible for lost profits, revenues, or data, financial losses or indirect, special, consequential, exemplary, or punitive damages (including academic failure).
+                    </p>
+                    <p>
+                        To the extent permitted by law, the total liability of COMSATSPrepHub for any claims under these terms is limited to the amount you paid us to use the Services (or, if we choose, to supplying you the Services again). Since our services are currently free, our maximum liability is $0.
+                    </p>
+                </section>
+
+                <!-- Section 7 -->
+                <section>
+                    <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-4">About these Terms</h2>
+                    <p class="mb-4">
+                        We may modify these terms or any additional terms that apply to a Service to, for example, reflect changes to the law or changes to our Services. You should look at the terms regularly.
+                    </p>
+                    <p>
+                        If you do not comply with these terms, and we don’t take action right away, this doesn’t mean that we are giving up any rights that we may have (such as taking action in the future).
+                    </p>
+                </section>
+
+            </div>
+            
+            <div class="mt-12 pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <a href="home.html" class="inline-flex items-center justify-center rounded-full bg-primary py-2.5 px-6 text-sm font-semibold text-white shadow-sm hover:bg-[#0d6b64] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all w-full sm:w-auto">
+                    I Understand & Accept
+                </a>
+                <a href="feedback.html" class="text-sm font-medium text-slate-500 hover:text-primary transition-colors">
+                    Contact Legal Support
+                </a>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Reusable Footer from style.css -->
+    <footer class="site-footer mt-auto">
+        <div class="footer-content">
+            <div class="footer-left">
+                <div class="footer-copyright" style="text-transform: uppercase;">COMSATSPrepHub</div>
+            </div>
+            <div class="footer-center">
+                <a class="footer-link" href="about-us.html">About Us</a>
+                <a class="footer-link" href="terms.html">Terms</a>
+                <a class="footer-link" href="feedback.html">Feedback</a>
+            </div>
+            <div class="footer-right">
+                <div class="footer-copyright" style="font-style: italic;">Made with care by Mushtaq Ahmad Saqi</div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
