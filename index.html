@@ -2,515 +2,695 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COMSATSPrepHub — Prepare Smarter for COMSATS Exams</title>
-    <meta name="description"
-        content="Access verified past papers, practice quizzes, and performance analytics for COMSATS University students.">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="auth-modal.css">
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COMSATSPrepHub — Prepare Smarter for COMSATS Exams</title>
+  <meta name="description"
+    content="Access verified past papers, practice quizzes, and performance analytics for COMSATS University students.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
+  <!-- Tailwind Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            primary: '#0f766e',
+            'primary-hover': '#0d6b64',
+            'primary-light': '#ccfbf1',
+            dark: '#1a1a2e',
+            accent: '#0f9690',
+          },
+          animation: {
+            'float-a': 'floatA 11s ease-in-out infinite',
+            'float-b': 'floatB 9s ease-in-out infinite',
+            'fade-up': 'fadeUp 0.6s ease forwards',
+          },
+          keyframes: {
+            floatA: {
+              '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+              '50%': { transform: 'translateY(-18px) rotate(4deg)' },
+            },
+            floatB: {
+              '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+              '50%': { transform: 'translateY(14px) rotate(-3deg)' },
+            },
+            fadeUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+          },
+        },
+      },
+    }
+  </script>
+
+  <!-- Existing stylesheets -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="auth-modal.css">
+  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+  <style>
+    /* Page-level tweaks that need to override Tailwind or add specifics */
+    .hero-blob-a {
+      position: absolute;
+      width: 420px;
+      height: 420px;
+      top: -110px;
+      right: -80px;
+      background: radial-gradient(circle at 30% 30%, rgba(56, 139, 210, 0.18), transparent 65%);
+      border-radius: 50%;
+      filter: blur(1px);
+      animation: floatA 11s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .hero-blob-b {
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      bottom: -80px;
+      left: -50px;
+      background: radial-gradient(circle at 60% 50%, rgba(100, 181, 246, 0.22), transparent 68%);
+      border-radius: 50%;
+      filter: blur(1px);
+      animation: floatB 9s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+    @keyframes floatA {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50%       { transform: translateY(-18px) rotate(4deg); }
+    }
+    @keyframes floatB {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50%       { transform: translateY(14px) rotate(-3deg); }
+    }
+
+    /* Squiggly underline on hero highlight */
+    .hero-underline {
+      position: relative;
+      display: inline-block;
+      color: #1a73e8;
+    }
+    .hero-underline::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+      width: 100%;
+      height: 5px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='12' viewBox='0 0 120 12'%3E%3Cpath d='M0 8 Q15 2,30 8 T60 8 T90 8 T120 8' fill='none' stroke='%231a73e8' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: repeat-x;
+      background-size: auto 100%;
+      opacity: 0.7;
+    }
+
+    /* Stats divider */
+    .stat-divider {
+      width: 1px;
+      height: 40px;
+      background: #e2e8f0;
+    }
+
+    /* Slightly tilted badge */
+    .badge-tilted {
+      display: inline-block;
+      transform: rotate(-1.5deg);
+    }
+
+    /* Feature card accent bar on top */
+    .feature-card-tw {
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .feature-card-tw::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 16px 16px 0 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .feature-card-tw:hover::before { opacity: 1; }
+    .feature-card-tw:hover {
+      transform: translateY(-5px) scale(1.01);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.07), 0 4px 8px rgba(0,0,0,0.03);
+    }
+    .fc-accent-1::before { background: linear-gradient(90deg, #0f766e, #10b981); }
+    .fc-accent-2::before { background: linear-gradient(90deg, #1a73e8, #6366f1); }
+    .fc-accent-3::before { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+
+    /* Founder card bar */
+    .founder-card-tw {
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s ease;
+    }
+    .founder-card-tw::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 0; height: 100%;
+      background: #0f766e;
+      border-radius: 16px 0 0 16px;
+      transition: width 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .founder-card-tw:hover::before { width: 5px; }
+    .founder-card-tw:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.09), 0 4px 12px rgba(0,0,0,0.04);
+    }
+
+    /* Mobile nav bottom safe area */
+    .mobile-nav {
+      padding-bottom: max(10px, env(safe-area-inset-bottom));
+    }
+
+    @media (max-width: 767px) {
+      .hero-blob-a { width: 200px; height: 200px; top: -60px; right: -40px; }
+      .hero-blob-b { width: 160px; height: 160px; bottom: -40px; left: -30px; }
+    }
+  </style>
 </head>
 
-<body>
-    <!-- Navigation -->
-    <header class="navbar navbar-dark">
-        <a href="index.html" class="navbar-brand">COMSATSPrepHub</a>
-        <nav class="nav-links">
-            <a href="index.html" class="nav-link active">Home</a>
-            <a href="subjects.html" class="nav-link">Subjects</a>
-            <a href="quiz.html" class="nav-link">Quiz</a>
-            <!-- <a href="leaderboard.html" class="nav-link">Leaderboard</a> -->
-        </nav>
-        <div class="nav-actions">
-            <button class="btn-signin-nav" id="open-auth-modal" aria-label="Open sign in">
-                <span class="material-symbols-outlined" style="font-size:17px;">person</span>
-                Sign In
-            </button>
-        </div>
-    </header>
+<body class="font-sans bg-[#f0f2f5] text-[#1a1a2e]">
 
-    <main class="main-content" style="padding: 0;">
-        <!-- Hero Section -->
-        <section class="hero-banner" data-aos="fade-in">
-            <div style="z-index: 10; max-width: 720px;" data-aos="zoom-in" data-aos-delay="100">
-                <div class="badge-dark" style="margin-bottom: 28px; background:rgba(26,115,232,0.12); color:#1a73e8;">
-                    EXCELLENCE IN ACADEMICS
-                </div>
-                <h1 class="hero-main-title">
-                    Prepare Smarter for<br><span class="hero-highlight">COMSATS Exams</span>
-                </h1>
-                <p class="profile-headline" style="margin: 0 auto 36px auto; max-width: 560px;">
-                    Access verified past papers, real-time practice quizzes, and performance analytics — all in one
-                    platform built by students, for students.
-                </p>
-                <div class="hero-actions">
-                    <a href="subjects.html" class="btn-primary"
-                        style="padding:14px 32px; font-size:15px; text-decoration:none;">
-                        Browse Subjects
-                    </a>
-                    <a href="quiz.html" class="btn-outline"
-                        style="padding:14px 32px; font-size:15px; text-decoration:none;">
-                        <span class="material-symbols-outlined">quiz</span> Start Quiz
-                    </a>
-                </div>
-            </div>
-        </section>
+  <!-- ═══════════════════════════════════ NAVBAR ═══════════════════════════════════ -->
+  <header class="navbar navbar-dark">
+    <a href="index.html" class="navbar-brand flex items-center gap-2.5">
+      <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center text-white font-black text-xs shadow-sm">C</span>
+      COMSATSPrepHub
+    </a>
 
-        <!-- Stats Counter -->
-        <section class="stats-row" data-aos="fade-up" data-aos-delay="200">
-            <div class="stat-item">
-                <div class="stat-number">500+</div>
-                <div class="stat-label">Past Papers</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">50+</div>
-                <div class="stat-label">Subjects</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">1000+</div>
-                <div class="stat-label">Students</div>
-            </div>
-        </section>
-
-        <!-- Features Section -->
-        <section class="features-section">
-            <div class="container">
-                <div style="margin-bottom: 48px;" data-aos="fade-up">
-                    <span class="section-label">Why Choose Us</span>
-                    <h2 class="dashboard-title">Master Your Curriculum</h2>
-                    <p class="question-desc" style="max-width: 480px;">Engineered features to transform how you study
-                        for engineering and management sciences.</p>
-                </div>
-
-                <div class="features-grid">
-                    <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
-                        <div class="feature-icon bg-icon-1">
-                            <span class="material-symbols-outlined" style="font-size:26px;">history_edu</span>
-                        </div>
-                        <div>
-                            <h3 class="feature-title">Past Papers Archive</h3>
-                            <p class="question-desc">The largest repository of departmental exams, sorted by semester,
-                                year, and exam type.</p>
-                        </div>
-                    </div>
-                    <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
-                        <div class="feature-icon bg-icon-2">
-                            <span class="material-symbols-outlined" style="font-size:26px;">quiz</span>
-                        </div>
-                        <div>
-                            <h3 class="feature-title">Practice Quizzes</h3>
-                            <p class="question-desc">Dynamic question banks modeled after real COMSATS terminal and
-                                sessional exams.</p>
-                        </div>
-                    </div>
-                    <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
-                        <div class="feature-icon bg-icon-3">
-                            <span class="material-symbols-outlined" style="font-size:26px;">analytics</span>
-                        </div>
-                        <div>
-                            <h3 class="feature-title">Track Progress</h3>
-                            <p class="question-desc">Visualized analytics to identify your weak spots and predict your
-                                GPA trajectory.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- The Collective Section -->
-        <section class="collective-section">
-            <div class="collective-header" data-aos="fade-right">
-                <span class="section-label">The Collective</span>
-                <h2 class="collective-title">Visionaries behind the hub.</h2>
-            </div>
-            <div class="collective-grid">
-                <div class="founder-card" data-aos="fade-up">
-                    <div class="founder-badge-wrap">
-                        <span class="badge-dark">FOUNDER</span>
-                    </div>
-                    <div class="founder-img-wrap">
-                        <img class="founder-img" src="My-image.png" alt="Mushtaq Ahmad Saqi">
-                    </div>
-                    <div>
-                        <h4 class="founder-name">Mushtaq Ahmad Saqi</h4>
-                        <p class="founder-role">Founder & UI/UX Designer</p>
-                        <p class="question-desc" style="margin-bottom: 20px;">Dedicated to bridging the gap between
-                            academic pressure and digital efficiency. Mushtaq crafted the platform to ensure students
-                            have a premium, distraction-free environment.</p>
-                    </div>
-                </div>
-                <!-- <div class="join-hub-card">
-                    <div class="join-icon-wrap">
-                        <span class="material-symbols-outlined" style="font-size:28px;">person_add</span>
-                    </div>
-                    <h4 style="font-size:18px; font-weight:700; margin-bottom:8px;">Join the Hub</h4>
-                    <p class="question-desc" style="margin-bottom:20px; font-size:14px;">Want to contribute your notes
-                        or papers to help fellow students?</p>
-                    <a href="upload.html" class="btn-primary" style="text-decoration:none;">Become a Contributor</a>
-                </div> -->
-            </div>
-        </section>
-
-        <!-- CTA Section -->
-        <section class="cta-section" data-aos="zoom-in" data-aos-delay="100">
-            <div class="cta-box">
-                <div class="cta-content">
-                    <div style="max-width: 520px;">
-                        <h2 class="cta-title">Help your community. Upload a Past Paper today.</h2>
-                        <p style="font-size:16px; color:rgba(255,255,255,0.75); line-height:1.6;">Knowledge grows when
-                            shared. Help thousands of students by contributing verified examination resources.</p>
-                    </div>
-                    <div>
-                        <a href="upload.html" class="btn-white" style="text-decoration:none;">
-                            <span class="material-symbols-outlined">cloud_upload</span> Contribute Now
-                        </a>
-                    </div>
-                </div>
-                <div class="cta-blur-blob"></div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="site-footer footer-dark">
-        <div class="footer-content">
-            <div class="footer-left">
-                <div class="footer-copyright" style="text-transform: uppercase;">COMSATSPrepHub</div>
-            </div>
-            <div class="footer-center">
-                <a class="footer-link" href="about-us.html">About Us</a>
-                <a class="footer-link" href="terms.html">Terms</a>
-                <a class="footer-link" href="feedback.html">Feedback</a>
-                <a class="footer-link" href="about-project.html">Learn More</a>
-            </div>
-            <div class="footer-right">
-                <div class="footer-copyright" style="font-style: italic;">Made with care by Mushtaq Ahmad Saqi</div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Mobile Nav -->
-    <nav class="mobile-nav">
-        <a href="index.html" class="mobile-nav-item active">
-            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">home</span>
-            <span class="mobile-nav-label">Home</span>
-        </a>
-        <a href="subjects.html" class="mobile-nav-item">
-            <span class="material-symbols-outlined">menu_book</span>
-            <span class="mobile-nav-label">Subjects</span>
-        </a>
-        <a href="quiz.html" class="mobile-nav-item">
-            <span class="material-symbols-outlined">quiz</span>
-            <span class="mobile-nav-label">Quiz</span>
-        </a>
-        <!-- <a href="leaderboard.html" class="mobile-nav-item">
-            <span class="material-symbols-outlined">leaderboard</span>
-            <span class="mobile-nav-label">Rank</span>
-        </a> -->
-        <a href="about-us.html" class="mobile-nav-item">
-            <span class="material-symbols-outlined">groups</span>
-            <span class="mobile-nav-label">Team</span>
-        </a>
+    <nav class="nav-links hidden md:flex">
+      <a href="index.html" class="nav-link active">Home</a>
+      <a href="subjects.html" class="nav-link">Subjects</a>
+      <a href="quiz.html" class="nav-link">Quiz</a>
     </nav>
 
-    <!-- ════════════════════════════════════════════════════════ -->
-    <!-- AUTH MODAL                                              -->
-    <!-- ════════════════════════════════════════════════════════ -->
-    <div class="auth-modal-overlay" id="auth-modal-overlay" role="dialog" aria-modal="true" aria-label="Authentication">
-        <div class="auth-modal am-auth" id="am-auth">
+    <div class="nav-actions">
+      <button class="btn-signin-nav" id="open-auth-modal" aria-label="Open sign in">
+        <span class="material-symbols-outlined" style="font-size:17px;">person</span>
+        Sign In
+      </button>
+    </div>
+  </header>
 
-            <!-- Close Button -->
-            <button class="auth-modal-close" id="close-auth-modal" aria-label="Close">
-                <span class="material-symbols-outlined" style="font-size:20px;">close</span>
+  <main class="flex-1" style="padding-top: 72px;">
+
+    <!-- ═══════════════════════════════════ HERO ═══════════════════════════════════ -->
+    <section class="relative overflow-hidden flex flex-col items-center justify-center text-center min-h-[calc(100vh-72px)] px-6 py-24 md:px-16 isolate"
+      style="background: radial-gradient(circle at 70% 60%, rgba(56,139,210,0.13), transparent 35%), radial-gradient(circle at 15% 10%, rgba(147,210,255,0.16), transparent 28%), linear-gradient(135deg, #f0f8ff 0%, #e8f4fd 45%, #ddeeff 100%);"
+      data-aos="fade-in">
+      <!-- Blobs -->
+      <div class="hero-blob-a"></div>
+      <div class="hero-blob-b"></div>
+
+      <div class="relative z-10 max-w-2xl mx-auto" data-aos="zoom-in" data-aos-delay="100">
+        <!-- Badge -->
+        <div class="badge-tilted inline-block mb-7">
+          <span class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase"
+            style="background:rgba(26,115,232,0.1); color:#1a73e8; border: 1px solid rgba(26,115,232,0.15);">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>
+            Excellence in Academics
+          </span>
+        </div>
+
+        <!-- Headline -->
+        <h1 class="font-extrabold tracking-tight leading-[1.08] mb-6 text-4xl sm:text-5xl md:text-6xl text-[#1a1a2e]">
+          Prepare Smarter for<br>
+          <span class="hero-underline">COMSATS Exams</span>
+        </h1>
+
+        <!-- Subtext -->
+        <p class="text-[#6b7280] text-base sm:text-lg leading-relaxed mb-10 max-w-md mx-auto">
+          Verified past papers, real-time practice quizzes,<br class="hidden sm:block"> and performance analytics — 
+          built by students, for students.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+          <a href="subjects.html"
+            class="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-primary text-white font-semibold text-[15px] shadow-md hover:bg-primary-hover hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300 no-underline">
+            <span class="material-symbols-outlined text-[18px]">auto_stories</span>
+            Browse Subjects
+          </a>
+          <a href="quiz.html"
+            class="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-white text-[#1a1a2e] font-semibold text-[15px] border-2 border-[#1a1a2e] hover:bg-[#1a1a2e] hover:text-white transition-all duration-300 no-underline">
+            <span class="material-symbols-outlined text-[18px]">quiz</span>
+            Start Quiz
+          </a>
+        </div>
+
+        <!-- Micro social proof -->
+        <p class="mt-10 text-[12px] text-[#9ca3af] tracking-wide">
+          Trusted by <strong class="text-[#6b7280] font-semibold">1,000+</strong> COMSATS students &nbsp;·&nbsp; Free &amp; open
+        </p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════ STATS ═══════════════════════════════════ -->
+    <section class="bg-white py-10 px-6" data-aos="fade-up" data-aos-delay="150">
+      <div class="max-w-3xl mx-auto flex items-center justify-center gap-0">
+        <!-- Stat 1 -->
+        <div class="flex-1 text-center py-4 px-2">
+          <div class="text-3xl sm:text-4xl font-black text-primary tracking-tight">500+</div>
+          <div class="text-xs text-[#6b7280] font-medium mt-1.5 uppercase tracking-widest">Past Papers</div>
+        </div>
+        <div class="stat-divider hidden sm:block"></div>
+        <!-- Stat 2 -->
+        <div class="flex-1 text-center py-4 px-2 border-x border-[#e2e8f0] sm:border-none">
+          <div class="text-3xl sm:text-4xl font-black text-primary tracking-tight">50+</div>
+          <div class="text-xs text-[#6b7280] font-medium mt-1.5 uppercase tracking-widest">Subjects</div>
+        </div>
+        <div class="stat-divider hidden sm:block"></div>
+        <!-- Stat 3 -->
+        <div class="flex-1 text-center py-4 px-2">
+          <div class="text-3xl sm:text-4xl font-black text-primary tracking-tight">1,000+</div>
+          <div class="text-xs text-[#6b7280] font-medium mt-1.5 uppercase tracking-widest">Students</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════ FEATURES ═══════════════════════════════════ -->
+    <section class="py-20 px-6 md:px-10 bg-[#f8f9fb]">
+      <div class="max-w-5xl mx-auto">
+        <!-- Section Header -->
+        <div class="mb-14" data-aos="fade-up">
+          <span class="block text-xs font-bold tracking-widest uppercase text-primary mb-3">Why Choose Us</span>
+          <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1a1a2e] mb-3">Master Your Curriculum</h2>
+          <p class="text-[#6b7280] text-[15px] leading-relaxed max-w-md">
+            Engineered features to transform how you study for engineering and management sciences.
+          </p>
+        </div>
+
+        <!-- Cards grid — intentionally NOT perfectly uniform -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+          <!-- Card 1 — slightly taller col on desktop via extra padding -->
+          <div class="feature-card-tw fc-accent-1 bg-white rounded-2xl p-8 border border-[#e2e8f0] md:pt-10 cursor-default"
+            data-aos="fade-up" data-aos-delay="80">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-[#ccfbf1] text-primary">
+              <span class="material-symbols-outlined text-2xl">history_edu</span>
+            </div>
+            <h3 class="text-[18px] font-bold text-[#1a1a2e] mb-2 leading-snug">Past Papers Archive</h3>
+            <p class="text-[#6b7280] text-sm leading-relaxed">
+              The largest repository of departmental exams, sorted by semester, year, and exam type.
+            </p>
+          </div>
+
+          <!-- Card 2 — standard height -->
+          <div class="feature-card-tw fc-accent-2 bg-white rounded-2xl p-8 border border-[#e2e8f0] cursor-default"
+            data-aos="fade-up" data-aos-delay="180">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-[#dbeafe] text-blue-600">
+              <span class="material-symbols-outlined text-2xl">quiz</span>
+            </div>
+            <h3 class="text-[18px] font-bold text-[#1a1a2e] mb-2 leading-snug">Practice Quizzes</h3>
+            <p class="text-[#6b7280] text-sm leading-relaxed">
+              Dynamic question banks modeled after real COMSATS terminal and sessional exams.
+            </p>
+            <!-- Small extra badge — a human touch -->
+            <span class="inline-block mt-4 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-600 border border-blue-100 tracking-wide">New questions weekly</span>
+          </div>
+
+          <!-- Card 3 — slightly different icon color to break uniformity -->
+          <div class="feature-card-tw fc-accent-3 bg-white rounded-2xl p-8 border border-[#e2e8f0] cursor-default"
+            data-aos="fade-up" data-aos-delay="280">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-[#fef3c7] text-amber-600">
+              <span class="material-symbols-outlined text-2xl">analytics</span>
+            </div>
+            <h3 class="text-[18px] font-bold text-[#1a1a2e] mb-2 leading-snug">Track Progress</h3>
+            <p class="text-[#6b7280] text-sm leading-relaxed">
+              Visualized analytics to identify your weak spots and predict your GPA trajectory.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════ FOUNDER / COLLECTIVE ═══════════════════════════════════ -->
+    <section class="py-20 px-6 md:px-10 bg-white">
+      <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <div class="mb-12" data-aos="fade-right">
+          <span class="block text-xs font-bold tracking-widest uppercase text-primary mb-3">The Collective</span>
+          <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1a1a2e]">Visionaries behind the hub.</h2>
+        </div>
+
+        <!-- Founder card -->
+        <div class="founder-card-tw bg-[#f8f9fb] rounded-2xl border border-[#e2e8f0] p-8 md:p-10 flex flex-col md:flex-row items-center gap-8 md:gap-10"
+          data-aos="fade-up">
+          <!-- Badge absolutely positioned -->
+          <div class="relative self-start md:self-auto flex-shrink-0">
+            <div class="w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg ring-2 ring-[#e2e8f0] transition-all duration-300">
+              <img src="My-image.png" alt="Mushtaq Ahmad Saqi" class="w-full h-full object-cover">
+            </div>
+            <!-- Founder badge tucked on the image -->
+            <span class="absolute -top-2 -right-2 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase bg-[#1a1a2e] text-white shadow-md transform rotate-2">
+              FOUNDER
+            </span>
+          </div>
+
+          <div class="flex-1 text-center md:text-left">
+            <p class="text-xs font-bold tracking-widest uppercase text-primary mb-1">Founder &amp; UI/UX Designer</p>
+            <h4 class="text-2xl sm:text-3xl font-bold text-[#1a1a2e] mb-3 leading-tight">Mushtaq Ahmad Saqi</h4>
+            <p class="text-[#6b7280] text-[15px] leading-relaxed mb-5 max-w-xl">
+              Dedicated to bridging the gap between academic pressure and digital efficiency. 
+              Mushtaq crafted this platform to ensure students have a premium, distraction-free environment to study and prepare.
+            </p>
+            <div class="flex flex-wrap gap-2 justify-center md:justify-start">
+              <span class="px-3 py-1 rounded-full bg-[#ccfbf1] text-primary text-xs font-semibold">UI/UX Design</span>
+              <span class="px-3 py-1 rounded-full bg-[#dbeafe] text-blue-700 text-xs font-semibold">Frontend Dev</span>
+              <span class="px-3 py-1 rounded-full bg-[#f3e8ff] text-purple-700 text-xs font-semibold">Education Tech</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════ CTA ═══════════════════════════════════ -->
+    <section class="py-16 px-6 md:px-10" data-aos="zoom-in" data-aos-delay="100">
+      <div class="max-w-5xl mx-auto relative overflow-hidden rounded-2xl px-8 py-14 md:px-16 md:py-16"
+        style="background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 60%, #0f766e 100%);">
+        <!-- Background blob -->
+        <div class="absolute top-0 right-0 w-72 h-72 rounded-full"
+          style="background: rgba(15,150,144,0.15); filter: blur(70px); transform: translate(40%,-40%); pointer-events:none;"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 rounded-full"
+          style="background: rgba(26,115,232,0.12); filter: blur(50px); transform: translate(-30%,30%); pointer-events:none;"></div>
+
+        <div class="relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-10 justify-between">
+          <div class="max-w-lg text-center md:text-left">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-white leading-tight mb-4 tracking-tight">
+              Help your community.<br>
+              <span class="text-teal-300">Upload a Past Paper</span> today.
+            </h2>
+            <p class="text-white/70 text-[15px] leading-relaxed">
+              Knowledge grows when shared. Help thousands of students by contributing verified examination resources.
+            </p>
+          </div>
+          <div class="flex-shrink-0">
+            <a href="upload.html"
+              class="flex items-center gap-2.5 px-8 py-4 rounded-full bg-white text-[#1a1a2e] font-bold text-[15px] hover:bg-[#ccfbf1] hover:text-primary transition-all duration-300 no-underline shadow-xl hover:-translate-y-0.5">
+              <span class="material-symbols-outlined text-xl">cloud_upload</span>
+              Contribute Now
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════════ FOOTER ═══════════════════════════════════ -->
+  <footer class="bg-[#1a1a2e] text-white py-8 px-6 md:px-10">
+    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5 text-center md:text-left">
+      <div class="font-extrabold text-sm tracking-widest uppercase text-white">COMSATSPrepHub</div>
+      <div class="flex flex-wrap justify-center gap-5 md:gap-7">
+        <a href="about-us.html" class="footer-link text-sm text-white/60 hover:text-white transition-colors duration-200 no-underline">About Us</a>
+        <a href="terms.html" class="footer-link text-sm text-white/60 hover:text-white transition-colors duration-200 no-underline">Terms</a>
+        <a href="feedback.html" class="footer-link text-sm text-white/60 hover:text-white transition-colors duration-200 no-underline">Feedback</a>
+        <a href="about-project.html" class="footer-link text-sm text-white/60 hover:text-white transition-colors duration-200 no-underline">Learn More</a>
+      </div>
+      <div class="text-xs text-white/40 italic">Made with care by Mushtaq Ahmad Saqi</div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════ MOBILE NAV ═══════════════════════════════════ -->
+  <nav class="mobile-nav md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center bg-white/95 backdrop-blur-md border-t border-[#e2e8f0] py-2.5 px-4 shadow-lg">
+    <a href="index.html" class="mobile-nav-item active flex flex-col items-center gap-0.5 text-primary">
+      <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1">home</span>
+      <span class="text-[10px] font-semibold tracking-wide">Home</span>
+    </a>
+    <a href="subjects.html" class="mobile-nav-item flex flex-col items-center gap-0.5 text-[#6b7280] hover:text-primary transition-colors">
+      <span class="material-symbols-outlined text-2xl">menu_book</span>
+      <span class="text-[10px] font-semibold tracking-wide">Subjects</span>
+    </a>
+    <a href="quiz.html" class="mobile-nav-item flex flex-col items-center gap-0.5 text-[#6b7280] hover:text-primary transition-colors">
+      <span class="material-symbols-outlined text-2xl">quiz</span>
+      <span class="text-[10px] font-semibold tracking-wide">Quiz</span>
+    </a>
+    <a href="about-us.html" class="mobile-nav-item flex flex-col items-center gap-0.5 text-[#6b7280] hover:text-primary transition-colors">
+      <span class="material-symbols-outlined text-2xl">groups</span>
+      <span class="text-[10px] font-semibold tracking-wide">Team</span>
+    </a>
+  </nav>
+
+  <!-- ════════════════════════ AUTH MODAL ════════════════════════ -->
+  <div class="auth-modal-overlay" id="auth-modal-overlay" role="dialog" aria-modal="true" aria-label="Authentication">
+    <div class="auth-modal am-auth" id="am-auth">
+
+      <button class="auth-modal-close" id="close-auth-modal" aria-label="Close">
+        <span class="material-symbols-outlined" style="font-size:20px;">close</span>
+      </button>
+
+      <!-- ══ LOGIN PANEL ══ -->
+      <div class="am-panel am-login">
+        <section class="am-side am-l-side">
+          <div class="am-bg-wrap">
+            <img class="am-bg-img"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZDdNBglJeWrhi1y9jHIye7HIzCaIJI2VjDX-tqDH8dlDCtls8eTrLe8AHu-8QNhXA2j51OpnRpksHOCmzKaSTGRVocinZu_g6kcjHVO-KmmMDRgKY9A5bjPCbTd74_QZ_b4E0mEa3s57hV_8PV1qoIcW1W1-cvoW50XK5HDsQXs-rmyiJQ9-eKURVp0nLXuzjPsJYIuZhEC6Sd_s8ZFgrUF-tG8TeuVUml81zCmnoAmSoX-XdJWNxIPpPGlURk9DNtY--FBNPa9HA"
+              alt="Background">
+          </div>
+          <div class="am-logo">COMSATSPrepHub</div>
+          <div class="am-hero">
+            <span class="am-sub">Academic Excellence</span>
+            <h2 class="am-h1">WELCOME BACK!</h2>
+            <p class="am-p">Access your curated prep materials and continue your journey toward academic mastery at COMSATS.</p>
+            <div class="am-dots">
+              <div class="am-dot active"></div>
+              <div class="am-dot"></div>
+              <div class="am-dot"></div>
+            </div>
+          </div>
+        </section>
+        <section class="am-form-panel">
+          <div class="am-wrap">
+            <div class="am-m-logo"><div class="am-m-name">COMSATSPrepHub</div></div>
+            <div class="am-head">
+              <h3 class="am-h2">Login</h3>
+              <p class="am-h2-sub">Welcome back to your academic curator.</p>
+            </div>
+            <form id="am-l-form">
+              <div class="am-item">
+                <label class="am-label" for="am-l-email">Email Address</label>
+                <div class="am-field">
+                  <span class="material-symbols-outlined am-icon">mail</span>
+                  <input class="am-in" id="am-l-email" name="email" type="email" placeholder="name@example.com" required>
+                </div>
+              </div>
+              <div class="am-item">
+                <div class="am-label-row">
+                  <label class="am-label" for="am-l-pass" style="margin-bottom:0;">Password</label>
+                  <a class="am-label-link" href="#">Forgot Password?</a>
+                </div>
+                <div class="am-field">
+                  <span class="material-symbols-outlined am-icon">lock</span>
+                  <input class="am-in" id="am-l-pass" name="password" type="password" placeholder="••••••••" required>
+                  <button class="am-eye" type="button" aria-label="Toggle password">
+                    <span class="material-symbols-outlined" style="font-size:18px;">visibility</span>
+                  </button>
+                </div>
+              </div>
+              <div class="am-check">
+                <input class="am-ck-in" type="checkbox" id="am-rem-in">
+                <label class="am-ck-lbl" for="am-rem-in">Keep me logged in</label>
+              </div>
+              <button class="am-btn am-b-login" type="submit">
+                <span>Login</span>
+                <span class="material-symbols-outlined" style="font-size:18px;">arrow_forward</span>
+              </button>
+              <div class="am-sep"><span>or</span></div>
+              <button class="am-btn-g" type="button" id="am-google-login">
+                <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" alt="Google">
+                <span>Sign in with Google</span>
+              </button>
+            </form>
+            <div class="am-swap">Don't have an account? <a href="#" class="am-to-up">Sign Up</a></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ══ SIGNUP PANEL ══ -->
+      <div class="am-panel am-signup">
+        <section class="am-side am-s-side">
+          <div class="am-bg-wrap">
+            <img class="am-bg-img"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk3-sOvD_tJohcdxadxtZFJ10l6HyxAbSE4RauxdmJfHf2zs_u4P38ESTUhEgJwACMcTPz6pi5NSGYVW9uobohnmF9gZ2L4ftwzuQ_IVi8C9i5F5nZgsq-49YwZihRSNuU7xyqpNU7wTUnjp265IAJ1xC08Fkzj6pMEq1juhdk208VCUWDAvkIVlKiUvZALMeyoFUi9xXkGA82r8dJkKDLwCujzX1EtT1wGN0dijfpNbSMh1cay34o_4cztvQ85r3FGObPL80zGWU9"
+              alt="Background">
+          </div>
+          <div class="am-hero">
+            <div class="am-line"></div>
+            <div class="am-stack">
+              <span class="am-sub">Academic Excellence</span>
+              <h2 class="am-h1">WELCOME!</h2>
+              <p class="am-p">Join the community of scholars at COMSATSPrepHub. Your curated journey to academic mastery starts here.</p>
+            </div>
+          </div>
+          <div class="am-foot-l"><div class="am-logo-n">COMSATSPrepHub</div></div>
+        </section>
+        <section class="am-form-panel">
+          <div class="am-wrap">
+            <div class="am-m-logo">
+              <div style="width:36px;height:3px;background:#006f1d;margin:0 auto 12px;border-radius:999px;"></div>
+              <div class="am-m-name" style="color:#5f5e5e;">COMSATSPrepHub</div>
+            </div>
+            <div class="am-head">
+              <h3 class="am-h2">Create your account</h3>
+              <p class="am-h2-sub">Sign up to access curated study materials and tracking.</p>
+            </div>
+            <button class="am-btn-g am-btn-g-up" type="button" id="am-google-signup">
+              <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" alt="Google">
+              <span>Continue with Google</span>
             </button>
+            <div class="am-sep"><span>or email</span></div>
+            <form id="am-s-form">
+              <div class="am-item">
+                <label class="am-label" for="am-s-name">Full Name</label>
+                <div class="am-field">
+                  <input class="am-in no-icon" id="am-s-name" name="name" type="text" placeholder="John Doe" required>
+                </div>
+              </div>
+              <div class="am-item">
+                <label class="am-label" for="am-s-email">Email Address</label>
+                <div class="am-field">
+                  <input class="am-in no-icon" id="am-s-email" name="email" type="email" placeholder="student@university.edu" required>
+                </div>
+              </div>
+              <div class="am-item">
+                <label class="am-label" for="am-s-pass">Password</label>
+                <div class="am-field">
+                  <input class="am-in no-icon" id="am-s-pass" name="password" type="password" placeholder="••••••••" required>
+                  <button class="am-eye" type="button" aria-label="Toggle password">
+                    <span class="material-symbols-outlined" style="font-size:18px;">visibility</span>
+                  </button>
+                </div>
+              </div>
+              <div class="am-check">
+                <input class="am-ck-in" type="checkbox" id="am-acc-in">
+                <label class="am-ck-lbl" for="am-acc-in">
+                  I agree to the <a href="terms.html">Terms of Service</a> and <a href="terms.html">Privacy Policy</a>.
+                </label>
+              </div>
+              <button class="am-btn am-b-signup" type="submit">Create Account</button>
+            </form>
+            <div class="am-swap">Already have an account? <a href="#" class="am-to-in">Sign In</a></div>
+          </div>
+        </section>
+      </div>
 
-            <!-- ══ LOGIN PANEL ══ -->
-            <div class="am-panel am-login">
-                <!-- Left Brand Side -->
-                <section class="am-side am-l-side">
-                    <div class="am-bg-wrap">
-                        <img class="am-bg-img"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZDdNBglJeWrhi1y9jHIye7HIzCaIJI2VjDX-tqDH8dlDCtls8eTrLe8AHu-8QNhXA2j51OpnRpksHOCmzKaSTGRVocinZu_g6kcjHVO-KmmMDRgKY9A5bjPCbTd74_QZ_b4E0mEa3s57hV_8PV1qoIcW1W1-cvoW50XK5HDsQXs-rmyiJQ9-eKURVp0nLXuzjPsJYIuZhEC6Sd_s8ZFgrUF-tG8TeuVUml81zCmnoAmSoX-XdJWNxIPpPGlURk9DNtY--FBNPa9HA"
-                            alt="Background">
-                    </div>
-                    <div class="am-logo">COMSATSPrepHub</div>
-                    <div class="am-hero">
-                        <span class="am-sub">Academic Excellence</span>
-                        <h2 class="am-h1">WELCOME BACK!</h2>
-                        <p class="am-p">Access your curated prep materials and continue your journey toward academic
-                            mastery at COMSATS.</p>
-                        <div class="am-dots">
-                            <div class="am-dot active"></div>
-                            <div class="am-dot"></div>
-                            <div class="am-dot"></div>
-                        </div>
-                    </div>
-                </section>
+    </div><!-- /.auth-modal -->
+  </div><!-- /.auth-modal-overlay -->
 
-                <!-- Right Form Side -->
-                <section class="am-form-panel">
-                    <div class="am-wrap">
-                        <div class="am-m-logo">
-                            <div class="am-m-name">COMSATSPrepHub</div>
-                        </div>
-                        <div class="am-head">
-                            <h3 class="am-h2">Login</h3>
-                            <p class="am-h2-sub">Welcome back to your academic curator.</p>
-                        </div>
-                        <form id="am-l-form">
-                            <!-- Email -->
-                            <div class="am-item">
-                                <label class="am-label" for="am-l-email">Email Address</label>
-                                <div class="am-field">
-                                    <span class="material-symbols-outlined am-icon">mail</span>
-                                    <input class="am-in" id="am-l-email" name="email" type="email"
-                                        placeholder="name@example.com" required>
-                                </div>
-                            </div>
-                            <!-- Password -->
-                            <div class="am-item">
-                                <div class="am-label-row">
-                                    <label class="am-label" for="am-l-pass" style="margin-bottom:0;">Password</label>
-                                    <a class="am-label-link" href="#">Forgot Password?</a>
-                                </div>
-                                <div class="am-field">
-                                    <span class="material-symbols-outlined am-icon">lock</span>
-                                    <input class="am-in" id="am-l-pass" name="password" type="password"
-                                        placeholder="••••••••" required>
-                                    <button class="am-eye" type="button" aria-label="Toggle password">
-                                        <span class="material-symbols-outlined"
-                                            style="font-size:18px;">visibility</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <!-- Remember me -->
-                            <div class="am-check">
-                                <input class="am-ck-in" type="checkbox" id="am-rem-in">
-                                <label class="am-ck-lbl" for="am-rem-in">Keep me logged in</label>
-                            </div>
-                            <!-- Submit -->
-                            <button class="am-btn am-b-login" type="submit">
-                                <span>Login</span>
-                                <span class="material-symbols-outlined" style="font-size:18px;">arrow_forward</span>
-                            </button>
-                            <!-- Divider -->
-                            <div class="am-sep"><span>or</span></div>
-                            <!-- Google -->
-                            <button class="am-btn-g" type="button" id="am-google-login">
-                                <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png"
-                                    alt="Google">
-                                <span>Sign in with Google</span>
-                            </button>
-                        </form>
-                        <div class="am-swap">
-                            Don't have an account?
-                            <a href="#" class="am-to-up">Sign Up</a>
-                        </div>
-                    </div>
-                </section>
-            </div>
+  <!-- ════════════════════════ SCRIPTS ════════════════════════ -->
+  <script type="module">
+    // ── MODAL OPEN / CLOSE ──
+    const overlay = document.getElementById('auth-modal-overlay');
+    const amAuth  = document.getElementById('am-auth');
+    const openBtn = document.getElementById('open-auth-modal');
+    const closeBtn= document.getElementById('close-auth-modal');
 
-            <!-- ══ SIGNUP PANEL ══ -->
-            <div class="am-panel am-signup">
-                <!-- Left Brand Side -->
-                <section class="am-side am-s-side">
-                    <div class="am-bg-wrap">
-                        <img class="am-bg-img"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk3-sOvD_tJohcdxadxtZFJ10l6HyxAbSE4RauxdmJfHf2zs_u4P38ESTUhEgJwACMcTPz6pi5NSGYVW9uobohnmF9gZ2L4ftwzuQ_IVi8C9i5F5nZgsq-49YwZihRSNuU7xyqpNU7wTUnjp265IAJ1xC08Fkzj6pMEq1juhdk208VCUWDAvkIVlKiUvZALMeyoFUi9xXkGA82r8dJkKDLwCujzX1EtT1wGN0dijfpNbSMh1cay34o_4cztvQ85r3FGObPL80zGWU9"
-                            alt="Background">
-                    </div>
-                    <div class="am-hero">
-                        <div class="am-line"></div>
-                        <div class="am-stack">
-                            <span class="am-sub">Academic Excellence</span>
-                            <h2 class="am-h1">WELCOME!</h2>
-                            <p class="am-p">Join the community of scholars at COMSATSPrepHub. Your curated journey to
-                                academic mastery starts here.</p>
-                        </div>
-                    </div>
-                    <div class="am-foot-l">
-                        <div class="am-logo-n">COMSATSPrepHub</div>
-                    </div>
-                </section>
+    function openModal(startTab) {
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      amAuth.classList.toggle('toggled', startTab === 'signup');
+    }
+    function closeModal() {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
 
-                <!-- Right Form Side -->
-                <section class="am-form-panel">
-                    <div class="am-wrap">
-                        <div class="am-m-logo">
-                            <div
-                                style="width:36px;height:3px;background:#006f1d;margin:0 auto 12px;border-radius:999px;">
-                            </div>
-                            <div class="am-m-name" style="color:#5f5e5e;">COMSATSPrepHub</div>
-                        </div>
-                        <div class="am-head">
-                            <h3 class="am-h2">Create your account</h3>
-                            <p class="am-h2-sub">Sign up to access curated study materials and tracking.</p>
-                        </div>
-                        <!-- Google Signup -->
-                        <button class="am-btn-g am-btn-g-up" type="button" id="am-google-signup">
-                            <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png"
-                                alt="Google">
-                            <span>Continue with Google</span>
-                        </button>
-                        <div class="am-sep"><span>or email</span></div>
-                        <form id="am-s-form">
-                            <!-- Name -->
-                            <div class="am-item">
-                                <label class="am-label" for="am-s-name">Full Name</label>
-                                <div class="am-field">
-                                    <input class="am-in no-icon" id="am-s-name" name="name" type="text"
-                                        placeholder="John Doe" required>
-                                </div>
-                            </div>
-                            <!-- Email -->
-                            <div class="am-item">
-                                <label class="am-label" for="am-s-email">Email Address</label>
-                                <div class="am-field">
-                                    <input class="am-in no-icon" id="am-s-email" name="email" type="email"
-                                        placeholder="student@university.edu" required>
-                                </div>
-                            </div>
-                            <!-- Password -->
-                            <div class="am-item">
-                                <label class="am-label" for="am-s-pass">Password</label>
-                                <div class="am-field">
-                                    <input class="am-in no-icon" id="am-s-pass" name="password" type="password"
-                                        placeholder="••••••••" required>
-                                    <button class="am-eye" type="button" aria-label="Toggle password">
-                                        <span class="material-symbols-outlined"
-                                            style="font-size:18px;">visibility</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <!-- Terms -->
-                            <div class="am-check">
-                                <input class="am-ck-in" type="checkbox" id="am-acc-in">
-                                <label class="am-ck-lbl" for="am-acc-in">
-                                    I agree to the <a href="terms.html">Terms of Service</a> and <a href="terms.html">Privacy Policy</a>.
-                                </label>
-                            </div>
-                            <!-- Submit -->
-                            <button class="am-btn am-b-signup" type="submit">Create Account</button>
-                        </form>
-                        <div class="am-swap">
-                            Already have an account?
-                            <a href="#" class="am-to-in">Sign In</a>
-                        </div>
-                    </div>
-                </section>
-            </div>
+    openBtn.addEventListener('click',  () => openModal('login'));
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click',  e => { if (e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-        </div><!-- /.auth-modal -->
-    </div><!-- /.auth-modal-overlay -->
+    // ── PANEL TOGGLE ──
+    document.querySelectorAll('.am-to-up').forEach(btn =>
+      btn.addEventListener('click', e => { e.preventDefault(); amAuth.classList.add('toggled'); })
+    );
+    document.querySelectorAll('.am-to-in').forEach(btn =>
+      btn.addEventListener('click', e => { e.preventDefault(); amAuth.classList.remove('toggled'); })
+    );
 
-    <!-- Auth Modal Script -->
-    <script type="module">
-        // ── MODAL OPEN / CLOSE ──
-        const overlay = document.getElementById('auth-modal-overlay');
-        const amAuth = document.getElementById('am-auth');
-        const openBtn = document.getElementById('open-auth-modal');
-        const closeBtn = document.getElementById('close-auth-modal');
-
-        function openModal(startTab) {
-            overlay.classList.add('open');
-            document.body.style.overflow = 'hidden';
-            if (startTab === 'signup') {
-                amAuth.classList.add('toggled');
-            } else {
-                amAuth.classList.remove('toggled');
-            }
+    // ── PASSWORD VISIBILITY ──
+    document.querySelectorAll('.am-eye').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = btn.parentElement.querySelector('input');
+        const icon  = btn.querySelector('.material-symbols-outlined');
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.textContent = 'visibility_off';
+        } else {
+          input.type = 'password';
+          icon.textContent = 'visibility';
         }
-        function closeModal() {
-            overlay.classList.remove('open');
-            document.body.style.overflow = '';
-        }
+      });
+    });
 
-        openBtn.addEventListener('click', () => openModal('login'));
-        closeBtn.addEventListener('click', closeModal);
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+    // ── SUPABASE AUTH ──
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-        // ── PANEL TOGGLE ──
-        document.querySelectorAll('.am-to-up').forEach(btn =>
-            btn.addEventListener('click', (e) => { e.preventDefault(); amAuth.classList.add('toggled'); })
-        );
-        document.querySelectorAll('.am-to-in').forEach(btn =>
-            btn.addEventListener('click', (e) => { e.preventDefault(); amAuth.classList.remove('toggled'); })
-        );
+    const SUPABASE_URL = 'https://xylyiscatznexduatjmg.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_K0t4H7M3LU96jy8_z_TJHg_ok_u-7HC';
+    let supabase = null;
+    if (SUPABASE_URL && SUPABASE_KEY) supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // ── PASSWORD VISIBILITY ──
-        document.querySelectorAll('.am-eye').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const input = btn.parentElement.querySelector('input');
-                const icon = btn.querySelector('.material-symbols-outlined');
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.textContent = 'visibility_off';
-                } else {
-                    input.type = 'password';
-                    icon.textContent = 'visibility';
-                }
-            });
-        });
+    // Sign Up
+    const amSForm = document.getElementById('am-s-form');
+    if (amSForm) {
+      amSForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!supabase) { Swal.fire('Error', 'Supabase not configured yet.', 'error'); return; }
+        const name  = document.getElementById('am-s-name').value;
+        const email = document.getElementById('am-s-email').value;
+        const pass  = document.getElementById('am-s-pass').value;
+        const acc   = document.getElementById('am-acc-in').checked;
+        if (!acc)          { Swal.fire('Notice', 'Please accept the terms first.', 'warning'); return; }
+        if (pass.length < 8) { Swal.fire('Notice', 'Password must be at least 8 characters.', 'warning'); return; }
+        const btn = amSForm.querySelector('button[type="submit"]');
+        btn.textContent = 'Processing...'; btn.disabled = true;
+        const { error } = await supabase.auth.signUp({ email, password: pass, options: { data: { full_name: name } } });
+        btn.textContent = 'Create Account'; btn.disabled = false;
+        if (error) Swal.fire('Error', error.message, 'error');
+        else { Swal.fire('Success!', 'Check your email to confirm.', 'success'); amSForm.reset(); closeModal(); }
+      });
+    }
 
-        // ── SUPABASE AUTH (configure your keys when ready) ──
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    // Login
+    const amLForm = document.getElementById('am-l-form');
+    if (amLForm) {
+      amLForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        if (!supabase) { Swal.fire('Error', 'Supabase not configured yet.', 'error'); return; }
+        const email = document.getElementById('am-l-email').value;
+        const pass  = document.getElementById('am-l-pass').value;
+        const btn   = amLForm.querySelector('button[type="submit"]');
+        btn.querySelector('span:first-child').textContent = 'Entering...'; btn.disabled = true;
+        const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+        btn.querySelector('span:first-child').textContent = 'Login'; btn.disabled = false;
+        if (error) Swal.fire('Error', error.message, 'error');
+        else { Swal.fire('Welcome back!', 'Successfully logged in.', 'success'); amLForm.reset(); closeModal(); }
+      });
+    }
+  </script>
 
-        const SUPABASE_URL = 'https://xylyiscatznexduatjmg.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_K0t4H7M3LU96jy8_z_TJHg_ok_u-7HC';
-        let supabase = null;
-        if (SUPABASE_URL && SUPABASE_KEY) {
-            supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    AOS.init({ once: true, offset: 50, duration: 750, easing: 'ease-out-cubic' });
+  </script>
 
-        // Sign Up
-        const amSForm = document.getElementById('am-s-form');
-        if (amSForm) {
-            amSForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                if (!supabase) { Swal.fire('Error', 'Supabase not configured yet.', 'error'); return; }
-                const name = document.getElementById('am-s-name').value;
-                const email = document.getElementById('am-s-email').value;
-                const pass = document.getElementById('am-s-pass').value;
-                const acc = document.getElementById('am-acc-in').checked;
-                if (!acc) { Swal.fire('Notice', 'Please accept the terms first.', 'warning'); return; }
-                if (pass.length < 8) { Swal.fire('Notice', 'Password must be at least 8 characters.', 'warning'); return; }
-                const btn = amSForm.querySelector('button[type="submit"]');
-                btn.textContent = 'Processing...';
-                btn.disabled = true;
-                const { error } = await supabase.auth.signUp({ email, password: pass, options: { data: { full_name: name } } });
-                btn.textContent = 'Create Account';
-                btn.disabled = false;
-                if (error) { Swal.fire('Error', error.message, 'error'); }
-                else { Swal.fire('Success!', 'Check your email to confirm.', 'success'); amSForm.reset(); closeModal(); }
-            });
-        }
-
-        // Login
-        const amLForm = document.getElementById('am-l-form');
-        if (amLForm) {
-            amLForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                if (!supabase) { Swal.fire('Error', 'Supabase not configured yet.', 'error'); return; }
-                const email = document.getElementById('am-l-email').value;
-                const pass = document.getElementById('am-l-pass').value;
-                const btn = amLForm.querySelector('button[type="submit"]');
-                btn.querySelector('span:first-child').textContent = 'Entering...';
-                btn.disabled = true;
-                const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
-                btn.querySelector('span:first-child').textContent = 'Login';
-                btn.disabled = false;
-                if (error) { Swal.fire('Error', error.message, 'error'); }
-                else { Swal.fire('Welcome back!', 'Successfully logged in.', 'success'); amLForm.reset(); closeModal(); }
-            });
-        }
-    </script>
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        AOS.init({ once: true, offset: 50, duration: 800 });
-    </script>
 </body>
-
 </html>
