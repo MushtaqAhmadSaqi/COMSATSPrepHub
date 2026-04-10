@@ -8,13 +8,6 @@
     <!-- Tailwind CSS Script -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .glass {
-                @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-xl;
-            }
-        }
-    </style>
     <script>
         tailwind.config = {
             theme: {
@@ -23,7 +16,16 @@
                         primary: '#3b82f6', // blue-500
                     }
                 }
-            }
+            },
+            plugins: [
+                function({ addComponents }) {
+                    addComponents({
+                        '.glass': {
+                            '@apply bg-white/5 backdrop-blur-md border border-white/10 shadow-xl': {},
+                        }
+                    });
+                }
+            ]
         }
     </script>
 </head>
@@ -34,7 +36,7 @@
 
         <nav class="hidden md:flex gap-6 items-center">
             <a href="home.html" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">Home</a>
-            <a href="subjects.hatml" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">Subjects</a>
+            <a href="subjects.html" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">Subjects</a>
             <a href="quiz.html" class="text-gray-300 hover:text-white transition-colors text-sm font-medium">Quiz</a>
         </nav>
 

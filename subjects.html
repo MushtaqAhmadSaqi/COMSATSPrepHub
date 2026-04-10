@@ -6,205 +6,156 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subjects | COMSATSPrepHub</title>
     <meta name="description" content="Browse all COMSATS subjects and access past papers organized by course.">
-    <link rel="stylesheet" href="style.css">
-    <style>
-        /* ── Loading skeleton ── */
-        .skeleton-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 20px;
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' },
+                        dark: { bg: '#0B0E14', surface: '#151A23', border: '#2A3441' }
+                    }
+                }
+            },
+            plugins: [
+                function({ addComponents, addUtilities }) {
+                    addComponents({
+                        '.glass-panel': {
+                            '@apply bg-white/80 dark:bg-dark-surface/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-2xl rounded-2xl transition-all duration-300': {},
+                        },
+                        '.hover-glass': {
+                            '@apply hover:bg-white dark:hover:bg-white/5 border-transparent hover:border-gray-300 dark:hover:border-white/20 hover:shadow-md transition-all duration-300': {},
+                        }
+                    });
+                }
+            ]
         }
-
-        .skeleton-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            animation: pulse 1.5s ease-in-out infinite;
+    </script>
+    <script>
+        // Check theme on load
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
         }
-
-        .skeleton-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 12px;
-            background: var(--border);
-            margin-bottom: 16px;
-        }
-
-        .skeleton-line {
-            height: 14px;
-            border-radius: 6px;
-            background: var(--border);
-            margin-bottom: 10px;
-        }
-
-        .skeleton-line.short {
-            width: 60%;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: .45;
-            }
-        }
-
-        /* ── Empty state ── */
-        .empty-state {
-            text-align: center;
-            padding: 80px 24px;
-            color: var(--text-muted);
-        }
-
-        .empty-state .empty-icon {
-            font-size: 56px;
-            margin-bottom: 16px;
-            opacity: .4;
-        }
-
-        .empty-state h3 {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--text-main);
-        }
-
-        .empty-state p {
-            font-size: 15px;
-            line-height: 1.6;
-        }
-
-        /* ── Error banner ── */
-        .error-banner {
-            background: #fee2e2;
-            border: 1px solid #fca5a5;
-            color: #b91c1c;
-            border-radius: 10px;
-            padding: 14px 18px;
-            font-size: 14px;
-            margin-bottom: 24px;
-        }
-
-        /* ── Subject count badge ── */
-        .subject-count-badge {
-            display: inline-block;
-            background: var(--primary-light, #eff6ff);
-            color: var(--primary);
-            font-size: 13px;
-            font-weight: 700;
-            padding: 4px 12px;
-            border-radius: 999px;
-            margin-top: 10px;
-        }
-    </style>
+    </script>
 </head>
 
-<body>
+<body class="bg-gray-50 dark:bg-dark-bg text-gray-900 dark:text-gray-100 transition-colors duration-300">
     <!-- Navigation -->
-    <header class="navbar">
-        <a href="home.html" class="navbar-brand">COMSATSPrepHub</a>
-        <nav class="nav-links">
-            <a href="home.html" class="nav-link">Home</a>
-            <a href="subjects.html" class="nav-link active">Subjects</a>
-            <a href="quiz.html" class="nav-link">Quiz</a>
-            <!-- <a href="leaderboard.html" class="nav-link">Leaderboard</a> -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-gray-200 dark:border-white/10 bg-white/60 dark:bg-dark-bg/60 backdrop-blur-md px-6 py-4 flex items-center justify-between mb-8">
+        <a href="home.html" class="text-xl font-bold tracking-tight text-brand-600 dark:text-white flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-xs text-white">C</span>
+            COMSATSPrepHub
+        </a>
+        <nav class="hidden md:flex gap-8 items-center font-medium">
+            <a href="home.html" class="text-gray-500 hover:text-brand-500 dark:text-gray-400 dark:hover:text-white transition-colors">Home</a>
+            <a href="subjects.html" class="text-brand-500 dark:text-white underline decoration-2 underline-offset-8">Subjects</a>
+            <a href="quiz.html" class="text-gray-500 hover:text-brand-500 dark:text-gray-400 dark:hover:text-white transition-colors">Quiz</a>
         </nav>
-        <div class="nav-actions">
-            <a href="subjects.html" class="btn-primary" style="text-decoration:none;">Get Started</a>
+        <div class="flex items-center gap-4">
+             <a href="dashboard.html" class="px-5 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow-lg shadow-brand-500/20 transition-all active:scale-95">Dashboard</a>
         </div>
     </header>
 
-    <main class="main-content container">
+    <main class="max-w-7xl mx-auto px-6 pb-20">
         <!-- Header + Search -->
-        <section class="page-header" style="margin-bottom: 32px;">
-            <div>
-                <span class="section-label" style="display:block;">Curated Archive</span>
-                <h1 class="main-title">Academic Catalog</h1>
-                <p class="question-desc" style="margin-top:12px; max-width:520px;">
-                    Explore past papers organized by subject. Subjects appear automatically when papers are uploaded.
-                </p>
-                <span class="subject-count-badge" id="subjectCountBadge" style="display:none;"></span>
-            </div>
-            <div class="subject-search">
-                <span class="material-symbols-outlined subject-search-icon">search</span>
-                <input id="subjectSearchInput" class="subject-search-input" placeholder="Search subjects..." type="text"
-                    oninput="filterSubjects()">
+        <section class="mb-12" data-aos="fade-down">
+            <div class="flex flex-col md:flex-row items-end justify-between gap-8">
+                <div class="max-w-2xl">
+                    <span class="inline-block px-3 py-1 rounded-full bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20 text-[11px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-widest mb-4">Curated Archive</span>
+                    <h1 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tight mb-4">Academic Catalog</h1>
+                    <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Explore past papers organized by subject. Access high-quality study materials designed for COMSATS students.
+                    </p>
+                    <div id="subjectCountBadge" class="mt-4 px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg inline-flex items-center gap-2" style="display:none;"></div>
+                </div>
+                
+                <div class="w-full md:w-96 relative group">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-500 transition-colors">search</span>
+                    <input id="subjectSearchInput" class="w-full pl-12 pr-4 py-4 bg-white dark:bg-dark-surface border border-gray-200 dark:border-white/10 rounded-2xl outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all shadow-sm group-hover:shadow-md dark:placeholder-gray-600" placeholder="Search subjects..." type="text" oninput="filterSubjects()">
+                </div>
             </div>
         </section>
 
         <!-- Error -->
-        <div id="errorBanner" class="error-banner" style="display:none;"></div>
+        <div id="errorBanner" class="p-4 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 text-red-700 dark:text-red-400 rounded-xl mb-8 flex items-center gap-3" style="display:none;"></div>
 
         <!-- Loading skeletons -->
-        <div id="loadingGrid" class="skeleton-grid">
-            <div class="skeleton-card">
-                <div class="skeleton-icon"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line short"></div>
+        <div id="loadingGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div class="glass-panel p-6 animate-pulse">
+                <div class="w-12 h-12 rounded-xl bg-gray-200 dark:bg-white/5 mb-4"></div>
+                <div class="h-4 bg-gray-200 dark:bg-white/5 rounded w-3/4 mb-3"></div>
+                <div class="h-3 bg-gray-200 dark:bg-white/5 rounded w-1/2"></div>
             </div>
-            <div class="skeleton-card">
-                <div class="skeleton-icon"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line short"></div>
+            <div class="glass-panel p-6 animate-pulse">
+                <div class="w-12 h-12 rounded-xl bg-gray-200 dark:bg-white/5 mb-4"></div>
+                <div class="h-4 bg-gray-200 dark:bg-white/5 rounded w-3/4 mb-3"></div>
+                <div class="h-3 bg-gray-200 dark:bg-white/5 rounded w-1/2"></div>
             </div>
-            <div class="skeleton-card">
-                <div class="skeleton-icon"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line short"></div>
+            <div class="glass-panel p-6 animate-pulse">
+                <div class="w-12 h-12 rounded-xl bg-gray-200 dark:bg-white/5 mb-4"></div>
+                <div class="h-4 bg-gray-200 dark:bg-white/5 rounded w-3/4 mb-3"></div>
+                <div class="h-3 bg-gray-200 dark:bg-white/5 rounded w-1/2"></div>
             </div>
-            <div class="skeleton-card">
-                <div class="skeleton-icon"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line short"></div>
-            </div>
-            <div class="skeleton-card">
-                <div class="skeleton-icon"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line short"></div>
-            </div>
-            <div class="skeleton-card">
-                <div class="skeleton-icon"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line short"></div>
+            <div class="glass-panel p-6 animate-pulse">
+                <div class="w-12 h-12 rounded-xl bg-gray-200 dark:bg-white/5 mb-4"></div>
+                <div class="h-4 bg-gray-200 dark:bg-white/5 rounded w-3/4 mb-3"></div>
+                <div class="h-3 bg-gray-200 dark:bg-white/5 rounded w-1/2"></div>
             </div>
         </div>
 
         <!-- Subjects Grid (populated dynamically) -->
-        <section class="subjects-grid" id="subjectsGrid" style="display:none;"></section>
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="subjectsGrid" style="display:none;"></section>
 
         <!-- No search results -->
-        <div id="noResults" class="no-results" style="display:none;">
-            <span class="material-symbols-outlined">search_off</span>
-            <p style="font-size:18px; font-weight:600;">No subjects found</p>
-            <p>Try a different search term.</p>
+        <div id="noResults" class="py-20 flex flex-col items-center justify-center text-center glass-panel" style="display:none;">
+            <div class="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-400 mb-6">
+                <span class="material-symbols-outlined text-4xl">search_off</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No subjects found</h3>
+            <p class="text-gray-500 dark:text-gray-400">Try adjusting your search criteria or keywords.</p>
         </div>
 
         <!-- Empty state (no papers at all) -->
-        <div id="emptyState" class="empty-state" style="display:none;">
-            <div class="empty-icon">📂</div>
-            <h3>No subjects yet</h3>
-            <p>Upload a past paper using the Admin Panel and its subject will appear here automatically.</p>
+        <div id="emptyState" class="py-20 flex flex-col items-center justify-center text-center glass-panel" style="display:none;">
+            <div class="w-16 h-16 rounded-2xl bg-brand-50 dark:bg-brand-500/10 flex items-center justify-center text-brand-600 mb-6">
+                <span class="material-symbols-outlined text-4xl">folder_off</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Archive is empty</h3>
+            <p class="text-gray-500 dark:text-gray-400 max-w-sm">No past papers have been uploaded yet. Check back soon for updates.</p>
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="site-footer">
-        <div class="footer-content">
-            <div class="footer-left">
-                <div class="footer-copyright" style="text-transform: uppercase;">COMSATSPrepHub</div>
+    <footer class="mt-auto border-t border-gray-200 dark:border-white/5 bg-white/60 dark:bg-black/40 backdrop-blur-md relative z-10 transition-colors">
+        <div class="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div class="flex flex-col gap-4">
+                <div class="text-sm font-bold tracking-widest text-brand-600 dark:text-brand-500/80 uppercase flex items-center gap-2">
+                    <span class="w-5 h-5 rounded bg-gradient-to-br from-brand-500 to-indigo-600 inline-flex items-center justify-center text-[10px] text-white font-black">C</span>
+                    COMSATSPrepHub
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 max-w-xs font-medium">The most comprehensive and community-driven archive for COMSATS University past papers.</p>
             </div>
-            <div class="footer-center">
-                <a class="footer-link" href="about-us.html">About Us</a>
-                <a class="footer-link" href="terms.html">Terms</a>
-                <a class="footer-link" href="feedback.html">Feedback</a>
+            <div class="flex gap-10">
+                <div class="flex flex-col gap-3">
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Navigation</p>
+                    <a class="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-500 dark:hover:text-white transition-colors" href="home.html">Home</a>
+                    <a class="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-500 dark:hover:text-white transition-colors" href="subjects.html">Subjects</a>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Legal</p>
+                    <a class="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-500 dark:hover:text-white transition-colors" href="terms.html">Terms</a>
+                    <a class="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-500 dark:hover:text-white transition-colors" href="feedback.html">Feedback</a>
+                </div>
             </div>
-            <div class="footer-right">
-                <div class="footer-copyright" style="font-style: italic;">Made with care by Mushtaq Ahmad Saqi</div>
+            <div class="text-right">
+                <p class="text-sm text-gray-500 dark:text-gray-500 font-bold mb-1">Made with <span class="text-red-500">♥</span></p>
+                <p class="text-xs text-gray-400 dark:text-gray-600 font-bold tracking-tight">Mushtaq Ahmad Saqi</p>
             </div>
         </div>
     </footer>
@@ -214,16 +165,16 @@
 
         // Icon + colour palette — cycles if more subjects than palette size
         const palette = [
-            { bg: '#e0e7ff', color: '#4f46e5', icon: 'data_object' },
-            { bg: '#dcfce7', color: '#16a34a', icon: 'database' },
-            { bg: '#fef3c7', color: '#d97706', icon: 'function' },
-            { bg: '#f3e8ff', color: '#9333ea', icon: 'scatter_plot' },
-            { bg: '#ccfbf1', color: '#0f766e', icon: 'terminal' },
-            { bg: '#fce7f3', color: '#db2777', icon: 'psychology' },
-            { bg: '#fee2e2', color: '#dc2626', icon: 'science' },
-            { bg: '#e0f2fe', color: '#0284c7', icon: 'code' },
-            { bg: '#fdf4ff', color: '#a21caf', icon: 'calculate' },
-            { bg: '#ecfdf5', color: '#059669', icon: 'grid_on' },
+            { bg: '#e0e7ff', color: '#4338ca', icon: 'data_object' }, // Indigo
+            { bg: '#dcfce7', color: '#15803d', icon: 'database' },    // Green
+            { bg: '#fef3c7', color: '#b45309', icon: 'function' },    // Amber
+            { bg: '#f3e8ff', color: '#7e22ce', icon: 'scatter_plot' }, // Purple
+            { bg: '#ccfbf1', color: '#0f766e', icon: 'terminal' },    // Teal
+            { bg: '#e0f2fe', color: '#0369a1', icon: 'code' },        // Sky
+            { bg: '#fce7f3', color: '#be185d', icon: 'psychology' },  // Pink
+            { bg: '#fee2e2', color: '#b91c1c', icon: 'science' },     // Red
+            { bg: '#f1f5f9', color: '#334155', icon: 'grid_on' },     // Slate
+            { bg: '#fae8ff', color: '#a21caf', icon: 'calculate' },   // Fuchsia
         ];
 
         async function loadSubjects() {
@@ -266,15 +217,18 @@
                     const p = palette[i % palette.length];
                     const url = `subject-papers.html?subject=${encodeURIComponent(s.subject_name)}&code=${encodeURIComponent(s.subject_code)}`;
                     return `
-                        <a href="${url}" class="subject-card-uniform" data-subject="${s.subject_name}">
-                            <div class="subject-icon-box" style="background:${p.bg}; color:${p.color};">
-                                <span class="material-symbols-outlined">${p.icon}</span>
+                        <a href="${url}" class="subject-card-uniform group glass-panel p-6 hover-glass flex flex-col items-start gap-4 h-full relative overflow-hidden" data-subject="${s.subject_name}">
+                            <div class="absolute -right-2 -bottom-2 w-24 h-24 bg-brand-500/5 rounded-full blur-2xl group-hover:bg-brand-500/10 transition-colors"></div>
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center border border-black/5 dark:border-white/10 group-hover:scale-110 transition-transform shadow-sm" style="background:${p.bg}; color:${p.color};">
+                                <span class="material-symbols-outlined text-[24px]">${p.icon}</span>
                             </div>
-                            <div class="subject-card-name">${escHtml(s.subject_name)}</div>
-                            <div class="subject-card-desc">${escHtml(s.subject_code)}</div>
-                            <div class="subject-card-meta">
-                                <span class="subject-paper-count">${s.count} Paper${s.count !== 1 ? 's' : ''}</span>
-                                <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">arrow_forward</span>
+                            <div class="flex-1 w-full">
+                                <h3 class="text-lg font-black text-gray-900 dark:text-white mb-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors uppercase tracking-tight line-clamp-2">${escHtml(s.subject_name)}</h3>
+                                <p class="text-[10px] font-black text-gray-500 dark:text-gray-500 uppercase tracking-widest">${escHtml(s.subject_code)}</p>
+                            </div>
+                            <div class="w-full pt-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between mt-auto">
+                                <span class="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase tracking-wider">${s.count} Paper${s.count !== 1 ? 's' : ''}</span>
+                                <span class="material-symbols-outlined text-gray-400 group-hover:translate-x-1 transition-all text-[18px]">arrow_forward</span>
                             </div>
                         </a>`;
                 }).join('');
@@ -305,6 +259,10 @@
         };
 
         loadSubjects();
+    </script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        AOS.init({ once: true, offset: 30, duration: 800, easing: 'ease-out-cubic' });
     </script>
 </body>
 
