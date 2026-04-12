@@ -4,235 +4,383 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - COMSATSPrepHub</title>
-    <!-- Simple, Semantic Stylesheet -->
-    <link rel="stylesheet" href="style.css">
+    <title>About Us | COMSATSPrepHub</title>
+    <meta name="description" content="Learn about the team and mission behind COMSATSPrepHub — a student-built platform for COMSATS academic excellence.">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: '#0f766e',
+                        'primary-hover': '#0d6b64',
+                        'primary-light': '#ccfbf1',
+                        dark: '#1a1a2e',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+    <style>
+        /* Founder card hover bar */
+        .founder-card-tw {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s ease;
+        }
+        .founder-card-tw::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 0; height: 100%;
+            background: #0f766e;
+            border-radius: 16px 0 0 16px;
+            transition: width 0.35s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .founder-card-tw:hover::before { width: 5px; }
+        .founder-card-tw:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.09), 0 4px 12px rgba(0,0,0,0.04);
+        }
+
+        /* Ghost contributor card */
+        .ghost-card {
+            border: 2px dashed #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: border-color 0.25s ease;
+        }
+        .ghost-card:hover { border-color: #0f766e; }
+
+        /* Mobile nav */
+        .mobile-nav-item { transition: color 0.2s; }
+        .mobile-nav-item.active { color: #0f766e; }
+
+        /* Scroll hide/show bottom nav */
+        #mobileBottomNav {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #mobileBottomNav.nav-hidden {
+            transform: translateY(100%);
+        }
+    </style>
 </head>
 
-<body class="bg-background text-on-background min-h-screen flex flex-col">
-    <!-- Top Navigation -->
-    <header class="navbar">
-        <a href="index.html" class="navbar-brand">COMSATSPrepHub</a>
-        <nav class="nav-links">
-            <a href="index.html" class="nav-link">Home</a>
-            <a href="subjects.html" class="nav-link">Subjects</a>
-            <a href="quiz.html" class="nav-link">Quiz</a>
-            <!-- <a href="leaderboard.html" class="nav-link">Leaderboard</a> -->
+<body class="font-sans bg-[#f0f2f5] text-[#1a1a2e] min-h-screen flex flex-col">
+
+    <!-- ═══ NAVBAR ═══ -->
+    <header class="sticky top-0 z-50 bg-[#1a1a2e] text-white px-6 py-4 flex items-center justify-between shadow-md" style="padding-bottom: max(16px, env(safe-area-inset-top));">
+        <a href="index.html" class="flex items-center gap-2 font-extrabold text-sm tracking-widest uppercase text-white no-underline">
+            <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center text-white font-black text-xs shadow-sm">C</span>
+            COMSATSPrepHub
+        </a>
+        <nav class="hidden md:flex gap-6 items-center text-sm font-medium">
+            <a href="index.html" class="text-white/60 hover:text-white transition-colors no-underline">Home</a>
+            <a href="subjects.html" class="text-white/60 hover:text-white transition-colors no-underline">Subjects</a>
+            <a href="quiz.html" class="text-white/60 hover:text-white transition-colors no-underline">Quiz</a>
+            <a href="about-us.html" class="text-white underline underline-offset-4 decoration-2 no-underline">Team</a>
         </nav>
-        <div class="nav-actions">
-            <a href="subjects.html" class="btn-primary" style="text-decoration:none;">Get Started</a>
-        </div>
+        <a href="subjects.html" class="hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary text-white font-semibold text-sm hover:bg-primary-hover transition-all no-underline">
+            Get Started
+        </a>
     </header>
 
-    <main class="main-content">
-        <!-- Hero Section: Our Mission -->
-        <section class="about-section" style="position: relative; overflow: hidden;">
-            <div class="container relative" style="z-index: 10;">
-                <div style="max-width: 768px;">
-                    <span class="section-label" style="display: block; margin-bottom: 16px;">Our Mission</span>
-                    <h1 class="main-title text-on-surface"
-                        style="font-size: 64px; font-weight: 900; line-height: 0.95; margin-bottom: 32px;">
-                        Transforming the 'paper chase' into an <span style="color: #535252;">intellectual
-                            journey.</span>
-                    </h1>
-                    <p class="question-desc"
-                        style="font-size: 24px; font-weight: 300; line-height: 1.6; max-width: 672px;">
-                        We centralize quality preparation materials to empower COMSATS students with clarity and
-                        authority in their academic pursuits.
+    <main class="flex-1" style="padding-bottom: 80px;">
+
+        <!-- ═══ HERO ═══ -->
+        <section class="relative overflow-hidden flex flex-col items-center justify-center text-center min-h-[40vh] px-6 py-20 md:px-16"
+            style="background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 60%, #0f766e 100%);"
+            data-aos="fade-in">
+            <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Ccircle cx=&quot;3&quot; cy=&quot;3&quot; r=&quot;2&quot; fill=&quot;white&quot; fill-opacity=&quot;0.5&quot;/%3E%3C/svg%3E'); background-size: 60px 60px;"></div>
+            <div class="relative z-10 max-w-2xl mx-auto">
+                <span class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase mb-6" style="background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.9); border: 1px solid rgba(255,255,255,0.2);">
+                    The People Behind The Platform
+                </span>
+                <h1 class="font-extrabold tracking-tight text-4xl sm:text-5xl md:text-6xl text-white leading-tight mb-6">
+                    Meet the <span class="text-teal-300">Team</span>
+                </h1>
+                <p class="text-white/70 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
+                    Built by students, for students. Every feature, every paper, every line of code — crafted with a single mission: make academic preparation effortless.
+                </p>
+            </div>
+        </section>
+
+        <!-- ═══ SECTION 1: DEVELOPER PROFILE ═══ -->
+        <section class="py-20 px-6 md:px-10 bg-white" data-aos="fade-up">
+            <div class="max-w-5xl mx-auto">
+                <div class="mb-12">
+                    <span class="block text-xs font-bold tracking-widest uppercase text-primary mb-3">The Builder</span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1a1a2e]">Lead Developer</h2>
+                </div>
+
+                <!-- Founder card — mirrors the Home page style exactly -->
+                <div class="founder-card-tw bg-[#f8f9fb] rounded-2xl border border-[#e2e8f0] p-8 md:p-10 flex flex-col md:flex-row items-center gap-8 md:gap-10">
+                    <!-- Badge absolutely positioned -->
+                    <div class="relative self-start md:self-auto flex-shrink-0">
+                        <div class="w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg ring-2 ring-[#e2e8f0] transition-all duration-300">
+                            <img src="My-image.png" alt="Mushtaq Ahmad Saqi" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="w-full h-full bg-gradient-to-br from-teal-500 to-blue-600 items-center justify-center text-white font-black text-5xl" style="display:none;">M</div>
+                        </div>
+                        <span class="absolute -top-2 -right-2 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase bg-[#1a1a2e] text-white shadow-md transform rotate-2">FOUNDER</span>
+                    </div>
+
+                    <div class="flex-1 text-center md:text-left">
+                        <p class="text-xs font-bold tracking-widest uppercase text-primary mb-1">Founder &amp; Lead Developer</p>
+                        <h3 class="text-2xl sm:text-3xl font-bold text-[#1a1a2e] mb-3 leading-tight">Mushtaq Ahmad Saqi</h3>
+                        <p class="text-[#6b7280] text-[15px] leading-relaxed mb-5 max-w-xl">
+                            Dedicated to bridging the gap between academic pressure and digital efficiency.
+                            Mushtaq designed and built this platform from scratch — every component, every database schema, and every user interaction — to ensure students have a premium, distraction-free environment to study and prepare.
+                        </p>
+                        <p class="text-[#6b7280] text-[15px] leading-relaxed mb-6 max-w-xl italic">
+                            "Our goal isn't just to help you pass; it's to help you master the material through curated clarity."
+                        </p>
+                        <div class="flex flex-wrap gap-2 justify-center md:justify-start mb-6">
+                            <span class="px-3 py-1 rounded-full bg-[#ccfbf1] text-primary text-xs font-semibold">UI/UX Design</span>
+                            <span class="px-3 py-1 rounded-full bg-[#dbeafe] text-blue-700 text-xs font-semibold">Frontend Dev</span>
+                            <span class="px-3 py-1 rounded-full bg-[#f3e8ff] text-purple-700 text-xs font-semibold">Education Tech</span>
+                            <span class="px-3 py-1 rounded-full bg-[#fef3c7] text-amber-700 text-xs font-semibold">Database Design</span>
+                        </div>
+                        <div class="flex gap-4 justify-center md:justify-start">
+                            <a href="#" class="flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover transition-colors no-underline">
+                                <span class="material-symbols-outlined text-[16px]">link</span> LinkedIn
+                            </a>
+                            <a href="#" class="flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover transition-colors no-underline">
+                                <span class="material-symbols-outlined text-[16px]">open_in_new</span> Portfolio
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ SECTION 2: CONTRIBUTORS ═══ -->
+        <section class="py-20 px-6 md:px-10 bg-[#f8f9fb]" data-aos="fade-up">
+            <div class="max-w-5xl mx-auto">
+                <div class="mb-12">
+                    <span class="block text-xs font-bold tracking-widest uppercase text-primary mb-3">The Community</span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#1a1a2e] mb-3">Contributors</h2>
+                    <p class="text-[#6b7280] text-[15px] leading-relaxed max-w-md">
+                        These incredible people help curate, verify, and expand the paper archive. Every contribution makes a real difference to thousands of students.
                     </p>
                 </div>
-            </div>
-            <!-- Decorative Elements -->
-            <div class="about-hero-decor"></div>
-        </section>
 
-        <!-- The Story Behind COMSATSPrepHub -->
-        <section class="about-section" style="background-color: var(--surface-alt);">
-            <div class="container">
-                <div class="about-layout about-layout-12">
-                    <div class="col-span-7">
-                        <h2
-                            style="font-size: 30px; font-weight: 700; color: var(--text-main); margin-bottom: 24px; letter-spacing: -0.5px;">
-                            The Story Behind COMSATSPrepHub</h2>
-                        <div style="display: flex; flex-direction: column; gap: 24px;">
-                            <p class="question-desc" style="font-size: 18px; line-height: 1.6;">
-                                Founded by <span style="font-weight: 600; color: var(--text-main);">Mushtaq Ahmad
-                                    Saqi</span>, COMSATSPrepHub was born out of a simple yet profound frustration: the
-                                fragmented and unreliable nature of academic materials.
-                            </p>
-                            <p class="question-desc" style="font-size: 18px; line-height: 1.6;">
-                                What began as a personal archive of vetted notes grew into a mission to build a central
-                                repository where quality is never compromised for quantity. Saqi envisioned a platform
-                                that doesn't just provide answers, but fosters a deeper understanding of the curriculum.
-                            </p>
+                <!-- Contributor grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+                    <!-- Ghost slot 1 -->
+                    <div class="ghost-card bg-white">
+                        <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-gray-400 text-[22px]">person_add</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm text-[#1a1a2e]">Your Name Here</p>
+                            <p class="text-xs text-[#6b7280] mt-0.5">Active Contributor</p>
                         </div>
                     </div>
-                    <div class="col-span-5">
-                        <div
-                            style="aspect-ratio: 1 / 1; border-radius: 8px; background-color: rgba(173, 179, 180, 0.2); overflow: hidden; position: relative;">
-                            <img style="width: 100%; height: 100%; object-fit: cover; filter: grayscale(100%); transition: var(--transition);"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRSJzBV9MVewntTiVAC8ehxt9Md5lKzmHOHcam8bMmQDUfthU72Dbx6eKHdBEAlV8xAtJtY-kEer2XKLssX8G4dQATjQJYkX2u8iVZVyaL6OplSD_u84nuAz7lBVw8o0XgU_p4HXyMkhGHcw5VCZZMWmaCpsSjfaZoDvbBd8XK0zSZdO31YJsN--cfYKZOzbL1a1JP-Nn92_C2zpo9d81zEgU5OE-BP2eqO3B3Z5lVVbkKf3gnAUd27NzoNVd0geqfqpTO3r4yj-U1"
-                                alt="Students studying">
-                            <div
-                                style="position: absolute; inset: 0; background-color: rgba(95, 94, 94, 0.1); mix-blend-mode: multiply;">
+
+                    <!-- Ghost slot 2 -->
+                    <div class="ghost-card bg-white">
+                        <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-gray-400 text-[22px]">person_add</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm text-[#1a1a2e]">Your Name Here</p>
+                            <p class="text-xs text-[#6b7280] mt-0.5">Resource Curator</p>
+                        </div>
+                    </div>
+
+                    <!-- Ghost slot 3 -->
+                    <div class="ghost-card bg-white">
+                        <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-gray-400 text-[22px]">person_add</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm text-[#1a1a2e]">Your Name Here</p>
+                            <p class="text-xs text-[#6b7280] mt-0.5">Subject Matter Expert</p>
+                        </div>
+                    </div>
+
+                    <!-- Ghost slot 4 -->
+                    <div class="ghost-card bg-white">
+                        <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-gray-400 text-[22px]">person_add</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm text-[#1a1a2e]">Your Name Here</p>
+                            <p class="text-xs text-[#6b7280] mt-0.5">Active Contributor</p>
+                        </div>
+                    </div>
+
+                    <!-- Ghost slot 5 -->
+                    <div class="ghost-card bg-white">
+                        <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-gray-400 text-[22px]">person_add</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm text-[#1a1a2e]">Your Name Here</p>
+                            <p class="text-xs text-[#6b7280] mt-0.5">Paper Verifier</p>
+                        </div>
+                    </div>
+
+                    <!-- Ghost slot 6 — with CTA flavour -->
+                    <div class="ghost-card bg-white border-primary/30 hover:border-primary cursor-pointer group" onclick="document.getElementById('contribute-section').scrollIntoView({behavior:'smooth'})">
+                        <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
+                            <span class="material-symbols-outlined text-primary text-[22px]">add_circle</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm text-primary">Could Be You!</p>
+                            <p class="text-xs text-[#6b7280] mt-0.5">Tap to learn how →</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ SECTION 3: CONTRIBUTING TO THE PAPER ═══ -->
+        <section id="contribute-section" class="py-16 px-6 md:px-10" data-aos="zoom-in" data-aos-delay="100">
+            <div class="max-w-5xl mx-auto relative overflow-hidden rounded-2xl px-8 py-14 md:px-16 md:py-16"
+                style="background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 60%, #0f766e 100%);">
+                <!-- Background blobs -->
+                <div class="absolute top-0 right-0 w-72 h-72 rounded-full pointer-events-none" style="background: rgba(15,150,144,0.15); filter: blur(70px); transform: translate(40%,-40%);"></div>
+                <div class="absolute bottom-0 left-0 w-48 h-48 rounded-full pointer-events-none" style="background: rgba(26,115,232,0.12); filter: blur(50px); transform: translate(-30%,30%);"></div>
+
+                <div class="relative z-10 flex flex-col lg:flex-row items-start gap-12 justify-between">
+                    <!-- Left: Explanation -->
+                    <div class="max-w-xl">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase mb-5" style="background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.15);">
+                            <span class="w-1.5 h-1.5 rounded-full bg-teal-300 inline-block"></span>
+                            Open Contribution
+                        </span>
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-white leading-tight mb-4 tracking-tight">
+                            Contribute a<br><span class="text-teal-300">Past Paper</span>
+                        </h2>
+                        <p class="text-white/70 text-[15px] leading-relaxed mb-6">
+                            Knowledge grows when shared. If you have past papers, notes, or study materials from your COMSATS exams, uploading them takes just 2 minutes and helps thousands of students who come after you.
+                        </p>
+
+                        <!-- Steps -->
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-4">
+                                <div class="w-8 h-8 rounded-full bg-teal-400/20 border border-teal-400/30 flex items-center justify-center flex-shrink-0 text-teal-300 text-xs font-black">1</div>
+                                <div>
+                                    <p class="text-white font-semibold text-sm">Upload your paper</p>
+                                    <p class="text-white/60 text-xs mt-0.5">Use our simple upload form — paste or attach your paper.</p>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Core Values Section -->
-        <section class="about-section bg-background">
-            <div class="container">
-                <div class="about-layout about-layout-2" style="align-items: flex-end; margin-bottom: 64px;">
-                    <div style="max-width: 576px;">
-                        <span class="section-label" style="display: block; margin-bottom: 16px;">The Standard</span>
-                        <h3 class="main-title text-on-surface" style="font-weight: 900; font-size: 36px;">Our Core
-                            Values</h3>
-                    </div>
-                    <p class="question-desc" style="max-width: 384px;">Every resource on our platform passes through a
-                        rigorous vetting process to ensure academic excellence.</p>
-                </div>
-
-                <div class="standards-grid">
-                    <!-- Value 1 -->
-                    <div class="value-card">
-                        <div class="value-icon-box">
-                            <span class="material-symbols-outlined">verified</span>
-                        </div>
-                        <h4 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 16px;">
-                            Vetted Accuracy</h4>
-                        <p class="question-desc" style="line-height: 1.6;">No more guesswork. Every past paper and note
-                            is cross-referenced for quality and relevance before being curated.</p>
-                    </div>
-                    <!-- Value 2 -->
-                    <div class="value-card">
-                        <div class="value-icon-box">
-                            <span class="material-symbols-outlined">bolt</span>
-                        </div>
-                        <h4 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 16px;">
-                            Minimalist Speed</h4>
-                        <p class="question-desc" style="line-height: 1.6;">Designed for exam weeks. Fast, frictionless
-                            access to the specific resources you need, when you need them most.</p>
-                    </div>
-                    <!-- Value 3 -->
-                    <div class="value-card">
-                        <div class="value-icon-box">
-                            <span class="material-symbols-outlined">groups</span>
-                        </div>
-                        <h4 style="font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 16px;">
-                            Community First</h4>
-                        <p class="question-desc" style="line-height: 1.6;">A collective intelligence project.
-                            Peer-to-peer knowledge sharing powered by the brightest minds in the department.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- The Collective Section -->
-        <section class="about-section" style="background-color: rgb(235, 238, 239);">
-            <div class="container">
-                <div class="about-layout about-layout-12" style="gap: 32px;">
-                    <!-- Founder Card -->
-                    <div class="col-span-8">
-                        <div
-                            style="background-color: var(--surface); border-radius: 8px; padding: 40px; box-shadow: var(--shadow-sm); display: flex; gap: 40px; align-items: center;">
-                            <div
-                                style="width: 192px; height: 192px; border-radius: 50%; overflow: hidden; background-color: rgba(173, 179, 180, 0.2); flex-shrink: 0;">
-                                <img style="width: 100%; height: 100%; object-fit: cover;" src="My-image.png"
-                                    alt="Mushtaq Ahmad Saqi">
+                            <div class="flex items-start gap-4">
+                                <div class="w-8 h-8 rounded-full bg-teal-400/20 border border-teal-400/30 flex items-center justify-center flex-shrink-0 text-teal-300 text-xs font-black">2</div>
+                                <div>
+                                    <p class="text-white font-semibold text-sm">We verify it</p>
+                                    <p class="text-white/60 text-xs mt-0.5">Our team checks for quality and marks it with subject metadata.</p>
+                                </div>
                             </div>
-                            <div style="flex-grow: 1;">
-                                <span
-                                    style="display: inline-block; background-color: #0c0f0f; color: var(--surface); font-size: 10px; font-weight: 700; letter-spacing: 2px; padding: 4px 12px; border-radius: 999px; margin-bottom: 16px;">FOUNDER</span>
-                                <h3
-                                    style="font-size: 30px; font-weight: 900; color: var(--text-main); margin-bottom: 8px; letter-spacing: -0.5px;">
-                                    Mushtaq Ahmad Saqi</h3>
-                                <p class="question-desc"
-                                    style="font-style: italic; line-height: 1.6; margin-bottom: 24px;">"Our goal isn't
-                                    just to help you pass; it's to help you master the material through curated
-                                    clarity."</p>
-                                <div style="display: flex; gap: 16px;">
-                                    <a class="hover-underline"
-                                        style="color: var(--primary); font-weight: 600; font-size: 14px;"
-                                        href="#">LinkedIn</a>
-                                    <a class="hover-underline"
-                                        style="color: var(--primary); font-weight: 600; font-size: 14px;"
-                                        href="#">Portfolio</a>
+                            <div class="flex items-start gap-4">
+                                <div class="w-8 h-8 rounded-full bg-teal-400/20 border border-teal-400/30 flex items-center justify-center flex-shrink-0 text-teal-300 text-xs font-black">3</div>
+                                <div>
+                                    <p class="text-white font-semibold text-sm">It goes live for everyone</p>
+                                    <p class="text-white/60 text-xs mt-0.5">Your contribution is credited and available to all students instantly.</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Contributor CTA Card -->
-                    <div class="col-span-4 rounded-xl"
-                        style="background-color: var(--primary); color: var(--surface); padding: 40px; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div>
-                            <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.5px;">
-                                Join The Collective</h3>
-                            <p style="opacity: 0.9; margin-bottom: 32px; line-height: 1.6;">Help us curate the next
-                                generation of academic resources. We are looking for top-performing students to
-                                contribute vetted notes.</p>
-                        </div>
-                        <a href="upload.html"
-                            style="width: 100%; background-color: var(--surface); color: var(--primary); padding: 16px; border-radius: 999px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; border: none; cursor: pointer; transition: background-color 0.2s; text-decoration: none; text-align: center; display: block;">
-                            Apply to Contribute
-                        </a>
-                    </div>
-
-                    <!-- Ghost Contributor Slots -->
-                    <div class="col-span-4 ghost-contributor">
-                        <div class="ghost-icon-box">
-                            <span class="material-symbols-outlined"
-                                style="color: rgba(117, 124, 125, 0.8);">person_add</span>
-                        </div>
-                        <div>
-                            <p style="font-size: 14px; font-weight: 700; color: var(--text-main);">Your Name Here</p>
-                            <p style="font-size: 12px; color: var(--text-muted);">Active Contributor</p>
-                        </div>
-                    </div>
-                    <div class="col-span-4 ghost-contributor">
-                        <div class="ghost-icon-box">
-                            <span class="material-symbols-outlined"
-                                style="color: rgba(117, 124, 125, 0.8);">person_add</span>
-                        </div>
-                        <div>
-                            <p style="font-size: 14px; font-weight: 700; color: var(--text-main);">Your Name Here</p>
-                            <p style="font-size: 12px; color: var(--text-muted);">Resource Curator</p>
-                        </div>
-                    </div>
-                    <div class="col-span-4 ghost-contributor">
-                        <div class="ghost-icon-box">
-                            <span class="material-symbols-outlined"
-                                style="color: rgba(117, 124, 125, 0.8);">person_add</span>
-                        </div>
-                        <div>
-                            <p style="font-size: 14px; font-weight: 700; color: var(--text-main);">Your Name Here</p>
-                            <p style="font-size: 12px; color: var(--text-muted);">Subject Matter Expert</p>
+                    <!-- Right: CTA card -->
+                    <div class="flex-shrink-0 w-full lg:w-auto">
+                        <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 text-center lg:min-w-[260px]">
+                            <div class="w-16 h-16 rounded-2xl bg-teal-300/20 border border-teal-300/30 flex items-center justify-center mx-auto mb-5">
+                                <span class="material-symbols-outlined text-teal-300 text-3xl">cloud_upload</span>
+                            </div>
+                            <h3 class="text-white font-bold text-xl mb-2">Ready to share?</h3>
+                            <p class="text-white/60 text-sm mb-6 leading-relaxed">It's free, quick, and makes a real difference.</p>
+                            <a href="upload.html"
+                                class="flex items-center justify-center gap-2 w-full px-6 py-3.5 rounded-full bg-white text-[#1a1a2e] font-bold text-sm hover:bg-[#ccfbf1] hover:text-primary transition-all duration-300 no-underline shadow-lg">
+                                <span class="material-symbols-outlined text-lg">upload_file</span>
+                                Upload a Paper
+                            </a>
+                            <p class="text-white/40 text-[11px] mt-4">Your name will be credited on the archive.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
+
     </main>
 
-    <!-- Footer -->
-        <footer class="site-footer">
-        <div class="footer-content">
-            <div class="footer-left">
-                <div class="footer-copyright" style="text-transform: uppercase;">COMSATSPrepHub</div>
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="bg-[#1a1a2e] text-white py-8 px-6 md:px-10">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5 text-center md:text-left">
+            <div class="font-extrabold text-sm tracking-widest uppercase text-white">COMSATSPrepHub</div>
+            <div class="flex flex-wrap justify-center gap-5 md:gap-7">
+                <a href="about-us.html" class="text-sm text-white/60 hover:text-white transition-colors duration-200 no-underline">About Us</a>
+                <a href="terms.html" class="text-sm text-white/60 hover:text-white transition-colors duration-200 no-underline">Terms</a>
+                <a href="feedback.html" class="text-sm text-white/60 hover:text-white transition-colors duration-200 no-underline">Feedback</a>
             </div>
-            <div class="footer-center">
-                <a class="footer-link" href="about-us.html">About Us</a>
-                <a class="footer-link" href="terms.html">Terms</a>
-                <a class="footer-link" href="feedback.html">Feedback</a>
-            </div>
-            <div class="footer-right">
-                <div class="footer-copyright" style="font-style: italic;">Made with care by Mushtaq Ahmad Saqi</div>
-            </div>
+            <div class="text-xs text-white/40 italic">Made with care by Mushtaq Ahmad Saqi</div>
         </div>
     </footer>
+
+    <!-- ═══ MOBILE BOTTOM NAV ═══ -->
+    <nav id="mobileBottomNav" class="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center bg-white/95 backdrop-blur-md border-t border-[#e2e8f0] py-2.5 px-4 shadow-lg" style="padding-bottom: max(10px, env(safe-area-inset-bottom));">
+        <a href="index.html" class="mobile-nav-item flex flex-col items-center gap-0.5 text-[#6b7280] hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-2xl">home</span>
+            <span class="text-[10px] font-semibold tracking-wide">Home</span>
+        </a>
+        <a href="subjects.html" class="mobile-nav-item flex flex-col items-center gap-0.5 text-[#6b7280] hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-2xl">menu_book</span>
+            <span class="text-[10px] font-semibold tracking-wide">Subjects</span>
+        </a>
+        <a href="quiz.html" class="mobile-nav-item flex flex-col items-center gap-0.5 text-[#6b7280] hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-2xl">quiz</span>
+            <span class="text-[10px] font-semibold tracking-wide">Quiz</span>
+        </a>
+        <a href="about-us.html" class="mobile-nav-item active flex flex-col items-center gap-0.5" style="color:#0f766e;">
+            <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1">groups</span>
+            <span class="text-[10px] font-semibold tracking-wide">Team</span>
+        </a>
+    </nav>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        AOS.init({ once: true, offset: 50, duration: 750, easing: 'ease-out-cubic' });
+
+        // ── Smart hide/show mobile bottom nav on scroll ──
+        (function () {
+            const nav = document.getElementById('mobileBottomNav');
+            if (!nav) return;
+            let lastScrollY = window.scrollY;
+            let ticking = false;
+
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        const currentScrollY = window.scrollY;
+                        if (currentScrollY > lastScrollY && currentScrollY > 60) {
+                            // Scrolling down → hide
+                            nav.classList.add('nav-hidden');
+                        } else {
+                            // Scrolling up → show
+                            nav.classList.remove('nav-hidden');
+                        }
+                        lastScrollY = currentScrollY;
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }, { passive: true });
+        })();
+    </script>
 </body>
 
 </html>

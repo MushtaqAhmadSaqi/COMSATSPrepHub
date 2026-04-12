@@ -428,7 +428,7 @@
   </footer>
 
   <!-- ═══════════════════════════════════ MOBILE NAV ═══════════════════════════════════ -->
-  <nav class="mobile-nav md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center bg-white/95 backdrop-blur-md border-t border-[#e2e8f0] py-2.5 px-4 shadow-lg">
+  <nav id="mobileBottomNav" class="mobile-nav md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center bg-white/95 backdrop-blur-md border-t border-[#e2e8f0] py-2.5 px-4 shadow-lg" style="transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);">
     <a href="index.html" class="mobile-nav-item active flex flex-col items-center gap-0.5 text-primary">
       <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1">home</span>
       <span class="text-[10px] font-semibold tracking-wide">Home</span>
@@ -711,6 +711,29 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     AOS.init({ once: true, offset: 50, duration: 750, easing: 'ease-out-cubic' });
+
+    // ── Smart scroll hide/show mobile bottom nav ──
+    (function () {
+        const nav = document.getElementById('mobileBottomNav');
+        if (!nav) return;
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const currentScrollY = window.scrollY;
+                    if (currentScrollY > lastScrollY && currentScrollY > 60) {
+                        nav.style.transform = 'translateY(100%)';
+                    } else {
+                        nav.style.transform = 'translateY(0)';
+                    }
+                    lastScrollY = currentScrollY;
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+    })();
   </script>
 
 </body>

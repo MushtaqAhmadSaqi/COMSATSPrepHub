@@ -6,7 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subjects | COMSATSPrepHub</title>
     <meta name="description" content="Browse all COMSATS subjects and access past papers organized by course.">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <link rel="stylesheet" href="auth-modal.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <script>
@@ -35,6 +40,15 @@
             ]
         }
     </script>
+    <style>
+        /* Smart hide/show mobile bottom nav */
+        #mobileBottomNav {
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #mobileBottomNav.nav-hidden {
+            transform: translateY(100%);
+        }
+    </style>
     <script>
         // Check theme on load
         if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -58,7 +72,10 @@
             <a href="quiz.html" class="text-gray-500 hover:text-brand-500 dark:text-gray-400 dark:hover:text-white transition-colors">Quiz</a>
         </nav>
         <div class="flex items-center gap-4">
-             <a href="dashboard.html" class="px-5 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow-lg shadow-brand-500/20 transition-all active:scale-95">Dashboard</a>
+             <button id="open-auth-modal" class="px-5 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow-lg shadow-brand-500/20 transition-all active:scale-95 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px]">dashboard</span>
+                Dashboard
+            </button>
         </div>
     </header>
 
@@ -159,6 +176,147 @@
             </div>
         </div>
     </footer>
+
+    <!-- ═══ MOBILE BOTTOM NAV ═══ -->
+    <nav id="mobileBottomNav" class="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center bg-white/95 backdrop-blur-md border-t border-[#e2e8f0] py-2.5 px-4 shadow-lg" style="padding-bottom: max(10px, env(safe-area-inset-bottom));">
+        <a href="index.html" class="flex flex-col items-center gap-0.5 text-[#6b7280] hover:text-brand-500 transition-colors">
+            <span class="material-symbols-outlined text-2xl">home</span>
+            <span class="text-[10px] font-semibold tracking-wide">Home</span>
+        </a>
+        <a href="subjects.html" class="flex flex-col items-center gap-0.5 text-brand-500">
+            <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1">menu_book</span>
+            <span class="text-[10px] font-semibold tracking-wide">Subjects</span>
+        </a>
+        <a href="quiz.html" class="flex flex-col items-center gap-0.5 text-[#6b7280] hover:text-brand-500 transition-colors">
+            <span class="material-symbols-outlined text-2xl">quiz</span>
+            <span class="text-[10px] font-semibold tracking-wide">Quiz</span>
+        </a>
+        <a href="about-us.html" class="flex flex-col items-center gap-0.5 text-[#6b7280] hover:text-brand-500 transition-colors">
+            <span class="material-symbols-outlined text-2xl">groups</span>
+            <span class="text-[10px] font-semibold tracking-wide">Team</span>
+        </a>
+    </nav>
+
+    <!-- ════════════════════════ AUTH MODAL ════════════════════════ -->
+    <div class="auth-modal-overlay" id="auth-modal-overlay" role="dialog" aria-modal="true" aria-label="Authentication">
+        <div class="auth-modal am-auth" id="am-auth">
+            <button class="auth-modal-close" id="close-auth-modal" aria-label="Close">
+                <span class="material-symbols-outlined" style="font-size:20px;">close</span>
+            </button>
+            <!-- ══ LOGIN PANEL ══ -->
+            <div class="am-panel am-login">
+                <section class="am-side am-l-side">
+                    <div class="am-bg-wrap">
+                        <img class="am-bg-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZDdNBglJeWrhi1y9jHIye7HIzCaIJI2VjDX-tqDH8dlDCtls8eTrLe8AHu-8QNhXA2j51OpnRpksHOCmzKaSTGRVocinZu_g6kcjHVO-KmmMDRgKY9A5bjPCbTd74_QZ_b4E0mEa3s57hV_8PV1qoIcW1W1-cvoW50XK5HDsQXs-rmyiJQ9-eKURVp0nLXuzjPsJYIuZhEC6Sd_s8ZFgrUF-tG8TeuVUml81zCmnoAmSoX-XdJWNxIPpPGlURk9DNtY--FBNPa9HA" alt="Background">
+                    </div>
+                    <div class="am-logo">COMSATSPrepHub</div>
+                    <div class="am-hero">
+                        <span class="am-sub">Academic Excellence</span>
+                        <h2 class="am-h1">WELCOME BACK!</h2>
+                        <p class="am-p">Access your curated prep materials and continue your journey toward academic mastery at COMSATS.</p>
+                        <div class="am-dots"><div class="am-dot active"></div><div class="am-dot"></div><div class="am-dot"></div></div>
+                    </div>
+                </section>
+                <section class="am-form-panel">
+                    <div class="am-wrap">
+                        <div class="am-m-logo"><div class="am-m-name">COMSATSPrepHub</div></div>
+                        <div class="am-head">
+                            <h3 class="am-h2">Login</h3>
+                            <p class="am-h2-sub">Welcome back to your academic curator.</p>
+                        </div>
+                        <form id="am-l-form">
+                            <div class="am-item">
+                                <label class="am-label" for="am-l-email">Email Address</label>
+                                <div class="am-field">
+                                    <span class="material-symbols-outlined am-icon">mail</span>
+                                    <input class="am-in" id="am-l-email" name="email" type="email" placeholder="name@example.com" required>
+                                </div>
+                            </div>
+                            <div class="am-item">
+                                <div class="am-label-row">
+                                    <label class="am-label" for="am-l-pass" style="margin-bottom:0;">Password</label>
+                                    <a class="am-label-link" href="#">Forgot Password?</a>
+                                </div>
+                                <div class="am-field">
+                                    <span class="material-symbols-outlined am-icon">lock</span>
+                                    <input class="am-in" id="am-l-pass" name="password" type="password" placeholder="••••••••" required>
+                                    <button class="am-eye" type="button" aria-label="Toggle password"><span class="material-symbols-outlined" style="font-size:18px;">visibility</span></button>
+                                </div>
+                            </div>
+                            <div class="am-check">
+                                <input class="am-ck-in" type="checkbox" id="am-rem-in">
+                                <label class="am-ck-lbl" for="am-rem-in">Keep me logged in</label>
+                            </div>
+                            <button class="am-btn am-b-login" type="submit"><span>Login</span><span class="material-symbols-outlined" style="font-size:18px;">arrow_forward</span></button>
+                            <div class="am-sep"><span>or</span></div>
+                            <button class="am-btn-g" type="button" id="am-google-login">
+                                <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" alt="Google">
+                                <span>Sign in with Google</span>
+                            </button>
+                        </form>
+                        <div class="am-swap">Don't have an account? <a href="#" class="am-to-up">Sign Up</a></div>
+                    </div>
+                </section>
+            </div>
+            <!-- ══ SIGNUP PANEL ══ -->
+            <div class="am-panel am-signup">
+                <section class="am-side am-s-side">
+                    <div class="am-bg-wrap">
+                        <img class="am-bg-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk3-sOvD_tJohcdxadxtZFJ10l6HyxAbSE4RauxdmJfHf2zs_u4P38ESTUhEgJwACMcTPz6pi5NSGYVW9uobohnmF9gZ2L4ftwzuQ_IVi8C9i5F5nZgsq-49YwZihRSNuU7xyqpNU7wTUnjp265IAJ1xC08Fkzj6pMEq1juhdk208VCUWDAvkIVlKiUvZALMeyoFUi9xXkGA82r8dJkKDLwCujzX1EtT1wGN0dijfpNbSMh1cay34o_4cztvQ85r3FGObPL80zGWU9" alt="Background">
+                    </div>
+                    <div class="am-hero">
+                        <div class="am-line"></div>
+                        <div class="am-stack">
+                            <span class="am-sub">Academic Excellence</span>
+                            <h2 class="am-h1">WELCOME!</h2>
+                            <p class="am-p">Join the community of scholars at COMSATSPrepHub. Your curated journey to academic mastery starts here.</p>
+                        </div>
+                    </div>
+                    <div class="am-foot-l"><div class="am-logo-n">COMSATSPrepHub</div></div>
+                </section>
+                <section class="am-form-panel">
+                    <div class="am-wrap">
+                        <div class="am-m-logo">
+                            <div style="width:36px;height:3px;background:#006f1d;margin:0 auto 12px;border-radius:999px;"></div>
+                            <div class="am-m-name" style="color:#5f5e5e;">COMSATSPrepHub</div>
+                        </div>
+                        <div class="am-head">
+                            <h3 class="am-h2">Create your account</h3>
+                            <p class="am-h2-sub">Sign up to access curated study materials and tracking.</p>
+                        </div>
+                        <button class="am-btn-g am-btn-g-up" type="button" id="am-google-signup">
+                            <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" alt="Google">
+                            <span>Continue with Google</span>
+                        </button>
+                        <div class="am-sep"><span>or email</span></div>
+                        <form id="am-s-form">
+                            <div class="am-item">
+                                <label class="am-label" for="am-s-name">Full Name</label>
+                                <div class="am-field"><input class="am-in no-icon" id="am-s-name" name="name" type="text" placeholder="John Doe" required></div>
+                            </div>
+                            <div class="am-item">
+                                <label class="am-label" for="am-s-email">Email Address</label>
+                                <div class="am-field"><input class="am-in no-icon" id="am-s-email" name="email" type="email" placeholder="student@university.edu" required></div>
+                            </div>
+                            <div class="am-item">
+                                <label class="am-label" for="am-s-pass">Password</label>
+                                <div class="am-field">
+                                    <input class="am-in no-icon" id="am-s-pass" name="password" type="password" placeholder="••••••••" required>
+                                    <button class="am-eye" type="button" aria-label="Toggle password"><span class="material-symbols-outlined" style="font-size:18px;">visibility</span></button>
+                                </div>
+                            </div>
+                            <div class="am-check">
+                                <input class="am-ck-in" type="checkbox" id="am-acc-in">
+                                <label class="am-ck-lbl" for="am-acc-in">I agree to the <a href="terms.html">Terms of Service</a> and <a href="terms.html">Privacy Policy</a>.</label>
+                            </div>
+                            <button class="am-btn am-b-signup" type="submit">Create Account</button>
+                        </form>
+                        <div class="am-swap">Already have an account? <a href="#" class="am-to-in">Sign In</a></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div><!-- /.auth-modal-overlay -->
 
     <script type="module">
         import { supabase, escapeHtml as escHtml } from './utils.js';
@@ -261,8 +419,124 @@
         loadSubjects();
     </script>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         AOS.init({ once: true, offset: 30, duration: 800, easing: 'ease-out-cubic' });
+    </script>
+
+    <!-- Auth modal logic + scroll nav -->
+    <script type="module">
+        // ── MODAL OPEN / CLOSE ──
+        const overlay  = document.getElementById('auth-modal-overlay');
+        const amAuth   = document.getElementById('am-auth');
+        const openBtn  = document.getElementById('open-auth-modal');
+        const closeBtn = document.getElementById('close-auth-modal');
+
+        function openModal(startTab) {
+            overlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+            amAuth.classList.toggle('toggled', startTab === 'signup');
+        }
+        function closeModal() {
+            overlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        openBtn.addEventListener('click',  () => openModal('login'));
+        closeBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click',  e => { if (e.target === overlay) closeModal(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+        // ── PANEL TOGGLE ──
+        document.querySelectorAll('.am-to-up').forEach(btn =>
+            btn.addEventListener('click', e => { e.preventDefault(); amAuth.classList.add('toggled'); })
+        );
+        document.querySelectorAll('.am-to-in').forEach(btn =>
+            btn.addEventListener('click', e => { e.preventDefault(); amAuth.classList.remove('toggled'); })
+        );
+
+        // ── PASSWORD VISIBILITY ──
+        document.querySelectorAll('.am-eye').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const input = btn.parentElement.querySelector('input');
+                const icon  = btn.querySelector('.material-symbols-outlined');
+                if (input.type === 'password') { input.type = 'text'; icon.textContent = 'visibility_off'; }
+                else { input.type = 'password'; icon.textContent = 'visibility'; }
+            });
+        });
+
+        // ── SUPABASE AUTH ──
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+        const SUPABASE_URL = 'https://xylyiscatznexduatjmg.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_K0t4H7M3LU96jy8_z_TJHg_ok_u-7HC';
+        const supabaseAuth = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Check session — if already logged in update button
+        const { data: sessionData } = await supabaseAuth.auth.getSession();
+        if (sessionData?.session) {
+            const user = sessionData.session.user;
+            const name = user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Me';
+            openBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">dashboard</span> ${name}'s Dashboard`;
+            openBtn.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'dashboard.html'; }, { once: true });
+        }
+
+        // Sign Up
+        const amSForm = document.getElementById('am-s-form');
+        if (amSForm) {
+            amSForm.addEventListener('submit', async e => {
+                e.preventDefault();
+                const name  = document.getElementById('am-s-name').value;
+                const email = document.getElementById('am-s-email').value;
+                const pass  = document.getElementById('am-s-pass').value;
+                const acc   = document.getElementById('am-acc-in').checked;
+                if (!acc) { Swal.fire('Notice', 'Please accept the terms first.', 'warning'); return; }
+                if (pass.length < 8) { Swal.fire('Notice', 'Password must be at least 8 characters.', 'warning'); return; }
+                const btn = amSForm.querySelector('button[type="submit"]');
+                btn.textContent = 'Processing...'; btn.disabled = true;
+                const { error } = await supabaseAuth.auth.signUp({ email, password: pass, options: { data: { full_name: name } } });
+                btn.textContent = 'Create Account'; btn.disabled = false;
+                if (error) Swal.fire('Error', error.message, 'error');
+                else { Swal.fire('Success!', 'Check your email to confirm.', 'success'); amSForm.reset(); closeModal(); }
+            });
+        }
+
+        // Login
+        const amLForm = document.getElementById('am-l-form');
+        if (amLForm) {
+            amLForm.addEventListener('submit', async e => {
+                e.preventDefault();
+                const email = document.getElementById('am-l-email').value;
+                const pass  = document.getElementById('am-l-pass').value;
+                const btn   = amLForm.querySelector('button[type="submit"]');
+                btn.querySelector('span:first-child').textContent = 'Entering...'; btn.disabled = true;
+                const { error } = await supabaseAuth.auth.signInWithPassword({ email, password: pass });
+                btn.querySelector('span:first-child').textContent = 'Login'; btn.disabled = false;
+                if (error) Swal.fire('Error', error.message, 'error');
+                else { amLForm.reset(); closeModal(); window.location.href = 'dashboard.html'; }
+            });
+        }
+
+        // ── SMART SCROLL HIDE/SHOW MOBILE NAV ──
+        const mobileNav = document.getElementById('mobileBottomNav');
+        if (mobileNav) {
+            let lastScrollY = window.scrollY;
+            let ticking = false;
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        const currentScrollY = window.scrollY;
+                        if (currentScrollY > lastScrollY && currentScrollY > 60) {
+                            mobileNav.classList.add('nav-hidden');
+                        } else {
+                            mobileNav.classList.remove('nav-hidden');
+                        }
+                        lastScrollY = currentScrollY;
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }, { passive: true });
+        }
     </script>
 </body>
 
