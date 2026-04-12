@@ -681,8 +681,29 @@
         const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
         btn.querySelector('span:first-child').textContent = 'Login'; btn.disabled = false;
         if (error) Swal.fire('Error', error.message, 'error');
-        else { Swal.fire('Welcome back!', 'Successfully logged in.', 'success'); amLForm.reset(); closeModal(); }
+        else {
+          amLForm.reset();
+          closeModal();
+          // Redirect to dashboard after successful login
+          window.location.href = 'dashboard.html';
+        }
       });
+    }
+
+    // ── CHECK SESSION ON LOAD — update nav if already logged in ──
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (sessionData?.session) {
+      const openAuthBtn = document.getElementById('open-auth-modal');
+      if (openAuthBtn) {
+        const user = sessionData.session.user;
+        const name = user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Me';
+        openAuthBtn.innerHTML = `<span class="material-symbols-outlined" style="font-size:17px;">dashboard</span> ${name}'s Dashboard`;
+        openAuthBtn.href = 'dashboard.html';
+        openAuthBtn.tagName !== 'A' && openAuthBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          window.location.href = 'dashboard.html';
+        });
+      }
     }
   </script>
 

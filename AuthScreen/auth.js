@@ -82,7 +82,7 @@ if (sForm) {
     if (error) {
       alert("Error: " + error.message);
     } else {
-      alert("Success! Check email.");
+      alert("Account created! Check your email to confirm, then login.");
       sForm.reset();
     }
   });
@@ -118,8 +118,9 @@ if (lForm) {
     if (error) {
       alert("Error: " + error.message);
     } else {
-      alert("Welcome back!");
       lForm.reset();
+      // Redirect to dashboard after successful login
+      window.location.href = '../dashboard.html';
     }
   });
 }

@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mushtaq Ahmad Saqi | COMSATSPrepHub</title>
+    <title id="pageTitle">Profile | COMSATSPrepHub</title>
     <!-- Tailwind CSS Script -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
@@ -63,8 +63,8 @@
                 <div class="flex flex-col lg:flex-row gap-8 justify-between shrink-0">
                     <div class="flex-1 space-y-4">
                         <div>
-                            <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Mushtaq Ahmad Saqi</h1>
-                            <p class="text-gray-400 font-medium text-lg mt-1 max-w-2xl">Founder of COMSATSPrepHub | UI/UX Designer | Software Engineering Student</p>
+                            <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight" id="profileName">Loading...</h1>
+                            <p class="text-gray-400 font-medium text-lg mt-1 max-w-2xl" id="profileRole">Student at COMSATSPrepHub</p>
 
                             <div class="flex flex-wrap items-center gap-3 mt-4">
                                 <span class="bg-gray-800 text-gray-300 border border-gray-700 text-xs font-bold px-3 py-1.5 rounded-full tracking-wider">FOUNDER</span>
@@ -208,6 +208,47 @@
             <div class="text-sm text-gray-500 italic">Made with care by Mushtaq Ahmad Saqi</div>
         </div>
     </footer>
+
+    <script type="module">
+        import { getUserSession, getDisplayName } from './user-state.js';
+
+        (async () => {
+            const session = await getUserSession();
+            const user    = session?.user ?? null;
+            const FOUNDER_EMAIL = 'mushtaqahmadsaqi786@gmail.com'; // update with your real email
+
+            const nameEl = document.getElementById('profileName');
+            const roleEl = document.getElementById('profileRole');
+            const titleEl = document.getElementById('pageTitle');
+
+            if (!user) {
+                // Not logged in — show generic
+                if (nameEl)  nameEl.textContent  = 'Guest';
+                if (roleEl)  roleEl.textContent  = 'Not signed in';
+                return;
+            }
+
+            const fullName = getDisplayName(user);
+
+            if (user.email === FOUNDER_EMAIL) {
+                // Founder view — show full hardcoded profile
+                if (nameEl)  nameEl.textContent  = 'Mushtaq Ahmad Saqi';
+                if (roleEl)  roleEl.textContent  = 'Founder of COMSATSPrepHub | UI/UX Designer | Software Engineering Student';
+                if (titleEl) titleEl.textContent = 'Mushtaq Ahmad Saqi | COMSATSPrepHub';
+            } else {
+                // Regular student view
+                if (nameEl)  nameEl.textContent  = fullName;
+                if (roleEl)  roleEl.textContent  = `Student at COMSATSPrepHub \u00B7 ${user.email}`;
+                if (titleEl) titleEl.textContent = `${fullName} | COMSATSPrepHub`;
+
+                // Hide founder-specific sections for regular users
+                const expSection = document.querySelector('section.glass.p-6.md\\:p-8.rounded-2xl');
+                if (expSection) {
+                    expSection.querySelector('h2')?.closest('section');
+                }
+            }
+        })();
+    </script>
 </body>
 
 </html>
