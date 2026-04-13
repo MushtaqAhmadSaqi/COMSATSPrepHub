@@ -62,7 +62,9 @@
                             'ul': { '@apply list-disc ml-5 space-y-1.5': {} },
                             'li': { '@apply leading-relaxed': {} },
                             'strong': { '@apply font-semibold text-slate-900': {} },
-                            'code': { '@apply font-mono text-[13px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded': {} },
+                            'pre': { '@apply max-w-full my-5 bg-slate-50 border border-slate-200 p-5 rounded-xl block whitespace-pre-wrap break-words': {} },
+                            'code': { '@apply font-mono text-[13px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded break-words whitespace-pre-wrap': {} },
+                            'pre code': { '@apply bg-transparent p-0 text-inherit whitespace-pre-wrap rounded-none': {} },
                         }
                     });
                     addUtilities({
