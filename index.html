@@ -178,9 +178,97 @@
       padding-bottom: max(10px, env(safe-area-inset-bottom));
     }
 
+    .mobile-nav-shell {
+      position: fixed;
+      left: 14px;
+      right: 14px;
+      bottom: 12px;
+      z-index: 55;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: linear-gradient(140deg, rgba(12, 24, 44, 0.92), rgba(17, 37, 63, 0.88));
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .mobile-nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 52px;
+      border-radius: 999px;
+      color: rgba(226, 232, 240, 0.9);
+      text-decoration: none;
+      transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+      padding: 0 12px;
+    }
+
+    .mobile-nav-item .material-symbols-outlined {
+      font-size: 23px;
+    }
+
+    .mobile-nav-item .label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .mobile-nav-item.active {
+      background: linear-gradient(140deg, #2b8de2, #2196f3);
+      color: #ffffff;
+      box-shadow: 0 10px 25px rgba(33, 150, 243, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .mobile-quick-actions {
+      position: fixed;
+      right: 16px;
+      bottom: 104px;
+      z-index: 54;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quick-action-btn {
+      width: 58px;
+      height: 58px;
+      border: none;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.35);
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .quick-action-btn:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 18px 30px rgba(15, 23, 42, 0.4);
+    }
+
+    .quick-action-btn.camera {
+      background: linear-gradient(145deg, #213a59, #132744);
+      width: 52px;
+      height: 52px;
+      color: #e2e8f0;
+    }
+
+    .quick-action-btn.add {
+      background: linear-gradient(145deg, #2b8de2, #2196f3);
+    }
+
     @media (max-width: 767px) {
       .hero-blob-a { width: 200px; height: 200px; top: -60px; right: -40px; }
       .hero-blob-b { width: 160px; height: 160px; bottom: -40px; left: -30px; }
+      .mobile-nav-item .label { display: none; }
+      .mobile-nav-item.active .label { display: inline; }
     }
   </style>
 </head>
@@ -211,7 +299,7 @@
   <main class="flex-1" style="padding-top: 72px;">
 
     <!-- ═══════════════════════════════════ HERO ═══════════════════════════════════ -->
-    <section class="relative overflow-hidden flex flex-col items-center justify-center text-center min-h-[calc(100vh-72px)] px-6 py-24 md:px-16 isolate"
+    <section id="home-section" class="relative overflow-hidden flex flex-col items-center justify-center text-center min-h-[calc(100vh-72px)] px-6 py-24 md:px-16 isolate"
       style="background: radial-gradient(circle at 70% 60%, rgba(56,139,210,0.13), transparent 35%), radial-gradient(circle at 15% 10%, rgba(147,210,255,0.16), transparent 28%), linear-gradient(135deg, #f0f8ff 0%, #e8f4fd 45%, #ddeeff 100%);"
       data-aos="fade-in">
       <!-- Blobs -->
@@ -262,7 +350,7 @@
     </section>
 
     <!-- ═══════════════════════════════════ STATS ═══════════════════════════════════ -->
-    <section class="bg-white py-10 px-6" data-aos="fade-up" data-aos-delay="150">
+    <section id="stats-section" class="bg-white py-10 px-6" data-aos="fade-up" data-aos-delay="150">
       <div class="max-w-3xl mx-auto flex items-center justify-center gap-0">
         <!-- Stat 1 -->
         <div class="flex-1 text-center py-4 px-2">
@@ -285,7 +373,7 @@
     </section>
 
     <!-- ═══════════════════════════════════ FEATURES ═══════════════════════════════════ -->
-    <section class="py-20 px-6 md:px-10 bg-[#f8f9fb]">
+    <section id="features-section" class="py-20 px-6 md:px-10 bg-[#f8f9fb]">
       <div class="max-w-5xl mx-auto">
         <!-- Section Header -->
         <div class="mb-14" data-aos="fade-up">
@@ -341,7 +429,7 @@
     </section>
 
     <!-- ═══════════════════════════════════ FOUNDER / COLLECTIVE ═══════════════════════════════════ -->
-    <section class="py-20 px-6 md:px-10 bg-white">
+    <section id="team-section" class="py-20 px-6 md:px-10 bg-white">
       <div class="max-w-5xl mx-auto">
         <!-- Header -->
         <div class="mb-12" data-aos="fade-right">
@@ -381,7 +469,7 @@
     </section>
 
     <!-- ═══════════════════════════════════ CTA ═══════════════════════════════════ -->
-    <section class="py-16 px-6 md:px-10" data-aos="zoom-in" data-aos-delay="100">
+    <section id="cta-section" class="py-16 px-6 md:px-10" data-aos="zoom-in" data-aos-delay="100">
       <div class="max-w-5xl mx-auto relative overflow-hidden rounded-2xl px-8 py-14 md:px-16 md:py-16"
         style="background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 60%, #0f766e 100%);">
         <!-- Background blob -->
@@ -428,24 +516,35 @@
   </footer>
 
   <!-- ═══════════════════════════════════ MOBILE NAV ═══════════════════════════════════ -->
-  <nav id="mobileBottomNav" class="mobile-nav md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center bg-white/95 backdrop-blur-md border-t border-[#e2e8f0] py-2.5 px-4 shadow-lg" style="transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);">
-    <a href="index.html" class="mobile-nav-item active flex flex-col items-center gap-0.5 text-primary">
-      <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1">home</span>
-      <span class="text-[10px] font-semibold tracking-wide">Home</span>
-    </a>
-    <a href="subjects.html" class="mobile-nav-item flex flex-col items-center gap-0.5 text-[#6b7280] hover:text-primary transition-colors">
-      <span class="material-symbols-outlined text-2xl">menu_book</span>
-      <span class="text-[10px] font-semibold tracking-wide">Subjects</span>
-    </a>
-    <a href="quiz.html" class="mobile-nav-item flex flex-col items-center gap-0.5 text-[#6b7280] hover:text-primary transition-colors">
-      <span class="material-symbols-outlined text-2xl">quiz</span>
-      <span class="text-[10px] font-semibold tracking-wide">Quiz</span>
-    </a>
-    <a href="about-us.html" class="mobile-nav-item flex flex-col items-center gap-0.5 text-[#6b7280] hover:text-primary transition-colors">
-      <span class="material-symbols-outlined text-2xl">groups</span>
-      <span class="text-[10px] font-semibold tracking-wide">Team</span>
-    </a>
+  <nav id="mobileBottomNav" class="mobile-nav mobile-nav-shell md:hidden p-2.5">
+    <div class="grid grid-cols-4 gap-1.5">
+      <a href="index.html" data-route="index.html" class="mobile-nav-item active" aria-label="Go to home page">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">home</span>
+        <span class="label">Home</span>
+      </a>
+      <a href="subjects.html" data-route="subjects.html" class="mobile-nav-item" aria-label="Go to subjects page">
+        <span class="material-symbols-outlined">menu_book</span>
+        <span class="label">Subjects</span>
+      </a>
+      <a href="quiz.html" data-route="quiz.html" class="mobile-nav-item" aria-label="Go to quiz page">
+        <span class="material-symbols-outlined">quiz</span>
+        <span class="label">Quiz</span>
+      </a>
+      <a href="about-us.html" data-route="about-us.html" class="mobile-nav-item" aria-label="Go to team page">
+        <span class="material-symbols-outlined">groups</span>
+        <span class="label">Team</span>
+      </a>
+    </div>
   </nav>
+
+  <div class="mobile-quick-actions md:hidden" aria-hidden="true">
+    <button class="quick-action-btn camera" type="button" title="Quick camera">
+      <span class="material-symbols-outlined">photo_camera</span>
+    </button>
+    <button class="quick-action-btn add" type="button" title="Create action">
+      <span class="material-symbols-outlined" style="font-size:30px; font-variation-settings:'FILL' 1">add_comment</span>
+    </button>
+  </div>
 
   <!-- ════════════════════════ AUTH MODAL ════════════════════════ -->
   <div class="auth-modal-overlay" id="auth-modal-overlay" role="dialog" aria-modal="true" aria-label="Authentication">
@@ -735,6 +834,68 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     AOS.init({ once: true, offset: 50, duration: 750, easing: 'ease-out-cubic' });
+
+    // ── Swipe + tap page navigation for project tabs ──
+    (function () {
+        const routes = ['index.html', 'subjects.html', 'quiz.html', 'about-us.html'];
+        const navItems = Array.from(document.querySelectorAll('#mobileBottomNav .mobile-nav-item'));
+        const main = document.querySelector('main');
+        if (!navItems.length || !main) return;
+
+        let touchStartX = 0;
+        let touchStartY = 0;
+        const currentPath = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+
+        function setActiveNavByRoute(route) {
+          navItems.forEach((item) => {
+            const active = (item.dataset.route || '').toLowerCase() === route;
+            item.classList.toggle('active', active);
+            const icon = item.querySelector('.material-symbols-outlined');
+            if (icon) {
+              icon.style.fontVariationSettings = active ? "'FILL' 1" : "'FILL' 0";
+            }
+          });
+        }
+
+        function getCurrentRouteIndex() {
+          const idx = routes.findIndex(route => route.toLowerCase() === currentPath);
+          return idx >= 0 ? idx : 0;
+        }
+
+        navItems.forEach((item) => {
+          item.addEventListener('click', () => {
+            const route = (item.dataset.route || '').toLowerCase();
+            if (route) setActiveNavByRoute(route);
+          });
+        });
+
+        main.addEventListener('touchstart', (event) => {
+          const touch = event.changedTouches[0];
+          if (!touch) return;
+          touchStartX = touch.clientX;
+          touchStartY = touch.clientY;
+        }, { passive: true });
+
+        main.addEventListener('touchend', (event) => {
+          const touch = event.changedTouches[0];
+          if (!touch) return;
+          const deltaX = touch.clientX - touchStartX;
+          const deltaY = touch.clientY - touchStartY;
+          const isHorizontalSwipe = Math.abs(deltaX) > 58 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25;
+          if (!isHorizontalSwipe) return;
+          const activeIndex = getCurrentRouteIndex();
+          let targetIndex = activeIndex;
+          if (deltaX < 0) {
+            targetIndex = activeIndex + 1;
+          } else {
+            targetIndex = activeIndex - 1;
+          }
+          const safeIndex = Math.max(0, Math.min(targetIndex, routes.length - 1));
+          if (safeIndex !== activeIndex) window.location.href = routes[safeIndex];
+        }, { passive: true });
+
+        setActiveNavByRoute(currentPath);
+    })();
 
     // ── Smart scroll hide/show mobile bottom nav ──
     (function () {
