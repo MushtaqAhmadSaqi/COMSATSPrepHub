@@ -661,12 +661,36 @@
         if (pass.length < 8) { Swal.fire('Notice', 'Password must be at least 8 characters.', 'warning'); return; }
         const btn = amSForm.querySelector('button[type="submit"]');
         btn.textContent = 'Processing...'; btn.disabled = true;
-        const { error } = await supabase.auth.signUp({ email, password: pass, options: { data: { full_name: name } } });
+        const redirectUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/dashboard.html');
+        const { error } = await supabase.auth.signUp({ 
+          email, 
+          password: pass, 
+          options: { 
+            data: { full_name: name },
+            emailRedirectTo: redirectUrl
+          } 
+        });
         btn.textContent = 'Create Account'; btn.disabled = false;
         if (error) Swal.fire('Error', error.message, 'error');
         else { Swal.fire('Success!', 'Check your email to confirm.', 'success'); amSForm.reset(); closeModal(); }
       });
     }
+
+    // Google Auth
+    const handleGoogleLogin = async (e) => {
+      e.preventDefault();
+      if (!supabase) { Swal.fire('Error', 'Supabase not configured yet.', 'error'); return; }
+      const redirectUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/dashboard.html');
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: redirectUrl }
+      });
+      if (error) Swal.fire('Error', error.message, 'error');
+    };
+    const googleLoginBtn = document.getElementById('am-google-login');
+    const googleSignupBtn = document.getElementById('am-google-signup');
+    if (googleLoginBtn) googleLoginBtn.addEventListener('click', handleGoogleLogin);
+    if (googleSignupBtn) googleSignupBtn.addEventListener('click', handleGoogleLogin);
 
     // Login
     const amLForm = document.getElementById('am-l-form');
