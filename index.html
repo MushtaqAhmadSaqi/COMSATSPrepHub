@@ -180,14 +180,18 @@
 
     .mobile-nav-shell {
       position: fixed;
-      left: 0px;
-      right: 15px;
-      bottom: 4px;
+      left: 0;
+      right: 0;
+      margin-left: auto;
+      margin-right: auto;
+      width: calc(100% - 32px);
+      max-width: 450px;
+      bottom: 16px;
       z-index: 55;
       border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      background: linear-gradient(140deg, rgba(12, 24, 44, 0.92), rgba(17, 37, 63, 0.88));
-      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      background: #111827; /* Darker solid background resembling the screenshot */
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
@@ -195,40 +199,37 @@
 
     .mobile-nav-item {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      min-height: 52px;
-      border-radius: 999px;
-      color: rgba(226, 232, 240, 0.9);
+      gap: 4px;
+      min-height: 56px;
+      border-radius: 20px;
+      color: rgba(255, 255, 255, 0.85); /* White-ish inactive text */
       text-decoration: none;
-      transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
-      padding: 0 12px;
+      transition: all 0.25s ease;
+      padding: 6px 2px;
     }
 
     .mobile-nav-item .material-symbols-outlined {
-      font-size: 23px;
+      font-size: 24px;
     }
 
     .mobile-nav-item .label {
       font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
+      font-weight: 600;
+      letter-spacing: 0.01em;
       white-space: nowrap;
     }
 
     .mobile-nav-item.active {
-      background: linear-gradient(140deg, #2b8de2, #2196f3);
-      color: #ffffff;
-      box-shadow: 0 10px 25px rgba(33, 150, 243, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-      transform: translateY(-1px);
+      background: rgba(43, 141, 226, 0.15); /* Translucent blue background */
+      color: #3b82f6; /* Blue text and icon */
     }
 
     @media (max-width: 767px) {
       .hero-blob-a { width: 200px; height: 200px; top: -60px; right: -40px; }
       .hero-blob-b { width: 160px; height: 160px; bottom: -40px; left: -30px; }
-      .mobile-nav-item .label { display: none; }
-      .mobile-nav-item.active .label { display: inline; }
     }
   </style>
 </head>
