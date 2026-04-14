@@ -9,7 +9,8 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <link rel="stylesheet" href="auth-modal.css">
     <link rel="stylesheet" href="style.css">
@@ -28,7 +29,7 @@
                 }
             },
             plugins: [
-                function({ addComponents, addUtilities }) {
+                function ({ addComponents, addUtilities }) {
                     addComponents({
                         '.glass-panel': {
                             '@apply bg-white/80 dark:bg-dark-surface/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-2xl rounded-2xl transition-all duration-300': {},
@@ -54,9 +55,10 @@
 
 <body class="bg-gray-50 dark:bg-dark-bg text-gray-900 dark:text-gray-100 transition-colors duration-300">
     <!-- Navigation -->
-    <header class="sticky top-0 z-50 glass-panel border-b border-gray-200 dark:border-white/10 bg-white/60 dark:bg-dark-bg/60 backdrop-blur-md px-6 py-4 flex items-center justify-between mb-8">
-        <a href="index.html" class="text-xl font-bold tracking-tight text-brand-600 dark:text-white flex items-center gap-2">
-            <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-xs text-white">C</span>
+    <!-- Navigation -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-gray-200 dark:border-white/10 bg-white/80 dark:bg-dark-bg/60 backdrop-blur-xl px-4 md:px-10 py-5 flex items-center justify-between mb-10 mx-0 md:mx-6 mt-0 md:mt-4">
+        <a href="index.html" class="text-lg md:text-xl font-bold tracking-tight text-brand-600 dark:text-white flex items-center gap-2 md:gap-3">
+            <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-xs text-white shadow-sm flex-shrink-0">C</span>
             COMSATSPrepHub
         </a>
         <nav class="hidden md:flex gap-8 items-center font-medium">
@@ -65,9 +67,10 @@
             <a href="quiz.html" class="text-gray-500 hover:text-brand-500 dark:text-gray-400 dark:hover:text-white transition-colors">Quiz</a>
         </nav>
         <div class="flex items-center gap-4">
-             <button id="open-auth-modal" class="px-5 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow-lg shadow-brand-500/20 transition-all active:scale-95 flex items-center gap-2">
-                <span class="material-symbols-outlined text-[16px]">dashboard</span>
-                Dashboard
+            <button id="open-auth-modal" class="px-4 md:px-6 py-2 md:py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm shadow-lg shadow-brand-500/20 transition-all active:scale-95 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">dashboard</span>
+                <span class="hidden sm:inline">Dashboard</span>
+                <span class="sm:hidden text-xs">Login</span>
             </button>
         </div>
     </header>
@@ -77,23 +80,34 @@
         <section class="mb-12" data-aos="fade-down">
             <div class="flex flex-col md:flex-row items-end justify-between gap-8">
                 <div class="max-w-2xl">
-                    <span class="inline-block px-3 py-1 rounded-full bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20 text-[11px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-widest mb-4">Curated Archive</span>
-                    <h1 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tight mb-4">Academic Catalog</h1>
+                    <span
+                        class="inline-block px-3 py-1 rounded-full bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20 text-[11px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-widest mb-4">Curated
+                        Archive</span>
+                    <h1 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tight mb-4">
+                        Academic Catalog</h1>
                     <p class="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
-                        Explore past papers organized by subject. Access high-quality study materials designed for COMSATS students.
+                        Explore past papers organized by subject. Access high-quality study materials designed for
+                        COMSATS students.
                     </p>
-                    <div id="subjectCountBadge" class="mt-4 px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg inline-flex items-center gap-2" style="display:none;"></div>
+                    <div id="subjectCountBadge"
+                        class="mt-4 px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg inline-flex items-center gap-2"
+                        style="display:none;"></div>
                 </div>
-                
+
                 <div class="w-full md:w-96 relative group">
-                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-500 transition-colors">search</span>
-                    <input id="subjectSearchInput" class="w-full pl-12 pr-4 py-4 bg-white dark:bg-dark-surface border border-gray-200 dark:border-white/10 rounded-2xl outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all shadow-sm group-hover:shadow-md dark:placeholder-gray-600" placeholder="Search subjects..." type="text" oninput="filterSubjects()">
+                    <span
+                        class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-500 transition-colors">search</span>
+                    <input id="subjectSearchInput"
+                        class="w-full pl-12 pr-4 py-4 bg-white dark:bg-dark-surface border border-gray-200 dark:border-white/10 rounded-2xl outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 transition-all shadow-sm group-hover:shadow-md dark:placeholder-gray-600"
+                        placeholder="Search subjects..." type="text" oninput="filterSubjects()">
                 </div>
             </div>
         </section>
 
         <!-- Error -->
-        <div id="errorBanner" class="p-4 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 text-red-700 dark:text-red-400 rounded-xl mb-8 flex items-center gap-3" style="display:none;"></div>
+        <div id="errorBanner"
+            class="p-4 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 text-red-700 dark:text-red-400 rounded-xl mb-8 flex items-center gap-3"
+            style="display:none;"></div>
 
         <!-- Loading skeletons -->
         <div id="loadingGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -120,11 +134,14 @@
         </div>
 
         <!-- Subjects Grid (populated dynamically) -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="subjectsGrid" style="display:none;"></section>
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="subjectsGrid"
+            style="display:none;"></section>
 
         <!-- No search results -->
-        <div id="noResults" class="py-20 flex flex-col items-center justify-center text-center glass-panel" style="display:none;">
-            <div class="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-400 mb-6">
+        <div id="noResults" class="py-20 flex flex-col items-center justify-center text-center glass-panel"
+            style="display:none;">
+            <div
+                class="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-400 mb-6">
                 <span class="material-symbols-outlined text-4xl">search_off</span>
             </div>
             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No subjects found</h3>
@@ -132,39 +149,51 @@
         </div>
 
         <!-- Empty state (no papers at all) -->
-        <div id="emptyState" class="py-20 flex flex-col items-center justify-center text-center glass-panel" style="display:none;">
-            <div class="w-16 h-16 rounded-2xl bg-brand-50 dark:bg-brand-500/10 flex items-center justify-center text-brand-600 mb-6">
+        <div id="emptyState" class="py-20 flex flex-col items-center justify-center text-center glass-panel"
+            style="display:none;">
+            <div
+                class="w-16 h-16 rounded-2xl bg-brand-50 dark:bg-brand-500/10 flex items-center justify-center text-brand-600 mb-6">
                 <span class="material-symbols-outlined text-4xl">folder_off</span>
             </div>
             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Archive is empty</h3>
-            <p class="text-gray-500 dark:text-gray-400 max-w-sm">No past papers have been uploaded yet. Check back soon for updates.</p>
+            <p class="text-gray-500 dark:text-gray-400 max-w-sm">No past papers have been uploaded yet. Check back soon
+                for updates.</p>
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="mt-auto border-t border-gray-200 dark:border-white/5 bg-white/60 dark:bg-black/40 backdrop-blur-md relative z-10 transition-colors">
+    <footer
+        class="mt-auto border-t border-gray-200 dark:border-white/5 bg-white/60 dark:bg-black/40 backdrop-blur-md relative z-10 transition-colors">
         <div class="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div class="flex flex-col gap-4">
-                <div class="text-sm font-bold tracking-widest text-brand-600 dark:text-brand-500/80 uppercase flex items-center gap-2">
-                    <span class="w-5 h-5 rounded bg-gradient-to-br from-brand-500 to-indigo-600 inline-flex items-center justify-center text-[10px] text-white font-black">C</span>
+                <div
+                    class="text-sm font-bold tracking-widest text-brand-600 dark:text-brand-500/80 uppercase flex items-center gap-2">
+                    <span
+                        class="w-5 h-5 rounded bg-gradient-to-br from-brand-500 to-indigo-600 inline-flex items-center justify-center text-[10px] text-white font-black">C</span>
                     COMSATSPrepHub
                 </div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 max-w-xs font-medium">The most comprehensive and community-driven archive for COMSATS University past papers.</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 max-w-xs font-medium">The most comprehensive and
+                    community-driven archive for COMSATS University past papers.</p>
             </div>
             <div class="flex gap-10">
                 <div class="flex flex-col gap-3">
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Navigation</p>
-                    <a class="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-500 dark:hover:text-white transition-colors" href="index.html">Home</a>
-                    <a class="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-500 dark:hover:text-white transition-colors" href="subjects.html">Subjects</a>
+                    <a class="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-500 dark:hover:text-white transition-colors"
+                        href="index.html">Home</a>
+                    <a class="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-500 dark:hover:text-white transition-colors"
+                        href="subjects.html">Subjects</a>
                 </div>
                 <div class="flex flex-col gap-3">
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Legal</p>
-                    <a class="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-500 dark:hover:text-white transition-colors" href="terms.html">Terms</a>
-                    <a class="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-500 dark:hover:text-white transition-colors" href="feedback.html">Feedback</a>
+                    <a class="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-500 dark:hover:text-white transition-colors"
+                        href="terms.html">Terms</a>
+                    <a class="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-brand-500 dark:hover:text-white transition-colors"
+                        href="feedback.html">Feedback</a>
                 </div>
             </div>
             <div class="text-right">
-                <p class="text-sm text-gray-500 dark:text-gray-500 font-bold mb-1">Made with <span class="text-red-500">♥</span></p>
+                <p class="text-sm text-gray-500 dark:text-gray-500 font-bold mb-1">Made with <span
+                        class="text-red-500">♥</span></p>
                 <p class="text-xs text-gray-400 dark:text-gray-600 font-bold tracking-tight">Mushtaq Ahmad Saqi</p>
             </div>
         </div>
@@ -202,19 +231,28 @@
             <div class="am-panel am-login">
                 <section class="am-side am-l-side">
                     <div class="am-bg-wrap">
-                        <img class="am-bg-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZDdNBglJeWrhi1y9jHIye7HIzCaIJI2VjDX-tqDH8dlDCtls8eTrLe8AHu-8QNhXA2j51OpnRpksHOCmzKaSTGRVocinZu_g6kcjHVO-KmmMDRgKY9A5bjPCbTd74_QZ_b4E0mEa3s57hV_8PV1qoIcW1W1-cvoW50XK5HDsQXs-rmyiJQ9-eKURVp0nLXuzjPsJYIuZhEC6Sd_s8ZFgrUF-tG8TeuVUml81zCmnoAmSoX-XdJWNxIPpPGlURk9DNtY--FBNPa9HA" alt="Background">
+                        <img class="am-bg-img"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZDdNBglJeWrhi1y9jHIye7HIzCaIJI2VjDX-tqDH8dlDCtls8eTrLe8AHu-8QNhXA2j51OpnRpksHOCmzKaSTGRVocinZu_g6kcjHVO-KmmMDRgKY9A5bjPCbTd74_QZ_b4E0mEa3s57hV_8PV1qoIcW1W1-cvoW50XK5HDsQXs-rmyiJQ9-eKURVp0nLXuzjPsJYIuZhEC6Sd_s8ZFgrUF-tG8TeuVUml81zCmnoAmSoX-XdJWNxIPpPGlURk9DNtY--FBNPa9HA"
+                            alt="Background">
                     </div>
                     <div class="am-logo">COMSATSPrepHub</div>
                     <div class="am-hero">
                         <span class="am-sub">Academic Excellence</span>
                         <h2 class="am-h1">WELCOME BACK!</h2>
-                        <p class="am-p">Access your curated prep materials and continue your journey toward academic mastery at COMSATS.</p>
-                        <div class="am-dots"><div class="am-dot active"></div><div class="am-dot"></div><div class="am-dot"></div></div>
+                        <p class="am-p">Access your curated prep materials and continue your journey toward academic
+                            mastery at COMSATS.</p>
+                        <div class="am-dots">
+                            <div class="am-dot active"></div>
+                            <div class="am-dot"></div>
+                            <div class="am-dot"></div>
+                        </div>
                     </div>
                 </section>
                 <section class="am-form-panel">
                     <div class="am-wrap">
-                        <div class="am-m-logo"><div class="am-m-name">COMSATSPrepHub</div></div>
+                        <div class="am-m-logo">
+                            <div class="am-m-name">COMSATSPrepHub</div>
+                        </div>
                         <div class="am-head">
                             <h3 class="am-h2">Login</h3>
                             <p class="am-h2-sub">Welcome back to your academic curator.</p>
@@ -224,7 +262,8 @@
                                 <label class="am-label" for="am-l-email">Email Address</label>
                                 <div class="am-field">
                                     <span class="material-symbols-outlined am-icon">mail</span>
-                                    <input class="am-in" id="am-l-email" name="email" type="email" placeholder="name@example.com" required>
+                                    <input class="am-in" id="am-l-email" name="email" type="email"
+                                        placeholder="name@example.com" required>
                                 </div>
                             </div>
                             <div class="am-item">
@@ -234,18 +273,24 @@
                                 </div>
                                 <div class="am-field">
                                     <span class="material-symbols-outlined am-icon">lock</span>
-                                    <input class="am-in" id="am-l-pass" name="password" type="password" placeholder="••••••••" required>
-                                    <button class="am-eye" type="button" aria-label="Toggle password"><span class="material-symbols-outlined" style="font-size:18px;">visibility</span></button>
+                                    <input class="am-in" id="am-l-pass" name="password" type="password"
+                                        placeholder="••••••••" required>
+                                    <button class="am-eye" type="button" aria-label="Toggle password"><span
+                                            class="material-symbols-outlined"
+                                            style="font-size:18px;">visibility</span></button>
                                 </div>
                             </div>
                             <div class="am-check">
                                 <input class="am-ck-in" type="checkbox" id="am-rem-in">
                                 <label class="am-ck-lbl" for="am-rem-in">Keep me logged in</label>
                             </div>
-                            <button class="am-btn am-b-login" type="submit"><span>Login</span><span class="material-symbols-outlined" style="font-size:18px;">arrow_forward</span></button>
+                            <button class="am-btn am-b-login" type="submit"><span>Login</span><span
+                                    class="material-symbols-outlined"
+                                    style="font-size:18px;">arrow_forward</span></button>
                             <div class="am-sep"><span>or</span></div>
                             <button class="am-btn-g" type="button" id="am-google-login">
-                                <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" alt="Google">
+                                <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png"
+                                    alt="Google">
                                 <span>Sign in with Google</span>
                             </button>
                         </form>
@@ -257,22 +302,29 @@
             <div class="am-panel am-signup">
                 <section class="am-side am-s-side">
                     <div class="am-bg-wrap">
-                        <img class="am-bg-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk3-sOvD_tJohcdxadxtZFJ10l6HyxAbSE4RauxdmJfHf2zs_u4P38ESTUhEgJwACMcTPz6pi5NSGYVW9uobohnmF9gZ2L4ftwzuQ_IVi8C9i5F5nZgsq-49YwZihRSNuU7xyqpNU7wTUnjp265IAJ1xC08Fkzj6pMEq1juhdk208VCUWDAvkIVlKiUvZALMeyoFUi9xXkGA82r8dJkKDLwCujzX1EtT1wGN0dijfpNbSMh1cay34o_4cztvQ85r3FGObPL80zGWU9" alt="Background">
+                        <img class="am-bg-img"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk3-sOvD_tJohcdxadxtZFJ10l6HyxAbSE4RauxdmJfHf2zs_u4P38ESTUhEgJwACMcTPz6pi5NSGYVW9uobohnmF9gZ2L4ftwzuQ_IVi8C9i5F5nZgsq-49YwZihRSNuU7xyqpNU7wTUnjp265IAJ1xC08Fkzj6pMEq1juhdk208VCUWDAvkIVlKiUvZALMeyoFUi9xXkGA82r8dJkKDLwCujzX1EtT1wGN0dijfpNbSMh1cay34o_4cztvQ85r3FGObPL80zGWU9"
+                            alt="Background">
                     </div>
                     <div class="am-hero">
                         <div class="am-line"></div>
                         <div class="am-stack">
                             <span class="am-sub">Academic Excellence</span>
                             <h2 class="am-h1">WELCOME!</h2>
-                            <p class="am-p">Join the community of scholars at COMSATSPrepHub. Your curated journey to academic mastery starts here.</p>
+                            <p class="am-p">Join the community of scholars at COMSATSPrepHub. Your curated journey to
+                                academic mastery starts here.</p>
                         </div>
                     </div>
-                    <div class="am-foot-l"><div class="am-logo-n">COMSATSPrepHub</div></div>
+                    <div class="am-foot-l">
+                        <div class="am-logo-n">COMSATSPrepHub</div>
+                    </div>
                 </section>
                 <section class="am-form-panel">
                     <div class="am-wrap">
                         <div class="am-m-logo">
-                            <div style="width:36px;height:3px;background:#006f1d;margin:0 auto 12px;border-radius:999px;"></div>
+                            <div
+                                style="width:36px;height:3px;background:#006f1d;margin:0 auto 12px;border-radius:999px;">
+                            </div>
                             <div class="am-m-name" style="color:#5f5e5e;">COMSATSPrepHub</div>
                         </div>
                         <div class="am-head">
@@ -280,29 +332,36 @@
                             <p class="am-h2-sub">Sign up to access curated study materials and tracking.</p>
                         </div>
                         <button class="am-btn-g am-btn-g-up" type="button" id="am-google-signup">
-                            <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" alt="Google">
+                            <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png"
+                                alt="Google">
                             <span>Continue with Google</span>
                         </button>
                         <div class="am-sep"><span>or email</span></div>
                         <form id="am-s-form">
                             <div class="am-item">
                                 <label class="am-label" for="am-s-name">Full Name</label>
-                                <div class="am-field"><input class="am-in no-icon" id="am-s-name" name="name" type="text" placeholder="John Doe" required></div>
+                                <div class="am-field"><input class="am-in no-icon" id="am-s-name" name="name"
+                                        type="text" placeholder="John Doe" required></div>
                             </div>
                             <div class="am-item">
                                 <label class="am-label" for="am-s-email">Email Address</label>
-                                <div class="am-field"><input class="am-in no-icon" id="am-s-email" name="email" type="email" placeholder="student@university.edu" required></div>
+                                <div class="am-field"><input class="am-in no-icon" id="am-s-email" name="email"
+                                        type="email" placeholder="student@university.edu" required></div>
                             </div>
                             <div class="am-item">
                                 <label class="am-label" for="am-s-pass">Password</label>
                                 <div class="am-field">
-                                    <input class="am-in no-icon" id="am-s-pass" name="password" type="password" placeholder="••••••••" required>
-                                    <button class="am-eye" type="button" aria-label="Toggle password"><span class="material-symbols-outlined" style="font-size:18px;">visibility</span></button>
+                                    <input class="am-in no-icon" id="am-s-pass" name="password" type="password"
+                                        placeholder="••••••••" required>
+                                    <button class="am-eye" type="button" aria-label="Toggle password"><span
+                                            class="material-symbols-outlined"
+                                            style="font-size:18px;">visibility</span></button>
                                 </div>
                             </div>
                             <div class="am-check">
                                 <input class="am-ck-in" type="checkbox" id="am-acc-in">
-                                <label class="am-ck-lbl" for="am-acc-in">I agree to the <a href="terms.html">Terms of Service</a> and <a href="terms.html">Privacy Policy</a>.</label>
+                                <label class="am-ck-lbl" for="am-acc-in">I agree to the <a href="terms.html">Terms of
+                                        Service</a> and <a href="terms.html">Privacy Policy</a>.</label>
                             </div>
                             <button class="am-btn am-b-signup" type="submit">Create Account</button>
                         </form>
@@ -422,9 +481,9 @@
     <!-- Auth modal logic + scroll nav -->
     <script type="module">
         // ── MODAL OPEN / CLOSE ──
-        const overlay  = document.getElementById('auth-modal-overlay');
-        const amAuth   = document.getElementById('am-auth');
-        const openBtn  = document.getElementById('open-auth-modal');
+        const overlay = document.getElementById('auth-modal-overlay');
+        const amAuth = document.getElementById('am-auth');
+        const openBtn = document.getElementById('open-auth-modal');
         const closeBtn = document.getElementById('close-auth-modal');
 
         function openModal(startTab) {
@@ -437,9 +496,9 @@
             document.body.style.overflow = '';
         }
 
-        openBtn.addEventListener('click',  () => openModal('login'));
+        openBtn.addEventListener('click', () => openModal('login'));
         closeBtn.addEventListener('click', closeModal);
-        overlay.addEventListener('click',  e => { if (e.target === overlay) closeModal(); });
+        overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
         // ── PANEL TOGGLE ──
@@ -454,7 +513,7 @@
         document.querySelectorAll('.am-eye').forEach(btn => {
             btn.addEventListener('click', () => {
                 const input = btn.parentElement.querySelector('input');
-                const icon  = btn.querySelector('.material-symbols-outlined');
+                const icon = btn.querySelector('.material-symbols-outlined');
                 if (input.type === 'password') { input.type = 'text'; icon.textContent = 'visibility_off'; }
                 else { input.type = 'password'; icon.textContent = 'visibility'; }
             });
@@ -480,22 +539,22 @@
         if (amSForm) {
             amSForm.addEventListener('submit', async e => {
                 e.preventDefault();
-                const name  = document.getElementById('am-s-name').value;
+                const name = document.getElementById('am-s-name').value;
                 const email = document.getElementById('am-s-email').value;
-                const pass  = document.getElementById('am-s-pass').value;
-                const acc   = document.getElementById('am-acc-in').checked;
+                const pass = document.getElementById('am-s-pass').value;
+                const acc = document.getElementById('am-acc-in').checked;
                 if (!acc) { Swal.fire('Notice', 'Please accept the terms first.', 'warning'); return; }
                 if (pass.length < 8) { Swal.fire('Notice', 'Password must be at least 8 characters.', 'warning'); return; }
                 const btn = amSForm.querySelector('button[type="submit"]');
                 btn.textContent = 'Processing...'; btn.disabled = true;
                 const redirectUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/dashboard.html');
-                const { error } = await supabaseAuth.auth.signUp({ 
-                    email, 
-                    password: pass, 
-                    options: { 
+                const { error } = await supabaseAuth.auth.signUp({
+                    email,
+                    password: pass,
+                    options: {
                         data: { full_name: name },
                         emailRedirectTo: redirectUrl
-                    } 
+                    }
                 });
                 btn.textContent = 'Create Account'; btn.disabled = false;
                 if (error) Swal.fire('Error', error.message, 'error');
@@ -524,8 +583,8 @@
             amLForm.addEventListener('submit', async e => {
                 e.preventDefault();
                 const email = document.getElementById('am-l-email').value;
-                const pass  = document.getElementById('am-l-pass').value;
-                const btn   = amLForm.querySelector('button[type="submit"]');
+                const pass = document.getElementById('am-l-pass').value;
+                const btn = amLForm.querySelector('button[type="submit"]');
                 btn.querySelector('span:first-child').textContent = 'Entering...'; btn.disabled = true;
                 const { error } = await supabaseAuth.auth.signInWithPassword({ email, password: pass });
                 btn.querySelector('span:first-child').textContent = 'Login'; btn.disabled = false;
