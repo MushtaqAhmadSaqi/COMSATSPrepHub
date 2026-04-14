@@ -178,23 +178,25 @@
     </footer>
 
     <!-- ═══ MOBILE BOTTOM NAV ═══ -->
-    <nav id="mobileBottomNav" class="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center bg-white/95 backdrop-blur-md border-t border-[#e2e8f0] py-2.5 px-4 shadow-lg" style="padding-bottom: max(10px, env(safe-area-inset-bottom));">
-        <a href="index.html" class="flex flex-col items-center gap-0.5 text-[#6b7280] hover:text-brand-500 transition-colors">
-            <span class="material-symbols-outlined text-2xl">home</span>
-            <span class="text-[10px] font-semibold tracking-wide">Home</span>
-        </a>
-        <a href="subjects.html" class="flex flex-col items-center gap-0.5 text-brand-500">
-            <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1">menu_book</span>
-            <span class="text-[10px] font-semibold tracking-wide">Subjects</span>
-        </a>
-        <a href="quiz.html" class="flex flex-col items-center gap-0.5 text-[#6b7280] hover:text-brand-500 transition-colors">
-            <span class="material-symbols-outlined text-2xl">quiz</span>
-            <span class="text-[10px] font-semibold tracking-wide">Quiz</span>
-        </a>
-        <a href="about-us.html" class="flex flex-col items-center gap-0.5 text-[#6b7280] hover:text-brand-500 transition-colors">
-            <span class="material-symbols-outlined text-2xl">groups</span>
-            <span class="text-[10px] font-semibold tracking-wide">Team</span>
-        </a>
+    <nav id="mobileBottomNav" class="mobile-nav-shell md:hidden">
+        <div class="mobile-nav-grid">
+            <a href="index.html" class="mobile-nav-item">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">home</span>
+                <span class="label">Home</span>
+            </a>
+            <a href="subjects.html" class="mobile-nav-item active">
+                <span class="material-symbols-outlined">menu_book</span>
+                <span class="label">Subjects</span>
+            </a>
+            <a href="quiz.html" class="mobile-nav-item">
+                <span class="material-symbols-outlined">quiz</span>
+                <span class="label">Quiz</span>
+            </a>
+            <a href="about-us.html" class="mobile-nav-item">
+                <span class="material-symbols-outlined">groups</span>
+                <span class="label">Team</span>
+            </a>
+        </div>
     </nav>
 
     <!-- ════════════════════════ AUTH MODAL ════════════════════════ -->

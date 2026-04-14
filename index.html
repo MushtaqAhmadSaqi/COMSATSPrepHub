@@ -173,60 +173,6 @@
       box-shadow: 0 20px 40px rgba(0,0,0,0.09), 0 4px 12px rgba(0,0,0,0.04);
     }
 
-    /* Mobile nav bottom safe area */
-    .mobile-nav {
-      padding-bottom: max(10px, env(safe-area-inset-bottom));
-    }
-
-    .mobile-nav-shell {
-      position: fixed;
-      left: 0;
-      right: 0;
-      margin-left: auto;
-      margin-right: auto;
-      width: calc(100% - 32px);
-      max-width: 450px;
-      bottom: 16px;
-      z-index: 55;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.15);
-      background: #111827; /* Darker solid background resembling the screenshot */
-      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
-    }
-
-    .mobile-nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      min-height: 56px;
-      border-radius: 20px;
-      color: rgba(255, 255, 255, 0.85); /* White-ish inactive text */
-      text-decoration: none;
-      transition: all 0.25s ease;
-      padding: 6px 2px;
-    }
-
-    .mobile-nav-item .material-symbols-outlined {
-      font-size: 24px;
-    }
-
-    .mobile-nav-item .label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-      white-space: nowrap;
-    }
-
-    .mobile-nav-item.active {
-      background: rgba(43, 141, 226, 0.15); /* Translucent blue background */
-      color: #3b82f6; /* Blue text and icon */
-    }
-
     @media (max-width: 767px) {
       .hero-blob-a { width: 200px; height: 200px; top: -60px; right: -40px; }
       .hero-blob-b { width: 160px; height: 160px; bottom: -40px; left: -30px; }
@@ -477,8 +423,8 @@
   </footer>
 
   <!-- ═══════════════════════════════════ MOBILE NAV ═══════════════════════════════════ -->
-  <nav id="mobileBottomNav" class="mobile-nav mobile-nav-shell md:hidden p-2.5">
-    <div class="grid grid-cols-4 gap-1.5">
+  <nav id="mobileBottomNav" class="mobile-nav-shell md:hidden">
+    <div class="mobile-nav-grid">
       <a href="index.html" data-route="index.html" class="mobile-nav-item active" aria-label="Go to home page">
         <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">home</span>
         <span class="label">Home</span>
