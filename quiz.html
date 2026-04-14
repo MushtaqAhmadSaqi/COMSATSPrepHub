@@ -186,5 +186,31 @@
             </a>
         </div>
     </nav>
+
+    <script>
+        // ── Smart hide/show mobile bottom nav on scroll ──
+        (function () {
+            const nav = document.getElementById('mobileBottomNav');
+            if (!nav) return;
+            let lastScrollY = window.scrollY;
+            let ticking = false;
+
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        const currentScrollY = window.scrollY;
+                        if (currentScrollY > lastScrollY && currentScrollY > 60) {
+                            nav.classList.add('nav-hidden');
+                        } else {
+                            nav.classList.remove('nav-hidden');
+                        }
+                        lastScrollY = currentScrollY;
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }, { passive: true });
+        })();
+    </script>
 </body>
 </html>

@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <link rel="stylesheet" href="auth-modal.css">
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <script>
@@ -40,14 +41,6 @@
             ]
         }
     </script>
-    <style>
-        /* Smart hide/show mobile bottom nav */
-        #mobileBottomNav {
-            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        #mobileBottomNav.nav-hidden {
-            transform: translateY(100%);
-        }
     </style>
     <script>
         // Check theme on load
@@ -181,7 +174,7 @@
     <nav id="mobileBottomNav" class="mobile-nav-shell md:hidden">
         <div class="mobile-nav-grid">
             <a href="index.html" class="mobile-nav-item">
-                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">home</span>
+                <span class="material-symbols-outlined">home</span>
                 <span class="label">Home</span>
             </a>
             <a href="subjects.html" class="mobile-nav-item active">

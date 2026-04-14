@@ -426,7 +426,7 @@
   <nav id="mobileBottomNav" class="mobile-nav-shell md:hidden">
     <div class="mobile-nav-grid">
       <a href="index.html" data-route="index.html" class="mobile-nav-item active" aria-label="Go to home page">
-        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">home</span>
+        <span class="material-symbols-outlined">home</span>
         <span class="label">Home</span>
       </a>
       <a href="subjects.html" data-route="subjects.html" class="mobile-nav-item" aria-label="Go to subjects page">
@@ -806,9 +806,9 @@
                 window.requestAnimationFrame(() => {
                     const currentScrollY = window.scrollY;
                     if (currentScrollY > lastScrollY && currentScrollY > 60) {
-                        nav.style.transform = 'translateY(100%)';
+                        nav.classList.add('nav-hidden');
                     } else {
-                        nav.style.transform = 'translateY(0)';
+                        nav.classList.remove('nav-hidden');
                     }
                     lastScrollY = currentScrollY;
                     ticking = false;
