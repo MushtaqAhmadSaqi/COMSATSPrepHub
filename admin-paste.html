@@ -95,39 +95,45 @@
                     prompt and send to ChatGPT</div>
                 <div id="promptText"
                     class="bg-black/30 rounded-lg p-4 md:p-5 text-[13px] font-mono whitespace-pre-wrap break-words text-blue-50 leading-relaxed shadow-inner">
-                    Convert this past paper into this exact JSON format. Output ONLY the raw JSON, no explanation:
+                    Convert the following past paper into the exact JSON structure provided below. Output ONLY the raw, valid JSON. Do not include markdown code blocks (like ```json) or any explanations.
 
+                    CRITICAL INSTRUCTIONS FOR UI RENDERING:
+                    1. JSON ESCAPING: You MUST double-escape all backslashes for LaTeX to prevent JSON syntax errors (e.g., write \\frac{1}{2} instead of \frac{1}{2}). You must also escape any internal double quotes (\").
+                    2. MATH DELIMITERS: Wrap inline math in $...$ and block equations in $$...$$. Example: $\\sum_{i=1}^{n}$
+                    3. NEWLINES: Use actual newline escape sequences (\n\n) to separate paragraphs or steps within a text field.
+                    4. TABLES: Format tables as Markdown tables within the JSON string, ensuring newline sequences (\n) separate the rows.
+                    5. INSTRUCTORS: If there are multiple instructors, set "instructor_name" to "Central Paper".
+
+                    JSON FORMAT TO STRICTLY FOLLOW:
                     {
-                    "subject_code": "CSC211",
-                    "subject_name": "Data Structures",
-                    "instructor_name": "Dr. Mushtaq Ahmad",
-                    "year": 2024,
-                    "exam_type": "Mid Term",
-                    "semester": "Spring",
-                    "total_marks": 25,
-                    "questions": [
-                    {
-                    "question_number": 1,
-                    "clo": "CLO-1",
-                    "marks": 5,
-                    "question_text": "Full question text here...",
-                    "model_answer": "Full model answer here..."
-                    }
-                    ]
+                      "subject_code": "CSC211",
+                      "subject_name": "Data Structures",
+                      "instructor_name": "Dr. Mushtaq Ahmad",
+                      "year": 2024,
+                      "exam_type": "Mid Term",
+                      "semester": "Spring",
+                      "total_marks": 25,
+                      "questions": [
+                        {
+                          "question_number": 1,
+                          "clo": "CLO-1",
+                          "marks": 5,
+                          "question_text": "Main question text goes here...",
+                          "sub_parts": [
+                            "A. First sub-part text...",
+                            "B. Second sub-part text..."
+                          ],
+                          "options": [
+                            "Option 1",
+                            "Option 2",
+                            "Option 3",
+                            "Option 4"
+                          ],
+                          "model_answer": "Step 1 explanation...\n\nStep 2 explanation..."
+                        }
+                      ]
                     }
 
-                    CRITICAL MATH INSTRUCTION:
-                    1. You MUST double-escape all backslashes in your LaTeX (e.g., write \\frac{1}{2} instead of \frac{1}{2}).
-                    2. Break derivations down step-by-step using double newlines (\n\n).
-                    3. MATH & EQUATIONS: You MUST wrap EVERY SINGLE mathematical expression, formula, or relational algebra in $$ ... $$ (for block) or $ ... $ (for inline). DO NOT output raw LaTeX without these delimiters!
-                    4. TABLE FORMATTING: If there is a table in the paper, you MUST format it as a proper Markdown table
-                    within the JSON string.
-                    5. MULTIPLE PARTS & OPTIONS: If a question has sub-parts (A, B, C, D) or multiple-choice options,
-                    you MUST format them as a Markdown list or separate them using double newlines (\n\n). Do NOT put
-                    them all on a single line.
-
-                    Replace all values with the actual paper content...
-                    CRITICAL: If there are multiple instructors, set "instructor_name" to "Central Paper".
                     [PASTE YOUR PAPER HERE]</div>
                 <button
                     class="copy-btn mt-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2 rounded-full text-sm font-bold transition shadow-sm"
@@ -231,6 +237,21 @@
             <div class="question-prose text-slate-800 text-[15.5px] leading-[1.9]">
                 ${formatMarkdown(q.question_text)}
             </div>
+
+            ${q.sub_parts && q.sub_parts.length ? `
+            <div class="mt-4 space-y-3 pl-4 border-l-2 border-indigo-200">
+                ${q.sub_parts.map(sp => `<div class="question-prose text-slate-800 text-[15px] leading-[1.8]">${formatMarkdown(sp)}</div>`).join('')}
+            </div>` : ''}
+
+            ${q.options && q.options.length ? `
+            <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                ${q.options.map((opt, i) => `
+                <div class="flex items-start gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div class="flex items-center justify-center w-6 h-6 rounded-full bg-white border border-slate-300 text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">${String.fromCharCode(65 + i)}</div>
+                    <div class="text-[14.5px] text-slate-700 leading-relaxed">${formatMarkdown(opt)}</div>
+                </div>
+                `).join('')}
+            </div>` : ''}
             
             ${q.model_answer ? `
             <div class="mt-4 bg-slate-50 border border-slate-200 rounded-lg p-4 md:p-5 question-prose text-slate-800 overflow-x-auto text-[15px] leading-[1.9]">
@@ -280,7 +301,7 @@
 
                 for (let i = 0; i < d.questions.length; i++) {
                     showStatus('loading', `📝 Inserting question ${i + 1} of ${d.questions.length}...`);
-                    const { error: qErr } = await supabase.from('questions').insert([{ paper_id: paperId, question_number: d.questions[i].question_number ?? i + 1, clo: d.questions[i].clo ?? null, marks: d.questions[i].marks ?? null, question_text: d.questions[i].question_text, model_answer: d.questions[i].model_answer ?? null }]);
+                    const { error: qErr } = await supabase.from('questions').insert([{ paper_id: paperId, question_number: d.questions[i].question_number ?? i + 1, clo: d.questions[i].clo ?? null, marks: d.questions[i].marks ?? null, question_text: d.questions[i].question_text, model_answer: d.questions[i].model_answer ?? null, sub_parts: d.questions[i].sub_parts ?? null, options: d.questions[i].options ?? null }]);
                     if (qErr) throw qErr;
                 }
 
