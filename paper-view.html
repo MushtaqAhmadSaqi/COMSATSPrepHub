@@ -374,6 +374,14 @@
             }
         }
 
+        // ── Format Markdown ───────────────────────────
+        function formatMarkdown(text) {
+            if (!text) return '';
+            let processed = text.replace(/\\\[/g, '$$$$').replace(/\\\]/g, '$$$$');
+            processed = processed.replace(/\\\(/g, '$').replace(/\\\)/g, '$');
+            return marked.parse(processed);
+        }
+
         // ── Render Questions ──────────────────────────
         function renderQuestions(questions) {
             const container = document.getElementById('questionsContainer');
@@ -415,7 +423,7 @@
 
                     <!-- Question text -->
                     <div class="px-5 sm:px-7 py-6 border-b border-slate-100">
-                        <div class="question-prose text-slate-800 text-[15.5px] leading-[1.9]">${marked.parse(q.question_text || '')}</div>
+                        <div class="question-prose text-slate-800 text-[15.5px] leading-[1.9]">${formatMarkdown(q.question_text)}</div>
                     </div>
 
                     <!-- Answer area -->
@@ -455,7 +463,7 @@
                                         <p class="text-[11px] font-bold uppercase tracking-widest text-teal-700">Model Answer</p>
                                     </div>
                                     <div id="model-content-${q.id}" class="question-prose text-slate-800 text-[15px] leading-[1.9]">
-                                        ${q.model_answer ? marked.parse(q.model_answer) : '<em class="text-slate-400">No model answer provided.</em>'}
+                                        ${q.model_answer ? formatMarkdown(q.model_answer) : '<em class="text-slate-400">No model answer provided.</em>'}
                                     </div>
                                 </div>
                             </div>

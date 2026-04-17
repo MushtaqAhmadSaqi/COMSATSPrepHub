@@ -117,10 +117,9 @@
                     }
 
                     CRITICAL MATH INSTRUCTION:
-                    1. You MUST double-escape all backslashes in your LaTeX (e.g., write \\frac{1}{2} instead of
-                    \frac{1}{2}).
+                    1. You MUST double-escape all backslashes in your LaTeX (e.g., write \\frac{1}{2} instead of \frac{1}{2}).
                     2. Break derivations down step-by-step using double newlines (\n\n).
-                    3. For large equations, use $$ ... $$. Use $ ... $ for inline variables.
+                    3. MATH & EQUATIONS: You MUST wrap EVERY SINGLE mathematical expression, formula, or relational algebra in $$ ... $$ (for block) or $ ... $ (for inline). DO NOT output raw LaTeX without these delimiters!
                     4. TABLE FORMATTING: If there is a table in the paper, you MUST format it as a proper Markdown table
                     within the JSON string.
                     5. MULTIPLE PARTS & OPTIONS: If a question has sub-parts (A, B, C, D) or multiple-choice options,
@@ -208,6 +207,13 @@
             hideStatus();
         };
 
+        function formatMarkdown(text) {
+            if (!text) return '';
+            let processed = text.replace(/\\\[/g, '$$$$').replace(/\\\]/g, '$$$$');
+            processed = processed.replace(/\\\(/g, '$').replace(/\\\)/g, '$');
+            return marked.parse(processed);
+        }
+
         function renderPreview(d) {
             document.getElementById('metaGrid').innerHTML = [
                 ['Subject Code', d.subject_code], ['Subject Name', d.subject_name], ['Instructor', d.instructor_name],
@@ -223,12 +229,12 @@
             </div>
             
             <div class="question-prose text-slate-800 text-[15.5px] leading-[1.9]">
-                ${marked.parse(q.question_text || '')}
+                ${formatMarkdown(q.question_text)}
             </div>
             
             ${q.model_answer ? `
             <div class="mt-4 bg-slate-50 border border-slate-200 rounded-lg p-4 md:p-5 question-prose text-slate-800 overflow-x-auto text-[15px] leading-[1.9]">
-                ${marked.parse(q.model_answer)}
+                ${formatMarkdown(q.model_answer)}
             </div>` : ''}
         </div>
     `).join('');
