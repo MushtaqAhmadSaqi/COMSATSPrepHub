@@ -93,16 +93,18 @@
             <div class="bg-gradient-to-br from-blue-900 to-blue-700 rounded-xl p-5 md:p-7 text-white mb-8 shadow-md">
                 <div class="text-[13px] font-bold uppercase tracking-wider mb-3 text-blue-200">📋 Step 1 — Copy this
                     prompt and send to ChatGPT</div>
-                <div id="promptText"
-                    class="bg-black/30 rounded-lg p-4 md:p-5 text-[13px] font-mono whitespace-pre-wrap break-words text-blue-50 leading-relaxed shadow-inner">
+                <code id="promptText"
+                    class="block bg-black/30 rounded-lg p-4 md:p-5 text-[13px] font-mono whitespace-pre-wrap break-words text-blue-50 leading-relaxed shadow-inner">
                     Convert the following past paper into the exact JSON structure provided below. Output ONLY the raw, valid JSON. Do not include markdown code blocks (like ```json) or any explanations.
 
                     CRITICAL INSTRUCTIONS FOR UI RENDERING:
                     1. JSON ESCAPING: You MUST double-escape all backslashes for LaTeX to prevent JSON syntax errors (e.g., write \\frac{1}{2} instead of \frac{1}{2}). You must also escape any internal double quotes (\").
                     2. MATH DELIMITERS: Wrap inline math in $...$ and block equations in $$...$$. Example: $\\sum_{i=1}^{n}$
-                    3. NEWLINES: Use actual newline escape sequences (\n\n) to separate paragraphs or steps within a text field.
-                    4. TABLES: Format tables as Markdown tables within the JSON string, ensuring newline sequences (\n) separate the rows.
-                    5. INSTRUCTORS: If there are multiple instructors, set "instructor_name" to "Central Paper".
+                    3. DATABASE SCHEMAS: You MUST wrap Database notation like underline commands in math delimiters. Example: $Branch(\\underline{branchCode}, branchName)$
+                    4. RELATIONAL ALGEBRA: Use $...$ for all symbols like $\sigma$, $\Pi$, $\bowtie$, etc.
+                    5. NEWLINES: Use actual newline escape sequences (\n\n) to separate paragraphs or steps within a text field.
+                    6. TABLES: Format tables as Markdown tables within the JSON string, ensuring newline sequences (\n) separate the rows.
+                    7. INSTRUCTORS: If there are multiple instructors, set "instructor_name" to "Central Paper".
 
                     JSON FORMAT TO STRICTLY FOLLOW:
                     {
@@ -134,7 +136,7 @@
                       ]
                     }
 
-                    [PASTE YOUR PAPER HERE]</div>
+                    [PASTE YOUR PAPER HERE]</code>
                 <button
                     class="copy-btn mt-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2 rounded-full text-sm font-bold transition shadow-sm"
                     onclick="copyPrompt()">📋 Copy Prompt</button>
@@ -215,7 +217,11 @@
 
         function formatMarkdown(text) {
             if (!text) return '';
-            let processed = text.replace(/\\\[/g, '$$$$').replace(/\\\]/g, '$$$$');
+            // Auto-wrap un-wrapped LaTeX commands like \underline{...} or database symbols
+            let processed = text.replace(/(\\underline\{[^{}]*\})/g, '$$$1$');
+            
+            // Standard delimiter conversion
+            processed = processed.replace(/\\\[/g, '$$$$').replace(/\\\]/g, '$$$$');
             processed = processed.replace(/\\\(/g, '$').replace(/\\\)/g, '$');
             return marked.parse(processed);
         }

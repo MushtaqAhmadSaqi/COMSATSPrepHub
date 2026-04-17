@@ -377,7 +377,11 @@
         // ── Format Markdown ───────────────────────────
         function formatMarkdown(text) {
             if (!text) return '';
-            let processed = text.replace(/\\\[/g, '$$$$').replace(/\\\]/g, '$$$$');
+            // Auto-wrap un-wrapped LaTeX commands like \underline{...}
+            let processed = text.replace(/(\\underline\{[^{}]*\})/g, '$$$1$');
+            
+            // Standard delimiter conversion
+            processed = processed.replace(/\\\[/g, '$$$$').replace(/\\\]/g, '$$$$');
             processed = processed.replace(/\\\(/g, '$').replace(/\\\)/g, '$');
             return marked.parse(processed);
         }
