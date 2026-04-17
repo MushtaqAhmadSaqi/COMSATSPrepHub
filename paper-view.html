@@ -423,11 +423,11 @@
 
                     <!-- Question text -->
                     <div class="px-5 sm:px-7 py-6 border-b border-slate-100">
-                        <div class="question-prose text-slate-800 text-[15.5px] leading-[1.9]">${formatMarkdown(q.question_text)}</div>
+                        <div class="question-prose text-slate-800 text-[15.5px] leading-[1.9] overflow-x-auto pb-2">${formatMarkdown(q.question_text)}</div>
                         
                         ${q.sub_parts && q.sub_parts.length ? `
                         <div class="mt-6 space-y-4 pl-5 border-l-[3px] border-brand-200">
-                            ${q.sub_parts.map(sp => `<div class="question-prose text-slate-800 text-[15.5px] leading-[1.8]">${formatMarkdown(sp)}</div>`).join('')}
+                            ${q.sub_parts.map(sp => `<div class="question-prose text-slate-800 text-[15.5px] leading-[1.8] overflow-x-auto pb-2">${formatMarkdown(sp)}</div>`).join('')}
                         </div>` : ''}
 
                         ${q.options && q.options.length ? `
@@ -477,7 +477,7 @@
                                         <span class="material-symbols-outlined text-[18px] text-teal-600">auto_awesome</span>
                                         <p class="text-[11px] font-bold uppercase tracking-widest text-teal-700">Model Answer</p>
                                     </div>
-                                    <div id="model-content-${q.id}" class="question-prose text-slate-800 text-[15px] leading-[1.9]">
+                                    <div id="model-content-${q.id}" class="question-prose text-slate-800 text-[15px] leading-[1.9] overflow-x-auto pb-2">
                                         ${q.model_answer ? formatMarkdown(q.model_answer) : '<em class="text-slate-400">No model answer provided.</em>'}
                                     </div>
                                 </div>
