@@ -127,7 +127,7 @@
                 // ── Query 1: Fetch papers for this subject (simple, no nested join) ──
                 const { data: papers, error: papersError } = await supabase
                     .from('past_papers')
-                    .select('id, subject_code, subject_name, year, exam_type, semester, total_marks')
+                    .select('id, subject_code, subject_name, instructor_name, year, exam_type, semester, total_marks')
                     .eq('subject_name', subjectName)
                     .order('year', { ascending: false });
 
@@ -188,7 +188,7 @@
                                     </div>
                                     <div>
                                         <div class="paper-card-title">${escHtml(p.exam_type)}</div>
-                                        <div class="paper-card-sub">${escHtml(p.semester)} ${p.year} · ${qCount} Question${qCount !== 1 ? 's' : ''} · ${p.total_marks} Marks</div>
+                                        <div class="paper-card-sub">${escHtml(p.semester)} ${p.year} · ${escHtml(p.instructor_name || '—')} · ${qCount} Qs · ${p.total_marks} Marks</div>
                                     </div>
                                 </div>
                                 <span class="material-symbols-outlined" style="color:var(--text-muted);font-size:20px;">open_in_new</span>

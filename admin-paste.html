@@ -10,6 +10,17 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap"
         rel="stylesheet">
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+        };
+    </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -89,6 +100,7 @@
                     {
                     "subject_code": "CSC211",
                     "subject_name": "Data Structures",
+                    "instructor_name": "Dr. Mushtaq Ahmad",
                     "year": 2024,
                     "exam_type": "Mid Term",
                     "semester": "Spring",
@@ -108,7 +120,7 @@
                     1. You MUST double-escape all backslashes in your LaTeX (e.g., write \\frac{1}{2} instead of
                     \frac{1}{2}).
                     2. Break derivations down step-by-step using double newlines (\n\n).
-                    3. For large equations, use \\[ ... \\]. Use \\( ... \\) for inline variables.
+                    3. For large equations, use $$ ... $$. Use $ ... $ for inline variables.
                     4. TABLE FORMATTING: If there is a table in the paper, you MUST format it as a proper Markdown table
                     within the JSON string.
                     5. MULTIPLE PARTS & OPTIONS: If a question has sub-parts (A, B, C, D) or multiple-choice options,
@@ -116,6 +128,7 @@
                     them all on a single line.
 
                     Replace all values with the actual paper content...
+                    CRITICAL: If there are multiple instructors, set "instructor_name" to "Central Paper".
                     [PASTE YOUR PAPER HERE]</div>
                 <button
                     class="copy-btn mt-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2 rounded-full text-sm font-bold transition shadow-sm"
@@ -181,9 +194,14 @@
             try { data = JSON.parse(cleaned); }
             catch (e) { return showStatus('error', `❌ <strong>Invalid JSON.</strong> Ensure no trailing commas and proper backslashes.<br><small class="opacity-80 mt-1 block">Error: ${e.message}</small>`); }
 
-            const required = ['subject_code', 'subject_name', 'year', 'exam_type', 'semester', 'total_marks', 'questions'];
+            const required = ['subject_code', 'subject_name', 'instructor_name', 'year', 'exam_type', 'semester', 'total_marks', 'questions'];
             for (const f of required) if (data[f] == null) return showStatus('error', `❌ Missing field: <code class="bg-red-100/50 px-1.5 py-0.5 rounded text-red-900 font-mono">${f}</code>`);
             if (!Array.isArray(data.questions) || !data.questions.length) return showStatus('error', '❌ Questions array is empty or missing.');
+
+            // Auto-replace multiple instructors with "Central Paper"
+            if (data.instructor_name && (data.instructor_name.includes(',') || data.instructor_name.includes('&') || data.instructor_name.toLowerCase().includes(' and '))) {
+                data.instructor_name = 'Central Paper';
+            }
 
             parsedData = data;
             renderPreview(data);
@@ -192,8 +210,8 @@
 
         function renderPreview(d) {
             document.getElementById('metaGrid').innerHTML = [
-                ['Subject Code', d.subject_code], ['Subject Name', d.subject_name], ['Year', d.year],
-                ['Exam Type', d.exam_type], ['Semester', d.semester], ['Total Marks', d.total_marks]
+                ['Subject Code', d.subject_code], ['Subject Name', d.subject_name], ['Instructor', d.instructor_name],
+                ['Year', d.year], ['Exam Type', d.exam_type], ['Semester', d.semester], ['Total Marks', d.total_marks]
             ].map(([k, v]) => `<div class="bg-slate-100/80 rounded-lg p-3 text-[12px] text-slate-500 uppercase tracking-wide font-semibold">${k}<strong class="block text-[15px] font-bold text-slate-900 mt-1 capitalize">${v}</strong></div>`).join('');
 
             document.getElementById('qList').innerHTML = d.questions.map(q => `
@@ -242,14 +260,14 @@
                 if (existing) {
                     showStatus('loading', '🔄 Existing paper found. Updating details & removing old questions...');
                     paperId = existing.id;
-                    const { error: updateErr } = await supabase.from('past_papers').update({ subject_name: d.subject_name, total_marks: d.total_marks }).eq('id', paperId);
+                    const { error: updateErr } = await supabase.from('past_papers').update({ subject_name: d.subject_name, instructor_name: d.instructor_name, total_marks: d.total_marks }).eq('id', paperId);
                     if (updateErr) throw updateErr;
 
                     const { error: delErr } = await supabase.from('questions').delete().eq('paper_id', paperId);
                     if (delErr) throw delErr;
                 } else {
                     showStatus('loading', '📄 Inserting new paper record...');
-                    const { data: paper, error: paperError } = await supabase.from('past_papers').insert([{ subject_code: subjectCode, subject_name: d.subject_name, year: d.year, exam_type: d.exam_type, semester: d.semester, total_marks: d.total_marks }]).select().single();
+                    const { data: paper, error: paperError } = await supabase.from('past_papers').insert([{ subject_code: subjectCode, subject_name: d.subject_name, instructor_name: d.instructor_name, year: d.year, exam_type: d.exam_type, semester: d.semester, total_marks: d.total_marks }]).select().single();
                     if (paperError) throw paperError;
                     paperId = paper.id;
                 }
