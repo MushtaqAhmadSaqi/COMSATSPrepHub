@@ -6,6 +6,14 @@
     <title>Quiz | COMSATSPrepHub</title>
     <!-- Simple, Semantic Stylesheet -->
     <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <style>
+        .hidden { display: none !important; }
+        .correct-answer { background-color: #dcfce7 !important; border-color: #166534 !important; color: #166534 !important; }
+        .wrong-answer { background-color: #fee2e2 !important; border-color: #991b1b !important; color: #991b1b !important; }
+        .explanation-box { margin-top: 15px; padding: 15px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; font-size: 14px; line-height: 1.6; display: none; }
+    </style>
 </head>
 <body>
     <!-- Top Navigation -->
@@ -15,10 +23,9 @@
             <a href="index.html" class="nav-link">Home</a>
             <a href="subjects.html" class="nav-link">Subjects</a>
             <a href="quiz.html" class="nav-link active">Quiz</a>
-            <!-- <a href="leaderboard.html" class="nav-link">Leaderboard</a> -->
         </nav>
         <div class="nav-actions">
-            <a href="subjects.html" class="btn-primary" style="text-decoration:none;">Get Started</a>
+            <a href="subjects.html" class="btn-primary" style="text-decoration:none;">Library</a>
         </div>
     </header>
 
@@ -26,122 +33,75 @@
     <main class="main-content container">
         
         <!-- Step 1: Select Topic Section -->
-        <section class="section-header">
+        <section id="step1-select" class="section-header">
             <span class="tagline">PHASE 01</span>
-            <h1 class="page-title">Select Your Topic</h1>
-            <p class="page-description">Choose a core programming concept to test your current knowledge. Each quiz is curated to highlight both strengths and architectural gaps.</p>
+            <h1 class="page-title">Select Your Quiz</h1>
+            <p class="page-description">These quizzes are intelligently generated from past paper exams. Test your logic against real historical exam questions.</p>
+            
+            <div id="quizGrid" class="topic-grid" style="margin-top: 40px;">
+                <!-- Dynamically populated from database -->
+                <p>Loading available quizzes...</p>
+            </div>
         </section>
 
-        <div class="topic-grid">
-            <!-- Topic Card: Variables -->
-            <button class="topic-card">
-                <div class="topic-icon">
-                    <span class="material-symbols-outlined">data_object</span>
-                </div>
-                <h3 class="topic-title">Variables</h3>
-                <p class="topic-desc">Mastering data storage and scope.</p>
-                <div class="topic-meta">12 Questions</div>
-            </button>
-
-            <!-- Topic Card: Loops (Active) -->
-            <button class="topic-card active">
-                <div class="topic-icon">
-                    <span class="material-symbols-outlined">sync</span>
-                </div>
-                <h3 class="topic-title">Loops</h3>
-                <p class="topic-desc">Iteration, recursion, and sequence control.</p>
-                <div class="topic-meta">In Progress</div>
-                <div class="topic-status-icon">
-                    <span class="material-symbols-outlined" style='font-variation-settings: "FILL" 1;'>check_circle</span>
-                </div>
-            </button>
-
-            <!-- Topic Card: Functions -->
-            <button class="topic-card">
-                <div class="topic-icon">
-                    <span class="material-symbols-outlined">javascript</span>
-                </div>
-                <h3 class="topic-title">Functions</h3>
-                <p class="topic-desc">Functional decomposition and return types.</p>
-                <div class="topic-meta">15 Questions</div>
-            </button>
-        </div>
-
         <!-- Step 2: Question Section -->
-        <section class="question-section">
-            <span class="bg-text">Q.01</span>
+        <section id="step2-question" class="question-section hidden">
+            <span class="bg-text" id="bgQuestionNum">Q.01</span>
             
             <div class="question-meta">
-                <span class="badge">LOOPS</span>
+                <span class="badge" id="quizBadgeLabel">QUIZ</span>
                 <div class="divider"></div>
-                <span class="question-count">Question 1 of 10</span>
+                <span class="question-count" id="questionCountLabel">Question 1 of N</span>
             </div>
             
-            <h2 class="question-title">What is a loop?</h2>
+            <h2 class="question-title" id="questionText">Loading question...</h2>
             
-            <div class="options-list">
-                <label class="option-label">
-                    <input class="option-input" name="q1" type="radio"/>
-                    <span class="option-text">A sequence of instructions that is continually repeated until a certain condition is reached.</span>
-                </label>
-                <label class="option-label">
-                    <input class="option-input" name="q1" type="radio"/>
-                    <span class="option-text">A method of defining variables that can be accessed globally within a program structure.</span>
-                </label>
-                <label class="option-label">
-                    <input class="option-input" name="q1" type="radio"/>
-                    <span class="option-text">A specific type of data structure used to store ordered collections of unique elements.</span>
-                </label>
+            <div class="options-list" id="optionsList">
+                <!-- Dynamically populated options -->
+            </div>
+
+            <!-- Explanation Box (Appears after answering) -->
+            <div class="explanation-box" id="explanationBox">
+                <strong>Explanation:</strong> <span id="explanationText"></span>
             </div>
             
             <div class="quiz-footer">
-                <button class="btn-text">
+                <button class="btn-text hidden" id="prevBtn" onclick="prevQuestion()">
                     <span class="material-symbols-outlined">chevron_left</span> Previous
                 </button>
-                <button class="btn-primary btn-large">
+                <!-- Space between -->
+                <div style="flex:1"></div>
+                <button class="btn-primary btn-large" id="nextBtn" onclick="nextQuestion()" disabled>
                     Next <span class="material-symbols-outlined">arrow_forward</span>
                 </button>
             </div>
         </section>
 
         <!-- Step 3: Results Section -->
-        <section class="results-section">
+        <section id="step3-results" class="results-section hidden">
             <!-- Score Breakdown -->
             <div class="score-panel">
                 <div class="score-title">Academic Performance</div>
                 <div class="score-circle-wrap">
                     <svg class="score-circle">
-                        <circle class="circle-bg" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-width="8"></circle>
-                        <circle class="circle-progress" cx="64" cy="64" fill="transparent" r="58" stroke="currentColor" stroke-width="8"></circle>
+                        <circle class="circle-bg" cx="64" cy="64" fill="transparent" r="58" stroke="#e2e8f0" stroke-width="8"></circle>
+                        <circle class="circle-progress" id="scoreProgress" cx="64" cy="64" fill="transparent" r="58" stroke="#0ea5e9" stroke-width="8" stroke-dasharray="364" stroke-dashoffset="364"></circle>
                     </svg>
                     <div class="score-text-wrap">
-                        <span class="score-value">7/10</span>
-                        <span class="score-percent">70%</span>
+                        <span class="score-value" id="scoreValue">0/10</span>
+                        <span class="score-percent" id="scorePercent">0%</span>
                     </div>
                 </div>
-                <div class="score-badge">GOOD PROGRESS</div>
+                <div class="score-badge" id="scoreBadge">EVALUATING</div>
             </div>
 
             <!-- Qualitative Analysis -->
             <div class="insights-panel">
                 <h3 class="insights-title">Quiz Insights</h3>
-                <p class="insights-desc">Your logic in <span class="highlight">Variables</span> is exceptional, but your structural understanding of control flow requires attention.</p>
+                <p class="insights-desc" id="insightsDesc">Your performance breakdown based on historical exam standards.</p>
                 
-                <div class="weak-areas-grid">
-                    <div class="weak-card">
-                        <div class="weak-label">Weak Area</div>
-                        <h4 class="weak-title">Loops</h4>
-                        <p class="weak-desc">Focus on nested iterations and exit conditions.</p>
-                    </div>
-                    <div class="weak-card">
-                        <div class="weak-label">Weak Area</div>
-                        <h4 class="weak-title">Functions</h4>
-                        <p class="weak-desc">Review parameter scoping and closure mechanics.</p>
-                    </div>
-                </div>
-                
-                <div class="actions-row">
-                    <button class="btn-dark">Review Mistakes</button>
+                <div class="actions-row mt-8">
+                    <button class="btn-dark" onclick="location.reload()">Take Another Quiz</button>
                     <a href="subjects.html" class="btn-outline" style="text-decoration: none;">Return to Library</a>
                 </div>
             </div>
@@ -149,18 +109,10 @@
     </main>
 
     <!-- Footer -->
-        <footer class="site-footer">
+    <footer class="site-footer">
         <div class="footer-content">
             <div class="footer-left">
                 <div class="footer-copyright" style="text-transform: uppercase;">COMSATSPrepHub</div>
-            </div>
-            <div class="footer-center">
-                <a class="footer-link" href="about-us.html">About Us</a>
-                <a class="footer-link" href="terms.html">Terms</a>
-                <a class="footer-link" href="feedback.html">Feedback</a>
-            </div>
-            <div class="footer-right">
-                <div class="footer-copyright" style="font-style: italic;">Made with care by Mushtaq Ahmad Saqi</div>
             </div>
         </div>
     </footer>
@@ -170,47 +122,213 @@
         <div class="mobile-nav-grid">
             <a href="index.html" class="mobile-nav-item">
                 <span class="material-symbols-outlined">home</span>
-                <span class="label">Home</span>
             </a>
             <a href="subjects.html" class="mobile-nav-item">
                 <span class="material-symbols-outlined">menu_book</span>
-                <span class="label">Subjects</span>
             </a>
             <a href="quiz.html" class="mobile-nav-item active">
                 <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">quiz</span>
-                <span class="label">Quiz</span>
-            </a>
-            <a href="about-us.html" class="mobile-nav-item">
-                <span class="material-symbols-outlined">groups</span>
-                <span class="label">Team</span>
             </a>
         </div>
     </nav>
 
-    <script>
-        // ── Smart hide/show mobile bottom nav on scroll ──
-        (function () {
-            const nav = document.getElementById('mobileBottomNav');
-            if (!nav) return;
-            let lastScrollY = window.scrollY;
-            let ticking = false;
+    <script type="module">
+        import { supabase } from './utils.js';
 
-            window.addEventListener('scroll', () => {
-                if (!ticking) {
-                    window.requestAnimationFrame(() => {
-                        const currentScrollY = window.scrollY;
-                        if (currentScrollY > lastScrollY && currentScrollY > 60) {
-                            nav.classList.add('nav-hidden');
-                        } else {
-                            nav.classList.remove('nav-hidden');
-                        }
-                        lastScrollY = currentScrollY;
-                        ticking = false;
-                    });
-                    ticking = true;
+        // State Machine
+        let quizzes = [];
+        let currentQuizName = '';
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let selectedAnswers = {}; // Mapping of questionIndex -> selectedOptionIndex
+
+        document.addEventListener('DOMContentLoaded', loadQuizzes);
+
+        async function loadQuizzes() {
+            try {
+                // Fetch quizzes from database
+                const { data, error } = await supabase.from('quizzes').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                
+                const grid = document.getElementById('quizGrid');
+                
+                if(!data || data.length === 0) {
+                    grid.innerHTML = '<p class="text-gray-500">No quizzes generated yet. Admin needs to generate them from the dashboard.</p>';
+                    return;
                 }
-            }, { passive: true });
-        })();
+
+                quizzes = data;
+                grid.innerHTML = '';
+
+                data.forEach(quiz => {
+                    const btn = document.createElement('button');
+                    btn.className = 'topic-card';
+                    btn.innerHTML = `
+                        <div class="topic-icon">
+                            <span class="material-symbols-outlined">psychology</span>
+                        </div>
+                        <h3 class="topic-title" style="font-size:16px;">${quiz.title}</h3>
+                        <p class="topic-desc">${quiz.subject_code} Past Paper Knowledge</p>
+                        <div class="topic-meta">AI Generated</div>
+                    `;
+                    btn.onclick = () => startQuiz(quiz.id, quiz.title, quiz.subject_code);
+                    grid.appendChild(btn);
+                });
+            } catch (err) {
+                console.error(err);
+                document.getElementById('quizGrid').innerHTML = '<p style="color:red;">Error loading quizzes.</p>';
+            }
+        }
+
+        async function startQuiz(quizId, title, subCode) {
+            currentQuizName = subCode;
+            document.getElementById('step1-select').classList.add('hidden');
+            
+            // Loading state
+            document.getElementById('step2-question').classList.remove('hidden');
+            document.getElementById('questionText').textContent = 'Loading quiz matrix...';
+            document.getElementById('optionsList').innerHTML = '';
+            document.getElementById('quizBadgeLabel').textContent = subCode.toUpperCase();
+
+            // Fetch questions
+            try {
+                const { data, error } = await supabase.from('quiz_questions').select('*').eq('quiz_id', quizId);
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    document.getElementById('questionText').textContent = 'Error: No questions found in this quiz.';
+                    return;
+                }
+
+                questions = data;
+                currentQuestionIndex = 0;
+                selectedAnswers = {};
+                renderQuestion();
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('questionText').textContent = 'Error launching quiz environment.';
+            }
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestionIndex];
+            
+            document.getElementById('bgQuestionNum').textContent = `Q.${String(currentQuestionIndex + 1).padStart(2, '0')}`;
+            document.getElementById('questionCountLabel').textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+            document.getElementById('questionText').textContent = q.question_text;
+
+            const optsList = document.getElementById('optionsList');
+            optsList.innerHTML = '';
+
+            const hasAnswered = selectedAnswers[currentQuestionIndex] !== undefined;
+            const explanationBox = document.getElementById('explanationBox');
+            const nextBtn = document.getElementById('nextBtn');
+
+            q.options.forEach((optText, index) => {
+                const label = document.createElement('label');
+                label.className = 'option-label';
+                
+                // If previously answered, apply classes
+                if (hasAnswered) {
+                    label.style.pointerEvents = 'none'; // Lock
+                    if (index === q.correct_option_index) {
+                        label.classList.add('correct-answer');
+                    } else if (index === selectedAnswers[currentQuestionIndex]) {
+                        label.classList.add('wrong-answer');
+                    }
+                }
+
+                label.innerHTML = `
+                    <input class="option-input" name="quizOpt" type="radio" value="${index}" ${hasAnswered && index === selectedAnswers[currentQuestionIndex] ? 'checked' : ''} ${hasAnswered ? 'disabled' : ''}/>
+                    <span class="option-text">${optText}</span>
+                `;
+
+                if (!hasAnswered) {
+                    label.onclick = (e) => {
+                        e.preventDefault();
+                        selectAnswer(index);
+                    };
+                }
+
+                optsList.appendChild(label);
+            });
+
+            // Handle Next / Finish button
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.innerHTML = `Finish Evaluation <span class="material-symbols-outlined">flag</span>`;
+            } else {
+                nextBtn.innerHTML = `Next <span class="material-symbols-outlined">arrow_forward</span>`;
+            }
+            nextBtn.disabled = !hasAnswered;
+
+            // Handle Explanation box
+            if (hasAnswered) {
+                document.getElementById('explanationText').textContent = q.explanation || "No advanced explanation provided.";
+                explanationBox.style.display = 'block';
+            } else {
+                explanationBox.style.display = 'none';
+            }
+        }
+
+        window.selectAnswer = function(optIndex) {
+            selectedAnswers[currentQuestionIndex] = optIndex;
+            renderQuestion(); // Re-render to show colors and explanation
+        };
+
+        window.nextQuestion = function() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        };
+
+        function showResults() {
+            document.getElementById('step2-question').classList.add('hidden');
+            document.getElementById('step3-results').classList.remove('hidden');
+
+            let correctCount = 0;
+            questions.forEach((q, i) => {
+                if (selectedAnswers[i] === q.correct_option_index) {
+                    correctCount++;
+                }
+            });
+
+            const total = questions.length;
+            const percent = Math.round((correctCount / total) * 100);
+
+            // Animate SVG circle
+            // Circle circumference = 2 * pi * r = 2 * 3.14 * 58 = ~364
+            // Offset = 364 - (percent / 100) * 364
+            const offset = (1 - (percent / 100)) * 364;
+            setTimeout(() => {
+                const progressCircle = document.getElementById('scoreProgress');
+                progressCircle.style.transition = 'stroke-dashoffset 1s ease-out';
+                progressCircle.style.strokeDashoffset = offset;
+            }, 100);
+
+            document.getElementById('scoreValue').textContent = `${correctCount}/${total}`;
+            document.getElementById('scorePercent').textContent = `${percent}%`;
+
+            const badge = document.getElementById('scoreBadge');
+            const desc = document.getElementById('insightsDesc');
+
+            if (percent >= 90) {
+                badge.textContent = "EXCEPTIONAL";
+                badge.style.background = "#dcfce7"; badge.style.color = "#166534";
+                desc.textContent = `Your foundational mastery of ${currentQuizName} is excellent. You are exam-ready.`;
+            } else if (percent >= 70) {
+                badge.textContent = "GOOD PROGRESS";
+                badge.style.background = "#e0f2fe"; badge.style.color = "#0369a1";
+                desc.textContent = `You have a strong understanding of ${currentQuizName}, but there are minor architectural gaps.`;
+            } else {
+                badge.textContent = "NEEDS REVIEW";
+                badge.style.background = "#fee2e2"; badge.style.color = "#991b1b";
+                desc.textContent = `Your logic in ${currentQuizName} requires attention. Review the core concepts and try again.`;
+            }
+        }
     </script>
 </body>
 </html>
