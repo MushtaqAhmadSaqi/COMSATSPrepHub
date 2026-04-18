@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,10 +10,14 @@
     <!-- Tailwind CSS with Typography plugin -->
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Roboto+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
     <!-- Material Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet">
 
     <!-- MathJax -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
@@ -27,8 +32,8 @@
                         mono: ['"Roboto Mono"', 'monospace'],
                     },
                     colors: {
-                        brand: { 50:'#f0f9ff', 100:'#e0f2fe', 400:'#38bdf8', 500:'#0ea5e9', 600:'#0284c7', 700:'#0369a1' },
-                        teal:  { 50:'#f0fdfa', 100:'#ccfbf1', 500:'#14b8a6', 600:'#0d9488', 700:'#0f766e' },
+                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1' },
+                        teal: { 50: '#f0fdfa', 100: '#ccfbf1', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e' },
                     },
                     animation: {
                         'fade-in': 'fadeIn 0.4s ease both',
@@ -36,9 +41,9 @@
                         'spin': 'spin 0.8s linear infinite',
                     },
                     keyframes: {
-                        fadeIn: { from:{ opacity:0 }, to:{ opacity:1 } },
-                        slideUp: { from:{ opacity:0, transform:'translateY(16px)' }, to:{ opacity:1, transform:'translateY(0)' } },
-                        spin: { to:{ transform:'rotate(360deg)' } },
+                        fadeIn: { from: { opacity: 0 }, to: { opacity: 1 } },
+                        slideUp: { from: { opacity: 0, transform: 'translateY(16px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+                        spin: { to: { transform: 'rotate(360deg)' } },
                     }
                 }
             }
@@ -72,21 +77,29 @@
         <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
             <!-- Left: Logo + Back -->
             <div class="flex items-center gap-3 min-w-0">
-                <a href="subjects.html" class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all group" title="Back to Subjects">
-                    <span class="material-symbols-outlined text-[20px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+                <a href="subjects.html"
+                    class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all group"
+                    title="Back to Subjects">
+                    <span
+                        class="material-symbols-outlined text-[20px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
                 </a>
                 <a href="home.html" class="flex items-center gap-2 min-w-0 group">
-                    <div class="w-7 h-7 flex-shrink-0 rounded-lg bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow">C</div>
-                    <span class="hidden sm:block font-bold text-slate-900 text-[15px] tracking-tight truncate group-hover:text-brand-600 transition-colors">COMSATSPrepHub</span>
+                    <div
+                        class="w-7 h-7 flex-shrink-0 rounded-lg bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow">
+                        C</div>
+                    <span
+                        class="hidden sm:block font-bold text-slate-900 text-[15px] tracking-tight truncate group-hover:text-brand-600 transition-colors">COMSATSPrepHub</span>
                 </a>
             </div>
 
             <!-- Right: Actions -->
             <div class="flex items-center gap-2 flex-shrink-0">
-                <a href="subjects.html" class="hidden sm:flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100 transition-all">
+                <a href="subjects.html"
+                    class="hidden sm:flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100 transition-all">
                     Library
                 </a>
-                <a href="home.html" class="flex items-center gap-1.5 text-sm font-semibold bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-brand-500/20">
+                <a href="home.html"
+                    class="flex items-center gap-1.5 text-sm font-semibold bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-brand-500/20">
                     Home
                 </a>
             </div>
@@ -102,20 +115,26 @@
             <!-- ================== STEP 1: QUIZ SELECT ================== -->
             <section id="step1-select" class="block animate-fade-in">
                 <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-10 shadow-sm mb-8">
-                    <p class="text-[11px] font-bold text-brand-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <p
+                        class="text-[11px] font-bold text-brand-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
                         <span class="material-symbols-outlined text-[14px]">psychology</span> Interactive Learning
                     </p>
-                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight mb-4 tracking-tight">AI Assessment Matrices</h1>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight mb-4 tracking-tight">AI
+                        Assessment Matrices</h1>
                     <p class="text-slate-600 leading-relaxed text-[15px] max-w-2xl">
-                        Challenge your understanding with dynamically compiled quizzes derived from historical exam frameworks. Select a module below to initiate evaluation.
+                        Challenge your understanding with dynamically compiled quizzes derived from historical exam
+                        frameworks. Select a module below to initiate evaluation.
                     </p>
                 </div>
 
                 <div id="quizGrid" class="grid sm:grid-cols-2 gap-6">
                     <!-- Loading state -->
                     <div class="col-span-full flex flex-col items-center justify-center py-16 gap-4 text-slate-400">
-                        <div class="w-10 h-10 rounded-full border-[3px] border-slate-200 border-t-brand-500 animate-spin"></div>
-                        <p class="text-sm font-medium font-mono uppercase tracking-widest text-[11px]">Compiling available modules...</p>
+                        <div
+                            class="w-10 h-10 rounded-full border-[3px] border-slate-200 border-t-brand-500 animate-spin">
+                        </div>
+                        <p class="text-sm font-medium font-mono uppercase tracking-widest text-[11px]">Compiling
+                            available modules...</p>
                     </div>
                 </div>
             </section>
@@ -123,28 +142,38 @@
             <!-- ================== STEP 2: ACTIVE QUESTION ================== -->
             <section id="step2-question" class="hidden animate-fade-in space-y-6">
                 <!-- Question Stats Bar -->
-                <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:px-6 flex items-center justify-between gap-4 shadow-sm">
+                <div
+                    class="bg-white border border-slate-200 rounded-2xl p-4 sm:px-6 flex items-center justify-between gap-4 shadow-sm">
                     <div class="flex items-center gap-3">
-                        <span id="quizBadgeLabel" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 border border-brand-100 rounded-full text-[11px] font-bold tracking-widest text-brand-600 uppercase">
+                        <span id="quizBadgeLabel"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 border border-brand-100 rounded-full text-[11px] font-bold tracking-widest text-brand-600 uppercase">
                             MODULE
                         </span>
                         <div class="w-px h-4 bg-slate-200"></div>
-                        <span id="questionCountLabel" class="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Question 0 of 0</span>
+                        <span id="questionCountLabel"
+                            class="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Question
+                            0 of 0</span>
                     </div>
                     <div class="flex-1 max-w-[120px] sm:max-w-xs h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div id="quizProgressBar" class="h-full bg-gradient-to-r from-brand-500 to-teal-500 transition-all duration-500 ease-out" style="width:0%"></div>
+                        <div id="quizProgressBar"
+                            class="h-full bg-gradient-to-r from-brand-500 to-teal-500 transition-all duration-500 ease-out"
+                            style="width:0%"></div>
                     </div>
                 </div>
 
                 <!-- Main Question Card -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm relative overflow-hidden transition-all">
+                <div
+                    class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm relative overflow-hidden transition-all">
                     <!-- Large Background Graphic -->
-                    <div id="bgQuestionNum" class="absolute -top-10 -right-4 text-[120px] font-black text-slate-50 select-none z-0 tracking-tighter italic opacity-50">
+                    <div id="bgQuestionNum"
+                        class="absolute -top-10 -right-4 text-[120px] font-black text-slate-50 select-none z-0 tracking-tighter italic opacity-50">
                         Q01
                     </div>
 
                     <div class="relative z-10 w-full">
-                        <h2 id="questionText" class="text-xl sm:text-2xl font-bold text-slate-900 leading-snug mb-8 tracking-tight font-mono"></h2>
+                        <h2 id="questionText"
+                            class="text-xl sm:text-2xl font-bold text-slate-900 leading-snug mb-8 tracking-tight font-mono">
+                        </h2>
 
                         <!-- Options List -->
                         <div id="optionsList" class="space-y-3 font-medium text-[15px]">
@@ -153,23 +182,31 @@
 
                         <!-- Explanation - Premium Reveal -->
                         <div id="explanationBox" class="hidden mt-8 animate-slide-up">
-                            <div class="relative bg-gradient-to-br from-slate-50 to-white border border-slate-200 rounded-2xl p-6 overflow-hidden">
+                            <div
+                                class="relative bg-gradient-to-br from-slate-50 to-white border border-slate-200 rounded-2xl p-6 overflow-hidden">
                                 <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-teal-500"></div>
                                 <div class="flex items-center gap-2 mb-3">
-                                    <span class="material-symbols-outlined text-[20px] text-teal-600">auto_awesome</span>
-                                    <h4 class="text-[11px] font-bold uppercase tracking-widest text-teal-700">Reference Heuristic</h4>
+                                    <span
+                                        class="material-symbols-outlined text-[20px] text-teal-600">auto_awesome</span>
+                                    <h4 class="text-[11px] font-bold uppercase tracking-widest text-teal-700">Reference
+                                        Heuristic</h4>
                                 </div>
-                                <p id="explanationText" class="text-slate-600 text-[14.5px] leading-relaxed italic font-mono"></p>
+                                <p id="explanationText"
+                                    class="text-slate-600 text-[14.5px] leading-relaxed italic font-mono"></p>
                             </div>
                         </div>
 
                         <!-- Footer Actions -->
                         <div class="mt-10 pt-8 border-t border-slate-100 flex items-center justify-between gap-4">
-                            <button id="prevBtn" onclick="prevQuestion()" class="hidden h-11 px-6 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-100 transition-all items-center gap-2 group">
-                                <span class="material-symbols-outlined text-[20px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span> Back
+                            <button id="prevBtn" onclick="prevQuestion()"
+                                class="hidden h-11 px-6 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-100 transition-all items-center gap-2 group">
+                                <span
+                                    class="material-symbols-outlined text-[20px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+                                Back
                             </button>
                             <div class="flex-1"></div>
-                            <button id="nextBtn" onclick="nextQuestion()" disabled class="h-11 px-8 rounded-xl bg-brand-600 text-white text-sm font-bold shadow-sm shadow-brand-500/20 hover:bg-brand-700 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed items-center gap-2 flex">
+                            <button id="nextBtn" onclick="nextQuestion()" disabled
+                                class="h-11 px-8 rounded-xl bg-brand-600 text-white text-sm font-bold shadow-sm shadow-brand-500/20 hover:bg-brand-700 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed items-center gap-2 flex">
                                 Verify Logic <span class="material-symbols-outlined text-[20px]">send</span>
                             </button>
                         </div>
@@ -179,43 +216,61 @@
 
             <!-- ================== STEP 3: RESULTS ================== -->
             <section id="step3-results" class="hidden animate-fade-in text-center">
-                <div class="bg-white border border-slate-200 rounded-3xl p-8 sm:p-16 shadow-xl relative overflow-hidden">
+                <div
+                    class="bg-white border border-slate-200 rounded-3xl p-8 sm:p-16 shadow-xl relative overflow-hidden">
                     <!-- Subtle background patterns -->
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-brand-50 rounded-full -mr-16 -mt-16 blur-3xl opacity-50"></div>
-                    <div class="absolute bottom-0 left-0 w-32 h-32 bg-teal-50 rounded-full -ml-16 -mb-16 blur-3xl opacity-50"></div>
+                    <div
+                        class="absolute top-0 right-0 w-32 h-32 bg-brand-50 rounded-full -mr-16 -mt-16 blur-3xl opacity-50">
+                    </div>
+                    <div
+                        class="absolute bottom-0 left-0 w-32 h-32 bg-teal-50 rounded-full -ml-16 -mb-16 blur-3xl opacity-50">
+                    </div>
 
                     <div class="relative z-10 max-w-sm mx-auto">
-                        <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300">
+                        <div
+                            class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300">
                             <span class="material-symbols-outlined text-[40px]">architecture</span>
                         </div>
-                        <h2 class="text-3xl font-extrabold text-slate-900 mb-2 leading-tight tracking-tight">Evaluation Results</h2>
-                        <p class="text-slate-500 text-sm mb-10 tracking-wide uppercase font-bold">Heuristic Summary Report</p>
+                        <h2 class="text-3xl font-extrabold text-slate-900 mb-2 leading-tight tracking-tight">Evaluation
+                            Results</h2>
+                        <p class="text-slate-500 text-sm mb-10 tracking-wide uppercase font-bold">Heuristic Summary
+                            Report</p>
 
                         <!-- Circular Progress -->
                         <div class="flex justify-center mb-10">
                             <div class="relative w-44 h-44">
                                 <svg class="w-full h-full -rotate-90">
-                                    <circle cx="88" cy="88" r="80" fill="none" class="stroke-slate-100" stroke-width="12"></circle>
-                                    <circle id="scoreProgress" cx="88" cy="88" r="80" fill="none" class="stroke-brand-500 transition-all duration-1000 ease-out" stroke-width="12" stroke-linecap="round" stroke-dasharray="502.65" stroke-dashoffset="502.65"></circle>
+                                    <circle cx="88" cy="88" r="80" fill="none" class="stroke-slate-100"
+                                        stroke-width="12"></circle>
+                                    <circle id="scoreProgress" cx="88" cy="88" r="80" fill="none"
+                                        class="stroke-brand-500 transition-all duration-1000 ease-out" stroke-width="12"
+                                        stroke-linecap="round" stroke-dasharray="502.65" stroke-dashoffset="502.65">
+                                    </circle>
                                 </svg>
                                 <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span id="scorePercent" class="text-4xl font-black text-slate-900 tracking-tighter">0%</span>
-                                    <span id="scoreValue" class="text-[11px] font-bold text-slate-400 font-mono tracking-widest mt-1 uppercase">0 / 0 NODES</span>
+                                    <span id="scorePercent"
+                                        class="text-4xl font-black text-slate-900 tracking-tighter">0%</span>
+                                    <span id="scoreValue"
+                                        class="text-[11px] font-bold text-slate-400 font-mono tracking-widest mt-1 uppercase">0
+                                        / 0 NODES</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Insights Card -->
                         <div class="p-6 rounded-2xl border-2 border-slate-50 bg-white mb-10">
-                            <span id="scoreBadge" class="inline-block px-3 py-1 rounded-full text-[11px] font-black tracking-widest mb-3 border uppercase">STATUS</span>
+                            <span id="scoreBadge"
+                                class="inline-block px-3 py-1 rounded-full text-[11px] font-black tracking-widest mb-3 border uppercase">STATUS</span>
                             <p id="insightsDesc" class="text-slate-600 text-[15px] leading-relaxed italic"></p>
                         </div>
 
                         <div class="flex flex-col gap-3">
-                            <button onclick="location.reload()" class="w-full h-12 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-black transition-all shadow-lg active:scale-95">
+                            <button onclick="location.reload()"
+                                class="w-full h-12 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-black transition-all shadow-lg active:scale-95">
                                 Initiate New Cycle
                             </button>
-                            <a href="subjects.html" class="w-full h-12 flex items-center justify-center text-sm font-bold text-slate-500 hover:text-slate-900 border border-slate-200 rounded-xl transition-all hover:bg-slate-50">
+                            <a href="subjects.html"
+                                class="w-full h-12 flex items-center justify-center text-sm font-bold text-slate-500 hover:text-slate-900 border border-slate-200 rounded-xl transition-all hover:bg-slate-50">
                                 Browse Library
                             </a>
                         </div>
@@ -239,7 +294,7 @@
         let currentQuizName = '';
         let questions = [];
         let currentQuestionIndex = 0;
-        let selectedAnswers = {}; 
+        let selectedAnswers = {};
 
         document.addEventListener('DOMContentLoaded', loadQuizzes);
 
@@ -248,11 +303,11 @@
             try {
                 const { data, error } = await supabase.from('quizzes').select('*').order('created_at', { ascending: false });
                 if (error) throw error;
-                
+
                 const grid = document.getElementById('quizGrid');
                 grid.innerHTML = '';
-                
-                if(!data || data.length === 0) {
+
+                if (!data || data.length === 0) {
                     grid.innerHTML = `
                         <div class="col-span-full bg-white border border-slate-200 rounded-2xl p-12 text-center text-slate-400 animate-fade-in shadow-sm">
                             <span class="material-symbols-outlined text-[48px] mb-4 opacity-50">deployed_code</span>
@@ -297,10 +352,10 @@
         async function startQuiz(quizId, title, subCode) {
             currentQuizName = subCode;
             document.getElementById('step1-select').classList.add('hidden');
-            
+
             const qSection = document.getElementById('step2-question');
             qSection.classList.remove('hidden');
-            
+
             document.getElementById('questionText').innerHTML = 'Initializing logic gate...';
             document.getElementById('optionsList').innerHTML = '';
             document.getElementById('quizBadgeLabel').textContent = subCode.toUpperCase();
@@ -330,18 +385,18 @@
             const q = questions[currentQuestionIndex];
             const hasAnswered = selectedAnswers[currentQuestionIndex] !== undefined;
             const isLast = currentQuestionIndex === questions.length - 1;
-            
+
             // Layout Updates
             document.getElementById('bgQuestionNum').textContent = `Q${String(currentQuestionIndex + 1).padStart(2, '0')}`;
             document.getElementById('questionCountLabel').textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
-            
+
             // Dynamic Progress
             const progressPct = ((currentQuestionIndex) / questions.length) * 100;
             document.getElementById('quizProgressBar').style.width = `${progressPct}%`;
 
             // Question Logic
             const qText = document.getElementById('questionText');
-            qText.innerHTML = q.question_text.replace(/\\n/g, '<br/>'); 
+            qText.innerHTML = q.question_text.replace(/\\n/g, '<br/>');
 
             // Option Builder
             const optsList = document.getElementById('optionsList');
@@ -350,7 +405,7 @@
             q.options.forEach((optText, index) => {
                 const div = document.createElement('div');
                 div.className = 'quiz-option';
-                
+
                 if (hasAnswered) {
                     div.classList.add('pointer-events-none', 'opacity-80');
                     if (index === q.correct_option_index) {
@@ -402,19 +457,19 @@
             }
         }
 
-        window.selectAnswer = function(optIndex) {
+        window.selectAnswer = function (optIndex) {
             selectedAnswers[currentQuestionIndex] = optIndex;
-            renderQuestion(); 
+            renderQuestion();
         };
 
-        window.nextQuestion = function() {
+        window.nextQuestion = function () {
             if (currentQuestionIndex < questions.length - 1) {
                 currentQuestionIndex++;
                 renderQuestion();
             }
         };
 
-        window.prevQuestion = function() {
+        window.prevQuestion = function () {
             if (currentQuestionIndex > 0) {
                 currentQuestionIndex--;
                 renderQuestion();
@@ -437,7 +492,7 @@
             // Circular Math (r=80 -> circumference ~502.65)
             const cir = 502.65;
             const targetOffset = cir - (percent / 100) * cir;
-            
+
             setTimeout(() => {
                 const progressCircle = document.getElementById('scoreProgress');
                 progressCircle.style.strokeDashoffset = targetOffset;
@@ -465,4 +520,5 @@
         }
     </script>
 </body>
+
 </html>
