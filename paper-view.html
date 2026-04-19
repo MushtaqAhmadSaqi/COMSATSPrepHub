@@ -170,34 +170,39 @@
             <main class="flex-1 min-w-0">
 
                 <!-- Paper Header Card -->
-                <div id="paperHeader"
-                    class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm mb-6 animate-fade-in">
-
+                <div id="paperHeader" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-sm mb-8 transition-all duration-300">
+                    
                     <!-- Loading Skeleton -->
                     <div id="paperLoadingSkeleton">
-                        <div class="flex flex-col gap-4">
-                            <div class="h-4 w-32 bg-slate-200 rounded animate-pulse"></div>
-                            <div class="h-8 w-3/4 bg-slate-200 rounded animate-pulse"></div>
-                            <div class="flex gap-2 mt-2">
-                                <div class="h-6 w-20 bg-slate-200 rounded-full animate-pulse"></div>
-                                <div class="h-6 w-24 bg-slate-200 rounded-full animate-pulse"></div>
-                                <div class="h-6 w-16 bg-slate-200 rounded-full animate-pulse"></div>
+                        <div class="animate-pulse space-y-4">
+                            <div class="h-4 w-28 bg-slate-200 dark:bg-white/10 rounded-full"></div>
+                            <div class="h-9 w-3/4 bg-slate-200 dark:bg-white/10 rounded-2xl"></div>
+                            <div class="flex gap-2">
+                                <div class="h-7 w-20 bg-slate-200 dark:bg-white/10 rounded-full"></div>
+                                <div class="h-7 w-24 bg-slate-200 dark:bg-white/10 rounded-full"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Real Paper Content (hidden until loaded) -->
+                    <!-- Real Content -->
                     <div id="paperTitleBlock" class="hidden">
-                        <div class="flex flex-col sm:flex-row sm:items-start gap-4 justify-between">
+                        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
                             <div class="flex-1 min-w-0">
-                                <p id="paperTagline"
-                                    class="text-[11px] font-bold text-brand-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[14px]">description</span> Past Paper
-                                </p>
-                                <h1 id="paperTitle"
-                                    class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight mb-4">
-                                </h1>
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-brand-100 dark:bg-brand-500/20 text-brand-700 dark:text-brand-400 text-xs font-bold">PAST PAPER</span>
+                                </div>
+                                
+                                <h1 id="paperTitle" class="text-2xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white mb-4 leading-tight"></h1>
+                                
                                 <div id="paperChips" class="flex flex-wrap gap-2"></div>
+                            </div>
+
+                            <!-- Quick Info -->
+                            <div class="lg:text-right">
+                                <div class="inline-flex items-center gap-2 bg-slate-100 dark:bg-white/5 px-4 py-2 rounded-2xl text-sm border border-slate-200/50 dark:border-white/5">
+                                    <span class="text-slate-500 dark:text-slate-400 font-medium">Total Marks:</span>
+                                    <span class="font-bold text-lg text-slate-900 dark:text-white" id="quickMarks"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -308,6 +313,7 @@
                 document.title = `${fullTitle} | COMSATSPrepHub`;
                 document.getElementById('paperTitle').textContent = fullTitle;
                 document.getElementById('navPaperTitle').textContent = fullTitle;
+                document.getElementById('quickMarks').textContent = paper.total_marks;
                 hidePaperSkeleton();
 
                 // Chips in header
@@ -316,10 +322,9 @@
                     ['person', paper.instructor_name || '—'],
                     ['calendar_today', `${paper.semester || ''} ${paper.year}`.trim()],
                     ['assignment', paper.exam_type],
-                    ['grade', `${paper.total_marks} Marks`],
                 ].map(([icon, label]) => `
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-full text-xs font-semibold text-slate-600">
-                        <span class="material-symbols-outlined text-[14px] text-slate-400">${icon}</span>${label}
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 rounded-full text-xs font-bold text-slate-600 dark:text-slate-400 shadow-sm transition-all hover:bg-white dark:hover:bg-white/10">
+                        <span class="material-symbols-outlined text-[14px] text-slate-400 dark:text-slate-500 font-variation-light">${icon}</span>${label}
                     </span>
                 `).join('');
 
@@ -575,85 +580,77 @@
                 // ── Question card ──
                 const card = document.createElement('section');
                 card.id = `q-card-${q.id}`;
-                card.className = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden animate-fade-in scroll-mt-32 transition-all hover:shadow-md';
+                card.className = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 scroll-mt-24 card-hover';
 
                 card.innerHTML = `
-                    <!-- Question Header stripe -->
-                    <div class="flex items-center justify-between gap-3 px-5 sm:px-7 py-4 border-b border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-slate-800/50">
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <span class="flex items-center justify-center w-8 h-8 rounded-xl bg-brand-600 text-white text-sm font-bold shadow-sm flex-shrink-0">${q.question_number}</span>
-                            ${q.clo ? `<span class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-500/20 px-2.5 py-1 rounded-full">${q.clo}</span>` : ''}
+                    <!-- Question Header -->
+                    <div class="flex items-center justify-between px-6 py-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-100 dark:border-white/10">
+                        <div class="flex items-center gap-4">
+                            <div class="w-9 h-9 rounded-2xl bg-brand-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                                ${q.question_number}
+                            </div>
+                            <div>
+                                <div class="font-semibold text-lg text-slate-900 dark:text-white">Question ${q.question_number}</div>
+                                ${q.clo ? `<div class="text-xs text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">${q.clo}</div>` : ''}
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2 flex-shrink-0">
-                            ${q.marks ? `<span class="text-[12px] font-bold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-full shadow-sm">${q.marks} Marks</span>` : ''}
-                            <span id="status-badge-${q.id}" class="hidden text-[11px] font-bold text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 border border-teal-200 dark:border-teal-500/20 px-3 py-1.5 rounded-full flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">check_circle</span> Answered
-                            </span>
+                        
+                        <div class="flex items-center gap-3">
+                            ${q.marks ? `<div class="px-4 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-bold text-slate-700 dark:text-slate-300 shadow-sm">${q.marks} Marks</div>` : ''}
+                            
+                            <div id="status-badge-${q.id}" class="hidden px-3 py-1.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-2xl flex items-center gap-1 transition-all animate-slide-up">
+                                <span class="material-symbols-outlined text-sm">check_circle</span> 
+                                <span>Answered</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Question text -->
-                    <div class="px-5 sm:px-7 py-6 border-b border-slate-100 dark:border-white/5">
-                        <div class="question-prose text-slate-800 dark:text-gray-200 text-[15.5px] leading-[1.9] overflow-x-auto pb-2">${formatMarkdown(q.question_text)}</div>
-                        
-                        ${graphHtml}
+                    <!-- Question Body -->
+                    <div class="p-6 sm:p-8">
+                        <div class="prose dark:prose-invert max-w-none text-[15.5px] leading-relaxed text-slate-800 dark:text-gray-200">
+                            ${formatMarkdown(q.question_text)}
+                        </div>
 
                         ${q.sub_parts && q.sub_parts.length ? `
-                        <div class="mt-6 space-y-4 pl-5 border-l-[3px] border-brand-200">
-                            ${q.sub_parts.map(sp => `<div class="question-prose text-slate-800 text-[15.5px] leading-[1.8] overflow-x-auto pb-2">${formatMarkdown(sp)}</div>`).join('')}
+                        <div class="mt-6 space-y-6 pl-5 border-l-[3px] border-brand-200/50">
+                            ${q.sub_parts.map(sp => `<div class="prose dark:prose-invert max-w-none text-[15.5px] leading-relaxed text-slate-700 dark:text-gray-300">${formatMarkdown(sp)}</div>`).join('')}
                         </div>` : ''}
-
-                        ${q.options && q.options.length ? `
-                        <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            ${q.options.map((opt, i) => `
-                            <div class="flex items-start gap-4 p-4 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 hover:border-brand-300 transition-colors cursor-pointer group">
-                                <div class="flex items-center justify-center w-7 h-7 rounded-full bg-white border border-slate-300 text-[13px] font-bold text-slate-600 flex-shrink-0 group-hover:border-brand-400 group-hover:text-brand-600 transition-colors shadow-sm">${String.fromCharCode(65 + i)}</div>
-                                <div class="text-[15px] text-slate-700 leading-relaxed">${formatMarkdown(opt)}</div>
+                        
+                        ${graphHtml}
+                        
+                        <!-- Model Answer -->
+                        <div id="model-${q.id}" class="hidden mt-8 transition-all">
+                            <div class="relative bg-gradient-to-br from-emerald-50/50 to-white/50 dark:from-emerald-900/10 dark:to-slate-900/30 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-6 shadow-inner animate-slide-up">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">auto_awesome</span>
+                                    <span class="font-black text-[11px] text-emerald-700 dark:text-emerald-300 uppercase tracking-widest">Model Answer</span>
+                                </div>
+                                <div class="prose dark:prose-invert max-w-none text-[15.5px] leading-relaxed text-slate-800 dark:text-gray-200">
+                                    ${q.model_answer ? formatMarkdown(q.model_answer) : '<em class="text-slate-400">No model answer available.</em>'}
+                                </div>
                             </div>
-                            `).join('')}
-                        </div>` : ''}
+                        </div>
                     </div>
 
-                    <!-- Answer area -->
-                    <div class="px-5 sm:px-7 py-6 space-y-4">
-                        <!-- Textarea -->
-                        <div>
-                            <label class="block text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">Your Answer</label>
-                            <textarea
-                                id="answer-${q.id}"
-                                rows="4"
-                                placeholder="Write your explanation or solution here before revealing the model answer..."
-                                class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 rounded-xl text-[15px] leading-relaxed text-slate-800 dark:text-gray-200 placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-400/20 focus:bg-white dark:focus:bg-slate-800 resize-y transition-all font-serif"
-                            ></textarea>
+                    <!-- Answer Section -->
+                    <div class="border-t border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-slate-800/40 p-6 sm:p-8">
+                        <div class="mb-4">
+                            <label class="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Write Your Solution</label>
+                            <textarea id="answer-${q.id}" rows="4" 
+                                class="mt-2 w-full px-5 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl text-[15px] focus:border-brand-500 focus:ring-4 focus:ring-brand-400/15 focus:outline-none resize-y transition-all text-slate-700 dark:text-gray-200 shadow-sm"
+                                placeholder="Explain your answer here before revealing the model solution..."></textarea>
                         </div>
-
-                        <!-- Submit row -->
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <button id="btn-${q.id}" onclick="submitAnswer('${q.id}')"
-                                class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-semibold px-5 py-2.5 rounded-xl text-sm shadow-sm hover:shadow-md transition-all">
-                                <span class="material-symbols-outlined text-[16px]">visibility</span>
-                                Submit & Reveal Answer
+                        
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                            <button onclick="submitAnswer('${q.id}')" id="btn-${q.id}"
+                                class="button-press inline-flex items-center justify-center gap-2 px-8 py-3 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-bold rounded-2xl text-sm transition-all shadow-md hover:shadow-lg">
+                                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                <span>Submit & Reveal Answer</span>
                             </button>
-                            <p class="text-xs text-slate-400 font-medium flex items-center gap-1.5 italic">
+                            
+                            <div class="flex items-center gap-2 text-[11px] text-slate-400 font-bold uppercase tracking-wider italic">
                                 <span class="material-symbols-outlined text-[14px]">info</span>
-                                Not saved · Self-study only
-                            </p>
-                        </div>
-
-                        <!-- Model answer (hidden until submit) -->
-                        <div id="model-${q.id}" class="hidden">
-                            <div class="relative mt-2 bg-gradient-to-br from-teal-50 to-slate-50 dark:from-teal-900/10 dark:to-slate-900/10 border border-teal-200/70 dark:border-teal-500/20 rounded-xl overflow-hidden animate-slide-up">
-                                <!-- Accent bar -->
-                                <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-teal-400 to-brand-400"></div>
-                                <div class="pl-5 pr-5 sm:pr-7 pt-5 pb-6">
-                                    <div class="flex items-center gap-2 mb-4">
-                                        <span class="material-symbols-outlined text-[18px] text-teal-600 dark:text-teal-400">auto_awesome</span>
-                                        <p class="text-[11px] font-bold uppercase tracking-widest text-teal-700 dark:text-teal-300">Model Answer</p>
-                                    </div>
-                                    <div id="model-content-${q.id}" class="question-prose text-slate-800 dark:text-gray-200 text-[15px] leading-[1.9] overflow-x-auto pb-2">
-                                        ${q.model_answer ? formatMarkdown(q.model_answer) : '<em class="text-slate-400 dark:text-gray-500">No model answer provided.</em>'}
-                                    </div>
-                                </div>
+                                Self-study mode • Not saved
                             </div>
                         </div>
                     </div>
