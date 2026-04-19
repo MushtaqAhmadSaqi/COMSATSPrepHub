@@ -128,13 +128,6 @@ function _injectMobileNav(currentPage) {
             </a>
           `;
         }).join('')}
-        
-        <!-- Bottom Bar Theme Toggle -->
-        <button onclick="if(window.toggleDarkMode) window.toggleDarkMode()"
-                class="flex flex-col items-center gap-1 px-4 py-2 rounded-2xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-all">
-          <span class="dark-mode-icon block w-6 h-6 flex items-center justify-center"></span>
-          <span class="text-[10px] font-bold">Theme</span>
-        </button>
       </div>
     </div>
   `;
