@@ -67,10 +67,10 @@ function _injectHeader(currentPage, session, userName) {
 
           <!-- Center: Pill Navigation (Desktop Only) -->
           <nav class="hidden md:flex items-center bg-gray-100/50 dark:bg-black/20 rounded-full p-1 border border-gray-200/50 dark:border-white/5">
-            <a href="index.html" class="px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'index.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Home</a>
-            <a href="subjects.html" class="px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'subjects.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Subjects</a>
-            <a href="quiz.html" class="px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'quiz.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Quiz</a>
-            <a href="about-us.html" class="px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'about-us.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Team</a>
+            <a href="index.html" class="nav-link-premium px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'index.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Home</a>
+            <a href="subjects.html" class="nav-link-premium px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'subjects.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Subjects</a>
+            <a href="quiz.html" class="nav-link-premium px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'quiz.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Quiz</a>
+            <a href="about-us.html" class="nav-link-premium px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'about-us.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Team</a>
           </nav>
 
           <!-- Right Side: Actions -->
@@ -154,9 +154,9 @@ function _injectFooter() {
           <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Verified academic resources for success.</p>
         </div>
         <div class="flex items-center justify-center gap-6">
-          <a href="about-us.html" class="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">About</a>
-          <a href="terms.html"    class="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">Terms</a>
-          <a href="https://github.com/MushtaqAhmadSaqi" target="_blank" class="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">Github</a>
+          <a href="about-us.html" class="nav-link-premium text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">About</a>
+          <a href="terms.html"    class="nav-link-premium text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">Terms</a>
+          <a href="https://github.com/MushtaqAhmadSaqi" target="_blank" class="nav-link-premium text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">Github</a>
         </div>
         <div class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest opacity-60">
           © 2026 Mushtaq Ahmad Saqi
@@ -242,10 +242,10 @@ function _initVanillaTilt() {
 function _applyVanillaTilt() {
   if (typeof VanillaTilt !== 'undefined') {
     VanillaTilt.init(document.querySelectorAll(".card-hover"), {
-      max: 12,
-      speed: 400,
+      max: 8,
+      speed: 600,
       glare: true,
-      "max-glare": 0.2,
+      "max-glare": 0.12,
       scale: 1.02
     });
   }

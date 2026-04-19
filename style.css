@@ -102,40 +102,76 @@ html.dark .active-pill {
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
-/* --- Premium Animations --- */
+/* --- Human-like Premium Animations --- */
 .card-hover {
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), 
+              box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transform-style: preserve-3d;
   will-change: transform;
 }
 
 .card-hover:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-6px) scale(1.015);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 
+              0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .button-press {
-  transition: transform 0.1s ease;
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.2s ease;
   will-change: transform;
 }
 
 .button-press:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
-/* Smooth page transitions */
+/* Page Transitions (Natural Feel) */
 .page-transition {
-  animation: fadeInUp 0.6s ease forwards;
+  animation: pageEnter 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-@keyframes fadeInUp {
+@keyframes pageEnter {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Navigation Hover (Subtle & Elegant) */
+.nav-link-premium {
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.nav-link-premium::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: #2563eb;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
+}
+
+.nav-link-premium:hover::after {
+  width: 80%;
+  left: 10%;
+}
+
+/* Respect Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .card-hover, .button-press, .page-transition, .nav-link-premium::after {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
   }
 }
 
