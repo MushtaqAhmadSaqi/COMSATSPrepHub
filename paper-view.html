@@ -32,6 +32,10 @@
         };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Chart.js for AI-generated graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+    <!-- Mermaid.js for flowcharts/diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <!-- Marked.js for Markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
@@ -272,6 +276,9 @@
     ═══════════════════════════════════════════════ -->
     <script type="module">
         import { supabase, escapeHtml } from './utils.js';
+        
+        // Initialize Mermaid
+        mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
 
         // ── State ───────────────────────────────────
         const params = new URLSearchParams(window.location.search);
@@ -377,13 +384,136 @@
         // ── Format Markdown ───────────────────────────
         function formatMarkdown(text) {
             if (!text) return '';
-            // Auto-wrap un-wrapped LaTeX commands like \underline{...}
-            let processed = text.replace(/(\\underline\{[^{}]*\})/g, '$$$1$');
-            
-            // Standard delimiter conversion
-            processed = processed.replace(/\\\[/g, '$$$$').replace(/\\\]/g, '$$$$');
-            processed = processed.replace(/\\\(/g, '$').replace(/\\\)/g, '$');
-            return marked.parse(processed);
+
+            // Step 1: Extract all math expressions and replace with placeholders
+            // This prevents marked.js from mangling LaTeX syntax
+            const mathBlocks = [];
+            let processed = text;
+
+            // Extract display math $$...$$ first
+            processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, (match) => {
+                mathBlocks.push(match);
+                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
+            });
+
+            // Extract display math \[...\]
+            processed = processed.replace(/\\\[([\s\S]*?)\\\]/g, (match) => {
+                const converted = '$$' + match.slice(2, -2) + '$$';
+                mathBlocks.push(converted);
+                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
+            });
+
+            // Extract inline math $...$
+            processed = processed.replace(/\$([^\$\n]+?)\$/g, (match) => {
+                mathBlocks.push(match);
+                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
+            });
+
+            // Extract inline math \(...\)
+            processed = processed.replace(/\\\(([\s\S]*?)\\\)/g, (match) => {
+                const converted = '$' + match.slice(2, -2) + '$';
+                mathBlocks.push(converted);
+                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
+            });
+
+            // Auto-wrap un-wrapped \underline{...} in $ delimiters
+            processed = processed.replace(/(\\underline\{[^{}]*\})/g, (match) => {
+                mathBlocks.push('$' + match + '$');
+                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
+            });
+
+            // Step 2: Run marked.js on the safe (math-free) text
+            const html = marked.parse(processed, { breaks: true, gfm: true });
+
+            // Step 3: Restore math expressions
+            let result = html;
+            for (let i = 0; i < mathBlocks.length; i++) {
+                result = result.replace(`%%MATH_BLOCK_${i}%%`, mathBlocks[i]);
+            }
+
+            return result;
+        }
+
+        // ── Graph/Chart Rendering ─────────────────────
+        function renderGraph(graphData, containerId) {
+            if (!graphData || !graphData.type) return '';
+
+            if (graphData.type === 'mermaid') {
+                return `<div class="my-6 flex justify-center"><div class="mermaid" id="${containerId}">${graphData.code || ''}</div></div>`;
+            }
+
+            const colors = [
+                'rgba(59,130,246,0.8)', 'rgba(99,102,241,0.8)',
+                'rgba(168,85,247,0.8)', 'rgba(236,72,153,0.8)',
+                'rgba(245,158,11,0.8)', 'rgba(16,185,129,0.8)'
+            ];
+            const borderColors = colors.map(c => c.replace('0.8', '1'));
+
+            const isScatter = graphData.type === 'scatter';
+
+            const datasets = (graphData.datasets || []).map((ds, i) => ({
+                ...ds,
+                backgroundColor: ds.backgroundColor || (graphData.type === 'pie' || graphData.type === 'doughnut' ? colors : colors[i % colors.length]),
+                borderColor: ds.borderColor || (graphData.type === 'pie' || graphData.type === 'doughnut' ? borderColors : borderColors[i % borderColors.length]),
+                borderWidth: ds.borderWidth || (isScatter ? 2.5 : 2),
+                tension: ds.tension || 0.3,
+                showLine: isScatter ? (ds.showLine !== false) : undefined,
+                pointRadius: isScatter ? (ds.pointRadius ?? 2) : undefined,
+                fill: ds.fill ?? false,
+            }));
+
+            const chartConfig = {
+                type: graphData.type,
+                data: { labels: graphData.labels || [], datasets },
+                _isFunction: isScatter,
+                _xMin: graphData.xMin ?? null, _xMax: graphData.xMax ?? null,
+                _yMin: graphData.yMin ?? null, _yMax: graphData.yMax ?? null,
+            };
+
+            return `
+                <div class="chart-container my-6 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm max-w-2xl mx-auto">
+                    ${graphData.title ? `<div class="text-center font-bold text-slate-700 mb-4 text-sm">${graphData.title}</div>` : ''}
+                    <canvas id="${containerId}" 
+                        data-chart='${JSON.stringify(chartConfig).replace(/'/g, "&#39;")}'
+                        style="max-height: 400px;">
+                    </canvas>
+                </div>`;
+        }
+
+        function initializeCharts() {
+            document.querySelectorAll('canvas[data-chart]').forEach(canvas => {
+                try {
+                    const config = JSON.parse(canvas.getAttribute('data-chart'));
+                    if (config.type === 'scatter' || config._isFunction) {
+                        config.data.datasets.forEach(ds => {
+                            if (ds.showLine !== false) ds.showLine = true;
+                            ds.pointRadius = ds.pointRadius ?? 2;
+                            ds.borderWidth = ds.borderWidth ?? 2.5;
+                        });
+                        config.options = {
+                            scales: {
+                                x: { type: 'linear', position: 'center', min: config._xMin ?? undefined, max: config._xMax ?? undefined, grid: { color: 'rgba(0,0,0,0.05)' } },
+                                y: { type: 'linear', position: 'center', min: config._yMin ?? undefined, max: config._yMax ?? undefined, grid: { color: 'rgba(0,0,0,0.05)' } }
+                            }
+                        };
+                        delete config._xMin; delete config._xMax; delete config._yMin; delete config._yMax; delete config._isFunction;
+                    }
+                    config.options = config.options || {};
+                    config.options.responsive = true;
+                    config.options.plugins = config.options.plugins || { legend: { position: 'bottom' } };
+                    new Chart(canvas, config);
+                } catch (e) {
+                    console.error('Chart init error:', e);
+                }
+            });
+        }
+
+        async function initializeMermaidDiagrams() {
+            const mEls = document.querySelectorAll('.mermaid');
+            if (mEls.length > 0) {
+                try { await mermaid.run({ nodes: mEls }); }
+                catch (e) { console.error('Mermaid error:', e); }
+            }
         }
 
         // ── Render Questions ──────────────────────────
@@ -391,6 +521,8 @@
             const container = document.getElementById('questionsContainer');
             container.classList.remove('hidden');
             const qNav = document.getElementById('qNav');
+
+            let chartCounter = 0;
 
             questions.forEach((q) => {
                 // ── Sidebar question nav link ──
@@ -404,6 +536,9 @@
                     ${q.marks ? `<span class="ml-auto text-[11px] font-bold text-slate-400">${q.marks}m</span>` : ''}
                 `;
                 qNav.appendChild(navLink);
+
+                // ── Graph/Diagram ──
+                const graphHtml = q.graph ? renderGraph(q.graph, `chart_pv_${chartCounter++}`) : '';
 
                 // ── Question card ──
                 const card = document.createElement('section');
@@ -429,6 +564,8 @@
                     <div class="px-5 sm:px-7 py-6 border-b border-slate-100">
                         <div class="question-prose text-slate-800 text-[15.5px] leading-[1.9] overflow-x-auto pb-2">${formatMarkdown(q.question_text)}</div>
                         
+                        ${graphHtml}
+
                         ${q.sub_parts && q.sub_parts.length ? `
                         <div class="mt-6 space-y-4 pl-5 border-l-[3px] border-brand-200">
                             ${q.sub_parts.map(sp => `<div class="question-prose text-slate-800 text-[15.5px] leading-[1.8] overflow-x-auto pb-2">${formatMarkdown(sp)}</div>`).join('')}
@@ -493,8 +630,12 @@
                 container.appendChild(card);
             });
 
-            // Trigger MathJax on everything
-            if (window.MathJax) MathJax.typesetPromise([container]).catch(console.error);
+            // Trigger Charts, Mermaid, and MathJax
+            requestAnimationFrame(() => {
+                initializeCharts();
+                initializeMermaidDiagrams();
+                if (window.MathJax) MathJax.typesetPromise([container]).catch(console.error);
+            });
         }
 
         // ── Submit Answer ─────────────────────────────
