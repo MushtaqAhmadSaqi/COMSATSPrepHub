@@ -50,13 +50,22 @@
             document.documentElement.classList.remove('dark');
         }
     </script>
+    <style>
+      /* Smart Header - Hide on scroll down, show on scroll up */
+      header {
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      header.header-hidden {
+        transform: translateY(-100%);
+      }
+    </style>
 </head>
 
 <body class="bg-gray-50 dark:bg-dark-bg text-gray-900 dark:text-gray-100 transition-colors duration-300">
     <!-- Header injected by js/layout.js -->
 
 
-    <main class="max-w-7xl mx-auto px-6 pb-20">
+    <main class="max-w-7xl mx-auto px-6 pt-24 pb-20 lg:pt-32">
         <!-- Header + Search -->
         <section class="mb-12" data-aos="fade-down">
             <div class="flex flex-col md:flex-row items-end justify-between gap-8">
@@ -283,7 +292,25 @@
     </script>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Load Layout injecter -->
     <script type="module" src="js/layout.js"></script>
+
+    <script>
+      // Smart Header Logic
+      let lastScrollTop = 0;
+      window.addEventListener('scroll', () => {
+        const header = document.querySelector('header');
+        if (!header) return;
+
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        if (scrollTop > lastScrollTop && scrollTop > 80) {
+          header.classList.add('header-hidden');
+        } else {
+          header.classList.remove('header-hidden');
+        }
+        lastScrollTop = scrollTop;
+      });
+    </script>
     <script>
         AOS.init({ once: true, offset: 30, duration: 800, easing: 'ease-out-cubic' });
     </script>

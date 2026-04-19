@@ -71,7 +71,7 @@ function _injectFooter() {
   if (document.querySelector('footer')) return; // page has its own footer
 
   const footer = document.createElement('footer');
-  footer.className = 'bg-[#1a1a2e] text-white py-8 px-6 md:px-10';
+  footer.className = 'bg-[#1a1a2e] text-white py-4 px-6 md:px-10';
   footer.innerHTML = `
       <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5 text-center md:text-left">
         <div class="font-extrabold text-sm tracking-widest uppercase text-white">COMSATSPrepHub</div>
@@ -162,11 +162,20 @@ function _initScrollHideNav() {
     if (ticking) return;
     window.requestAnimationFrame(() => {
       const nav = document.getElementById('mobileBottomNav');
+      const header = document.querySelector('header');
+      const curr = window.scrollY;
+
+      // Hide/Show Mobile Nav
       if (nav) {
-        const curr = window.scrollY;
         nav.classList.toggle('nav-hidden', curr > lastScrollY && curr > 60);
-        lastScrollY = curr;
       }
+
+      // Hide/Show Top Header
+      if (header) {
+        header.classList.toggle('header-hidden', curr > lastScrollY && curr > 80);
+      }
+
+      lastScrollY = curr;
       ticking = false;
     });
     ticking = true;

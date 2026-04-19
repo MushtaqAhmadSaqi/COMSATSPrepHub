@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL,GRAD,opsz@100..700,0..1,-50..200,20..48');
 
 :root {
@@ -79,6 +79,11 @@ img {
   align-items: center;
   padding: 0 32px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header-hidden {
+  transform: translateY(-100%);
 }
 
 .navbar-brand {
@@ -348,7 +353,7 @@ img {
 .site-footer {
   border-top: 1px solid var(--border);
   background: var(--surface);
-  padding: 24px 32px;
+  padding: 12px 32px;
   margin-top: auto;
 }
 
