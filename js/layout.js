@@ -1,8 +1,8 @@
 /**
  * js/layout.js
  * ─────────────────────────────────────────────────────────────────────────────
- * Injects the shared Header and Footer into every page.
- * Handles: mobile responsive menu, session-aware buttons, 
+ * Injects the shared Header, Footer, and Mobile Bottom Nav into every page.
+ * Handles: premium glassmorphism pill, session-aware buttons, 
  * dark mode sync, and scroll transitions.
  */
 
@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   _injectHeader(currentPage, session, userName);
   _injectFooter();
+  _injectMobileNav(currentPage);
   _wireNavButton(session, userName);
   
   // Initialization
@@ -26,15 +27,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   _initSwipeNav(currentPage);
   _initScrollHideNav();
-
-  // Mobile Menu Toggle (from user)
-  const menuBtn = document.getElementById('mobile-menu-btn');
-  const mobileMenu = document.getElementById('mobile-menu');
-  if (menuBtn && mobileMenu) {
-    menuBtn.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
-    });
-  }
 });
 
 // ── AOS (Animate On Scroll) ──────────────────────────────────────────────────
@@ -45,96 +37,107 @@ function _initAOS() {
       easing: 'ease-out-cubic',
       once: true,
       offset: 50,
-      disable: false // Ensure content reveals on mobile as well
+      disable: false
     });
   }
 }
 
-// ── Header ────────────────────────────────────────────────────────────────────
+// ── Header (Premium Pill Style) ───────────────────────────────────────────────
 function _injectHeader(currentPage, session, userName) {
   if (document.querySelector('header')) return;
 
   const isLoggedIn = !!session;
+  const initial = userName ? userName.charAt(0).toUpperCase() : '?';
 
   const header = document.createElement('header');
-  header.className = 'sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-gray-200 dark:border-white/10';
+  header.className = 'sticky top-0 z-50 transition-all duration-300 w-full';
   header.innerHTML = `
-    <div class="max-w-7xl mx-auto px-4 py-3">
-      <div class="flex items-center justify-between">
-        
-        <!-- Logo -->
-        <a href="index.html" class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-[#2563eb] flex items-center justify-center">
-            <span class="text-white font-black text-xl">C</span>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+        <!-- Glassmorphism Navbar Pill -->
+        <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-gray-200/50 dark:border-white/10 rounded-[2rem] shadow-xl px-4 sm:px-8 py-3 flex items-center justify-between transition-all duration-300">
+          
+          <!-- Left: Logo -->
+          <a href="index.html" class="flex items-center gap-3 group">
+            <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#3b82f6] to-[#1e40af] flex items-center justify-center text-white font-black text-xl shadow-md group-hover:scale-105 transition-transform ring-1 ring-white/20">C</div>
+            <span class="font-black text-xl tracking-tighter text-[#1a1a2e] dark:text-white hidden sm:block">COMSATSPrepHub</span>
+            <span class="font-black text-xl tracking-tighter text-[#1a1a2e] dark:text-white sm:hidden">COMSATS</span>
+          </a>
+
+          <!-- Center: Pill Navigation (Desktop Only) -->
+          <nav class="hidden md:flex items-center bg-gray-100/50 dark:bg-black/20 rounded-full p-1 border border-gray-200/50 dark:border-white/5">
+            <a href="index.html" class="px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'index.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Home</a>
+            <a href="subjects.html" class="px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'subjects.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Subjects</a>
+            <a href="quiz.html" class="px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'quiz.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Quiz</a>
+            <a href="dashboard.html" class="px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'dashboard.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Dashboard</a>
+          </nav>
+
+          <!-- Right Side: Actions -->
+          <div class="flex items-center gap-2 sm:gap-3">
+            <!-- Dark Mode Toggle -->
+            <button id="dark-mode-toggle"
+                    class="p-2.5 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all text-gray-600 dark:text-gray-300"
+                    aria-label="Toggle dark mode">
+              <span id="dark-mode-icon" class="block w-5 h-5 flex items-center justify-center"></span>
+            </button>
+
+            <!-- Auth Section -->
+            <button id="open-auth-modal" 
+                    class="flex items-center gap-2 bg-[#1e1e2e] dark:bg-white hover:bg-black dark:hover:bg-gray-100 text-white dark:text-[#1e1e2e] px-5 py-2 rounded-full text-xs font-bold transition-all active:scale-95 shadow-md">
+              ${isLoggedIn ? `
+                <div class="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center text-[10px] text-white hidden sm:flex font-black">${initial}</div>
+                <span>Dashboard</span>
+              ` : `
+                <span class="material-symbols-outlined text-[18px]">person</span>
+                <span>Sign In</span>
+              `}
+            </button>
           </div>
-          <span class="font-black text-lg tracking-tight text-[#1e293b] dark:text-white hidden sm:block">COMSATSPrepHub</span>
-          <span class="font-black text-lg tracking-tight text-[#1e293b] dark:text-white sm:hidden">COMSATS</span>
-        </a>
-
-        <!-- Desktop Nav -->
-        <nav class="hidden md:flex items-center bg-[#f8fafc] dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-1">
-          <a href="index.html" class="px-4 py-1.5 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'index.html' ? 'active-pill' : 'text-gray-600 dark:text-gray-300 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/10'}">Home</a>
-          <a href="subjects.html" class="px-4 py-1.5 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'subjects.html' ? 'active-pill' : 'text-gray-600 dark:text-gray-300 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/10'}">Subjects</a>
-          <a href="quiz.html" class="px-4 py-1.5 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'quiz.html' ? 'active-pill' : 'text-gray-600 dark:text-gray-300 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/10'}">Quiz</a>
-          <a href="dashboard.html" class="px-4 py-1.5 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'dashboard.html' ? 'active-pill' : 'text-gray-600 dark:text-gray-300 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/10'}">Dashboard</a>
-        </nav>
-
-        <!-- Right Side -->
-        <div class="flex items-center gap-2">
-          
-          <!-- Dark Mode Toggle -->
-          <button id="dark-mode-toggle" class="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300">
-            <span id="dark-mode-icon" class="block w-5 h-5 flex items-center justify-center"></span>
-          </button>
-
-          <!-- Sign In (Desktop) -->
-          <button id="open-auth-modal" class="hidden md:flex items-center gap-1.5 bg-[#1e293b] dark:bg-white text-white dark:text-[#1e293b] px-4 py-2 rounded-2xl text-sm font-bold transition-all active:scale-95 shadow-sm">
-            ${isLoggedIn ? 'Dashboard' : 'Sign In'}
-          </button>
-
-          <!-- Mobile Menu Button -->
-          <button id="mobile-menu-btn" class="md:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
         </div>
       </div>
-
-      <!-- Mobile Menu -->
-      <div id="mobile-menu" class="hidden md:hidden mt-3 pb-3 border-t border-gray-200 dark:border-white/10 pt-3">
-        <div class="flex flex-col gap-1">
-          <a href="index.html" class="px-4 py-2.5 text-sm font-semibold rounded-xl transition-all ${currentPage === 'index.html' ? 'bg-[#f1f5f9] dark:bg-white/10 text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10'}">Home</a>
-          <a href="subjects.html" class="px-4 py-2.5 text-sm font-semibold rounded-xl transition-all ${currentPage === 'subjects.html' ? 'bg-[#f1f5f9] dark:bg-white/10 text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10'}">Subjects</a>
-          <a href="quiz.html" class="px-4 py-2.5 text-sm font-semibold rounded-xl transition-all ${currentPage === 'quiz.html' ? 'bg-[#f1f5f9] dark:bg-white/10 text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10'}">Quiz</a>
-          <a href="dashboard.html" class="px-4 py-2.5 text-sm font-semibold rounded-xl transition-all ${currentPage === 'dashboard.html' ? 'bg-[#f1f5f9] dark:bg-white/10 text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10'}">Dashboard</a>
-          
-          <button id="mobile-signin-btn" class="mt-2 px-4 py-2.5 text-sm font-bold bg-[#1e293b] dark:bg-white text-white dark:text-[#1e293b] rounded-2xl text-center">
-            ${isLoggedIn ? 'Dashboard' : 'Sign In'}
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
+    `;
   document.body.prepend(header);
 }
 
-// ── Header Controls (Dark Mode Sync) ──────────────────────────────────────────
-function _initHeaderToggles() {
-  const toggle = document.getElementById('dark-mode-toggle');
-  if (toggle) {
-    toggle.addEventListener('click', () => {
-      if (window.toggleDarkMode) window.toggleDarkMode();
-    });
-  }
+// ── Mobile Bottom Navigation ──────────────────────────────────────────────────
+function _injectMobileNav(currentPage) {
+  if (window.innerWidth > 1024) return;
+  if (document.getElementById('mobileBottomNav')) return;
+
+  const nav = document.createElement('nav');
+  nav.id = 'mobileBottomNav';
+  nav.className = 'fixed bottom-4 left-4 right-4 z-[60] lg:hidden transition-transform duration-300';
+  
+  const items = [
+    { id: 'index.html', label: 'Home', icon: 'home' },
+    { id: 'subjects.html', label: 'Subjects', icon: 'menu_book' },
+    { id: 'quiz.html', label: 'Quiz', icon: 'quiz' },
+    { id: 'dashboard.html', label: 'Dashboard', icon: 'dashboard' }
+  ];
+
+  nav.innerHTML = `
+    <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-[2rem] shadow-2xl px-2 py-2">
+      <div class="flex items-center justify-around">
+        ${items.map(item => {
+          const isActive = currentPage === item.id;
+          return `
+            <a href="${item.id}" class="flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all ${isActive ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}">
+              <span class="material-symbols-outlined text-[24px]" style="${isActive ? "font-variation-settings:'FILL' 1" : ''}">${item.icon}</span>
+              <span class="text-[10px] font-bold">${item.label}</span>
+            </a>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(nav);
 }
 
 // ── Footer ────────────────────────────────────────────────────────────────────
 function _injectFooter() {
   if (document.querySelector('footer')) return;
-
   const footer = document.createElement('footer');
-  footer.className = 'bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-white/5 py-8 px-6 transition-colors duration-300 rounded-t-[3rem] mt-auto';
+  footer.className = 'bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-white/5 py-8 px-6 transition-colors duration-300 rounded-t-[3rem] mt-auto pb-24 lg:pb-8';
   footer.innerHTML = `
       <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
         <div>
@@ -154,69 +157,59 @@ function _injectFooter() {
   document.body.appendChild(footer);
 }
 
-// ── Wire Nav Auth Button ──────────────────────────────────────────────────────
-function _wireNavButton(session, userName) {
-  const desktopBtn = document.getElementById('open-auth-modal');
-  const mobileBtn = document.getElementById('mobile-signin-btn');
-  
-  [desktopBtn, mobileBtn].forEach(btn => {
-    if (!btn) return;
-    if (session) {
-      btn.addEventListener('click', () => { window.location.href = 'dashboard.html'; });
-    } else {
-      btn.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
-    }
-  });
+// ── Shared Logic ──────────────────────────────────────────────────────────────
+function _initHeaderToggles() {
+  const toggle = document.getElementById('dark-mode-toggle');
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      if (window.toggleDarkMode) window.toggleDarkMode();
+    });
+  }
 }
 
-// ── Swipe Navigation ──────────────────────────────────────────────────────────
+function _wireNavButton(session, userName) {
+  const btn = document.getElementById('open-auth-modal');
+  if (!btn) return;
+  if (session) {
+    btn.addEventListener('click', () => { window.location.href = 'dashboard.html'; });
+  } else {
+    btn.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
+  }
+}
+
 function _initSwipeNav(currentPage) {
   const ROUTES = ['index.html', 'subjects.html', 'quiz.html', 'dashboard.html'];
   const main = document.querySelector('main');
   if (!main) return;
-
   let touchStartX = 0;
-  let touchStartY = 0;
-
-  main.addEventListener('touchstart', e => {
-    const t = e.changedTouches[0]; if (!t) return;
-    touchStartX = t.clientX; touchStartY = t.clientY;
-  }, { passive: true });
-
+  main.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].clientX; }, { passive: true });
   main.addEventListener('touchend', e => {
-    const t = e.changedTouches[0]; if (!t) return;
-    const dx = t.clientX - touchStartX;
-    const dy = t.clientY - touchStartY;
-    if (Math.abs(dx) < 58 || Math.abs(dx) <= Math.abs(dy) * 1.25) return;
-
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) < 80) return;
     const idx = ROUTES.findIndex(r => r === currentPage);
-    const safeIdx = Math.max(0, Math.min((idx < 0 ? 0 : idx) + (dx < 0 ? 1 : -1), ROUTES.length - 1));
-    if (safeIdx !== idx) window.location.href = ROUTES[safeIdx];
+    const nextIdx = Math.max(0, Math.min(idx + (dx < 0 ? 1 : -1), ROUTES.length - 1));
+    if (nextIdx !== idx) window.location.href = ROUTES[nextIdx];
   }, { passive: true });
 }
 
-// ── Scroll Hide/Show Header ───────────────────────────────────────────────────
 function _initScrollHideNav() {
   let lastScrollY = window.scrollY;
   let ticking = false;
-
   window.addEventListener('scroll', () => {
     if (ticking) return;
     window.requestAnimationFrame(() => {
       const header = document.querySelector('header');
+      const bottomNav = document.getElementById('mobileBottomNav');
       const curr = window.scrollY;
-
-      if (Math.abs(curr - lastScrollY) <= 5) { ticking = false; return; }
-
-      if (header) {
-        if (curr > lastScrollY && curr > 80) {
-          header.classList.add('header-hidden');
-          document.getElementById('mobile-menu')?.classList.add('hidden');
-        } else if (curr < lastScrollY) {
-          header.classList.remove('header-hidden');
-        }
+      if (Math.abs(curr - lastScrollY) <= 10) { ticking = false; return; }
+      
+      if (curr > lastScrollY && curr > 100) {
+        if (header) header.classList.add('header-hidden');
+        if (bottomNav) bottomNav.style.transform = 'translateY(120%)';
+      } else {
+        if (header) header.classList.remove('header-hidden');
+        if (bottomNav) bottomNav.style.transform = 'translateY(0)';
       }
-
       lastScrollY = curr;
       ticking = false;
     });
