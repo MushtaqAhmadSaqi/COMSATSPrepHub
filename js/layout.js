@@ -39,47 +39,67 @@ function _injectHeader(currentPage, session, userName) {
   if (document.querySelector('header')) return;
 
   const isLoggedIn = !!session;
-  const btnLabel = isLoggedIn 
-    ? `<span class="material-symbols-outlined text-[17px]">dashboard</span><span class="hidden sm:inline">${userName}</span>` 
-    : `<span class="material-symbols-outlined text-[17px]">person</span><span class="hidden sm:inline">Sign In</span>`;
+  const initial = userName ? userName.charAt(0).toUpperCase() : '?';
 
   const header = document.createElement('header');
-  header.className = 'navbar sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/10 transition-all duration-300';
+  header.className = 'sticky top-0 z-50 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-xl border-b border-gray-100 dark:border-white/5 transition-all duration-300';
   header.innerHTML = `
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-        <!-- Logo -->
-        <a href="index.html" class="flex items-center gap-2.5 group">
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center text-white font-black text-xs shadow-sm group-hover:scale-105 transition-transform">C</div>
-          <span class="font-black text-lg tracking-tight text-[#1a1a2e] dark:text-white">COMSATSPrepHub</span>
-        </a>
+      <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+          
+          <!-- Logo -->
+          <a href="index.html" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-2xl bg-[#2563eb] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+              <span class="text-white font-black text-2xl">C</span>
+            </div>
+            <span class="font-black text-2xl tracking-tighter text-[#1e293b] dark:text-white">COMSATSPrepHub</span>
+          </a>
 
-        <!-- Desktop Navigation -->
-        <nav class="hidden md:flex items-center gap-8">
-          <a href="index.html" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors ${currentPage === 'index.html' ? 'text-primary dark:text-primary' : ''}">Home</a>
-          <a href="subjects.html" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors ${currentPage === 'subjects.html' ? 'text-primary dark:text-primary' : ''}">Subjects</a>
-          <a href="quiz.html" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors ${currentPage === 'quiz.html' ? 'text-primary dark:text-primary' : ''}">Quiz</a>
-          <a href="about-us.html" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors ${currentPage === 'about-us.html' ? 'text-primary dark:text-primary' : ''}">Team</a>
-        </nav>
+          <!-- Center: Pill Navigation -->
+          <nav class="hidden md:flex items-center bg-[#f8fafc] dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl p-1 shadow-inner">
+            <a href="index.html" class="px-6 py-2 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'index.html' ? 'active-pill shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/5'}">
+              Home
+            </a>
+            <a href="subjects.html" class="px-6 py-2 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'subjects.html' ? 'active-pill shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/5'}">
+              Subjects
+            </a>
+            <a href="quiz.html" class="px-6 py-2 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'quiz.html' ? 'active-pill shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/5'}">
+              Quiz
+            </a>
+            <a href="about-us.html" class="px-6 py-2 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'about-us.html' ? 'active-pill shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/5'}">
+              Team
+            </a>
+          </nav>
 
-        <!-- Right Actions -->
-        <div class="flex items-center gap-2 sm:gap-4">
-          <!-- Dark Mode Toggle -->
-          <button id="dark-mode-toggle"
-                  class="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all active:scale-95 text-gray-600 dark:text-gray-300"
-                  aria-label="Toggle dark mode">
-            <span id="dark-mode-icon" class="block w-5 h-5 flex items-center justify-center"></span>
-          </button>
+          <!-- Right Side -->
+          <div class="flex items-center gap-3">
+            
+            <!-- Dark Mode Toggle -->
+            <button id="dark-mode-toggle"
+                    class="p-2.5 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all text-gray-600 dark:text-gray-400 hover:text-[#1e293b] dark:hover:text-white"
+                    aria-label="Toggle dark mode">
+              <span id="dark-mode-icon" class="block w-5 h-5 flex items-center justify-center"></span>
+            </button>
 
-          <!-- Auth/Dashboard -->
-          <button id="open-auth-modal" 
-                  class="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90 transition-all shadow-sm">
-            ${btnLabel}
-          </button>
+            <!-- Auth Section -->
+            <button id="open-auth-modal" 
+                    class="flex items-center gap-2 bg-[#1e293b] dark:bg-white hover:bg-black dark:hover:bg-gray-100 text-white dark:text-[#1e293b] px-6 py-2.5 rounded-3xl text-sm font-bold transition-all active:scale-95 shadow-sm">
+              ${isLoggedIn ? `
+                <div class="w-6 h-6 rounded-lg bg-[#2563eb] flex items-center justify-center text-[10px] text-white ring-1 ring-white/30 hidden sm:flex">${initial}</div>
+                <span>Dashboard</span>
+              ` : `
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span>Sign In</span>
+              `}
+            </button>
 
-          <!-- Mobile Menu trigger (conceptual) -->
-          <button class="md:hidden p-2 text-gray-500" aria-label="Menu">
-            <span class="material-symbols-outlined">menu</span>
-          </button>
+            <!-- Mobile Menu -->
+            <button class="md:hidden p-2 text-gray-600 dark:text-gray-400" aria-label="Menu">
+              <span class="material-symbols-outlined">menu</span>
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -91,7 +111,7 @@ function _injectFooter() {
   if (document.querySelector('footer')) return;
 
   const footer = document.createElement('footer');
-  footer.className = 'bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-white/5 py-8 px-6 transition-colors duration-300';
+  footer.className = 'bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-white/5 py-8 px-6 transition-colors duration-300 rounded-t-[3rem] mt-auto';
   footer.innerHTML = `
       <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
         <div>

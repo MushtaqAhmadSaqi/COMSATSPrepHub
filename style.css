@@ -79,25 +79,15 @@ img {
   max-width: 1100px;
 }
 
-/* --- Navbar --- */
-.navbar {
-  width: 100%;
+header {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   z-index: 50;
-  background: rgba(255, 255, 255, 0.80);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.6);
-  height: 64px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 24px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .header-hidden {
-  transform: translateY(-100%);
+  transform: translateY(-120%);
 }
 
 .navbar-brand {
@@ -118,28 +108,18 @@ img {
   text-decoration: none;
   font-weight: 500;
   font-size: 15px;
-  transition: var(--transition);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
 .nav-link:hover {
+  transform: translateY(-1px);
   color: var(--text-main);
 }
 
 .nav-link.active {
   color: var(--primary);
   font-weight: 600;
-}
-
-.nav-link.active::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--primary);
-  border-radius: 2px;
 }
 
 .nav-actions {
