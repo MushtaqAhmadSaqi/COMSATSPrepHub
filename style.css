@@ -89,6 +89,22 @@ header {
 .header-hidden {
   transform: translateY(-120%);
 }
+/* --- Navbar Pills --- */
+.active-pill {
+  background-color: #2563eb !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+html.dark .active-pill {
+  background-color: #3b82f6 !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.nav-pill {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 
 .navbar-brand {
   font-size: 1.2rem;

@@ -66,8 +66,8 @@ function _injectHeader(currentPage, session, userName) {
             <a href="quiz.html" class="px-6 py-2 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'quiz.html' ? 'active-pill shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/5'}">
               Quiz
             </a>
-            <a href="about-us.html" class="px-6 py-2 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'about-us.html' ? 'active-pill shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/5'}">
-              Team
+            <a href="dashboard.html" class="px-6 py-2 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'dashboard.html' ? 'active-pill shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/5'}">
+              Dashboard
             </a>
           </nav>
 
