@@ -165,14 +165,28 @@ function _initScrollHideNav() {
       const header = document.querySelector('header');
       const curr = window.scrollY;
 
+      // Only act if there is a real change in scroll position
+      if (Math.abs(curr - lastScrollY) <= 5) {
+        ticking = false;
+        return;
+      }
+
       // Hide/Show Mobile Nav
       if (nav) {
-        nav.classList.toggle('nav-hidden', curr > lastScrollY && curr > 60);
+        if (curr > lastScrollY && curr > 60) {
+          nav.classList.add('nav-hidden');
+        } else if (curr < lastScrollY) {
+          nav.classList.remove('nav-hidden');
+        }
       }
 
       // Hide/Show Top Header
       if (header) {
-        header.classList.toggle('header-hidden', curr > lastScrollY && curr > 80);
+        if (curr > lastScrollY && curr > 80) {
+          header.classList.add('header-hidden');
+        } else if (curr < lastScrollY) {
+          header.classList.remove('header-hidden');
+        }
       }
 
       lastScrollY = curr;

@@ -872,10 +872,13 @@
         window.addEventListener('scroll', () => {
             const scrollTop = window.scrollY || document.documentElement.scrollTop;
 
+            // Only act if there is a real change in scroll position
+            if (Math.abs(scrollTop - lastScrollTop) <= 5) return;
+
             if (scrollTop > lastScrollTop && scrollTop > 80) {
                 // Scrolling down → hide header
                 header.classList.add('header-hidden');
-            } else {
+            } else if (scrollTop < lastScrollTop) {
                 // Scrolling up → show header
                 header.classList.remove('header-hidden');
             }

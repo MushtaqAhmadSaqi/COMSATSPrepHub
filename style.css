@@ -456,7 +456,7 @@ img {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   display: flex !important;
-  padding: 8px;
+  padding: 6px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -486,9 +486,9 @@ img {
   align-items: center;
   justify-content: center;
   gap: 2px;
-  min-height: 56px;
-  min-width: 56px;
-  padding: 8px 4px;
+  min-height: 48px;
+  min-width: 48px;
+  padding: 6px 4px;
   border-radius: 9999px;
   color: #94a3b8;
   text-decoration: none;
