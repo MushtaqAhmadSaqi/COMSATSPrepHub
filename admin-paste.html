@@ -7,7 +7,9 @@
     <title>Admin — Paste & Upload | COMSATSPrepHub</title>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
 
     <!-- MathJax Config (BEFORE loading MathJax) -->
     <script>
@@ -90,23 +92,39 @@
     <!-- Custom Styles -->
     <style>
         /* Smooth transitions for dark mode */
-        * { transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+        * {
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        }
 
         /* Fix MathJax overflow */
-        mjx-container { max-width: 100% !important; overflow-x: auto !important; }
-        mjx-container[display="true"] { display: block !important; margin: 1.25rem 0 !important; padding-bottom: 0.5rem; }
+        mjx-container {
+            max-width: 100% !important;
+            overflow-x: auto !important;
+        }
+
+        mjx-container[display="true"] {
+            display: block !important;
+            margin: 1.25rem 0 !important;
+            padding-bottom: 0.5rem;
+        }
 
         /* Loading spinner */
         .spinner {
-            width: 20px; height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-top-color: white;
             border-radius: 50%;
             animation: spin 0.6s linear infinite;
             display: inline-block;
             vertical-align: middle;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         /* Textarea line numbers feel */
         #jsonPaste {
@@ -126,42 +144,90 @@
         .question-card {
             transition: transform 0.15s, box-shadow 0.15s;
         }
+
         .question-card:hover {
             transform: translateY(-1px);
         }
 
         /* Dark mode overrides */
-        .dark body { background: #0f172a; color: #e2e8f0; }
-        .dark .bg-white { background: #1e293b !important; }
-        .dark .bg-slate-50 { background: #0f172a !important; }
-        .dark .text-slate-900 { color: #f1f5f9 !important; }
-        .dark .text-slate-800 { color: #e2e8f0 !important; }
-        .dark .text-slate-700 { color: #cbd5e1 !important; }
-        .dark .text-slate-600 { color: #94a3b8 !important; }
-        .dark .text-slate-500 { color: #64748b !important; }
-        .dark .border-slate-200 { border-color: #334155 !important; }
-        .dark .border-gray-200 { border-color: #334155 !important; }
-        .dark .bg-slate-100 { background: #334155 !important; }
-        .dark .question-prose strong { color: #f1f5f9 !important; }
-        .dark .question-prose code { background: #334155 !important; color: #f472b6 !important; }
+        .dark body {
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .dark .bg-white {
+            background: #1e293b !important;
+        }
+
+        .dark .bg-slate-50 {
+            background: #0f172a !important;
+        }
+
+        .dark .text-slate-900 {
+            color: #f1f5f9 !important;
+        }
+
+        .dark .text-slate-800 {
+            color: #e2e8f0 !important;
+        }
+
+        .dark .text-slate-700 {
+            color: #cbd5e1 !important;
+        }
+
+        .dark .text-slate-600 {
+            color: #94a3b8 !important;
+        }
+
+        .dark .text-slate-500 {
+            color: #64748b !important;
+        }
+
+        .dark .border-slate-200 {
+            border-color: #334155 !important;
+        }
+
+        .dark .border-gray-200 {
+            border-color: #334155 !important;
+        }
+
+        .dark .bg-slate-100 {
+            background: #334155 !important;
+        }
+
+        .dark .question-prose strong {
+            color: #f1f5f9 !important;
+        }
+
+        .dark .question-prose code {
+            background: #334155 !important;
+            color: #f472b6 !important;
+        }
     </style>
 </head>
 
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
     <!-- Header -->
-    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between shadow-sm">
+    <header
+        class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between shadow-sm">
         <a href="index.html" class="font-bold text-xl text-slate-900 tracking-tight flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-sm">C</div>
+            <div
+                class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-sm">
+                C</div>
             <span class="hidden sm:block">COMSATSPrepHub</span>
         </a>
         <nav class="hidden md:flex gap-4">
             <a href="index.html" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition">Home</a>
-            <a href="subjects.html" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition">Subjects</a>
+            <a href="subjects.html"
+                class="text-sm font-medium text-slate-600 hover:text-slate-900 transition">Subjects</a>
         </nav>
         <div class="flex items-center gap-3">
             <!-- Dark Mode Toggle -->
-            <button id="darkToggle" onclick="toggleDarkMode()" class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 transition text-lg" title="Toggle Dark Mode">🌙</button>
-            <div class="text-sm font-bold text-slate-500 bg-slate-100 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200">
+            <button id="darkToggle" onclick="toggleDarkMode()"
+                class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 transition text-lg"
+                title="Toggle Dark Mode">🌙</button>
+            <div
+                class="text-sm font-bold text-slate-500 bg-slate-100 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200">
                 🔐 Admin Panel
             </div>
         </div>
@@ -171,13 +237,16 @@
         <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-10 shadow-sm">
             <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">⚙️ Paste & Upload Whole Paper</h1>
             <p class="text-slate-500 text-sm md:text-base leading-relaxed mb-8">
-                Copy the <strong>ChatGPT prompt below</strong> → paste your paper into ChatGPT → copy the JSON it gives you → paste it here → click Upload. <strong>One go. No manual filling.</strong>
+                Copy the <strong>ChatGPT prompt below</strong> → paste your paper into ChatGPT → copy the JSON it gives
+                you → paste it here → click Upload. <strong>One go. No manual filling.</strong>
             </p>
 
             <!-- Prompt Box -->
             <div class="bg-gradient-to-br from-blue-900 to-blue-700 rounded-xl p-5 md:p-7 text-white mb-8 shadow-md">
-                <div class="text-[13px] font-bold uppercase tracking-wider mb-3 text-blue-200">📋 Step 1 — Copy this prompt and send to ChatGPT</div>
-                <code id="promptText" class="block bg-black/30 rounded-lg p-4 md:p-5 text-[13px] font-mono whitespace-pre-wrap break-words text-blue-50 leading-relaxed shadow-inner max-h-[400px] overflow-y-auto">Convert the following past paper into the exact JSON structure provided below. Output ONLY the raw, valid JSON. Do not include markdown code blocks (like ```json) or any explanations.
+                <div class="text-[13px] font-bold uppercase tracking-wider mb-3 text-blue-200">📋 Step 1 — Copy this
+                    prompt and send to ChatGPT</div>
+                <code id="promptText"
+                    class="block bg-black/30 rounded-lg p-4 md:p-5 text-[13px] font-mono whitespace-pre-wrap break-words text-blue-50 leading-relaxed shadow-inner max-h-[400px] overflow-y-auto">Convert the following past paper into the exact JSON structure provided below. Output ONLY the raw, valid JSON. Do not include markdown code blocks (like ```json) or any explanations.
 CRITICAL INSTRUCTIONS FOR UI RENDERING:
 JSON ESCAPING: You MUST double-escape all backslashes for LaTeX to prevent JSON syntax errors (e.g., write \\frac{1}{2} instead of \frac{1}{2}). You must also escape any internal double quotes (\").
 MATH DELIMITERS: Wrap inline math in $...$ and block equations in $$...$$. Example: $\\sum_{i=1}^{n}$
@@ -193,246 +262,252 @@ GRAPHS/CHARTS: If the question includes a graph or chart:
    - For FLOWCHARTS or TREES: Use type "mermaid" with a "code" field containing Mermaid syntax.
    - Always include "showLine": true in scatter datasets if you want a connected curve.
 JSON FORMAT TO STRICTLY FOLLOW: { "subject_code": "CSC211", "subject_name": "Data Structures", "instructor_name": "Dr. Mushtaq Ahmad", "year": 2024, "exam_type": "Mid Term", "semester": "Spring", "total_marks": 25, "questions": [ { "question_number": 1, "clo": "CLO-1", "marks": 5, "question_text": "Main question text goes here...", "sub_parts": [ "A. First sub-part text...", "B. Second sub-part text..." ], "options": ["Option 1", "Option 2", "Option 3", "Option 4"], "model_answer": "Step 1 explanation...", "graph": { "type": "scatter", "title": "Graph Title", "xMin": -5, "xMax": 3, "yMin": -12, "yMax": 2, "datasets": [ { "label": "Function Name", "showLine": true, "data": [{"x": -4, "y": -21}, {"x": -3, "y": -11}, {"x": -2, "y": -5}] } ] } } ] }
-[PASTE YOUR PAPER HERE]</code> <button class="copy-btn mt-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2 rounded-full text-sm font-bold transition shadow-sm flex items-center gap-2" onclick="copyPrompt()"> 📋 Copy Prompt </button> </div>
-
-
-        <!-- Paste Area -->
-        <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-500 mb-2">📝 Step 2 — Paste JSON from ChatGPT</label>
-        <div class="relative">
-            <textarea id="jsonPaste" placeholder='{"subject_code": "CSC211", ...}'
-                class="w-full min-h-[280px] p-4 border-2 border-slate-200 rounded-xl font-mono text-[13.5px] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition resize-y bg-slate-50/50 text-slate-800 leading-relaxed shadow-inner"
-                spellcheck="false"></textarea>
-            <!-- JSON line count indicator -->
-            <div id="jsonInfo" class="absolute bottom-3 right-3 text-[11px] font-mono text-slate-400"></div>
-        </div>
-
-
-        <!-- JSON Validation Indicator -->
-        <div id="jsonValidation" class="mt-2 text-[12px] font-medium h-5"></div>
-
-
-        <!-- Buttons -->
-        <div class="flex flex-col sm:flex-row gap-3 mt-5">
-            <button onclick="parsePaper()"
-                class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 border-2 border-blue-500 font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2">
-                🔍 Parse & Preview
-            </button>
-            <button id="uploadBtn" onclick="uploadPaper()"
-                class="hidden flex-[2] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 rounded-xl transition shadow-md hover:shadow-lg flex items-center justify-center gap-2">
-                🚀 Upload to Database
-            </button>
-            <button id="exportBtn" onclick="exportJSON()"
-                class="hidden flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border-2 border-slate-300 font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2">
-                💾 Export JSON
-            </button>
-        </div>
-
-
-        <!-- Preview -->
-        <div id="preview" class="hidden mt-10 border-t border-slate-100 pt-8">
-            <div class="flex items-center justify-between mb-4">
-                <div class="text-[13px] font-bold uppercase tracking-wide text-slate-500">📑 Paper Preview — Check before uploading</div>
-                <span id="questionCount" class="text-[12px] font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200"></span>
+[PASTE YOUR PAPER HERE]</code> <button
+                    class="copy-btn mt-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2 rounded-full text-sm font-bold transition shadow-sm flex items-center gap-2"
+                    onclick="copyPrompt()"> 📋 Copy Prompt </button>
             </div>
-            <div id="metaGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8"></div>
-            <div id="qList" class="flex flex-col gap-5"></div>
+
+
+            <!-- Paste Area -->
+            <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-500 mb-2">📝 Step 2 — Paste
+                JSON from ChatGPT</label>
+            <div class="relative">
+                <textarea id="jsonPaste" placeholder='{"subject_code": "CSC211", ...}'
+                    class="w-full min-h-[280px] p-4 border-2 border-slate-200 rounded-xl font-mono text-[13.5px] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition resize-y bg-slate-50/50 text-slate-800 leading-relaxed shadow-inner"
+                    spellcheck="false"></textarea>
+                <!-- JSON line count indicator -->
+                <div id="jsonInfo" class="absolute bottom-3 right-3 text-[11px] font-mono text-slate-400"></div>
+            </div>
+
+
+            <!-- JSON Validation Indicator -->
+            <div id="jsonValidation" class="mt-2 text-[12px] font-medium h-5"></div>
+
+
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 mt-5">
+                <button onclick="parsePaper()"
+                    class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 border-2 border-blue-500 font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2">
+                    🔍 Parse & Preview
+                </button>
+                <button id="uploadBtn" onclick="uploadPaper()"
+                    class="hidden flex-[2] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 rounded-xl transition shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                    🚀 Upload to Database
+                </button>
+                <button id="exportBtn" onclick="exportJSON()"
+                    class="hidden flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border-2 border-slate-300 font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2">
+                    💾 Export JSON
+                </button>
+            </div>
+
+
+            <!-- Preview -->
+            <div id="preview" class="hidden mt-10 border-t border-slate-100 pt-8">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="text-[13px] font-bold uppercase tracking-wide text-slate-500">📑 Paper Preview — Check
+                        before uploading</div>
+                    <span id="questionCount"
+                        class="text-[12px] font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200"></span>
+                </div>
+                <div id="metaGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8"></div>
+                <div id="qList" class="flex flex-col gap-5"></div>
+            </div>
+
+
+            <!-- Status Box -->
+            <div id="statusBox" class="hidden mt-5 p-4 rounded-xl text-sm leading-relaxed border transition-all"></div>
         </div>
+    </main>
 
 
-        <!-- Status Box -->
-        <div id="statusBox" class="hidden mt-5 p-4 rounded-xl text-sm leading-relaxed border transition-all"></div>
-    </div>
-</main>
+    <!-- Footer -->
+    <footer class="text-center text-slate-400 text-xs py-6 border-t border-slate-100">
+        COMSATSPrepHub Admin Panel &middot; Built with ❤️
+    </footer>
 
 
-<!-- Footer -->
-<footer class="text-center text-slate-400 text-xs py-6 border-t border-slate-100">
-    COMSATSPrepHub Admin Panel &middot; Built with ❤️
-</footer>
+    <script type="module">
+        import { supabase, escapeHtml as escHtml } from './utils.js';
 
 
-<script type="module">
-    import { supabase, escapeHtml as escHtml } from './utils.js';
+        let parsedData = null;
 
 
-    let parsedData = null;
+        // Initialize Mermaid
+        mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
 
 
-    // Initialize Mermaid
-    mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
-
-
-    // ── Dark Mode Toggle ──
-    window.toggleDarkMode = function () {
-        document.documentElement.classList.toggle('dark');
-        const isDark = document.documentElement.classList.contains('dark');
-        localStorage.setItem('darkMode', isDark);
-        document.getElementById('darkToggle').textContent = isDark ? '☀️' : '🌙';
-    };
-    // Load saved preference
-    if (localStorage.getItem('darkMode') === 'true') {
-        document.documentElement.classList.add('dark');
-        document.getElementById('darkToggle').textContent = '☀️';
-    }
-
-
-    // ── Live JSON Validation ──
-    const jsonTextarea = document.getElementById('jsonPaste');
-    const jsonValidation = document.getElementById('jsonValidation');
-    const jsonInfo = document.getElementById('jsonInfo');
-
-
-    jsonTextarea.addEventListener('input', function () {
-        const val = this.value.trim();
-        const lines = val.split('\n').length;
-        const chars = val.length;
-        jsonInfo.textContent = `${lines} lines · ${chars.toLocaleString()} chars`;
-
-
-        if (!val) {
-            jsonValidation.innerHTML = '';
-            return;
-        }
-        const cleaned = val.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-        try {
-            JSON.parse(cleaned);
-            jsonValidation.innerHTML = '<span class="text-emerald-600">✅ Valid JSON syntax</span>';
-        } catch (e) {
-            jsonValidation.innerHTML = `<span class="text-red-500">❌ ${e.message}</span>`;
-        }
-    });
-
-    // ── Copy prompt ──
-    window.copyPrompt = function () {
-        const text = document.getElementById('promptText').innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            const btn = document.querySelector('.copy-btn');
-            btn.innerHTML = '✅ Copied!';
-            setTimeout(() => { btn.innerHTML = '📋 Copy Prompt'; }, 2000);
-        });
-    };
-
-    // ── Export JSON ──
-    window.exportJSON = function () {
-        if (!parsedData) return;
-        const blob = new Blob([JSON.stringify(parsedData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${parsedData.subject_code}_${parsedData.year}_${parsedData.exam_type.replace(/\s/g, '_')}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-    };
-
-    // ══════════════════════════════════════════════
-    //  CORE FIX: Safe Markdown + MathJax rendering
-    // ══════════════════════════════════════════════
-    function formatMarkdown(text) {
-        if (!text) return '';
-
-        // Step 1: Extract all math expressions and replace with placeholders
-        // This prevents marked.js from mangling LaTeX syntax
-        const mathBlocks = [];
-        let processed = text;
-
-        // Extract display math $$...$$ first
-        processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, (match) => {
-            mathBlocks.push(match);
-            return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
-        });
-
-        // Extract display math \[...\]
-        processed = processed.replace(/\\\[([\s\S]*?)\\\]/g, (match) => {
-            const converted = '$$' + match.slice(2, -2) + '$$';
-            mathBlocks.push(converted);
-            return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
-        });
-
-        // Extract inline math $...$
-        processed = processed.replace(/\$([^\$\n]+?)\$/g, (match) => {
-            mathBlocks.push(match);
-            return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
-        });
-
-        // Extract inline math \(...\)
-        processed = processed.replace(/\\\(([\s\S]*?)\\\)/g, (match) => {
-            const converted = '$' + match.slice(2, -2) + '$';
-            mathBlocks.push(converted);
-            return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
-        });
-
-        // Auto-wrap un-wrapped \underline{...} in $ delimiters
-        processed = processed.replace(/(\\underline\{[^{}]*\})/g, (match) => {
-            mathBlocks.push('$' + match + '$');
-            return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
-        });
-
-        // Step 2: Run marked.js on the safe (math-free) text
-        const html = marked.parse(processed, { breaks: true, gfm: true });
-
-        // Step 3: Restore math expressions
-        let result = html;
-        for (let i = 0; i < mathBlocks.length; i++) {
-            result = result.replace(`%%MATH_BLOCK_${i}%%`, mathBlocks[i]);
+        // ── Dark Mode Toggle ──
+        window.toggleDarkMode = function () {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+            document.getElementById('darkToggle').textContent = isDark ? '☀️' : '🌙';
+        };
+        // Load saved preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+            document.getElementById('darkToggle').textContent = '☀️';
         }
 
-        return result;
-    }
 
-    // ══════════════════════════════════════════
-    //  Graph/Chart Rendering
-    // ══════════════════════════════════════════
-    function renderGraph(graphData, containerId) {
-        if (!graphData || !graphData.type) return '';
+        // ── Live JSON Validation ──
+        const jsonTextarea = document.getElementById('jsonPaste');
+        const jsonValidation = document.getElementById('jsonValidation');
+        const jsonInfo = document.getElementById('jsonInfo');
 
-        // Mermaid diagrams
-        if (graphData.type === 'mermaid') {
-            return `<div class="my-4 flex justify-center">
-                <div class="mermaid" id="${containerId}">${graphData.code || ''}</div>
-            </div>`;
-        }
 
-        // Color palette
-        const colors = [
-            'rgba(59,130,246,0.8)', 'rgba(99,102,241,0.8)',
-            'rgba(168,85,247,0.8)', 'rgba(236,72,153,0.8)',
-            'rgba(245,158,11,0.8)', 'rgba(16,185,129,0.8)'
-        ];
-        const borderColors = colors.map(c => c.replace('0.8', '1'));
+        jsonTextarea.addEventListener('input', function () {
+            const val = this.value.trim();
+            const lines = val.split('\n').length;
+            const chars = val.length;
+            jsonInfo.textContent = `${lines} lines · ${chars.toLocaleString()} chars`;
 
-        const isScatter = graphData.type === 'scatter';
 
-        const datasets = (graphData.datasets || []).map((ds, i) => ({
-            ...ds,
-            backgroundColor: ds.backgroundColor || (graphData.type === 'pie' || graphData.type === 'doughnut' ? colors : colors[i % colors.length]),
-            borderColor: ds.borderColor || (graphData.type === 'pie' || graphData.type === 'doughnut' ? borderColors : borderColors[i % borderColors.length]),
-            borderWidth: ds.borderWidth || (isScatter ? 2.5 : 2),
-            tension: ds.tension || 0.3,
-            showLine: isScatter ? (ds.showLine !== false) : undefined,
-            pointRadius: isScatter ? (ds.pointRadius ?? 2) : undefined,
-            fill: ds.fill ?? false,
-        }));
+            if (!val) {
+                jsonValidation.innerHTML = '';
+                return;
+            }
+            const cleaned = val.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+            try {
+                JSON.parse(cleaned);
+                jsonValidation.innerHTML = '<span class="text-emerald-600">✅ Valid JSON syntax</span>';
+            } catch (e) {
+                jsonValidation.innerHTML = `<span class="text-red-500">❌ ${e.message}</span>`;
+            }
+        });
 
-        // Build Chart.js config — embed axis bounds as custom fields
-        const chartConfig = {
-            type: graphData.type,
-            data: {
-                labels: graphData.labels || [],
-                datasets: datasets
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { position: 'bottom' } }
-            },
-            // Custom fields for our initializeCharts() to consume
-            _isFunction: isScatter,
-            _xMin: graphData.xMin ?? null,
-            _xMax: graphData.xMax ?? null,
-            _yMin: graphData.yMin ?? null,
-            _yMax: graphData.yMax ?? null,
+        // ── Copy prompt ──
+        window.copyPrompt = function () {
+            const text = document.getElementById('promptText').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.innerHTML = '✅ Copied!';
+                setTimeout(() => { btn.innerHTML = '📋 Copy Prompt'; }, 2000);
+            });
         };
 
-        return `
+        // ── Export JSON ──
+        window.exportJSON = function () {
+            if (!parsedData) return;
+            const blob = new Blob([JSON.stringify(parsedData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${parsedData.subject_code}_${parsedData.year}_${parsedData.exam_type.replace(/\s/g, '_')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        // ══════════════════════════════════════════════
+        //  CORE FIX: Safe Markdown + MathJax rendering
+        // ══════════════════════════════════════════════
+        function formatMarkdown(text) {
+            if (!text) return '';
+
+            // Step 1: Extract all math expressions and replace with placeholders
+            // This prevents marked.js from mangling LaTeX syntax
+            const mathBlocks = [];
+            let processed = text;
+
+            // Extract display math $$...$$ first
+            processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, (match) => {
+                mathBlocks.push(match);
+                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
+            });
+
+            // Extract display math \[...\]
+            processed = processed.replace(/\\\[([\s\S]*?)\\\]/g, (match) => {
+                const converted = '$$' + match.slice(2, -2) + '$$';
+                mathBlocks.push(converted);
+                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
+            });
+
+            // Extract inline math $...$
+            processed = processed.replace(/\$([^\$\n]+?)\$/g, (match) => {
+                mathBlocks.push(match);
+                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
+            });
+
+            // Extract inline math \(...\)
+            processed = processed.replace(/\\\(([\s\S]*?)\\\)/g, (match) => {
+                const converted = '$' + match.slice(2, -2) + '$';
+                mathBlocks.push(converted);
+                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
+            });
+
+            // Auto-wrap un-wrapped \underline{...} in $ delimiters
+            processed = processed.replace(/(\\underline\{[^{}]*\})/g, (match) => {
+                mathBlocks.push('$' + match + '$');
+                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
+            });
+
+            // Step 2: Run marked.js on the safe (math-free) text
+            const html = marked.parse(processed, { breaks: true, gfm: true });
+
+            // Step 3: Restore math expressions
+            let result = html;
+            for (let i = 0; i < mathBlocks.length; i++) {
+                result = result.replace(`%%MATH_BLOCK_${i}%%`, mathBlocks[i]);
+            }
+
+            return result;
+        }
+
+        // ══════════════════════════════════════════
+        //  Graph/Chart Rendering
+        // ══════════════════════════════════════════
+        function renderGraph(graphData, containerId) {
+            if (!graphData || !graphData.type) return '';
+
+            // Mermaid diagrams
+            if (graphData.type === 'mermaid') {
+                return `<div class="my-4 flex justify-center">
+                <div class="mermaid" id="${containerId}">${graphData.code || ''}</div>
+            </div>`;
+            }
+
+            // Color palette
+            const colors = [
+                'rgba(59,130,246,0.8)', 'rgba(99,102,241,0.8)',
+                'rgba(168,85,247,0.8)', 'rgba(236,72,153,0.8)',
+                'rgba(245,158,11,0.8)', 'rgba(16,185,129,0.8)'
+            ];
+            const borderColors = colors.map(c => c.replace('0.8', '1'));
+
+            const isScatter = graphData.type === 'scatter';
+
+            const datasets = (graphData.datasets || []).map((ds, i) => ({
+                ...ds,
+                backgroundColor: ds.backgroundColor || (graphData.type === 'pie' || graphData.type === 'doughnut' ? colors : colors[i % colors.length]),
+                borderColor: ds.borderColor || (graphData.type === 'pie' || graphData.type === 'doughnut' ? borderColors : borderColors[i % borderColors.length]),
+                borderWidth: ds.borderWidth || (isScatter ? 2.5 : 2),
+                tension: ds.tension || 0.3,
+                showLine: isScatter ? (ds.showLine !== false) : undefined,
+                pointRadius: isScatter ? (ds.pointRadius ?? 2) : undefined,
+                fill: ds.fill ?? false,
+            }));
+
+            // Build Chart.js config — embed axis bounds as custom fields
+            const chartConfig = {
+                type: graphData.type,
+                data: {
+                    labels: graphData.labels || [],
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
+                },
+                // Custom fields for our initializeCharts() to consume
+                _isFunction: isScatter,
+                _xMin: graphData.xMin ?? null,
+                _xMax: graphData.xMax ?? null,
+                _yMin: graphData.yMin ?? null,
+                _yMax: graphData.yMax ?? null,
+            };
+
+            return `
             <div class="chart-container my-5 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
                 ${graphData.title ? `<div class="text-center font-semibold text-slate-700 mb-3 text-sm">${graphData.title}</div>` : ''}
                 <canvas id="${containerId}" 
@@ -440,127 +515,127 @@ JSON FORMAT TO STRICTLY FOLLOW: { "subject_code": "CSC211", "subject_name": "Dat
                     style="max-height: 400px;">
                 </canvas>
             </div>`;
-    }
+        }
 
-    function initializeCharts() {
-        document.querySelectorAll('canvas[data-chart]').forEach(canvas => {
-            try {
-                const config = JSON.parse(canvas.getAttribute('data-chart'));
+        function initializeCharts() {
+            document.querySelectorAll('canvas[data-chart]').forEach(canvas => {
+                try {
+                    const config = JSON.parse(canvas.getAttribute('data-chart'));
 
-                // If scatter/function plot, configure proper axes
-                if (config.type === 'scatter' || config._isFunction) {
-                    // Enable line drawing for scatter datasets
-                    config.data.datasets.forEach(ds => {
-                        if (ds.showLine !== false) ds.showLine = true;
-                        ds.pointRadius = ds.pointRadius ?? 2;
-                        ds.borderWidth = ds.borderWidth ?? 2.5;
-                        ds.tension = ds.tension ?? 0.3;
-                        ds.fill = ds.fill ?? false;
-                    });
+                    // If scatter/function plot, configure proper axes
+                    if (config.type === 'scatter' || config._isFunction) {
+                        // Enable line drawing for scatter datasets
+                        config.data.datasets.forEach(ds => {
+                            if (ds.showLine !== false) ds.showLine = true;
+                            ds.pointRadius = ds.pointRadius ?? 2;
+                            ds.borderWidth = ds.borderWidth ?? 2.5;
+                            ds.tension = ds.tension ?? 0.3;
+                            ds.fill = ds.fill ?? false;
+                        });
 
-                    // Set axis ranges from graph metadata
+                        // Set axis ranges from graph metadata
+                        config.options = config.options || {};
+                        config.options.scales = {
+                            x: {
+                                type: 'linear',
+                                position: 'center',
+                                min: config._xMin ?? undefined,
+                                max: config._xMax ?? undefined,
+                                title: { display: true, text: 'x' },
+                                grid: { color: 'rgba(0,0,0,0.06)' }
+                            },
+                            y: {
+                                type: 'linear',
+                                position: 'center',
+                                min: config._yMin ?? undefined,
+                                max: config._yMax ?? undefined,
+                                title: { display: true, text: 'y' },
+                                grid: { color: 'rgba(0,0,0,0.06)' }
+                            }
+                        };
+
+                        // Clean up custom props before passing to Chart.js
+                        delete config._xMin;
+                        delete config._xMax;
+                        delete config._yMin;
+                        delete config._yMax;
+                        delete config._isFunction;
+                    }
+
                     config.options = config.options || {};
-                    config.options.scales = {
-                        x: {
-                            type: 'linear',
-                            position: 'center',
-                            min: config._xMin ?? undefined,
-                            max: config._xMax ?? undefined,
-                            title: { display: true, text: 'x' },
-                            grid: { color: 'rgba(0,0,0,0.06)' }
-                        },
-                        y: {
-                            type: 'linear',
-                            position: 'center',
-                            min: config._yMin ?? undefined,
-                            max: config._yMax ?? undefined,
-                            title: { display: true, text: 'y' },
-                            grid: { color: 'rgba(0,0,0,0.06)' }
-                        }
-                    };
+                    config.options.responsive = true;
+                    config.options.plugins = config.options.plugins || {};
+                    config.options.plugins.legend = { position: 'bottom' };
 
-                    // Clean up custom props before passing to Chart.js
-                    delete config._xMin;
-                    delete config._xMax;
-                    delete config._yMin;
-                    delete config._yMax;
-                    delete config._isFunction;
-                }
-
-                config.options = config.options || {};
-                config.options.responsive = true;
-                config.options.plugins = config.options.plugins || {};
-                config.options.plugins.legend = { position: 'bottom' };
-
-                new Chart(canvas, config);
-            } catch (e) {
-                console.error('Chart init error:', e);
-                canvas.parentElement.innerHTML = `
+                    new Chart(canvas, config);
+                } catch (e) {
+                    console.error('Chart init error:', e);
+                    canvas.parentElement.innerHTML = `
                     <div class="text-red-500 text-sm p-4 text-center">
                         ⚠️ Chart rendering failed: ${e.message}
                     </div>`;
+                }
+            });
+        }
+
+        async function initializeMermaidDiagrams() {
+            const mermaidEls = document.querySelectorAll('.mermaid');
+            if (mermaidEls.length > 0) {
+                try { await mermaid.run({ nodes: mermaidEls }); }
+                catch (e) { console.error('Mermaid error:', e); }
             }
-        });
-    }
-
-    async function initializeMermaidDiagrams() {
-        const mermaidEls = document.querySelectorAll('.mermaid');
-        if (mermaidEls.length > 0) {
-            try { await mermaid.run({ nodes: mermaidEls }); }
-            catch (e) { console.error('Mermaid error:', e); }
-        }
-    }
-
-    // ── Parse JSON from textarea ──
-    window.parsePaper = function () {
-        const raw = document.getElementById('jsonPaste').value.trim();
-        if (!raw) return showStatus('error', '⚠️ Please paste the JSON from ChatGPT first.');
-
-        const cleaned = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-
-
-        let data;
-        try { data = JSON.parse(cleaned); }
-        catch (e) {
-            return showStatus('error', `❌ <strong>Invalid JSON.</strong> Ensure no trailing commas and proper backslashes.<br><small class="opacity-80 mt-1 block">Error: ${e.message}</small>`);
         }
 
+        // ── Parse JSON from textarea ──
+        window.parsePaper = function () {
+            const raw = document.getElementById('jsonPaste').value.trim();
+            if (!raw) return showStatus('error', '⚠️ Please paste the JSON from ChatGPT first.');
 
-        const required = ['subject_code', 'subject_name', 'instructor_name', 'year', 'exam_type', 'semester', 'total_marks', 'questions'];
-        for (const f of required) {
-            if (data[f] == null) return showStatus('error', `❌ Missing field: <code class="bg-red-100/50 px-1.5 py-0.5 rounded text-red-900 font-mono">${f}</code>`);
-        }
-        if (!Array.isArray(data.questions) || !data.questions.length) return showStatus('error', '❌ Questions array is empty or missing.');
-
-
-        // Auto-replace multiple instructors with "Central Paper"
-        if (data.instructor_name && (data.instructor_name.includes(',') || data.instructor_name.includes('&') || data.instructor_name.toLowerCase().includes(' and '))) {
-            data.instructor_name = 'Central Paper';
-        }
+            const cleaned = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
 
 
-        parsedData = data;
-        renderPreview(data);
-        hideStatus();
-        showStatus('success', `✅ Parsed successfully! <strong>${data.questions.length} questions</strong> found. Review below and click Upload.`);
-    };
+            let data;
+            try { data = JSON.parse(cleaned); }
+            catch (e) {
+                return showStatus('error', `❌ <strong>Invalid JSON.</strong> Ensure no trailing commas and proper backslashes.<br><small class="opacity-80 mt-1 block">Error: ${e.message}</small>`);
+            }
 
 
-    // ── Render Preview ──
-    function renderPreview(d) {
-        document.getElementById('questionCount').textContent = `${d.questions.length} Questions · ${d.total_marks} Marks`;
+            const required = ['subject_code', 'subject_name', 'instructor_name', 'year', 'exam_type', 'semester', 'total_marks', 'questions'];
+            for (const f of required) {
+                if (data[f] == null) return showStatus('error', `❌ Missing field: <code class="bg-red-100/50 px-1.5 py-0.5 rounded text-red-900 font-mono">${f}</code>`);
+            }
+            if (!Array.isArray(data.questions) || !data.questions.length) return showStatus('error', '❌ Questions array is empty or missing.');
 
 
-        document.getElementById('metaGrid').innerHTML = [
-            ['📚', 'Subject Code', d.subject_code],
-            ['📖', 'Subject Name', d.subject_name],
-            ['👨🏫', 'Instructor', d.instructor_name],
-            ['📅', 'Year', d.year],
-            ['📝', 'Exam Type', d.exam_type],
-            ['🗓️', 'Semester', d.semester],
-            ['🎯', 'Total Marks', d.total_marks],
-            ['❓', 'Questions', d.questions.length]
-        ].map(([icon, k, v]) => `
+            // Auto-replace multiple instructors with "Central Paper"
+            if (data.instructor_name && (data.instructor_name.includes(',') || data.instructor_name.includes('&') || data.instructor_name.toLowerCase().includes(' and '))) {
+                data.instructor_name = 'Central Paper';
+            }
+
+
+            parsedData = data;
+            renderPreview(data);
+            hideStatus();
+            showStatus('success', `✅ Parsed successfully! <strong>${data.questions.length} questions</strong> found. Review below and click Upload.`);
+        };
+
+
+        // ── Render Preview ──
+        function renderPreview(d) {
+            document.getElementById('questionCount').textContent = `${d.questions.length} Questions · ${d.total_marks} Marks`;
+
+
+            document.getElementById('metaGrid').innerHTML = [
+                ['📚', 'Subject Code', d.subject_code],
+                ['📖', 'Subject Name', d.subject_name],
+                ['👨🏫', 'Instructor', d.instructor_name],
+                ['📅', 'Year', d.year],
+                ['📝', 'Exam Type', d.exam_type],
+                ['🗓️', 'Semester', d.semester],
+                ['🎯', 'Total Marks', d.total_marks],
+                ['❓', 'Questions', d.questions.length]
+            ].map(([icon, k, v]) => `
             <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-3.5 border border-slate-200 hover:shadow-sm transition">
                 <div class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold flex items-center gap-1">${icon} ${k}</div>
                 <strong class="block text-[15px] font-bold text-slate-900 mt-1 capitalize">${v}</strong>
@@ -568,14 +643,14 @@ JSON FORMAT TO STRICTLY FOLLOW: { "subject_code": "CSC211", "subject_name": "Dat
         `).join('');
 
 
-        let chartIndex = 0;
+            let chartIndex = 0;
 
 
-        document.getElementById('qList').innerHTML = d.questions.map((q, idx) => {
-            const graphHtml = q.graph ? renderGraph(q.graph, `chart_${idx}_${chartIndex++}`) : '';
+            document.getElementById('qList').innerHTML = d.questions.map((q, idx) => {
+                const graphHtml = q.graph ? renderGraph(q.graph, `chart_${idx}_${chartIndex++}`) : '';
 
 
-            return `
+                return `
             <div class="question-card border border-slate-200 rounded-xl p-5 md:p-6 text-sm bg-white shadow-sm hover:shadow-md">
                 <!-- Question Header -->
                 <div class="flex items-start justify-between mb-4">
@@ -628,114 +703,114 @@ JSON FORMAT TO STRICTLY FOLLOW: { "subject_code": "CSC211", "subject_name": "Dat
                     </div>
                 </details>` : ''}
             </div>`;
-        }).join('');
+            }).join('');
 
 
-        document.getElementById('preview').classList.remove('hidden');
-        document.getElementById('uploadBtn').classList.remove('hidden');
-        document.getElementById('exportBtn').classList.remove('hidden');
+            document.getElementById('preview').classList.remove('hidden');
+            document.getElementById('uploadBtn').classList.remove('hidden');
+            document.getElementById('exportBtn').classList.remove('hidden');
 
 
-        // Initialize Charts and Mermaid after DOM update
-        requestAnimationFrame(() => {
-            initializeCharts();
-            initializeMermaidDiagrams();
-            if (window.MathJax) {
-                MathJax.typesetPromise([document.getElementById('qList')]).catch(err => console.error('MathJax error:', err));
-            }
-        });
+            // Initialize Charts and Mermaid after DOM update
+            requestAnimationFrame(() => {
+                initializeCharts();
+                initializeMermaidDiagrams();
+                if (window.MathJax) {
+                    MathJax.typesetPromise([document.getElementById('qList')]).catch(err => console.error('MathJax error:', err));
+                }
+            });
 
 
-        setTimeout(() => {
-            document.getElementById('preview').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-    }
+            setTimeout(() => {
+                document.getElementById('preview').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
 
 
-    // ── Upload to Supabase ──
-    window.uploadPaper = async function () {
-        if (!parsedData) return showStatus('error', '⚠️ Please parse the JSON first.');
+        // ── Upload to Supabase ──
+        window.uploadPaper = async function () {
+            if (!parsedData) return showStatus('error', '⚠️ Please parse the JSON first.');
 
 
-        if (!confirm(`Upload ${parsedData.questions.length} questions for ${parsedData.subject_code} ${parsedData.exam_type} ${parsedData.year}?`)) return;
+            if (!confirm(`Upload ${parsedData.questions.length} questions for ${parsedData.subject_code} ${parsedData.exam_type} ${parsedData.year}?`)) return;
 
 
-        const btn = document.getElementById('uploadBtn');
-        btn.disabled = true;
-        btn.innerHTML = `<span class="spinner"></span> Uploading...`;
+            const btn = document.getElementById('uploadBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner"></span> Uploading...`;
 
 
-        const d = parsedData;
-        const subjectCode = String(d.subject_code).toUpperCase();
+            const d = parsedData;
+            const subjectCode = String(d.subject_code).toUpperCase();
 
 
-        try {
-            showStatus('loading', '🔍 Checking for existing paper...');
-            const { data: existing } = await supabase.from('past_papers').select('id')
-                .eq('subject_code', subjectCode)
-                .eq('year', d.year)
-                .eq('exam_type', d.exam_type)
-                .eq('semester', d.semester)
-                .maybeSingle();
+            try {
+                showStatus('loading', '🔍 Checking for existing paper...');
+                const { data: existing } = await supabase.from('past_papers').select('id')
+                    .eq('subject_code', subjectCode)
+                    .eq('year', d.year)
+                    .eq('exam_type', d.exam_type)
+                    .eq('semester', d.semester)
+                    .maybeSingle();
 
 
-            let paperId;
+                let paperId;
 
 
-            if (existing) {
-                showStatus('loading', '🔄 Existing paper found. Updating & removing old questions...');
-                paperId = existing.id;
-                const { error: updateErr } = await supabase.from('past_papers').update({
-                    subject_name: d.subject_name,
-                    instructor_name: d.instructor_name,
-                    total_marks: d.total_marks
-                }).eq('id', paperId);
-                if (updateErr) throw updateErr;
+                if (existing) {
+                    showStatus('loading', '🔄 Existing paper found. Updating & removing old questions...');
+                    paperId = existing.id;
+                    const { error: updateErr } = await supabase.from('past_papers').update({
+                        subject_name: d.subject_name,
+                        instructor_name: d.instructor_name,
+                        total_marks: d.total_marks
+                    }).eq('id', paperId);
+                    if (updateErr) throw updateErr;
 
 
-                const { error: delErr } = await supabase.from('questions').delete().eq('paper_id', paperId);
-                if (delErr) throw delErr;
-            } else {
-                showStatus('loading', '📝 Inserting new paper record...');
-                const { data: paper, error: paperError } = await supabase.from('past_papers').insert([{
-                    subject_code: subjectCode,
-                    subject_name: d.subject_name,
-                    instructor_name: d.instructor_name,
-                    year: d.year,
-                    exam_type: d.exam_type,
-                    semester: d.semester,
-                    total_marks: d.total_marks
-                }]).select().single();
-                if (paperError) throw paperError;
-                paperId = paper.id;
-            }
+                    const { error: delErr } = await supabase.from('questions').delete().eq('paper_id', paperId);
+                    if (delErr) throw delErr;
+                } else {
+                    showStatus('loading', '📝 Inserting new paper record...');
+                    const { data: paper, error: paperError } = await supabase.from('past_papers').insert([{
+                        subject_code: subjectCode,
+                        subject_name: d.subject_name,
+                        instructor_name: d.instructor_name,
+                        year: d.year,
+                        exam_type: d.exam_type,
+                        semester: d.semester,
+                        total_marks: d.total_marks
+                    }]).select().single();
+                    if (paperError) throw paperError;
+                    paperId = paper.id;
+                }
 
 
-            // Batch insert all questions at once (faster than one-by-one)
-            showStatus('loading', `📤 Inserting ${d.questions.length} questions...`);
-            const questionsPayload = d.questions.map((q, i) => ({
-                paper_id: paperId,
-                question_number: q.question_number ?? i + 1,
-                clo: q.clo ?? null,
-                marks: q.marks ?? null,
-                question_text: q.question_text,
-                model_answer: q.model_answer ?? null,
-                sub_parts: q.sub_parts ?? null,
-                options: q.options ?? null,
-                graph: q.graph ?? null
-            }));
+                // Batch insert all questions at once (faster than one-by-one)
+                showStatus('loading', `📤 Inserting ${d.questions.length} questions...`);
+                const questionsPayload = d.questions.map((q, i) => ({
+                    paper_id: paperId,
+                    question_number: q.question_number ?? i + 1,
+                    clo: q.clo ?? null,
+                    marks: q.marks ?? null,
+                    question_text: q.question_text,
+                    model_answer: q.model_answer ?? null,
+                    sub_parts: q.sub_parts ?? null,
+                    options: q.options ?? null,
+                    graph: q.graph ?? null
+                }));
 
 
-            const { error: qErr } = await supabase.from('questions').insert(questionsPayload);
-            if (qErr) throw qErr;
+                const { error: qErr } = await supabase.from('questions').insert(questionsPayload);
+                if (qErr) throw qErr;
 
 
-            btn.innerHTML = '✅ Uploaded!';
-            btn.classList.replace('from-blue-600', 'from-emerald-600');
-            btn.classList.replace('to-indigo-600', 'to-emerald-600');
+                btn.innerHTML = '✅ Uploaded!';
+                btn.classList.replace('from-blue-600', 'from-emerald-600');
+                btn.classList.replace('to-indigo-600', 'to-emerald-600');
 
 
-            showStatus('success', `
+                showStatus('success', `
                 <strong>✅ ${existing ? 'Update' : 'Upload'} Complete!</strong><br><br>
                 ${existing ? 'Replaced' : 'Inserted'} <strong>${d.questions.length} questions</strong> for 
                 <strong class="text-emerald-900">${subjectCode} — ${d.subject_name}</strong>.<br><br>
@@ -743,32 +818,32 @@ JSON FORMAT TO STRICTLY FOLLOW: { "subject_code": "CSC211", "subject_name": "Dat
                     🔗 <a href="paper-view.html?subject=${subjectCode}&year=${d.year}&exam=${encodeURIComponent(d.exam_type)}" target="_blank" class="text-emerald-700 font-bold break-all hover:underline">View Paper on Website →</a>
                 </div>
             `);
-        } catch (err) {
-            resetBtn(btn);
-            showStatus('error', `❌ <strong>Error:</strong> ${err.message}<br><small class="opacity-80">Make sure past_papers & questions tables exist with a "graph" JSONB column.</small>`);
-        }
-    };
-
-
-    function showStatus(type, html) {
-        const box = document.getElementById('statusBox');
-        box.className = 'mt-5 p-4 rounded-xl text-sm leading-relaxed border transition-all';
-        const styles = {
-            success: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-            error: 'bg-red-50 text-red-800 border-red-200',
-            loading: 'bg-blue-50 text-blue-800 border-blue-200'
+            } catch (err) {
+                resetBtn(btn);
+                showStatus('error', `❌ <strong>Error:</strong> ${err.message}<br><small class="opacity-80">Make sure past_papers & questions tables exist with a "graph" JSONB column.</small>`);
+            }
         };
-        box.classList.add(...(styles[type] || styles.loading).split(' '));
-        box.innerHTML = html;
-    }
-    function hideStatus() { document.getElementById('statusBox').classList.add('hidden'); }
-    function resetBtn(btn) {
-        btn.disabled = false;
-        btn.innerHTML = '🚀 Upload to Database';
-        btn.classList.replace('from-emerald-600', 'from-blue-600');
-        btn.classList.replace('to-emerald-600', 'to-indigo-600');
-    }
-</script>
+
+
+        function showStatus(type, html) {
+            const box = document.getElementById('statusBox');
+            box.className = 'mt-5 p-4 rounded-xl text-sm leading-relaxed border transition-all';
+            const styles = {
+                success: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+                error: 'bg-red-50 text-red-800 border-red-200',
+                loading: 'bg-blue-50 text-blue-800 border-blue-200'
+            };
+            box.classList.add(...(styles[type] || styles.loading).split(' '));
+            box.innerHTML = html;
+        }
+        function hideStatus() { document.getElementById('statusBox').classList.add('hidden'); }
+        function resetBtn(btn) {
+            btn.disabled = false;
+            btn.innerHTML = '🚀 Upload to Database';
+            btn.classList.replace('from-emerald-600', 'from-blue-600');
+            btn.classList.replace('to-emerald-600', 'to-indigo-600');
+        }
+    </script>
 </body>
 
 </html>
