@@ -43,7 +43,7 @@ export function closeModal() {
 // ── HTML Template ─────────────────────────────────────────────────────────────
 function _injectModalHTML() {
     const html = `
-    <div class="auth-modal-overlay" id="auth-modal-overlay" role="dialog" aria-modal="true" aria-label="Authentication">
+    <div class="auth-modal-overlay" id="auth-modal-overlay" role="dialog" aria-modal="true" aria-label="Authentication" style="display: none;">
       <div class="auth-modal am-auth" id="am-auth">
 
         <button class="auth-modal-close" id="close-auth-modal" aria-label="Close">
