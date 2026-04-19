@@ -11,6 +11,15 @@ import { supabase, auth } from './core.js';
 // ── Public API ────────────────────────────────────────────────────────────────
 export function initAuthModal() {
     if (document.getElementById('auth-modal-overlay')) return; // already injected
+    
+    // Dynamically inject stylesheet if missing
+    if (!document.querySelector('link[href*="auth-modal.css"]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'auth-modal.css';
+        document.head.appendChild(link);
+    }
+
     _injectModalHTML();
     _attachListeners();
 }

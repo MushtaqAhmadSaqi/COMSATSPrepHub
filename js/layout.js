@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   _injectHeader(currentPage, session, userName);
   _injectFooter();
   _injectMobileNav(currentPage);
-  initAuthModal();
   _wireNavButton(session, userName);
+  if (!session) initAuthModal();
   _initSwipeNav(currentPage);
   _initScrollHideNav();
   _initAOS();
@@ -122,7 +122,7 @@ function _wireNavButton(session, userName) {
   if (session) {
     btn.addEventListener('click', () => { window.location.href = 'dashboard.html'; });
   } else {
-    btn.addEventListener('click', () => openModal('login'));
+    btn.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
   }
 }
 
