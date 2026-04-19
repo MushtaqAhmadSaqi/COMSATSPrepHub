@@ -28,6 +28,7 @@
 
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
@@ -53,7 +54,7 @@
     </script>
     <style type="text/tailwindcss">
         @layer utilities {
-            .glass { @apply bg-white/80 backdrop-blur-xl border border-slate-200/80; }
+            .glass { @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/10; }
             .quiz-option { 
               @apply flex items-start gap-4 p-5 border-2 border-slate-200 rounded-2xl cursor-pointer transition-all duration-200 bg-white hover:border-brand-500 hover:bg-brand-50 font-mono text-[14px]; 
             }
@@ -86,14 +87,15 @@
             .quiz-option.wrong .radio-ui::after { @apply bg-white; }
         }
     </style>
+    <script src="js/dark-mode.js"></script>
 </head>
 
-<body class="bg-slate-50 text-slate-700 font-sans antialiased min-h-screen">
+<body class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300 antialiased min-h-screen">
 
     <!-- ═══════════════════════════════════════════════
          MAIN LAYOUT
     ═══════════════════════════════════════════════ -->
-    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 pt-24 pb-8 lg:pt-32 lg:pb-12 text-slate-700">
+    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 pt-10 pb-8 lg:pb-12 text-slate-700">
         <div class="max-w-4xl mx-auto">
 
             <!-- ================== STEP 1: QUIZ SELECT ================== -->

@@ -43,6 +43,7 @@
 
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
@@ -78,7 +79,7 @@
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-700 font-sans antialiased min-h-screen">
+<body class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300 antialiased min-h-screen">
 
     <!-- ═══════════════════════════════════════════════
          STICKY TOP NAV
@@ -499,9 +500,14 @@
         }
 
         function initializeCharts() {
+            const isDark = document.documentElement.classList.contains('dark');
             document.querySelectorAll('canvas[data-chart]').forEach(canvas => {
                 try {
                     const config = JSON.parse(canvas.getAttribute('data-chart'));
+                    
+                    // Theme-aware defaults
+                    Chart.defaults.color = isDark ? '#94a3b8' : '#64748b';
+                    
                     if (config.type === 'scatter' || config._isFunction) {
                         config.data.datasets.forEach(ds => {
                             if (ds.showLine !== false) ds.showLine = true;
@@ -510,8 +516,16 @@
                         });
                         config.options = {
                             scales: {
-                                x: { type: 'linear', position: 'center', min: config._xMin ?? undefined, max: config._xMax ?? undefined, grid: { color: 'rgba(0,0,0,0.05)' } },
-                                y: { type: 'linear', position: 'center', min: config._yMin ?? undefined, max: config._yMax ?? undefined, grid: { color: 'rgba(0,0,0,0.05)' } }
+                                x: { 
+                                    type: 'linear', position: 'center', 
+                                    min: config._xMin ?? undefined, max: config._xMax ?? undefined, 
+                                    grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } 
+                                },
+                                y: { 
+                                    type: 'linear', position: 'center', 
+                                    min: config._yMin ?? undefined, max: config._yMax ?? undefined, 
+                                    grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' } 
+                                }
                             }
                         };
                         delete config._xMin; delete config._xMax; delete config._yMin; delete config._yMax; delete config._isFunction;
@@ -561,26 +575,26 @@
                 // ── Question card ──
                 const card = document.createElement('section');
                 card.id = `q-card-${q.id}`;
-                card.className = 'bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden animate-fade-in scroll-mt-32 transition-shadow hover:shadow-md';
+                card.className = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden animate-fade-in scroll-mt-32 transition-all hover:shadow-md';
 
                 card.innerHTML = `
                     <!-- Question Header stripe -->
-                    <div class="flex items-center justify-between gap-3 px-5 sm:px-7 py-4 border-b border-slate-100 bg-slate-50/70">
+                    <div class="flex items-center justify-between gap-3 px-5 sm:px-7 py-4 border-b border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-slate-800/50">
                         <div class="flex items-center gap-3 flex-wrap">
                             <span class="flex items-center justify-center w-8 h-8 rounded-xl bg-brand-600 text-white text-sm font-bold shadow-sm flex-shrink-0">${q.question_number}</span>
-                            ${q.clo ? `<span class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-full">${q.clo}</span>` : ''}
+                            ${q.clo ? `<span class="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-500/20 px-2.5 py-1 rounded-full">${q.clo}</span>` : ''}
                         </div>
                         <div class="flex items-center gap-2 flex-shrink-0">
-                            ${q.marks ? `<span class="text-[12px] font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-full shadow-sm">${q.marks} Marks</span>` : ''}
-                            <span id="status-badge-${q.id}" class="hidden text-[11px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-full flex items-center gap-1">
+                            ${q.marks ? `<span class="text-[12px] font-bold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-full shadow-sm">${q.marks} Marks</span>` : ''}
+                            <span id="status-badge-${q.id}" class="hidden text-[11px] font-bold text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 border border-teal-200 dark:border-teal-500/20 px-3 py-1.5 rounded-full flex items-center gap-1">
                                 <span class="material-symbols-outlined text-[14px]">check_circle</span> Answered
                             </span>
                         </div>
                     </div>
 
                     <!-- Question text -->
-                    <div class="px-5 sm:px-7 py-6 border-b border-slate-100">
-                        <div class="question-prose text-slate-800 text-[15.5px] leading-[1.9] overflow-x-auto pb-2">${formatMarkdown(q.question_text)}</div>
+                    <div class="px-5 sm:px-7 py-6 border-b border-slate-100 dark:border-white/5">
+                        <div class="question-prose text-slate-800 dark:text-gray-200 text-[15.5px] leading-[1.9] overflow-x-auto pb-2">${formatMarkdown(q.question_text)}</div>
                         
                         ${graphHtml}
 
@@ -604,12 +618,12 @@
                     <div class="px-5 sm:px-7 py-6 space-y-4">
                         <!-- Textarea -->
                         <div>
-                            <label class="block text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2">Your Answer</label>
+                            <label class="block text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">Your Answer</label>
                             <textarea
                                 id="answer-${q.id}"
                                 rows="4"
                                 placeholder="Write your explanation or solution here before revealing the model answer..."
-                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[15px] leading-relaxed text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-400/20 focus:bg-white resize-y transition-all font-serif"
+                                class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 rounded-xl text-[15px] leading-relaxed text-slate-800 dark:text-gray-200 placeholder:text-slate-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-400/20 focus:bg-white dark:focus:bg-slate-800 resize-y transition-all font-serif"
                             ></textarea>
                         </div>
 
@@ -628,16 +642,16 @@
 
                         <!-- Model answer (hidden until submit) -->
                         <div id="model-${q.id}" class="hidden">
-                            <div class="relative mt-2 bg-gradient-to-br from-teal-50 to-slate-50 border border-teal-200/70 rounded-xl overflow-hidden animate-slide-up">
+                            <div class="relative mt-2 bg-gradient-to-br from-teal-50 to-slate-50 dark:from-teal-900/10 dark:to-slate-900/10 border border-teal-200/70 dark:border-teal-500/20 rounded-xl overflow-hidden animate-slide-up">
                                 <!-- Accent bar -->
                                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-teal-400 to-brand-400"></div>
                                 <div class="pl-5 pr-5 sm:pr-7 pt-5 pb-6">
                                     <div class="flex items-center gap-2 mb-4">
-                                        <span class="material-symbols-outlined text-[18px] text-teal-600">auto_awesome</span>
-                                        <p class="text-[11px] font-bold uppercase tracking-widest text-teal-700">Model Answer</p>
+                                        <span class="material-symbols-outlined text-[18px] text-teal-600 dark:text-teal-400">auto_awesome</span>
+                                        <p class="text-[11px] font-bold uppercase tracking-widest text-teal-700 dark:text-teal-300">Model Answer</p>
                                     </div>
-                                    <div id="model-content-${q.id}" class="question-prose text-slate-800 text-[15px] leading-[1.9] overflow-x-auto pb-2">
-                                        ${q.model_answer ? formatMarkdown(q.model_answer) : '<em class="text-slate-400">No model answer provided.</em>'}
+                                    <div id="model-content-${q.id}" class="question-prose text-slate-800 dark:text-gray-200 text-[15px] leading-[1.9] overflow-x-auto pb-2">
+                                        ${q.model_answer ? formatMarkdown(q.model_answer) : '<em class="text-slate-400 dark:text-gray-500">No model answer provided.</em>'}
                                     </div>
                                 </div>
                             </div>

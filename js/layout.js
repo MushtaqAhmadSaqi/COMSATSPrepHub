@@ -36,50 +36,76 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ── Header ────────────────────────────────────────────────────────────────────
 function _injectHeader(currentPage, session, userName) {
-  // Don't inject if page already has a header (e.g. quiz.html uses its own minimal nav)
   if (document.querySelector('header')) return;
 
   const isLoggedIn = !!session;
-  const btnLabel = isLoggedIn ? `<span class="material-symbols-outlined" style="font-size:17px;">dashboard</span>${userName}'s Dashboard` : '<span class="material-symbols-outlined" style="font-size:17px;">person</span>Sign In';
+  const btnLabel = isLoggedIn 
+    ? `<span class="material-symbols-outlined text-[17px]">dashboard</span><span class="hidden sm:inline">${userName}</span>` 
+    : `<span class="material-symbols-outlined text-[17px]">person</span><span class="hidden sm:inline">Sign In</span>`;
 
   const header = document.createElement('header');
-  header.className = 'navbar navbar-dark';
+  header.className = 'navbar sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/10 transition-all duration-300';
   header.innerHTML = `
-      <a href="index.html" class="navbar-brand flex items-center gap-2.5">
-        <span class="w-7 h-7 rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center text-white font-black text-xs shadow-sm">C</span>
-        COMSATSPrepHub
-      </a>
-      <nav class="nav-links hidden md:flex">
-        <a href="index.html"   class="nav-link ${currentPage === 'index.html' ? 'active' : ''}">Home</a>
-        <a href="subjects.html" class="nav-link ${currentPage === 'subjects.html' ? 'active' : ''}">Subjects</a>
-        <a href="quiz.html"    class="nav-link ${currentPage === 'quiz.html' ? 'active' : ''}">Quiz</a>
-        <a href="about-us.html" class="nav-link ${currentPage === 'about-us.html' ? 'active' : ''}">Team</a>
-      </nav>
-      ${currentPage === 'index.html' ? `
-      <div class="nav-actions">
-        <button class="btn-signin-nav" id="open-auth-modal" aria-label="Open sign in or dashboard">
-          ${btnLabel}
-        </button>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center gap-2.5 group">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center text-white font-black text-xs shadow-sm group-hover:scale-105 transition-transform">C</div>
+          <span class="font-black text-lg tracking-tight text-[#1a1a2e] dark:text-white">COMSATSPrepHub</span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="index.html" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors ${currentPage === 'index.html' ? 'text-primary dark:text-primary' : ''}">Home</a>
+          <a href="subjects.html" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors ${currentPage === 'subjects.html' ? 'text-primary dark:text-primary' : ''}">Subjects</a>
+          <a href="quiz.html" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors ${currentPage === 'quiz.html' ? 'text-primary dark:text-primary' : ''}">Quiz</a>
+          <a href="about-us.html" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors ${currentPage === 'about-us.html' ? 'text-primary dark:text-primary' : ''}">Team</a>
+        </nav>
+
+        <!-- Right Actions -->
+        <div class="flex items-center gap-2 sm:gap-4">
+          <!-- Dark Mode Toggle -->
+          <button id="dark-mode-toggle"
+                  class="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all active:scale-95 text-gray-600 dark:text-gray-300"
+                  aria-label="Toggle dark mode">
+            <span id="dark-mode-icon" class="block w-5 h-5 flex items-center justify-center"></span>
+          </button>
+
+          <!-- Auth/Dashboard -->
+          <button id="open-auth-modal" 
+                  class="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90 transition-all shadow-sm">
+            ${btnLabel}
+          </button>
+
+          <!-- Mobile Menu trigger (conceptual) -->
+          <button class="md:hidden p-2 text-gray-500" aria-label="Menu">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+        </div>
       </div>
-      ` : ''}
     `;
   document.body.prepend(header);
 }
 
 // ── Footer ────────────────────────────────────────────────────────────────────
 function _injectFooter() {
-  if (document.querySelector('footer')) return; // page has its own footer
+  if (document.querySelector('footer')) return;
 
   const footer = document.createElement('footer');
-  footer.className = 'bg-[#1a1a2e] text-white py-4 px-6 md:px-10';
+  footer.className = 'bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-white/5 py-8 px-6 transition-colors duration-300';
   footer.innerHTML = `
-      <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5 text-center md:text-left">
-        <div class="font-extrabold text-sm tracking-widest uppercase text-white">COMSATSPrepHub</div>
-        <div class="flex flex-wrap justify-center gap-5 md:gap-7">
-          <a href="about-us.html" class="footer-link text-sm text-white/60 hover:text-white transition-colors duration-200 no-underline">About Us</a>
-          <a href="terms.html"    class="footer-link text-sm text-white/60 hover:text-white transition-colors duration-200 no-underline">Terms</a>
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+        <div>
+          <div class="font-black text-lg tracking-tight text-[#1a1a2e] dark:text-white mb-1">COMSATSPrepHub</div>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Master your academic journey with verified resources.</p>
         </div>
-        <div class="text-xs text-white/40 italic">Made with care by Mushtaq Ahmad Saqi</div>
+        <div class="flex flex-wrap justify-center gap-6 md:gap-10">
+          <a href="about-us.html" class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">About Us</a>
+          <a href="terms.html"    class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">Terms</a>
+          <a href="https://github.com/MushtaqAhmadSaqi" target="_blank" class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">Github</a>
+        </div>
+        <div class="text-[10px] font-medium text-gray-400 dark:text-gray-500 italic uppercase tracking-wider">
+          Made with care by Mushtaq Ahmad Saqi
+        </div>
       </div>
     `;
   document.body.appendChild(footer);

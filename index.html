@@ -18,6 +18,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
@@ -41,6 +42,7 @@
       }
     }
   </script>
+  <script src="js/dark-mode.js"></script>
 
   <!-- Existing stylesheets -->
   <link rel="stylesheet" href="style.css">
@@ -168,14 +170,16 @@
   </style>
 </head>
 
-<body class="font-sans bg-[#f0f2f5] text-[#1a1a2e]">
+<body class="font-sans bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300">
 
   <!-- Header, Footer, Mobile Nav & Auth Modal injected by js/layout.js -->
 
-  <main class="flex-1" style="padding-top: 72px;">
+  <main class="flex-1 pb-24">
+
 
     <!-- ═══════════════════════════════════ HERO ═══════════════════════════════════ -->
-    <section id="home-section" class="relative overflow-hidden flex flex-col items-center justify-center text-center min-h-[calc(100vh-72px)] px-6 py-24 md:px-16 isolate"
+    <section id="home-section" class="relative overflow-hidden flex flex-col items-center justify-center text-center min-h-[90vh] px-6 py-24 md:px-16 isolate"
+
       style="background: radial-gradient(circle at 70% 60%, rgba(56,139,210,0.13), transparent 35%), radial-gradient(circle at 15% 10%, rgba(147,210,255,0.16), transparent 28%), linear-gradient(135deg, #f0f8ff 0%, #e8f4fd 45%, #ddeeff 100%);"
       data-aos="fade-in">
       <!-- Blobs -->

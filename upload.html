@@ -6,31 +6,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Past Paper | COMSATSPrepHub</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              primary: '#0f766e',
+              'primary-hover': '#0d6b64',
+              'primary-light': '#ccfbf1',
+              dark: '#1a1a2e',
+              accent: '#0f9690',
+              brand: {
+                50: '#f0f9ff',
+                100: '#e0f2fe',
+                400: '#38bdf8',
+                500: '#0ea5e9',
+                600: '#0284c7',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <script src="js/dark-mode.js"></script>
 </head>
 
-<body class="bg-background text-on-background min-h-screen flex flex-col">
-    <!-- Top Navigation -->
-    <header class="navbar" style="background-color: rgba(255, 255, 255, 0.7); backdrop-filter: blur(24px);">
-        <a href="index.html" class="navbar-brand">COMSATSPrepHub</a>
-
-        <nav class="nav-links">
-            <a href="index.html" class="nav-link">Home</a>
-            <a href="subjects.html" class="nav-link">Subjects</a>
-            <a href="quiz.html" class="nav-link">Quiz</a>
-            <!-- <a href="leaderboard.html" class="nav-link">Leaderboard</a> -->
-        </nav>
-
-        <div class="nav-actions">
-            <!-- Profile Action -->
-            <a href="profile.html" class="btn-icon" style="color: var(--text-main);">
-                <span class="material-symbols-outlined">account_circle</span>
-            </a>
-        </div>
-    </header>
+<body class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300 min-h-screen flex flex-col">
+    <!-- Header injected by js/layout.js -->
 
     <main class="main-content container text-on-background">
         <!-- Editorial Header Section -->
-        <header class="page-header" style="max-width: 672px;">
+        <div class="page-header" style="max-width: 672px;">
             <div>
                 <span class="section-label" style="display: block; color: var(--primary);">Community Repository</span>
                 <h1 class="main-title text-on-surface">Upload Past Paper</h1>
@@ -38,7 +49,7 @@
                     students master their courses. Join our network of academic curators by sharing high-quality
                     resources.</p>
             </div>
-        </header>
+        </div>
 
         <div class="upload-layout">
             <!-- Form Section -->
@@ -168,22 +179,7 @@
         </div>
     </main>
 
-    <!-- Footer -->
-        <footer class="site-footer">
-        <div class="footer-content">
-            <div class="footer-left">
-                <div class="footer-copyright" style="text-transform: uppercase;">COMSATSPrepHub</div>
-            </div>
-            <div class="footer-center">
-                <a class="footer-link" href="about-us.html">About Us</a>
-                <a class="footer-link" href="terms.html">Terms</a>
-                <a class="footer-link" href="feedback.html">Feedback</a>
-            </div>
-            <div class="footer-right">
-                <div class="footer-copyright" style="font-style: italic;">Made with care by Mushtaq Ahmad Saqi</div>
-            </div>
-        </div>
-    </footer>
+    <!-- Footer injected by js/layout.js -->
 
     <script type="module">
         import { escapeHtml } from './utils.js';

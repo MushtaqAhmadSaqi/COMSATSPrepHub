@@ -6,49 +6,30 @@
     <title>Subject Papers | COMSATSPrepHub</title>
     <meta name="description" content="Browse past papers organized by year and exam type.">
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* ── Skeleton ── */
-        .skeleton-year { height: 28px; width: 80px; border-radius: 8px; background: var(--border); margin-bottom: 16px; animation: pulse 1.5s ease-in-out infinite; }
-        .skeleton-paper { height: 72px; border-radius: 12px; background: var(--border); margin-bottom: 12px; animation: pulse 1.5s ease-in-out infinite; }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-
-        /* ── Stat pills ── */
-        .stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; margin-bottom: 32px; }
-        .stat-pill {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 999px;
-            padding: 8px 18px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 6px;
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              primary: '#0f766e',
+              'primary-hover': '#0d6b64',
+              'primary-light': '#ccfbf1',
+              dark: '#1a1a2e',
+              accent: '#0f9690',
+            }
+          }
         }
-        .stat-pill strong { color: var(--text-main); }
-
-        /* ── Error / empty ── */
-        .error-banner { background:#fee2e2; border:1px solid #fca5a5; color:#b91c1c; border-radius:10px; padding:14px 18px; font-size:14px; margin-bottom:24px; }
-        .empty-state { text-align:center; padding:80px 24px; color:var(--text-muted); }
-        .empty-state h3 { font-size:20px; font-weight:700; margin-bottom:8px; color:var(--text-main); }
-        .empty-state .empty-icon { font-size:52px; opacity:.4; margin-bottom:16px; }
-    </style>
+      }
+    </script>
+    <script src="js/dark-mode.js"></script>
 </head>
-<body>
-    <!-- Navigation -->
-    <header class="navbar">
-        <a href="index.html" class="navbar-brand">COMSATSPrepHub</a>
-        <nav class="nav-links">
-            <a href="index.html" class="nav-link">Home</a>
-            <a href="subjects.html" class="nav-link active">Subjects</a>
-            <a href="quiz.html" class="nav-link">Quiz</a>
-            <!-- <a href="leaderboard.html" class="nav-link">Leaderboard</a> -->
-        </nav>
-        <div class="nav-actions">
-            <a href="subjects.html" class="btn-primary" style="text-decoration:none;">Get Started</a>
-        </div>
-    </header>
+<body class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300 antialiased min-h-screen">
+    <!-- Navigation injected by js/layout.js -->
 
     <main class="main-content container">
         <!-- Header -->
@@ -93,22 +74,7 @@
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="site-footer">
-        <div class="footer-content">
-            <div class="footer-left">
-                <div class="footer-copyright" style="text-transform: uppercase;">COMSATSPrepHub</div>
-            </div>
-            <div class="footer-center">
-                <a class="footer-link" href="about-us.html">About Us</a>
-                <a class="footer-link" href="terms.html">Terms</a>
-                <a class="footer-link" href="feedback.html">Feedback</a>
-            </div>
-            <div class="footer-right">
-                <div class="footer-copyright" style="font-style: italic;">Made with care by Mushtaq Ahmad Saqi</div>
-            </div>
-        </div>
-    </footer>
+    <!-- Footer injected by js/layout.js -->
 
     <script type="module">
         import { supabase, escapeHtml as escHtml } from './utils.js';
@@ -220,5 +186,6 @@
 
         loadPapers();
     </script>
+    <script type="module" src="js/layout.js"></script>
 </body>
 </html>
