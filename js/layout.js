@@ -76,8 +76,6 @@ function _injectFooter() {
         <div class="flex flex-wrap justify-center gap-5 md:gap-7">
           <a href="about-us.html" class="footer-link text-sm text-white/60 hover:text-white transition-colors duration-200 no-underline">About Us</a>
           <a href="terms.html"    class="footer-link text-sm text-white/60 hover:text-white transition-colors duration-200 no-underline">Terms</a>
-          <a href="feedback.html" class="footer-link text-sm text-white/60 hover:text-white transition-colors duration-200 no-underline">Feedback</a>
-          <a href="about-project.html" class="footer-link text-sm text-white/60 hover:text-white transition-colors duration-200 no-underline">Learn More</a>
         </div>
         <div class="text-xs text-white/40 italic">Made with care by Mushtaq Ahmad Saqi</div>
       </div>

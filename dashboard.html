@@ -116,16 +116,16 @@
 
             <!-- Profile Area -->
             <div class="relative ml-2 sm:ml-0">
-                <a href="profile.html" id="profileBadge" class="block w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 dark:border-dark-border hover:border-brand-500 transition-colors cursor-pointer shrink-0 shadow-sm">
+                <div id="profileBadge" class="block w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 dark:border-dark-border hover:border-brand-500 transition-colors cursor-pointer shrink-0 shadow-sm">
                     <div id="profileAvatarLetter" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-500 to-indigo-600 text-white font-bold text-lg hidden"></div>
                     <img alt="Profile" id="profileAvatarImg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF8hllT6BznGxRqRK5mi2iAVo3qqBrJfRqOW2bzxqRIvsBoDNlf4TYE51Jn_Ln4ITe_aRY77WAfIG6QFiXxEbgMhW3_JM4u_tjix56XMijLfuP9RR59tZ1MOyHNpzCWr-fmJM_85QPURJyxNK0EXWXaepKp6GJmXQqOpaghg0z-oqs_KxDPQizP-NzSN0mGnq93wGfmfPa1cfe2ZcsCvFUAjNkirssbM7Jd-iKHYg1y06CDA4oYTSNxHt_I69wkTidDB5HeVUzpK_q" class="w-full h-full object-cover">
-                </a>
+                </div>
                 <div id="profileTooltip" class="hidden absolute top-full right-0 mt-2 w-48 bg-white dark:bg-dark-surface rounded-xl p-2 shadow-xl dark:shadow-2xl border border-gray-100 dark:border-white/10 z-50 origin-top-right opacity-0 transition-all duration-200">
                     <div class="px-3 py-2 border-b border-gray-100 dark:border-white/5 mb-1 transition-colors">
                         <p class="text-sm text-gray-900 dark:text-white font-semibold" id="tooltipName">Loading...</p>
                         <p class="text-xs text-brand-600 dark:text-brand-400" id="tooltipRole">Student</p>
                     </div>
-                    <a href="profile.html" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg transition-colors"><span class="material-symbols-outlined text-[18px]">person</span> View Profile</a>
+                    <a href="#" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg transition-colors cursor-not-allowed opacity-50"><span class="material-symbols-outlined text-[18px]">person</span> Profile (Disabled)</a>
                     <a href="#" class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg transition-colors border-t border-gray-100 dark:border-white/5 mt-1 pt-1.5"><span class="material-symbols-outlined text-[18px]">settings</span> Settings</a>
                     <a href="#" id="logoutBtn" class="flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors mt-1"><span class="material-symbols-outlined text-[18px]">logout</span> Log out</a>
                 </div>
@@ -196,19 +196,6 @@
                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Study Time</p>
             </div>
 
-            <!-- Card 4 -->
-            <div class="glass-panel p-5 hover-glass border border-gray-100 dark:border-white/5 group" data-aos="fade-up" data-aos-delay="200">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-all dark:shadow-[inset_0_0_10px_rgba(168,85,247,0.1)]">
-                        <span class="material-symbols-outlined">military_tech</span>
-                    </div>
-                    <span class="flex items-center gap-1 text-xs font-semibold text-brand-700 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20 px-2 py-1 rounded-md">
-                        <span class="material-symbols-outlined text-[14px]">keyboard_double_arrow_up</span> Top 5%
-                    </span>
-                </div>
-                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-1 transition-colors" id="statRank">—</h3>
-                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Global Campus Rank</p>
-            </div>
         </div>
 
         <!-- Main Content Area: Chart & Upcoming -->
@@ -409,21 +396,6 @@
                 </div>
             </div>
 
-            <!-- Recent Activity Timeline -->
-            <div class="glass-panel p-6" data-aos="fade-up" data-aos-delay="450">
-                <div class="flex items-center justify-between mb-6 border-b border-gray-100 dark:border-white/5 pb-4 transition-colors">
-                    <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 transition-colors">
-                        <span class="material-symbols-outlined text-indigo-500 dark:text-indigo-400 text-[20px]">history</span>
-                        Recent Activity
-                    </h2>
-                    <a href="activity.html" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 uppercase tracking-wider transition-colors">Full Log</a>
-                </div>
-
-                <div id="activityTimeline" class="relative pl-6 space-y-6 before:absolute before:inset-0 before:ml-2.5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-brand-300 dark:before:from-brand-500/50 before:via-gray-200 dark:before:via-white/10 before:to-transparent">
-                    <!-- populated by JS -->
-                    <div class="text-sm text-gray-400 dark:text-gray-500 italic pl-2">No recent activity yet. Start by browsing a subject!</div>
-                </div>
-            </div>
 
         </div>
     </main>
@@ -438,7 +410,6 @@
             <div class="flex gap-6">
                 <a class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" href="about-us.html">About Us</a>
                 <a class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" href="terms.html">Terms</a>
-                <a class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" href="feedback.html">Feedback</a>
             </div>
             <div class="text-sm text-gray-500 dark:text-gray-500 font-medium transition-colors">Made with <span class="text-red-500">&hearts;</span> by Mushtaq Ahmad Saqi</div>
         </div>
