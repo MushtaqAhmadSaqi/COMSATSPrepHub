@@ -69,7 +69,7 @@ function _injectHeader(currentPage, session, userName) {
             <a href="index.html" class="px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'index.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Home</a>
             <a href="subjects.html" class="px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'subjects.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Subjects</a>
             <a href="quiz.html" class="px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'quiz.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Quiz</a>
-            <a href="dashboard.html" class="px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'dashboard.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Dashboard</a>
+            <a href="about-us.html" class="px-5 py-1.5 text-sm font-semibold rounded-full transition-all ${currentPage === 'about-us.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Team</a>
           </nav>
 
           <!-- Right Side: Actions -->
@@ -112,7 +112,7 @@ function _injectMobileNav(currentPage) {
     { id: 'index.html', label: 'Home', icon: 'home' },
     { id: 'subjects.html', label: 'Subjects', icon: 'menu_book' },
     { id: 'quiz.html', label: 'Quiz', icon: 'quiz' },
-    { id: 'dashboard.html', label: 'Dashboard', icon: 'dashboard' }
+    { id: 'about-us.html', label: 'Team', icon: 'groups' }
   ];
 
   nav.innerHTML = `
