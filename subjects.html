@@ -55,6 +55,7 @@
         <section class="mb-12" data-aos="fade-down">
             <div class="flex flex-col md:flex-row items-end justify-between gap-8">
                 <div class="max-w-2xl">
+                    <span
                         class="inline-block px-3 py-1 rounded-full bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20 text-[11px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-widest mb-4">Study
                         Materials</span>
                     <h1 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tight mb-4">
@@ -167,10 +168,8 @@
 
           if (error) throw error;
 
-          // Hide loading skeleton
-          loadingGrid.style.display = 'none';
-
           if (!papers || papers.length === 0) {
+            loadingGrid.style.display = 'none';
             emptyState.style.display = 'block';
             return;
           }
@@ -205,8 +204,10 @@
 
             const card = document.createElement('a');
             card.href = url;
-            card.className = `subject-card-uniform card-hover group glass-panel p-6 hover-glass flex flex-col items-start gap-4 h-full relative overflow-hidden transition-all duration-300`;
+            card.className = "card-hover group relative bg-white dark:bg-[#1e293b] p-6 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden";
+            card.setAttribute('data-aos', 'fade-up');
             card.setAttribute('data-subject', s.subject_name);
+            card.style.display = 'block';
 
             card.innerHTML = `
               <div class="w-12 h-12 rounded-xl flex items-center justify-center border border-black/5 dark:border-white/10 group-hover:scale-110 transition-transform shadow-sm bg-[var(--palette-bg)] dark:bg-white/10" 
@@ -237,7 +238,10 @@
           // Add all cards at once (much faster)
           grid.innerHTML = '';
           grid.appendChild(fragment);
-          grid.style.display = '';
+          
+          // Reveal grid
+          loadingGrid.style.display = 'none';
+          grid.style.display = 'grid';
 
           // Re-init 3D Tilt for dynamic cards
           if (window.reinitVanillaTilt) window.reinitVanillaTilt();

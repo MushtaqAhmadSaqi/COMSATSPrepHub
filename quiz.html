@@ -324,25 +324,29 @@
           quizzes = data;
 
           // Create quiz cards
-          data.forEach(quiz => {
-            const btn = document.createElement('button');
-            btn.className = 'button-press p-6 bg-white border-2 border-slate-100 rounded-3xl text-left hover:border-brand-500 transition-all group card-hover';
-            btn.innerHTML = `
-              <div class="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-500/10 flex items-center justify-center text-brand-600 dark:text-brand-400 mb-6 group-hover:scale-110 transition-transform">
-                <span class="material-symbols-outlined">quiz</span>
+          grid.innerHTML = quizzes.map(q => `
+            <div data-aos="fade-up" 
+                 class="card-hover group bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl p-6 hover:shadow-xl transition-all cursor-pointer"
+                 onclick="startQuiz('${q.id}', '${q.title}', '${q.subject_code}')">
+              <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-brand-50 dark:bg-brand-500/10 flex items-center justify-center text-brand-600 dark:text-brand-400 group-hover:scale-110 transition-transform">
+                  <span class="material-symbols-outlined">quiz</span>
+                </div>
+                <div class="px-2 py-1 rounded-md bg-slate-100 dark:bg-white/5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  ${q.questions_count || 0} Questions
+                </div>
               </div>
-              <h3 class="text-xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">${escHtml(quiz.title)}</h3>
-              <p class="text-sm text-slate-500 dark:text-gray-400 font-bold uppercase tracking-widest">${escHtml(quiz.subject_code)}</p>
-              
-              <div class="relative z-10 mt-8 pt-4 border-t border-slate-50 flex items-center justify-between">
-                <span class="text-[10px] font-black text-slate-300 uppercase tracking-[2px]">AI GENERATED</span>
-                <span class="material-symbols-outlined text-[18px] text-slate-300 group-hover:text-brand-400 transition-all group-hover:translate-x-1">arrow_forward</span>
+              <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-brand-600 transition-colors">${q.title}</h3>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">${q.subject_code}</p>
+              <div class="mt-6 flex items-center gap-2 text-brand-600 dark:text-brand-400 font-bold text-xs">
+                <span>Attempt Module</span>
+                <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
               </div>
-            `;
+            </div>
+          `).join('');
 
-            btn.onclick = () => startQuiz(quiz.id, quiz.title, quiz.subject_code);
-            grid.appendChild(btn);
-          });
+          // Re-init 3D Tilt for dynamic cards
+          if (window.reinitVanillaTilt) window.reinitVanillaTilt();
 
         } catch (err) {
           console.error(err);
@@ -370,7 +374,7 @@
         document.getElementById('step2-question').classList.remove('hidden');
 
         // Hide mobile navigation during quiz
-        const mobileNav = document.querySelector('.mobile-nav-shell');
+        const mobileNav = document.getElementById('mobileBottomNav');
         if (mobileNav) {
           mobileNav.style.display = 'none';
         }
@@ -450,6 +454,9 @@
           optsList.appendChild(div);
         });
 
+        // Re-init 3D Tilt for options
+        if (window.reinitVanillaTilt) window.reinitVanillaTilt();
+
         const nextBtn = document.getElementById('nextBtn');
         const prevBtn = document.getElementById('prevBtn');
 
@@ -502,9 +509,9 @@
         document.getElementById('step3-results').classList.remove('hidden');
 
         // Show mobile navigation again after quiz ends
-        const mobileNav = document.querySelector('.mobile-nav-shell');
+        const mobileNav = document.getElementById('mobileBottomNav');
         if (mobileNav) {
-          mobileNav.style.display = 'flex';
+          mobileNav.style.display = 'block';
         }
         document.body.classList.remove('quiz-active');
 
