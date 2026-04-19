@@ -23,6 +23,9 @@
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
+    <!-- Global Styles for Nav -->
+    <link rel="stylesheet" href="style.css">
+
     <script>
         tailwind.config = {
             theme: {
@@ -69,42 +72,6 @@
 </head>
 
 <body class="bg-slate-50 text-slate-700 font-sans antialiased min-h-screen">
-
-    <!-- ═══════════════════════════════════════════════
-         STICKY TOP NAV (Identical to Paper View)
-    ═══════════════════════════════════════════════ -->
-    <header class="sticky top-0 z-50 glass shadow-sm border-t-0 border-l-0 border-r-0">
-        <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
-            <!-- Left: Logo + Back -->
-            <div class="flex items-center gap-3 min-w-0">
-                <a href="subjects.html"
-                    class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all group"
-                    title="Back to Subjects">
-                    <span
-                        class="material-symbols-outlined text-[20px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
-                </a>
-                <a href="home.html" class="flex items-center gap-2 min-w-0 group">
-                    <div
-                        class="w-7 h-7 flex-shrink-0 rounded-lg bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow">
-                        C</div>
-                    <span
-                        class="hidden sm:block font-bold text-slate-900 text-[15px] tracking-tight truncate group-hover:text-brand-600 transition-colors">COMSATSPrepHub</span>
-                </a>
-            </div>
-
-            <!-- Right: Actions -->
-            <div class="flex items-center gap-2 flex-shrink-0">
-                <a href="subjects.html"
-                    class="hidden sm:flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100 transition-all">
-                    Library
-                </a>
-                <a href="home.html"
-                    class="flex items-center gap-1.5 text-sm font-semibold bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl shadow-sm transition-all focus:ring-2 focus:ring-brand-500/20">
-                    Home
-                </a>
-            </div>
-        </div>
-    </header>
 
     <!-- ═══════════════════════════════════════════════
          MAIN LAYOUT
@@ -519,6 +486,11 @@
             }
         }
     </script>
+    
+    <!-- Load SweetAlert (used by auth logic) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Load Layout injecter -->
+    <script type="module" src="js/layout.js"></script>
 </body>
 
 </html>

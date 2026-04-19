@@ -55,11 +55,13 @@ function _injectHeader(currentPage, session, userName) {
         <a href="quiz.html"    class="nav-link ${currentPage === 'quiz.html' ? 'active' : ''}">Quiz</a>
         <a href="about-us.html" class="nav-link ${currentPage === 'about-us.html' ? 'active' : ''}">Team</a>
       </nav>
+      ${currentPage === 'index.html' ? `
       <div class="nav-actions">
         <button class="btn-signin-nav" id="open-auth-modal" aria-label="Open sign in or dashboard">
           ${btnLabel}
         </button>
       </div>
+      ` : ''}
     `;
   document.body.prepend(header);
 }
