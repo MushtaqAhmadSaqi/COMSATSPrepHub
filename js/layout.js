@@ -138,20 +138,20 @@ function _injectMobileNav(currentPage) {
 function _injectFooter() {
   if (document.querySelector('footer')) return;
   const footer = document.createElement('footer');
-  footer.className = 'bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-white/5 py-8 px-6 transition-colors duration-300 rounded-t-[3rem] mt-auto pb-24 lg:pb-8';
+  footer.className = 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-100 dark:border-white/5 py-6 px-6 transition-colors duration-300 rounded-t-[2rem] mt-auto pb-24 lg:pb-6';
   footer.innerHTML = `
-      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-        <div>
-          <div class="font-black text-lg tracking-tight text-[#1a1a2e] dark:text-white mb-1">COMSATSPrepHub</div>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Master your academic journey with verified resources.</p>
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+        <div class="space-y-0.5">
+          <div class="font-black text-base tracking-tight text-[#1a1a2e] dark:text-white">COMSATSPrepHub</div>
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Verified academic resources for success.</p>
         </div>
-        <div class="flex flex-wrap justify-center gap-6 md:gap-10">
-          <a href="about-us.html" class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">About Us</a>
-          <a href="terms.html"    class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">Terms</a>
-          <a href="https://github.com/MushtaqAhmadSaqi" target="_blank" class="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">Github</a>
+        <div class="flex items-center justify-center gap-6">
+          <a href="about-us.html" class="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">About</a>
+          <a href="terms.html"    class="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">Terms</a>
+          <a href="https://github.com/MushtaqAhmadSaqi" target="_blank" class="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">Github</a>
         </div>
-        <div class="text-[10px] font-medium text-gray-400 dark:text-gray-500 italic uppercase tracking-wider">
-          Made with care by Mushtaq Ahmad Saqi
+        <div class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest opacity-60">
+          © 2026 Mushtaq Ahmad Saqi
         </div>
       </div>
     `;
