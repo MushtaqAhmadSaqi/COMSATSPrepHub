@@ -12,9 +12,7 @@
         darkMode: 'class',
         theme: {
           extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-            },
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
             colors: {
               primary: '#0f766e',
               'primary-hover': '#0d6b64',
@@ -27,77 +25,133 @@
       }
     </script>
     <script src="js/dark-mode.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 </head>
 <body class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300 antialiased min-h-screen">
-    <!-- Navigation injected by js/layout.js -->
+    
+    <!-- Navigation (injected by layout.js) -->
 
-    <main class="main-content container">
-        <!-- Header -->
-        <div class="papers-header">
-            <a href="subjects.html" class="papers-back-link">
-                <span class="material-symbols-outlined" style="font-size:20px;">arrow_back</span>
+    <main class="max-w-5xl mx-auto px-5 py-8 page-transition">
+        
+        <!-- Header Section -->
+        <div class="mb-8">
+            <!-- Back Button -->
+            <a href="subjects.html" 
+               class="nav-link-premium inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary mb-4 transition-colors">
+                <span class="material-symbols-outlined text-lg">arrow_back</span>
                 Back to Subjects
             </a>
-            <span class="section-label" style="display:block;">Past Papers</span>
-            <h1 class="main-title" id="subjectTitle">Loading...</h1>
-            <p class="question-desc" style="margin-top:12px;">
-                Browse all past papers organized by year. Click any paper to view its questions and model answers.
-            </p>
-            <!-- Stats -->
-            <div class="stats-row" id="statsRow" style="display:none;">
-                <div class="stat-pill">📄 <strong id="statPapers">0</strong> Papers</div>
-                <div class="stat-pill">📝 <strong id="statQuestions">0</strong> Questions</div>
-                <div class="stat-pill">🗓️ <strong id="statYears">—</strong> Years</div>
+
+            <!-- Subject Header -->
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-sm">
+                            <span class="text-white text-2xl font-bold" id="subjectIcon">📘</span>
+                        </div>
+                        <div>
+                            <h1 class="text-3xl md:text-4xl font-black tracking-tight" id="subjectTitle">Loading...</h1>
+                            <p class="text-gray-600 dark:text-gray-400 mt-1" id="subjectCode"></p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400 max-w-md">
+                        Browse all past papers organized by year. Click any paper to view questions and model answers.
+                    </p>
+                </div>
+
+                <!-- Stats -->
+                <div id="statsRow" class="hidden md:flex items-center gap-3">
+                    <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-2 flex items-center gap-2 shadow-sm">
+                        <span class="text-xl">📄</span>
+                        <div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Papers</div>
+                            <div class="font-bold text-lg" id="statPapers">0</div>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-2 flex items-center gap-2 shadow-sm">
+                        <span class="text-xl">📝</span>
+                        <div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Questions</div>
+                            <div class="font-bold text-lg" id="statQuestions">0</div>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-2 flex items-center gap-2 shadow-sm">
+                        <span class="text-xl">🗓️</span>
+                        <div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Years</div>
+                            <div class="font-bold text-lg" id="statYears">—</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Error -->
-        <div id="errorBanner" class="error-banner" style="display:none;"></div>
-
-        <!-- Skeleton loading -->
-        <div id="loadingSkeleton">
-            <div class="skeleton-year"></div>
-            <div class="skeleton-paper"></div>
-            <div class="skeleton-paper"></div>
-            <div class="skeleton-year" style="margin-top:24px;"></div>
-            <div class="skeleton-paper"></div>
+        <!-- Error Banner -->
+        <div id="errorBanner" class="hidden mb-6 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-400 px-4 py-3 rounded-2xl flex items-start gap-3">
+            <span class="material-symbols-outlined mt-0.5">error</span>
+            <div id="errorMessage"></div>
         </div>
 
-        <!-- Papers container (populated dynamically) -->
-        <div id="papersContainer" style="display:none;"></div>
-
-        <!-- Empty state -->
-        <div id="emptyState" class="empty-state" style="display:none;">
-            <div class="empty-icon">📂</div>
-            <h3>No papers yet</h3>
-            <p>No past papers have been uploaded for this subject yet.<br>Use the Admin Panel to upload the first one.</p>
+        <!-- Loading Skeleton -->
+        <div id="loadingSkeleton" class="space-y-8">
+            <div class="space-y-3">
+                <div class="h-6 w-32 bg-gray-200 dark:bg-white/10 rounded-full animate-pulse"></div>
+                <div class="h-20 bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl animate-pulse"></div>
+                <div class="h-20 bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl animate-pulse"></div>
+            </div>
         </div>
+
+        <!-- Papers Container -->
+        <div id="papersContainer" class="hidden space-y-10"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16">
+            <div class="w-20 h-20 mx-auto mb-6 rounded-3xl bg-gray-100 dark:bg-white/10 flex items-center justify-center">
+                <span class="text-5xl">📂</span>
+            </div>
+            <h3 class="text-2xl font-bold mb-2">No papers found</h3>
+            <p class="text-gray-600 dark:text-gray-400 max-w-sm mx-auto">
+                No past papers have been uploaded for this subject yet.<br>
+                Check back later or contact your instructor.
+            </p>
+        </div>
+
     </main>
 
-    <!-- Footer injected by js/layout.js -->
+    <!-- Footer injected by layout.js -->
 
     <script type="module">
         import { supabase, escapeHtml as escHtml } from './utils.js';
 
-        // Read subject from URL
-        const params      = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(window.location.search);
         const subjectName = params.get('subject') || '';
-        const subjectCode = params.get('code')    || '';
+        const subjectCode = params.get('code') || '';
 
-        // Set page title
+        // Set header info
         document.getElementById('subjectTitle').textContent = subjectName || 'Unknown Subject';
+        document.getElementById('subjectCode').textContent = subjectCode ? `Code: ${subjectCode}` : '';
         document.title = `${subjectName} — Papers | COMSATSPrepHub`;
+
+        // Set icon based on subject
+        const iconEl = document.getElementById('subjectIcon');
+        const subjectIcons = {
+            'Data Structures': '💻',
+            'Operating Systems': '🖥️',
+            'Calculus': '📐',
+            'Linear Algebra': '📊',
+            'Web Technologies': '🌐'
+        };
+        iconEl.textContent = subjectIcons[subjectName] || '📘';
 
         async function loadPapers() {
             try {
-                // ── Query 1: Fetch papers for this subject (simple, no nested join) ──
-                const { data: papers, error: papersError } = await supabase
+                const { data: papers, error } = await supabase
                     .from('past_papers')
                     .select('id, subject_code, subject_name, instructor_name, year, exam_type, semester, total_marks')
                     .eq('subject_name', subjectName)
                     .order('year', { ascending: false });
 
-                if (papersError) throw papersError;
+                if (error) throw error;
 
                 document.getElementById('loadingSkeleton').style.display = 'none';
 
@@ -106,86 +160,129 @@
                     return;
                 }
 
-                // ── Query 2: Get question counts separately (avoids needing FK relationship) ──
+                // Get question counts
                 const paperIds = papers.map(p => p.id);
                 const { data: questions } = await supabase
                     .from('questions')
                     .select('id, paper_id')
                     .in('paper_id', paperIds);
 
-                // Build count map: paper_id → count
                 const qCountMap = {};
                 if (questions) {
-                    for (const q of questions) {
+                    questions.forEach(q => {
                         qCountMap[q.paper_id] = (qCountMap[q.paper_id] || 0) + 1;
-                    }
+                    });
                 }
 
-                // ── Stats ──
+                // Stats
                 const totalQuestions = Object.values(qCountMap).reduce((s, c) => s + c, 0);
                 const years = [...new Set(papers.map(p => p.year))];
-                document.getElementById('statPapers').textContent   = papers.length;
+                
+                document.getElementById('statPapers').textContent = papers.length;
                 document.getElementById('statQuestions').textContent = totalQuestions;
-                document.getElementById('statYears').textContent     = years.length > 1
-                    ? `${Math.min(...years)}–${Math.max(...years)}`
+                document.getElementById('statYears').textContent = years.length > 1 
+                    ? `${Math.min(...years)}–${Math.max(...years)}` 
                     : years[0];
                 document.getElementById('statsRow').style.display = 'flex';
 
-                // ── Group papers by year ──
+                // Group by year
                 const byYear = {};
-                for (const p of papers) {
+                papers.forEach(p => {
                     if (!byYear[p.year]) byYear[p.year] = [];
                     byYear[p.year].push(p);
-                }
+                });
 
                 const sortedYears = Object.keys(byYear).sort((a, b) => b - a);
-
                 const container = document.getElementById('papersContainer');
+
                 container.innerHTML = sortedYears.map(year => {
                     const yearPapers = byYear[year];
-                    const cardsHtml = yearPapers.map(p => {
+                    
+                    const cardsHTML = yearPapers.map(p => {
                         const qCount = qCountMap[p.id] || 0;
-                        const url = `paper-view.html?id=${p.id}`;
+                        const isMid = p.exam_type.toLowerCase().includes('mid');
+                        
                         return `
-                            <a href="${url}" class="paper-card">
-                                <div class="paper-card-info">
-                                    <div class="paper-card-icon">
-                                        <span class="material-symbols-outlined">description</span>
+                            <a href="paper-view.html?id=${p.id}" 
+                               class="group block bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 hover:shadow-xl transition-all duration-300 card-hover">
+                                
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <!-- Exam Type Badge -->
+                                        <div class="px-3 py-1 rounded-full text-xs font-bold ${isMid 
+                                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' 
+                                            : 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400'}">
+                                            ${escHtml(p.exam_type)}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div class="paper-card-title">${escHtml(p.exam_type)}</div>
-                                        <div class="paper-card-sub">${escHtml(p.semester)} ${p.year} · ${escHtml(p.instructor_name || '—')} · ${qCount} Qs · ${p.total_marks} Marks</div>
+                                    
+                                    <div class="text-right">
+                                        <div class="text-sm font-bold text-gray-900 dark:text-white">${p.year}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">${escHtml(p.semester)}</div>
                                     </div>
                                 </div>
-                                <span class="material-symbols-outlined" style="color:var(--text-muted);font-size:20px;">open_in_new</span>
-                            </a>`;
+
+                                <div class="mb-4">
+                                    <div class="font-semibold text-lg text-gray-900 dark:text-white mb-1">
+                                        ${escHtml(p.instructor_name || 'Unknown Instructor')}
+                                    </div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                                        ${qCount} Questions • ${p.total_marks} Marks
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between text-sm">
+                                    <div class="flex items-center gap-2 text-primary group-hover:gap-3 transition-all">
+                                        <span class="font-medium">View Paper</span>
+                                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                                    </div>
+                                    <div class="text-gray-400 group-hover:text-primary transition-colors">
+                                        <span class="material-symbols-outlined transition-transform group-hover:translate-x-1">open_in_new</span>
+                                    </div>
+                                </div>
+                            </a>
+                        `;
                     }).join('');
 
                     return `
-                        <div class="year-group">
-                            <div class="year-label">
-                                <span class="material-symbols-outlined" style="color:var(--primary);">calendar_today</span>
-                                ${year}
+                        <div>
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="px-4 py-1.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-2xl flex items-center gap-2 shadow-sm">
+                                    <span class="material-symbols-outlined text-primary">calendar_today</span>
+                                    <span class="font-bold text-lg">${year}</span>
+                                </div>
+                                <div class="flex-1 h-px bg-gray-200 dark:bg-white/10"></div>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">${yearPapers.length} papers</span>
                             </div>
-                            <div class="papers-row">${cardsHtml}</div>
-                        </div>`;
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                ${cardsHTML}
+                            </div>
+                        </div>
+                    `;
                 }).join('');
 
                 container.style.display = 'block';
+
+                // Initialize 3D tilt using global re-init
+                if (window.reinitVanillaTilt) {
+                    window.reinitVanillaTilt();
+                }
 
             } catch (err) {
                 document.getElementById('loadingSkeleton').style.display = 'none';
                 const banner = document.getElementById('errorBanner');
                 banner.style.display = 'block';
-                banner.innerHTML = `⚠️ Could not load papers: <strong>${err.message}</strong><br>
-                    <small style="opacity:.8;">Searching for subject: "<strong>${escHtml(subjectName)}</strong>"</small>`;
+                document.getElementById('errorMessage').innerHTML = `
+                    <strong>Failed to load papers</strong><br>
+                    <span class="text-sm">${err.message}</span>
+                `;
             }
         }
 
-
-
         loadPapers();
     </script>
+
     <script type="module" src="js/layout.js"></script>
 </body>
 </html>
