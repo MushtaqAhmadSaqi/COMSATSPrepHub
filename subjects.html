@@ -14,33 +14,32 @@
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <link rel="stylesheet" href="auth-modal.css">
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: {
-                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' },
-                        dark: { bg: '#0B0E14', surface: '#151A23', border: '#2A3441' }
-                    }
-                }
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
             },
-            plugins: [
-                function ({ addComponents, addUtilities }) {
-                    addComponents({
-                        '.glass-panel': {
-                            '@apply bg-white/80 dark:bg-dark-surface/80 backdrop-blur-xl border border-gray-200 dark:border-white/10 shadow-sm dark:shadow-2xl rounded-2xl transition-all duration-300': {},
-                        },
-                        '.hover-glass': {
-                            '@apply hover:bg-white dark:hover:bg-white/5 border-transparent hover:border-gray-300 dark:hover:border-white/20 hover:shadow-md transition-all duration-300': {},
-                        }
-                    });
-                }
-            ]
+            colors: {
+              primary: '#0f766e',
+              'primary-hover': '#0d6b64',
+              'primary-light': '#ccfbf1',
+              dark: '#1a1a2e',
+              accent: '#0f9690',
+              brand: {
+                50: '#f0f9ff',
+                100: '#e0f2fe',
+                400: '#38bdf8',
+                500: '#0ea5e9',
+                600: '#0284c7',
+              }
+            }
+          }
         }
+      }
     </script>
     </style>
     <script>
@@ -144,104 +143,143 @@
 
 
     <script type="module">
-        import { supabase, escapeHtml as escHtml } from './utils.js';
+      import { supabase, escapeHtml as escHtml } from './utils.js';
 
-        // Icon + colour palette — cycles if more subjects than palette size
-        const palette = [
-            { bg: '#e0e7ff', color: '#4338ca', icon: 'data_object' }, // Indigo
-            { bg: '#dcfce7', color: '#15803d', icon: 'database' },    // Green
-            { bg: '#fef3c7', color: '#b45309', icon: 'function' },    // Amber
-            { bg: '#f3e8ff', color: '#7e22ce', icon: 'scatter_plot' }, // Purple
-            { bg: '#ccfbf1', color: '#0f766e', icon: 'terminal' },    // Teal
-            { bg: '#e0f2fe', color: '#0369a1', icon: 'code' },        // Sky
-            { bg: '#fce7f3', color: '#be185d', icon: 'psychology' },  // Pink
-            { bg: '#fee2e2', color: '#b91c1c', icon: 'science' },     // Red
-            { bg: '#f1f5f9', color: '#334155', icon: 'grid_on' },     // Slate
-            { bg: '#fae8ff', color: '#a21caf', icon: 'calculate' },   // Fuchsia
-        ];
+      // Color palette for subject cards
+      const palette = [
+        { bg: '#e0e7ff', color: '#4338ca', icon: 'data_object' },
+        { bg: '#dcfce7', color: '#15803d', icon: 'database' },
+        { bg: '#fef3c7', color: '#b45309', icon: 'function' },
+        { bg: '#f3e8ff', color: '#7e22ce', icon: 'scatter_plot' },
+        { bg: '#ccfbf1', color: '#0f766e', icon: 'terminal' },
+        { bg: '#e0f2fe', color: '#0369a1', icon: 'code' },
+        { bg: '#fce7f3', color: '#be185d', icon: 'psychology' },
+        { bg: '#fee2e2', color: '#b91c1c', icon: 'science' },
+      ];
 
-        async function loadSubjects() {
-            try {
-                // Fetch all papers, group by subject_name in JS
-                const { data: papers, error } = await supabase
-                    .from('past_papers')
-                    .select('id, subject_code, subject_name')
-                    .order('subject_name', { ascending: true });
+      async function loadSubjects() {
+        const loadingGrid = document.getElementById('loadingGrid');
+        const badge = document.getElementById('subjectCountBadge');
+        const grid = document.getElementById('subjectsGrid');
+        const errorBanner = document.getElementById('errorBanner');
+        const emptyState = document.getElementById('emptyState');
 
-                if (error) throw error;
+        try {
+          // Fetch all papers from Supabase
+          const { data: papers, error } = await supabase
+            .from('past_papers')
+            .select('id, subject_code, subject_name')
+            .order('subject_name', { ascending: true });
 
-                document.getElementById('loadingGrid').style.display = 'none';
+          if (error) throw error;
 
-                if (!papers || papers.length === 0) {
-                    document.getElementById('emptyState').style.display = 'block';
-                    return;
-                }
+          // Hide loading skeleton
+          loadingGrid.style.display = 'none';
 
-                // Group by subject_name → count papers
-                const subjectMap = {};
-                for (const p of papers) {
-                    const key = p.subject_name;
-                    if (!subjectMap[key]) {
-                        subjectMap[key] = { subject_name: p.subject_name, subject_code: p.subject_code, count: 0 };
-                    }
-                    subjectMap[key].count++;
-                }
+          if (!papers || papers.length === 0) {
+            emptyState.style.display = 'block';
+            return;
+          }
 
-                const subjects = Object.values(subjectMap).sort((a, b) => a.subject_name.localeCompare(b.subject_name));
-
-                // Badge
-                const badge = document.getElementById('subjectCountBadge');
-                badge.textContent = `${subjects.length} Subject${subjects.length !== 1 ? 's' : ''}`;
-                badge.style.display = 'inline-block';
-
-                // Render cards
-                const grid = document.getElementById('subjectsGrid');
-                grid.innerHTML = subjects.map((s, i) => {
-                    const p = palette[i % palette.length];
-                    const url = `subject-papers.html?subject=${encodeURIComponent(s.subject_name)}&code=${encodeURIComponent(s.subject_code)}`;
-                    return `
-                        <a href="${url}" class="subject-card-uniform group glass-panel p-6 hover-glass flex flex-col items-start gap-4 h-full relative overflow-hidden" data-subject="${s.subject_name}">
-                            <div class="absolute -right-2 -bottom-2 w-24 h-24 bg-brand-500/5 rounded-full blur-2xl group-hover:bg-brand-500/10 transition-colors"></div>
-                            <div class="w-12 h-12 rounded-xl flex items-center justify-center border border-black/5 dark:border-white/10 group-hover:scale-110 transition-transform shadow-sm" style="background:${p.bg}; color:${p.color};">
-                                <span class="material-symbols-outlined text-[24px]">${p.icon}</span>
-                            </div>
-                            <div class="flex-1 w-full">
-                                <h3 class="text-lg font-black text-gray-900 dark:text-white mb-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors uppercase tracking-tight line-clamp-2">${escHtml(s.subject_name)}</h3>
-                                <p class="text-[10px] font-black text-gray-500 dark:text-gray-500 uppercase tracking-widest">${escHtml(s.subject_code)}</p>
-                            </div>
-                            <div class="w-full pt-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between mt-auto">
-                                <span class="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase tracking-wider">${s.count} Paper${s.count !== 1 ? 's' : ''}</span>
-                                <span class="material-symbols-outlined text-gray-400 group-hover:translate-x-1 transition-all text-[18px]">arrow_forward</span>
-                            </div>
-                        </a>`;
-                }).join('');
-
-                grid.style.display = '';
-
-            } catch (err) {
-                document.getElementById('loadingGrid').style.display = 'none';
-                const banner = document.getElementById('errorBanner');
-                banner.style.display = 'block';
-                banner.textContent = '⚠️ Could not load subjects: ' + err.message;
+          // Group papers by subject
+          const subjectMap = {};
+          papers.forEach(p => {
+            if (!subjectMap[p.subject_name]) {
+              subjectMap[p.subject_name] = {
+                subject_name: p.subject_name,
+                subject_code: p.subject_code,
+                count: 0
+              };
             }
+            subjectMap[p.subject_name].count++;
+          });
+
+          const subjects = Object.values(subjectMap).sort((a, b) =>
+            a.subject_name.localeCompare(b.subject_name)
+          );
+
+          // Show subject count badge immediately
+          badge.textContent = `${subjects.length} Subject${subjects.length !== 1 ? 's' : ''}`;
+          badge.style.display = 'inline-block';
+
+          // Use DocumentFragment for better performance (faster loading)
+          const fragment = document.createDocumentFragment();
+
+          subjects.forEach((s, i) => {
+            const p = palette[i % palette.length];
+            const url = `subject-papers.html?subject=${encodeURIComponent(s.subject_name)}&code=${encodeURIComponent(s.subject_code)}`;
+
+            const card = document.createElement('a');
+            card.href = url;
+            card.className = `subject-card-uniform group glass-panel p-6 hover-glass flex flex-col items-start gap-4 h-full relative overflow-hidden`;
+            card.setAttribute('data-subject', s.subject_name);
+
+            card.innerHTML = `
+              <div class="absolute -right-2 -bottom-2 w-24 h-24 bg-brand-500/5 rounded-full blur-2xl group-hover:bg-brand-500/10 transition-colors"></div>
+              
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center border border-black/5 dark:border-white/10 group-hover:scale-110 transition-transform shadow-sm" 
+                   style="background: ${p.bg}; color: ${p.color};">
+                <span class="material-symbols-outlined text-[24px]">${p.icon}</span>
+              </div>
+              
+              <div class="flex-1 w-full">
+                <h3 class="text-lg font-black text-gray-900 dark:text-white mb-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors uppercase tracking-tight line-clamp-2">
+                  ${escHtml(s.subject_name)}
+                </h3>
+                <p class="text-[10px] font-black text-gray-500 dark:text-gray-500 uppercase tracking-widest">
+                  ${escHtml(s.subject_code)}
+                </p>
+              </div>
+              
+              <div class="w-full pt-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between mt-auto">
+                <span class="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-white/5 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                  ${s.count} Paper${s.count !== 1 ? 's' : ''}
+                </span>
+                <span class="material-symbols-outlined text-gray-400 group-hover:translate-x-1 transition-all text-[18px]">arrow_forward</span>
+              </div>
+            `;
+
+            fragment.appendChild(card);
+          });
+
+          // Add all cards at once (much faster)
+          grid.innerHTML = '';
+          grid.appendChild(fragment);
+          grid.style.display = '';
+
+        } catch (err) {
+          loadingGrid.style.display = 'none';
+          errorBanner.style.display = 'block';
+          errorBanner.innerHTML = `
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-red-500">error</span>
+              <div>
+                <p class="font-bold">Failed to load subjects</p>
+                <p class="text-sm">${err.message}</p>
+              </div>
+            </div>
+          `;
         }
+      }
 
+      // Search filter function (keep this)
+      window.filterSubjects = function () {
+        const query = document.getElementById('subjectSearchInput').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.subject-card-uniform');
+        let visible = 0;
 
+        cards.forEach(card => {
+          const name = card.getAttribute('data-subject').toLowerCase();
+          const show = name.includes(query);
+          card.style.display = show ? '' : 'none';
+          if (show) visible++;
+        });
 
-        window.filterSubjects = function () {
-            const query = document.getElementById('subjectSearchInput').value.toLowerCase().trim();
-            const cards = document.querySelectorAll('.subject-card-uniform');
-            let visible = 0;
-            cards.forEach(card => {
-                const name = card.getAttribute('data-subject').toLowerCase();
-                const show = name.includes(query);
-                card.style.display = show ? '' : 'none';
-                if (show) visible++;
-            });
-            document.getElementById('noResults').style.display = (visible === 0 && cards.length > 0) ? '' : 'none';
-        };
+        document.getElementById('noResults').style.display = (visible === 0 && cards.length > 0) ? '' : 'none';
+      };
 
-        loadSubjects();
+      // Load subjects when page opens
+      loadSubjects();
     </script>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

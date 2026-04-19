@@ -9,7 +9,9 @@
         content="View past paper questions, write your answers, and compare with model solutions on COMSATSPrepHub.">
 
     <!-- Tailwind CSS with Typography plugin -->
-    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography,forms,aspect-ratio"></script>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     <!-- Google Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap"
@@ -40,54 +42,29 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        serif: ['Lora', 'Georgia', 'serif'],
-                    },
-                    colors: {
-                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1' },
-                        teal: { 50: '#f0fdfa', 100: '#ccfbf1', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e' },
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.4s ease both',
-                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16,1,0.3,1) both',
-                        'spin': 'spin 0.8s linear infinite',
-                    },
-                    keyframes: {
-                        fadeIn: { from: { opacity: 0 }, to: { opacity: 1 } },
-                        slideUp: { from: { opacity: 0, transform: 'translateY(16px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
-                        spin: { to: { transform: 'rotate(360deg)' } },
-                    }
-                }
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
             },
-            plugins: [
-                function ({ addComponents, addUtilities }) {
-                    addComponents({
-                        '.glass': { '@apply bg-white/80 backdrop-blur-xl border border-slate-200/80': {} },
-                        '.question-prose': {
-                            'table': { '@apply w-full border-collapse text-sm my-4': {} },
-                            'th': { '@apply bg-slate-100 text-slate-700 font-semibold text-left px-3 py-2 border border-slate-200': {} },
-                            'td': { '@apply px-3 py-2 border border-slate-200 text-slate-700': {} },
-                            'tr:nth-child(even) td': { '@apply bg-slate-50/70': {} },
-                            'p': { '@apply leading-[1.9] mb-3': {} },
-                            'ol': { '@apply list-decimal ml-5 space-y-1.5': {} },
-                            'ul': { '@apply list-disc ml-5 space-y-1.5': {} },
-                            'li': { '@apply leading-relaxed': {} },
-                            'strong': { '@apply font-semibold text-slate-900': {} },
-                            'pre': { '@apply max-w-full my-5 bg-slate-50 border border-slate-200 p-5 rounded-xl block whitespace-pre-wrap break-words': {} },
-                            'code': { '@apply font-mono text-[13px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded break-words whitespace-pre-wrap': {} },
-                            'pre code': { '@apply bg-transparent p-0 text-inherit whitespace-pre-wrap rounded-none': {} },
-                        }
-                    });
-                    addUtilities({
-                        'mjx-container[display="true"]': { '@apply my-5 block overflow-x-auto overflow-y-hidden max-w-full pb-2': {} }
-                    });
-                }
-            ]
+            colors: {
+              primary: '#0f766e',
+              'primary-hover': '#0d6b64',
+              'primary-light': '#ccfbf1',
+              dark: '#1a1a2e',
+              accent: '#0f9690',
+              brand: {
+                50: '#f0f9ff',
+                100: '#e0f2fe',
+                400: '#38bdf8',
+                500: '#0ea5e9',
+                600: '#0284c7',
+              }
+            }
+          }
         }
+      }
     </script>
 </head>
 
@@ -184,15 +161,20 @@
                 <div id="paperHeader"
                     class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm mb-6 animate-fade-in">
 
-                    <!-- Loading state -->
-                    <div id="loadingState" class="flex flex-col items-center justify-center py-16 gap-4 text-slate-400">
-                        <div
-                            class="w-10 h-10 rounded-full border-[3px] border-slate-200 border-t-brand-500 animate-spin">
+                    <!-- Loading Skeleton -->
+                    <div id="paperLoadingSkeleton">
+                        <div class="flex flex-col gap-4">
+                            <div class="h-4 w-32 bg-slate-200 rounded animate-pulse"></div>
+                            <div class="h-8 w-3/4 bg-slate-200 rounded animate-pulse"></div>
+                            <div class="flex gap-2 mt-2">
+                                <div class="h-6 w-20 bg-slate-200 rounded-full animate-pulse"></div>
+                                <div class="h-6 w-24 bg-slate-200 rounded-full animate-pulse"></div>
+                                <div class="h-6 w-16 bg-slate-200 rounded-full animate-pulse"></div>
+                            </div>
                         </div>
-                        <p class="text-sm font-medium">Loading paper from database...</p>
                     </div>
 
-                    <!-- Paper title (hidden until loaded) -->
+                    <!-- Real Paper Content (hidden until loaded) -->
                     <div id="paperTitleBlock" class="hidden">
                         <div class="flex flex-col sm:flex-row sm:items-start gap-4 justify-between">
                             <div class="flex-1 min-w-0">
@@ -314,6 +296,7 @@
                 document.title = `${fullTitle} | COMSATSPrepHub`;
                 document.getElementById('paperTitle').textContent = fullTitle;
                 document.getElementById('navPaperTitle').textContent = fullTitle;
+                hidePaperSkeleton();
 
                 // Chips in header
                 document.getElementById('paperChips').innerHTML = [
@@ -366,16 +349,15 @@
                 globalQuestions = questions;
                 totalQuestions = questions.length;
 
-                // Reveal header, hide loader
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('paperTitleBlock').classList.remove('hidden');
+                // updateProgress is called below
                 document.getElementById('progressWrap').style.display = '';
                 updateProgress();
 
                 renderQuestions(questions);
 
             } catch (err) {
-                document.getElementById('loadingState').style.display = 'none';
+                const skeleton = document.getElementById('paperLoadingSkeleton');
+                if (skeleton) skeleton.style.display = 'none';
                 document.getElementById('errorState').classList.remove('hidden');
                 document.getElementById('errorMsg').textContent = err.message;
             }
@@ -831,6 +813,29 @@
 
         // ── Boot ─────────────────────────────────────
         loadPaper();
+    </script>
+    <script>
+        // Hide skeleton when paper finishes loading
+        function hidePaperSkeleton() {
+            const skeleton = document.getElementById('paperLoadingSkeleton');
+            const content = document.getElementById('paperTitleBlock');
+
+            if (skeleton && content) {
+                skeleton.style.transition = 'opacity 0.3s ease';
+                skeleton.style.opacity = '0';
+
+                setTimeout(() => {
+                    skeleton.style.display = 'none';
+                    content.classList.remove('hidden');
+                    content.style.opacity = '0';
+                    content.style.transition = 'opacity 0.4s ease';
+
+                    setTimeout(() => {
+                        content.style.opacity = '1';
+                    }, 50);
+                }, 300);
+            }
+        }
     </script>
 </body>
 

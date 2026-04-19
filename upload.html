@@ -187,15 +187,17 @@
 
     <script type="module">
         import { escapeHtml } from './utils.js';
-        
+
         const form = document.getElementById('uploadForm');
         const fileInput = document.getElementById('fileInput');
+        const submitBtn = form.querySelector('button[type="submit"]');
 
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
+            // Basic validation
             if (!fileInput.files || fileInput.files.length === 0) {
-                alert('Please select a file to upload.');
+                showError('Please select a file to upload.');
                 return;
             }
 
@@ -203,20 +205,84 @@
             const maxSize = 5 * 1024 * 1024; // 5MB
 
             if (file.size > maxSize) {
-                alert('Security Error: File is too large. Maximum allowed size is 5MB.');
+                showError('File is too large. Maximum allowed size is 5MB.');
                 return;
             }
 
             const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
             if (!allowedTypes.includes(file.type)) {
-                alert('Security Error: Invalid file type completely rejected.\nOnly PDF and images (JPEG, PNG, WEBP) are allowed.');
+                showError('Only PDF and image files (JPG, PNG, WEBP) are allowed.');
                 return;
             }
 
-            // Safe to proceed to upload payload prep
-            alert('File strictly validated! Ready for secure server transmission.');
-            form.reset();
+            // Show loading state
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <span class="flex items-center justify-center gap-2">
+                    <span class="animate-spin text-xl">⟳</span> Uploading...
+                </span>
+            `;
+
+            // Simulate upload (replace with real Supabase upload later)
+            setTimeout(() => {
+                // Success message
+                showSuccess('Thank you! Your paper has been submitted for review.');
+                
+                // Reset form
+                form.reset();
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+
+                // Optional: redirect after success
+                // setTimeout(() => window.location.href = 'subjects.html', 2000);
+            }, 1500);
         });
+
+        function showError(message) {
+            const existing = document.getElementById('upload-error');
+            if (existing) existing.remove();
+            const existingSuccess = document.getElementById('upload-success');
+            if (existingSuccess) existingSuccess.remove();
+
+            const errorDiv = document.createElement('div');
+            errorDiv.id = 'upload-error';
+            errorDiv.className = 'mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-3 animate-fade-in';
+            errorDiv.innerHTML = `
+                <span class="material-symbols-outlined text-red-500 mt-0.5">error</span>
+                <div>
+                    <p class="font-bold text-sm">Upload Error</p>
+                    <p class="text-xs opacity-90">${message}</p>
+                </div>
+            `;
+            
+            form.appendChild(errorDiv);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (errorDiv.parentNode) errorDiv.parentNode.removeChild(errorDiv);
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const existing = document.getElementById('upload-success');
+            if (existing) existing.remove();
+            const existingError = document.getElementById('upload-error');
+            if (existingError) existingError.remove();
+
+            const successDiv = document.createElement('div');
+            successDiv.id = 'upload-success';
+            successDiv.className = 'mt-4 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl flex items-start gap-3 animate-fade-in';
+            successDiv.innerHTML = `
+                <span class="material-symbols-outlined text-emerald-500 mt-0.5">check_circle</span>
+                <div>
+                    <p class="font-bold text-sm">Success!</p>
+                    <p class="text-xs opacity-90">${message}</p>
+                </div>
+            `;
+            
+            form.appendChild(successDiv);
+        }
     </script>
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>

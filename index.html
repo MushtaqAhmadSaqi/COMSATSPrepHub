@@ -29,28 +29,16 @@
             'primary-light': '#ccfbf1',
             dark: '#1a1a2e',
             accent: '#0f9690',
-          },
-          animation: {
-            'float-a': 'floatA 11s ease-in-out infinite',
-            'float-b': 'floatB 9s ease-in-out infinite',
-            'fade-up': 'fadeUp 0.6s ease forwards',
-          },
-          keyframes: {
-            floatA: {
-              '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
-              '50%': { transform: 'translateY(-18px) rotate(4deg)' },
-            },
-            floatB: {
-              '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
-              '50%': { transform: 'translateY(14px) rotate(-3deg)' },
-            },
-            fadeUp: {
-              '0%': { opacity: '0', transform: 'translateY(20px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
-            },
-          },
-        },
-      },
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+            }
+          }
+        }
+      }
     }
   </script>
 
@@ -198,8 +186,8 @@
         <!-- Badge -->
         <div class="badge-tilted inline-block mb-7">
           <span class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase"
-            style="background:rgba(26,115,232,0.1); color:#1a73e8; border: 1px solid rgba(26,115,232,0.15);">
-            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block"></span>
+                style="background:rgba(26,115,232,0.1); color:#1a73e8; border: 1px solid rgba(26,115,232,0.15);">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block animate-pulse"></span>
             Excellence in Academics
           </span>
         </div>
@@ -239,24 +227,49 @@
 
     <!-- ═══════════════════════════════════ STATS ═══════════════════════════════════ -->
     <section id="stats-section" class="bg-white py-10 px-6" data-aos="fade-up" data-aos-delay="150">
-      <div class="max-w-3xl mx-auto flex items-center justify-center gap-0">
-        <!-- Stat 1 -->
-        <div class="flex-1 text-center py-4 px-2">
-          <div class="text-3xl sm:text-4xl font-black text-primary tracking-tight">500+</div>
-          <div class="text-xs text-[#6b7280] font-medium mt-1.5 uppercase tracking-widest">Past Papers</div>
+      <div class="max-w-3xl mx-auto">
+        
+        <!-- Skeleton Loading (shows while page loads) -->
+        <div id="stats-skeleton" class="flex items-center justify-center gap-8">
+          <div class="flex-1 text-center">
+            <div class="h-9 w-16 bg-gray-200 rounded mx-auto mb-2 animate-pulse"></div>
+            <div class="h-3 w-20 bg-gray-200 rounded mx-auto animate-pulse"></div>
+          </div>
+          <div class="hidden sm:block w-px h-10 bg-gray-200"></div>
+          <div class="flex-1 text-center border-x border-gray-100 sm:border-none">
+            <div class="h-9 w-16 bg-gray-200 rounded mx-auto mb-2 animate-pulse"></div>
+            <div class="h-3 w-20 bg-gray-200 rounded mx-auto animate-pulse"></div>
+          </div>
+          <div class="hidden sm:block w-px h-10 bg-gray-200"></div>
+          <div class="flex-1 text-center">
+            <div class="h-9 w-16 bg-gray-200 rounded mx-auto mb-2 animate-pulse"></div>
+            <div class="h-3 w-20 bg-gray-200 rounded mx-auto animate-pulse"></div>
+          </div>
         </div>
-        <div class="stat-divider hidden sm:block"></div>
-        <!-- Stat 2 -->
-        <div class="flex-1 text-center py-4 px-2 border-x border-[#e2e8f0] sm:border-none">
-          <div class="text-3xl sm:text-4xl font-black text-primary tracking-tight">50+</div>
-          <div class="text-xs text-[#6b7280] font-medium mt-1.5 uppercase tracking-widest">Subjects</div>
+
+        <!-- Real Stats (hidden until loaded) -->
+        <div id="stats-real" class="hidden flex items-center justify-center gap-0">
+          <!-- Stat 1 -->
+          <div class="flex-1 text-center py-4 px-2">
+            <div class="text-3xl sm:text-4xl font-black text-primary tracking-tight">500+</div>
+            <div class="text-xs text-[#6b7280] font-medium mt-1.5 uppercase tracking-widest">Past Papers</div>
+          </div>
+          <div class="stat-divider hidden sm:block"></div>
+          
+          <!-- Stat 2 -->
+          <div class="flex-1 text-center py-4 px-2 border-x border-[#e2e8f0] sm:border-none">
+            <div class="text-3xl sm:text-4xl font-black text-primary tracking-tight">50+</div>
+            <div class="text-xs text-[#6b7280] font-medium mt-1.5 uppercase tracking-widest">Subjects</div>
+          </div>
+          <div class="stat-divider hidden sm:block"></div>
+          
+          <!-- Stat 3 -->
+          <div class="flex-1 text-center py-4 px-2">
+            <div class="text-3xl sm:text-4xl font-black text-primary tracking-tight">1,000+</div>
+            <div class="text-xs text-[#6b7280] font-medium mt-1.5 uppercase tracking-widest">Students</div>
+          </div>
         </div>
-        <div class="stat-divider hidden sm:block"></div>
-        <!-- Stat 3 -->
-        <div class="flex-1 text-center py-4 px-2">
-          <div class="text-3xl sm:text-4xl font-black text-primary tracking-tight">1,000+</div>
-          <div class="text-xs text-[#6b7280] font-medium mt-1.5 uppercase tracking-widest">Students</div>
-        </div>
+        
       </div>
     </section>
 
@@ -372,5 +385,30 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script type="module" src="js/layout.js"></script>
 
+  <script>
+    // Show real stats after page loads (removes skeleton)
+    window.addEventListener('load', function() {
+      setTimeout(() => {
+        const skeleton = document.getElementById('stats-skeleton');
+        const realStats = document.getElementById('stats-real');
+        
+        if (skeleton && realStats) {
+          skeleton.style.transition = 'opacity 0.3s ease';
+          skeleton.style.opacity = '0';
+          
+          setTimeout(() => {
+            skeleton.style.display = 'none';
+            realStats.classList.remove('hidden');
+            realStats.style.opacity = '0';
+            realStats.style.transition = 'opacity 0.4s ease';
+            
+            setTimeout(() => {
+              realStats.style.opacity = '1';
+            }, 50);
+          }, 300);
+        }
+      }, 800); // Show skeleton for 800ms then reveal real stats
+    });
+  </script>
 </body>
 </html>

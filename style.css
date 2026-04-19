@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL,GRAD,opsz@100..700,0..1,-50..200,20..48');
 
 :root {
@@ -435,31 +435,33 @@ img {
   }
 }
 
-/* --- Mobile Nav --- */
+/* IMPROVED MOBILE NAVIGATION */
 .mobile-nav-shell {
   position: fixed;
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: calc(100% - 32px);
-  max-width: 450px;
-  bottom: 16px;
-  z-index: 55;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  background: #111827; 
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 24px);
+  max-width: 420px;
+  bottom: 12px;
+  z-index: 100;
+  border-radius: 9999px;
+  background: #0f172a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
+              0 0 0 1px rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex !important;
+  padding: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .mobile-nav-shell.nav-hidden {
-  transform: translateY(150%);
+  transform: translate(-50%, 120%);
+  opacity: 0;
+  pointer-events: none;
 }
 
+/* Desktop Hidden Controller */
 @media (min-width: 768px) {
   .mobile-nav-shell {
     display: none !important;
@@ -469,9 +471,8 @@ img {
 .mobile-nav-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
+  gap: 4px;
   width: 100%;
-  padding: 10px;
 }
 
 .mobile-nav-item {
@@ -479,35 +480,47 @@ img {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 2px;
   min-height: 56px;
-  border-radius: 20px;
-  color: rgba(255, 255, 255, 0.85);
+  min-width: 56px;
+  padding: 8px 4px;
+  border-radius: 9999px;
+  color: #94a3b8;
   text-decoration: none;
-  transition: all 0.25s ease;
-  padding: 6px 2px;
+  transition: all 0.2s ease;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.mobile-nav-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+}
+
+.mobile-nav-item.active {
+  background: #0f766e;
+  color: white;
+  box-shadow: 0 4px 15px rgba(15, 118, 110, 0.4);
 }
 
 .mobile-nav-item .material-symbols-outlined {
-  font-size: 24px;
+  font-size: 22px;
+  margin-bottom: 2px;
 }
 
 .mobile-nav-item .label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
 
-    .mobile-nav-item.active {
-      background: rgba(43, 141, 226, 0.15);
-      color: #3b82f6; 
-    }
-
-    .mobile-nav-item.active .material-symbols-outlined {
-      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-    }
-
+/* Extra padding on very small screens */
+@media (max-width: 380px) {
+  .mobile-nav-item {
+    min-height: 52px;
+    padding: 6px 2px;
+  }
+}
 @media (max-width: 768px) {
   .nav-links {
     display: none;
@@ -2658,4 +2671,70 @@ img {
   margin-bottom: 12px;
   display: block;
   color: var(--border);
+}
+/* -----------------------------------------------
+   ACCESSIBILITY IMPROVEMENTS
+   ----------------------------------------------- */
+
+/* Better focus states for keyboard users */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.2);
+}
+
+/* Make sure interactive elements have visible focus */
+.quiz-option:focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 3px;
+}
+
+/* Improve contrast for selected quiz options */
+.quiz-option.selected {
+  border-color: #0f766e;
+  background-color: #ccfbf1;
+  color: #0f766e;
+}
+
+.quiz-option.correct {
+  border-color: #15803d;
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.quiz-option.wrong {
+  border-color: #dc2626;
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+/* Make sure all buttons and links have good touch targets on mobile */
+button, 
+a, 
+.nav-link,
+.mobile-nav-item {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Better contrast for muted text */
+.text-muted,
+.text-gray-500,
+.text-slate-400 {
+  color: #64748b !important;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .quiz-option {
+    border-width: 3px;
+  }
+  
+  button {
+    border: 2px solid currentColor;
+  }
 }

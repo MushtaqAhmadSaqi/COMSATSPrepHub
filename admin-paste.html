@@ -42,51 +42,33 @@
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography,forms,aspect-ratio"></script>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        serif: ['Lora', 'Georgia', 'serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    }
-                }
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
             },
-            plugins: [
-                function ({ addComponents, addUtilities }) {
-                    addComponents({
-                        '.question-prose': {
-                            'table': { '@apply w-full border-collapse text-sm my-4': {} },
-                            'th': { '@apply bg-slate-100 text-slate-700 font-semibold text-left px-3 py-2 border border-slate-200': {} },
-                            'td': { '@apply px-3 py-2 border border-slate-200 text-slate-700': {} },
-                            'tr:nth-child(even) td': { '@apply bg-slate-50/70': {} },
-                            'p': { '@apply leading-[1.9] mb-3': {} },
-                            'ol': { '@apply list-decimal ml-5 space-y-1.5': {} },
-                            'ul': { '@apply list-disc ml-5 space-y-1.5': {} },
-                            'li': { '@apply leading-relaxed': {} },
-                            'strong': { '@apply font-semibold text-slate-900': {} },
-                            'pre': { '@apply max-w-full my-5 bg-slate-900 text-slate-100 border border-slate-700 p-5 rounded-xl block whitespace-pre-wrap break-words': {} },
-                            'code': { '@apply font-mono text-[13px] bg-slate-100 text-pink-600 px-1.5 py-0.5 rounded break-words whitespace-pre-wrap': {} },
-                            'pre code': { '@apply bg-transparent p-0 text-inherit whitespace-pre-wrap rounded-none text-slate-100': {} },
-                            'img': { '@apply max-w-full rounded-lg my-4 shadow-md': {} },
-                            'h1,h2,h3,h4': { '@apply font-bold text-slate-900 mt-4 mb-2': {} },
-                            'blockquote': { '@apply border-l-4 border-blue-300 pl-4 italic text-slate-600 my-3': {} },
-                        }
-                    });
-                    addUtilities({
-                        '.mjx-container[display="true"]': {
-                            '@apply my-5 block overflow-x-auto overflow-y-hidden max-w-full pb-2': {}
-                        },
-                        '.mjx-container': {
-                            '@apply overflow-x-auto max-w-full': {}
-                        }
-                    });
-                }
-            ]
+            colors: {
+              primary: '#0f766e',
+              'primary-hover': '#0d6b64',
+              'primary-light': '#ccfbf1',
+              dark: '#1a1a2e',
+              accent: '#0f9690',
+              brand: {
+                50: '#f0f9ff',
+                100: '#e0f2fe',
+                400: '#38bdf8',
+                500: '#0ea5e9',
+                600: '#0284c7',
+              }
+            }
+          }
         }
+      }
     </script>
 
     <!-- Custom Styles -->

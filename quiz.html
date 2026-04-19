@@ -27,38 +27,55 @@
     <link rel="stylesheet" href="style.css">
 
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['"Roboto Mono"', 'monospace'],
-                    },
-                    colors: {
-                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1' },
-                        teal: { 50: '#f0fdfa', 100: '#ccfbf1', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e' },
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.4s ease both',
-                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16,1,0.3,1) both',
-                        'spin': 'spin 0.8s linear infinite',
-                    },
-                    keyframes: {
-                        fadeIn: { from: { opacity: 0 }, to: { opacity: 1 } },
-                        slideUp: { from: { opacity: 0, transform: 'translateY(16px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
-                        spin: { to: { transform: 'rotate(360deg)' } },
-                    }
-                }
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              primary: '#0f766e',
+              'primary-hover': '#0d6b64',
+              'primary-light': '#ccfbf1',
+              dark: '#1a1a2e',
+              accent: '#0f9690',
+              brand: {
+                50: '#f0f9ff',
+                100: '#e0f2fe',
+                400: '#38bdf8',
+                500: '#0ea5e9',
+                600: '#0284c7',
+              }
             }
+          }
         }
+      }
     </script>
     <style type="text/tailwindcss">
         @layer utilities {
             .glass { @apply bg-white/80 backdrop-blur-xl border border-slate-200/80; }
-            .quiz-option { @apply flex items-start gap-4 p-5 border-2 border-slate-100 rounded-2xl cursor-pointer transition-all duration-200 bg-white hover:border-brand-400 hover:bg-brand-50/30 font-mono text-[14px]; }
-            .quiz-option.selected { @apply border-brand-500 bg-brand-50 shadow-sm ring-1 ring-brand-500; }
-            .quiz-option.correct { @apply border-teal-500 bg-teal-50 text-teal-900 ring-teal-500; }
-            .quiz-option.wrong { @apply border-red-500 bg-red-50 text-red-900 ring-red-500; }
+            .quiz-option { 
+              @apply flex items-start gap-4 p-5 border-2 border-slate-200 rounded-2xl cursor-pointer transition-all duration-200 bg-white hover:border-brand-500 hover:bg-brand-50 font-mono text-[14px]; 
+            }
+
+            .quiz-option.selected { 
+              border-color: #0f766e; 
+              background-color: #ccfbf1; 
+              color: #0f766e;
+              box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.2);
+            }
+
+            .quiz-option.correct { 
+              border-color: #15803d; 
+              background-color: #dcfce7; 
+              color: #15803d;
+            }
+
+            .quiz-option.wrong { 
+              border-color: #dc2626; 
+              background-color: #fee2e2; 
+              color: #dc2626;
+            }
             
             .radio-ui { @apply w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all bg-white; }
             .quiz-option.selected .radio-ui { @apply border-brand-500; }
@@ -122,9 +139,13 @@
                             0 of 0</span>
                     </div>
                     <div class="flex-1 max-w-[120px] sm:max-w-xs h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div id="quizProgressBar"
-                            class="h-full bg-gradient-to-r from-brand-500 to-teal-500 transition-all duration-500 ease-out"
-                            style="width:0%"></div>
+                        <div id="quizProgressBar" 
+                             class="h-full bg-gradient-to-r from-brand-500 to-teal-500 transition-all duration-500 ease-out"
+                             role="progressbar"
+                             aria-valuemin="0"
+                             aria-valuemax="100"
+                             aria-valuenow="0"
+                             style="width:0%"></div>
                     </div>
                 </div>
 
@@ -254,237 +275,265 @@
          SCRIPTS
     ═══════════════════════════════════════════════ -->
     <script type="module">
-        import { supabase, escapeHtml } from './utils.js';
+      import { supabase, escapeHtml } from './utils.js';
 
-        // ── State ───────────────────────────────────
-        let quizzes = [];
-        let currentQuizName = '';
-        let questions = [];
-        let currentQuestionIndex = 0;
-        let selectedAnswers = {};
+      // State variables
+      let quizzes = [];
+      let currentQuizName = '';
+      let questions = [];
+      let currentQuestionIndex = 0;
+      let selectedAnswers = {};
 
-        document.addEventListener('DOMContentLoaded', loadQuizzes);
+      // Load quizzes when page opens
+      document.addEventListener('DOMContentLoaded', loadQuizzes);
 
-        // ── Load Available Quizzes ───────────────────
-        async function loadQuizzes() {
-            try {
-                const { data, error } = await supabase.from('quizzes').select('*').order('created_at', { ascending: false });
-                if (error) throw error;
+      // ── Load Available Quizzes ───────────────────
+      async function loadQuizzes() {
+        const grid = document.getElementById('quizGrid');
 
-                const grid = document.getElementById('quizGrid');
-                grid.innerHTML = '';
+        try {
+          // Add a timeout so it doesn't spin forever
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Loading timeout')), 8000)
+          );
 
-                if (!data || data.length === 0) {
-                    grid.innerHTML = `
-                        <div class="col-span-full bg-white border border-slate-200 rounded-2xl p-12 text-center text-slate-400 animate-fade-in shadow-sm">
-                            <span class="material-symbols-outlined text-[48px] mb-4 opacity-50">deployed_code</span>
-                            <p class="font-bold text-slate-900 text-lg mb-1">No Assessment Modules Available</p>
-                            <p class="text-[14px] font-medium leading-relaxed">Admin systems must pre-compile datasets before evaluation cycles can be initiated.</p>
-                        </div>`;
-                    return;
-                }
+          const fetchPromise = supabase
+            .from('quizzes')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-                quizzes = data;
+          // Wait for either data or timeout
+          const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
-                data.forEach(quiz => {
-                    const btn = document.createElement('button');
-                    btn.className = 'bg-white border border-slate-200 hover:border-brand-400 hover:shadow-xl hover:shadow-brand-500/5 transition-all p-6 text-left rounded-2xl group flex flex-col justify-between h-full group animate-fade-in relative overflow-hidden';
-                    btn.innerHTML = `
-                        <!-- Subtle graphic -->
-                        <div class="absolute -bottom-4 -right-4 text-slate-100 group-hover:text-brand-50 transition-colors duration-500 scale-150 group-hover:rotate-12 transform">
-                             <span class="material-symbols-outlined text-[64px]">extension</span>
-                        </div>
-                        <div class="relative z-10">
-                            <div class="w-11 h-11 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-brand-50 group-hover:text-brand-600 flex items-center justify-center mb-6 transition-colors">
-                                <span class="material-symbols-outlined text-[24px]">terminal</span>
-                            </div>
-                            <h3 class="font-bold text-slate-900 text-[17px] mb-2 leading-tight group-hover:text-brand-700 transition-colors">${quiz.title}</h3>
-                            <p class="text-[12px] font-bold text-slate-400 uppercase tracking-widest font-mono">${quiz.subject_code} Framework</p>
-                        </div>
-                        <div class="relative z-10 mt-8 pt-4 border-t border-slate-50 flex items-center justify-between">
-                            <span class="text-[10px] font-black text-slate-300 uppercase tracking-[2px]">AI GENERATED</span>
-                            <span class="material-symbols-outlined text-[18px] text-slate-300 group-hover:text-brand-400 transition-all group-hover:translate-x-1">arrow_forward</span>
-                        </div>
-                    `;
-                    btn.onclick = () => startQuiz(quiz.id, quiz.title, quiz.subject_code);
-                    grid.appendChild(btn);
-                });
-            } catch (err) {
-                console.error(err);
-                document.getElementById('quizGrid').innerHTML = '<p class="col-span-full p-6 bg-red-50 text-red-600 font-bold border-2 border-red-100 rounded-2xl text-center">EXCEPTION: Internal dataset sync failure.</p>';
+          if (error) throw error;
+
+          grid.innerHTML = '';
+
+          if (!data || data.length === 0) {
+            grid.innerHTML = `
+              <div class="col-span-full bg-white border border-slate-200 rounded-2xl p-12 text-center text-slate-400 shadow-sm">
+                <span class="material-symbols-outlined text-[48px] mb-4 opacity-50">deployed_code</span>
+                <p class="font-bold text-slate-900 text-lg mb-1">No Quizzes Available Yet</p>
+                <p class="text-[14px] font-medium">Admin needs to create some quizzes first.</p>
+              </div>`;
+            return;
+          }
+
+          quizzes = data;
+
+          // Create quiz cards
+          data.forEach(quiz => {
+            const btn = document.createElement('button');
+            btn.className = 'bg-white border border-slate-200 hover:border-brand-400 hover:shadow-xl hover:shadow-brand-500/5 transition-all p-6 text-left rounded-2xl group flex flex-col justify-between h-full group animate-fade-in relative overflow-hidden';
+
+            btn.innerHTML = `
+              <div class="absolute -bottom-4 -right-4 text-slate-100 group-hover:text-brand-50 transition-colors duration-500 scale-150 group-hover:rotate-12 transform">
+                <span class="material-symbols-outlined text-[64px]">extension</span>
+              </div>
+              
+              <div class="relative z-10">
+                <div class="w-11 h-11 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-brand-50 group-hover:text-brand-600 flex items-center justify-center mb-6 transition-colors">
+                  <span class="material-symbols-outlined text-[24px]">terminal</span>
+                </div>
+                <h3 class="font-bold text-slate-900 text-[17px] mb-2 leading-tight group-hover:text-brand-700 transition-colors">${quiz.title}</h3>
+                <p class="text-[12px] font-bold text-slate-400 uppercase tracking-widest font-mono">${quiz.subject_code} Framework</p>
+              </div>
+              
+              <div class="relative z-10 mt-8 pt-4 border-t border-slate-50 flex items-center justify-between">
+                <span class="text-[10px] font-black text-slate-300 uppercase tracking-[2px]">AI GENERATED</span>
+                <span class="material-symbols-outlined text-[18px] text-slate-300 group-hover:text-brand-400 transition-all group-hover:translate-x-1">arrow_forward</span>
+              </div>
+            `;
+
+            btn.onclick = () => startQuiz(quiz.id, quiz.title, quiz.subject_code);
+            grid.appendChild(btn);
+          });
+
+        } catch (err) {
+          console.error(err);
+          grid.innerHTML = `
+            <div class="col-span-full bg-red-50 border border-red-200 rounded-2xl p-8 text-center shadow-sm">
+              <div class="flex flex-col items-center">
+                <span class="material-symbols-outlined text-red-500 text-[48px] mb-4">error</span>
+                <p class="font-bold text-red-700 text-lg mb-2">Failed to load quizzes</p>
+                <p class="text-red-600 text-sm mb-6">Something went wrong. Please try again.</p>
+                
+                <button onclick="location.reload()" 
+                        class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center gap-2 transition-all">
+                  <span class="material-symbols-outlined">refresh</span>
+                  Try Again
+                </button>
+              </div>
+            </div>`;
+        }
+      }
+
+      // ── Start a Quiz ──────────────────────────────
+      async function startQuiz(quizId, title, subCode) {
+        currentQuizName = subCode;
+        document.getElementById('step1-select').classList.add('hidden');
+        document.getElementById('step2-question').classList.remove('hidden');
+
+        document.getElementById('questionText').innerHTML = 'Loading questions...';
+        document.getElementById('optionsList').innerHTML = '';
+        document.getElementById('quizBadgeLabel').textContent = subCode.toUpperCase();
+
+        try {
+          const { data, error } = await supabase
+            .from('quiz_questions')
+            .select('*')
+            .eq('quiz_id', quizId);
+
+          if (error) throw error;
+
+          if (!data || data.length === 0) {
+            document.getElementById('questionText').innerHTML = 
+              '<span class="text-red-500">No questions found for this quiz.</span>';
+            return;
+          }
+
+          questions = data;
+          currentQuestionIndex = 0;
+          selectedAnswers = {};
+          renderQuestion();
+
+        } catch (err) {
+          console.error(err);
+          document.getElementById('questionText').innerHTML = 
+            `<span class="text-red-500">Error loading questions: ${err.message}</span>`;
+        }
+      }
+
+      // ── Render Current Question ───────────────────
+      function renderQuestion() {
+        const q = questions[currentQuestionIndex];
+        const hasAnswered = selectedAnswers[currentQuestionIndex] !== undefined;
+        const isLast = currentQuestionIndex === questions.length - 1;
+
+        document.getElementById('bgQuestionNum').textContent = `Q${String(currentQuestionIndex + 1).padStart(2, '0')}`;
+        document.getElementById('questionCountLabel').textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+
+        const progressPct = ((currentQuestionIndex) / questions.length) * 100;
+        document.getElementById('quizProgressBar').style.width = `${progressPct}%`;
+
+        const qText = document.getElementById('questionText');
+        qText.innerHTML = q.question_text.replace(/\\n/g, '<br/>');
+
+        const optsList = document.getElementById('optionsList');
+        optsList.innerHTML = '';
+
+        q.options.forEach((optText, index) => {
+          const div = document.createElement('div');
+          div.className = 'quiz-option';
+
+          if (hasAnswered) {
+            div.classList.add('pointer-events-none', 'opacity-80');
+            if (index === q.correct_option_index) {
+              div.classList.add('correct');
+            } else if (index === selectedAnswers[currentQuestionIndex]) {
+              div.classList.add('wrong');
             }
+          } else if (selectedAnswers[currentQuestionIndex] === index) {
+            div.classList.add('selected');
+          }
+
+          div.innerHTML = `
+            <div class="radio-ui"></div>
+            <div class="flex-1 leading-relaxed capitalize">${optText}</div>
+          `;
+
+          if (!hasAnswered) {
+            div.onclick = () => selectAnswer(index);
+          }
+          optsList.appendChild(div);
+        });
+
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+
+        prevBtn.style.display = currentQuestionIndex > 0 ? 'flex' : 'none';
+
+        if (isLast) {
+          nextBtn.innerHTML = `Finish Quiz <span class="material-symbols-outlined text-[20px]">verified_user</span>`;
+        } else {
+          nextBtn.innerHTML = `Next Question <span class="material-symbols-outlined text-[20px]">arrow_forward</span>`;
         }
 
-        // ── Launch Quiz ──────────────────────────────
-        async function startQuiz(quizId, title, subCode) {
-            currentQuizName = subCode;
-            document.getElementById('step1-select').classList.add('hidden');
+        nextBtn.disabled = !hasAnswered;
+        nextBtn.onclick = () => isLast ? showResults() : nextQuestion();
 
-            const qSection = document.getElementById('step2-question');
-            qSection.classList.remove('hidden');
-
-            document.getElementById('questionText').innerHTML = 'Initializing logic gate...';
-            document.getElementById('optionsList').innerHTML = '';
-            document.getElementById('quizBadgeLabel').textContent = subCode.toUpperCase();
-
-            try {
-                const { data, error } = await supabase.from('quiz_questions').select('*').eq('quiz_id', quizId);
-                if (error) throw error;
-
-                if (!data || data.length === 0) {
-                    document.getElementById('questionText').innerHTML = '<span class="text-red-500 italic">Dataset Integrity Error: Array Empty.</span>';
-                    return;
-                }
-
-                questions = data;
-                currentQuestionIndex = 0;
-                selectedAnswers = {};
-                renderQuestion();
-
-            } catch (err) {
-                console.error(err);
-                document.getElementById('questionText').innerHTML = 'FATAL EXCEPTION: Execution kernel failed.';
-            }
+        const explanationBox = document.getElementById('explanationBox');
+        if (hasAnswered && q.explanation) {
+          document.getElementById('explanationText').innerHTML = q.explanation.replace(/\\n/g, '<br/>');
+          explanationBox.classList.remove('hidden');
+        } else {
+          explanationBox.classList.add('hidden');
         }
 
-        // ── Render Specific Question ──────────────────
-        function renderQuestion() {
-            const q = questions[currentQuestionIndex];
-            const hasAnswered = selectedAnswers[currentQuestionIndex] !== undefined;
-            const isLast = currentQuestionIndex === questions.length - 1;
-
-            // Layout Updates
-            document.getElementById('bgQuestionNum').textContent = `Q${String(currentQuestionIndex + 1).padStart(2, '0')}`;
-            document.getElementById('questionCountLabel').textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
-
-            // Dynamic Progress
-            const progressPct = ((currentQuestionIndex) / questions.length) * 100;
-            document.getElementById('quizProgressBar').style.width = `${progressPct}%`;
-
-            // Question Logic
-            const qText = document.getElementById('questionText');
-            qText.innerHTML = q.question_text.replace(/\\n/g, '<br/>');
-
-            // Option Builder
-            const optsList = document.getElementById('optionsList');
-            optsList.innerHTML = '';
-
-            q.options.forEach((optText, index) => {
-                const div = document.createElement('div');
-                div.className = 'quiz-option';
-
-                if (hasAnswered) {
-                    div.classList.add('pointer-events-none', 'opacity-80');
-                    if (index === q.correct_option_index) {
-                        div.classList.add('correct');
-                    } else if (index === selectedAnswers[currentQuestionIndex]) {
-                        div.classList.add('wrong');
-                    }
-                } else if (selectedAnswers[currentQuestionIndex] === index) {
-                    div.classList.add('selected');
-                }
-
-                div.innerHTML = `
-                    <div class="radio-ui"></div>
-                    <div class="flex-1 leading-relaxed capitalize">${optText}</div>
-                `;
-
-                if (!hasAnswered) {
-                    div.onclick = () => selectAnswer(index);
-                }
-                optsList.appendChild(div);
-            });
-
-            // Button States
-            const nextBtn = document.getElementById('nextBtn');
-            const prevBtn = document.getElementById('prevBtn');
-
-            if (currentQuestionIndex > 0) prevBtn.style.display = 'flex';
-            else prevBtn.style.display = 'none';
-
-            if (isLast) nextBtn.innerHTML = `Finalize Evaluation <span class="material-symbols-outlined text-[20px]">verified_user</span>`;
-            else nextBtn.innerHTML = `Continue Block <span class="material-symbols-outlined text-[20px]">arrow_forward</span>`;
-
-            nextBtn.disabled = !hasAnswered;
-            nextBtn.onclick = () => isLast ? showResults() : nextQuestion();
-
-            // Explanation Reveal
-            const explanationBox = document.getElementById('explanationBox');
-            if (hasAnswered) {
-                document.getElementById('explanationText').innerHTML = q.explanation ? q.explanation.replace(/\\n/g, '<br/>') : "No deeper dataset documentation available for this node.";
-                explanationBox.classList.remove('hidden');
-            } else {
-                explanationBox.classList.add('hidden');
-            }
-
-            // LaTeX Injection
-            if (window.MathJax) {
-                MathJax.typesetClear([qText, optsList, explanationBox]);
-                MathJax.typesetPromise([qText, optsList, explanationBox]).catch(console.error);
-            }
+        // Render math if needed
+        if (window.MathJax) {
+          MathJax.typesetPromise([qText, optsList, explanationBox]).catch(console.error);
         }
+      }
 
-        window.selectAnswer = function (optIndex) {
-            selectedAnswers[currentQuestionIndex] = optIndex;
-            renderQuestion();
-        };
+      window.selectAnswer = function (optIndex) {
+        selectedAnswers[currentQuestionIndex] = optIndex;
+        renderQuestion();
+      };
 
-        window.nextQuestion = function () {
-            if (currentQuestionIndex < questions.length - 1) {
-                currentQuestionIndex++;
-                renderQuestion();
-            }
-        };
-
-        window.prevQuestion = function () {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
-                renderQuestion();
-            }
-        };
-
-        // ── Final Evaluation Report ──────────────────
-        function showResults() {
-            document.getElementById('step2-question').classList.add('hidden');
-            document.getElementById('step3-results').classList.remove('hidden');
-
-            let correctCount = 0;
-            questions.forEach((q, i) => {
-                if (selectedAnswers[i] === q.correct_option_index) correctCount++;
-            });
-
-            const total = questions.length;
-            const percent = Math.round((correctCount / total) * 100);
-
-            // Circular Math (r=80 -> circumference ~502.65)
-            const cir = 502.65;
-            const targetOffset = cir - (percent / 100) * cir;
-
-            setTimeout(() => {
-                const progressCircle = document.getElementById('scoreProgress');
-                progressCircle.style.strokeDashoffset = targetOffset;
-            }, 150);
-
-            document.getElementById('scoreValue').textContent = `${correctCount} / ${total} NODES`;
-            document.getElementById('scorePercent').textContent = `${percent}%`;
-
-            const badge = document.getElementById('scoreBadge');
-            const desc = document.getElementById('insightsDesc');
-
-            if (percent >= 90) {
-                badge.textContent = "OPTIMIZED";
-                badge.className = "inline-block px-3 py-1 rounded-full text-[11px] font-black tracking-widest mb-3 border border-teal-200 bg-teal-50 text-teal-700 uppercase";
-                desc.textContent = `Your logic structures in the ${currentQuizName} module are operating at peak efficiency. Mastery attained.`;
-            } else if (percent >= 70) {
-                badge.textContent = "STABLE";
-                badge.className = "inline-block px-3 py-1 rounded-full text-[11px] font-black tracking-widest mb-3 border border-brand-200 bg-brand-50 text-brand-700 uppercase";
-                desc.textContent = `Fundamental grasp of the ${currentQuizName} framework is detected. Minor conceptual packet loss identified.`;
-            } else {
-                badge.textContent = "CRITICAL FAIL";
-                badge.className = "inline-block px-3 py-1 rounded-full text-[11px] font-black tracking-widest mb-3 border border-red-200 bg-red-50 text-red-700 uppercase";
-                desc.textContent = `High-level logical failure in ${currentQuizName} protocols. Recommend intensive dataset review and manual recalculation.`;
-            }
+      window.nextQuestion = function () {
+        if (currentQuestionIndex < questions.length - 1) {
+          currentQuestionIndex++;
+          renderQuestion();
         }
+      };
+
+      window.prevQuestion = function () {
+        if (currentQuestionIndex > 0) {
+          currentQuestionIndex--;
+          renderQuestion();
+        }
+      };
+
+      function showResults() {
+        document.getElementById('step2-question').classList.add('hidden');
+        document.getElementById('step3-results').classList.remove('hidden');
+
+        let correctCount = 0;
+        questions.forEach((q, i) => {
+          if (selectedAnswers[i] === q.correct_option_index) correctCount++;
+        });
+
+        const total = questions.length;
+        const percent = Math.round((correctCount / total) * 100);
+
+        const cir = 502.65;
+        const targetOffset = cir - (percent / 100) * cir;
+
+        setTimeout(() => {
+          document.getElementById('scoreProgress').style.strokeDashoffset = targetOffset;
+        }, 150);
+
+        document.getElementById('scoreValue').textContent = `${correctCount} / ${total}`;
+        document.getElementById('scorePercent').textContent = `${percent}%`;
+
+        const badge = document.getElementById('scoreBadge');
+        const desc = document.getElementById('insightsDesc');
+
+        if (percent >= 90) {
+          badge.textContent = "EXCELLENT";
+          badge.className = "inline-block px-3 py-1 rounded-full text-[11px] font-black tracking-widest mb-3 border border-teal-200 bg-teal-50 text-teal-700 uppercase";
+          desc.textContent = `Amazing work! You really understand ${currentQuizName}.`;
+        } else if (percent >= 70) {
+          badge.textContent = "GOOD";
+          badge.className = "inline-block px-3 py-1 rounded-full text-[11px] font-black tracking-widest mb-3 border border-brand-200 bg-brand-50 text-brand-700 uppercase";
+          desc.textContent = `Good job! You have a solid understanding of ${currentQuizName}.`;
+        } else {
+          badge.textContent = "NEEDS PRACTICE";
+          badge.className = "inline-block px-3 py-1 rounded-full text-[11px] font-black tracking-widest mb-3 border border-red-200 bg-red-50 text-red-700 uppercase";
+          desc.textContent = `Keep practicing ${currentQuizName}. Review the questions you got wrong.`;
+        }
+      }
     </script>
     
     <!-- Load SweetAlert (used by auth logic) -->
