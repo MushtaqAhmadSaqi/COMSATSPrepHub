@@ -246,22 +246,46 @@
                 <div class="text-[13px] font-bold uppercase tracking-wider mb-3 text-blue-200">📋 Step 1 — Copy this
                     prompt and send to ChatGPT</div>
                 <code id="promptText"
-                    class="block bg-black/30 rounded-lg p-4 md:p-5 text-[13px] font-mono whitespace-pre-wrap break-words text-blue-50 leading-relaxed shadow-inner max-h-[400px] overflow-y-auto">Convert the following past paper into the exact JSON structure provided below. Output ONLY the raw, valid JSON. Do not include markdown code blocks (like ```json) or any explanations.
+                    class="block bg-black/30 rounded-lg p-4 md:p-5 text-[13px] font-mono whitespace-pre-wrap break-words text-blue-50 leading-relaxed shadow-inner max-h-[400px] overflow-y-auto">Convert the following past paper into the exact JSON structure provided below. Output ONLY the raw, valid JSON. Do not include markdown code blocks or any explanations.
+
 CRITICAL INSTRUCTIONS FOR UI RENDERING:
-JSON ESCAPING: You MUST double-escape all backslashes for LaTeX to prevent JSON syntax errors (e.g., write \\frac{1}{2} instead of \frac{1}{2}). You must also escape any internal double quotes (\").
-MATH DELIMITERS: Wrap inline math in $...$ and block equations in $$...$$. Example: $\\sum_{i=1}^{n}$
-DATABASE SCHEMAS: You MUST wrap Database notation like underline commands in math delimiters. Example: $Branch(\\underline{branchCode}, branchName)$
-RELATIONAL ALGEBRA: Use $...$ for all symbols like $\sigma$, $\Pi$, $\bowtie$, etc.
-NEWLINES: Use actual newline escape sequences (\n\n) to separate paragraphs or steps within a text field.
-TABLES: Format tables as Markdown tables within the JSON string, ensuring newline sequences (\n) separate the rows.
-INSTRUCTORS: If there are multiple instructors, set "instructor_name" to "Central Paper".
-GRAPHS/CHARTS: If the question includes a graph or chart:
+- JSON ESCAPING: EVERY LaTeX backslash MUST be double-escaped as \\ (e.g. \\frac{1}{2}, \\tan, \\sec^2, \\frac{du}{dx}). Never use single backslash.
+- MATH DELIMITERS: Wrap EVERY inline math in $...$ and block equations in $$...$$. Even single equations or steps must be wrapped.
+- DATABASE SCHEMAS: Wrap Database notation like underline commands in math delimiters. Example: $Branch(\\underline{branchCode}, branchName)$
+- RELATIONAL ALGEBRA: Use $...$ for all symbols like $\sigma$, $\Pi$, $\bowtie$, etc.
+- NEWLINES: Use actual newline escape sequences (\n\n) to separate paragraphs or steps within a text field.
+- TABLES: Format tables as Markdown tables within the JSON string, ensuring newline sequences (\n) separate the rows.
+- INSTRUCTORS: If there are multiple instructors, set "instructor_name" to "Central Paper".
+- GRAPHS/CHARTS: If the question includes a graph or chart:
    - Add a "graph" object to that question.
    - For MATHEMATICAL FUNCTIONS: Use type "scatter", compute AT LEAST 20 evenly-spaced {x, y} coordinate pairs covering the relevant domain, and include them in the datasets data array as objects: [{"x": -4, "y": 5}, {"x": -3, "y": -1}, ...]. Also include "xMin", "xMax", "yMin", "yMax" for proper axis scaling.
    - For BAR/PIE/LINE charts with categories: Use "labels" for categories and "data" as a plain number array.
    - For FLOWCHARTS or TREES: Use type "mermaid" with a "code" field containing Mermaid syntax.
    - Always include "showLine": true in scatter datasets if you want a connected curve.
-JSON FORMAT TO STRICTLY FOLLOW: { "subject_code": "CSC211", "subject_name": "Data Structures", "instructor_name": "Dr. Mushtaq Ahmad", "year": 2024, "exam_type": "Mid Term", "semester": "Spring", "total_marks": 25, "questions": [ { "question_number": 1, "clo": "CLO-1", "marks": 5, "question_text": "Main question text goes here...", "sub_parts": [ "A. First sub-part text...", "B. Second sub-part text..." ], "options": ["Option 1", "Option 2", "Option 3", "Option 4"], "model_answer": "Step 1 explanation...", "graph": { "type": "scatter", "title": "Graph Title", "xMin": -5, "xMax": 3, "yMin": -12, "yMax": 2, "datasets": [ { "label": "Function Name", "showLine": true, "data": [{"x": -4, "y": -21}, {"x": -3, "y": -11}, {"x": -2, "y": -5}] } ] } } ] }
+
+JSON FORMAT:
+{
+  "subject_code": "CSC211",
+  "subject_name": "Data Structures",
+  "instructor_name": "Dr. Mushtaq Ahmad",
+  "year": 2024,
+  "exam_type": "Mid Term",
+  "semester": "Spring",
+  "total_marks": 25,
+  "questions": [
+    {
+      "question_number": 1,
+      "clo": "CLO-1",
+      "marks": 5,
+      "question_text": "Main question text goes here...",
+      "sub_parts": ["A. ...", "B. ..."],
+      "options": ["Opt 1", "Opt 2", "Opt 3", "Opt 4"],
+      "model_answer": "Step-by-step solution...",
+      "graph": { "type": "scatter", "title": "Chart Title", "datasets": [...] }
+    }
+  ]
+}
+
 [PASTE YOUR PAPER HERE]</code> <button
                     class="copy-btn mt-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2 rounded-full text-sm font-bold transition shadow-sm flex items-center gap-2"
                     onclick="copyPrompt()"> 📋 Copy Prompt </button>
@@ -402,50 +426,75 @@ JSON FORMAT TO STRICTLY FOLLOW: { "subject_code": "CSC211", "subject_name": "Dat
         // ══════════════════════════════════════════════
         //  CORE FIX: Safe Markdown + MathJax rendering
         // ══════════════════════════════════════════════
+        // ── SUPER AGGRESSIVE REPAIR for smashed ChatGPT model answers ──
+        function normalizeModelAnswer(text) {
+            if (!text || typeof text !== 'string') return '';
+
+            let fixed = text;
+
+            // 1. Fix common word-sticking patterns (Letu → Let u, Differentiatebothsides → Differentiate both sides)
+            fixed = fixed.replace(/Letu/g, 'Let u');
+            fixed = fixed.replace(/so\(tan/g, 'so tan');
+            fixed = fixed.replace(/Differentiatebothsidesw\.r\.t\.x/g, 'Differentiate both sides w.r.t. x');
+            fixed = fixed.replace(/fracdu dx/g, '\\frac{du}{dx}');
+            fixed = fixed.replace(/fracdy dx/g, '\\frac{dy}{dx}');
+            fixed = fixed.replace(/fracd([a-z])/g, '\\frac{d$1}');
+
+            // 2. Add spaces around math symbols and commands
+            fixed = fixed.replace(/([=+\-*/^()])/g, ' $1 ');
+            fixed = fixed.replace(/\s+/g, ' ');           // normalize multiple spaces
+
+            // 3. Force newlines before typical solution steps
+            fixed = fixed.replace(/(Let |Differentiate |so |Then |Thus |Now |Where |Therefore )/gi, '\n\n$1');
+            fixed = fixed.replace(/(\$\s*[^$]+?)\s*([=])\s*/g, '\n\n$1 $2 ');
+
+            // 4. Auto-wrap any equation-like line that doesn’t already have $
+            const lines = fixed.split('\n');
+            const cleanedLines = lines.map(line => {
+                const trimmed = line.trim();
+                if (!trimmed) return '';
+
+                // If it looks like math and doesn’t start with $
+                if ((trimmed.includes('=') || trimmed.includes('^') || trimmed.includes('y\'') || 
+                     trimmed.includes('\\tan') || trimmed.includes('\\sec') || trimmed.includes('\\frac')) &&
+                    !trimmed.startsWith('$') && !trimmed.startsWith('$$')) {
+                    
+                    return '$' + trimmed + '$';
+                }
+                return trimmed;
+            });
+
+            return cleanedLines.join('\n\n');
+        }
+
+        // ══════════════════════════════════════════════
+        //  SAFE Markdown + MathJax rendering (FINAL VERSION)
+        // ══════════════════════════════════════════════
         function formatMarkdown(text) {
-            if (!text) return '';
+            if (!text || typeof text !== 'string') return '';
 
-            // Step 1: Extract all math expressions and replace with placeholders
-            // This prevents marked.js from mangling LaTeX syntax
+            // ←←← NEW: First normalize the smashed model answer
+            let processed = text.includes('Letu') || text.includes('Differentiatebothsides') 
+                            ? normalizeModelAnswer(text) 
+                            : text;
+
             const mathBlocks = [];
-            let processed = text;
+            let counter = 0;
 
-            // Extract display math $$...$$ first
-            processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, (match) => {
-                mathBlocks.push(match);
-                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
+            // Extract all math blocks
+            processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, match => { mathBlocks.push(match); return `%%MATH_BLOCK_${counter++}%%`; });
+            processed = processed.replace(/\\\[([\s\S]*?)\\\]/g, match => { 
+                mathBlocks.push('$$' + match.slice(2, -2) + '$$'); return `%%MATH_BLOCK_${counter++}%%`; 
+            });
+            processed = processed.replace(/\$(.+?)\$/g, match => { mathBlocks.push(match); return `%%MATH_BLOCK_${counter++}%%`; });
+            processed = processed.replace(/\\\(([\s\S]*?)\\\)/g, match => { 
+                mathBlocks.push('$' + match.slice(2, -2) + '$'); return `%%MATH_BLOCK_${counter++}%%`; 
             });
 
-            // Extract display math \[...\]
-            processed = processed.replace(/\\\[([\s\S]*?)\\\]/g, (match) => {
-                const converted = '$$' + match.slice(2, -2) + '$$';
-                mathBlocks.push(converted);
-                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
-            });
-
-            // Extract inline math $...$
-            processed = processed.replace(/\$([^\$\n]+?)\$/g, (match) => {
-                mathBlocks.push(match);
-                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
-            });
-
-            // Extract inline math \(...\)
-            processed = processed.replace(/\\\(([\s\S]*?)\\\)/g, (match) => {
-                const converted = '$' + match.slice(2, -2) + '$';
-                mathBlocks.push(converted);
-                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
-            });
-
-            // Auto-wrap un-wrapped \underline{...} in $ delimiters
-            processed = processed.replace(/(\\underline\{[^{}]*\})/g, (match) => {
-                mathBlocks.push('$' + match + '$');
-                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
-            });
-
-            // Step 2: Run marked.js on the safe (math-free) text
+            // Run marked.js
             const html = marked.parse(processed, { breaks: true, gfm: true });
 
-            // Step 3: Restore math expressions
+            // Restore math
             let result = html;
             for (let i = 0; i < mathBlocks.length; i++) {
                 result = result.replace(`%%MATH_BLOCK_${i}%%`, mathBlocks[i]);
@@ -595,7 +644,11 @@ JSON FORMAT TO STRICTLY FOLLOW: { "subject_code": "CSC211", "subject_name": "Dat
 
 
             let data;
-            try { data = JSON.parse(cleaned); }
+            try { 
+                data = JSON.parse(cleaned); 
+                console.log('%cModel Answer Sample (check backslashes)', 'color:orange;font-weight:bold');
+                console.log(JSON.stringify(data.questions[0]?.model_answer || '', null, 2));
+            }
             catch (e) {
                 return showStatus('error', `❌ <strong>Invalid JSON.</strong> Ensure no trailing commas and proper backslashes.<br><small class="opacity-80 mt-1 block">Error: ${e.message}</small>`);
             }
@@ -711,13 +764,28 @@ JSON FORMAT TO STRICTLY FOLLOW: { "subject_code": "CSC211", "subject_name": "Dat
             document.getElementById('exportBtn').classList.remove('hidden');
 
 
-            // Initialize Charts and Mermaid after DOM update
+            // Re-render MathJax when user opens a Model Answer (critical fix!)
             requestAnimationFrame(() => {
                 initializeCharts();
                 initializeMermaidDiagrams();
-                if (window.MathJax) {
-                    MathJax.typesetPromise([document.getElementById('qList')]).catch(err => console.error('MathJax error:', err));
+
+                const qList = document.getElementById('qList');
+                if (window.MathJax && qList) {
+                    MathJax.typesetPromise([qList]).catch(err => console.error('MathJax error:', err));
                 }
+
+                // ── CRITICAL FIX for collapsible Model Answers ──
+                document.querySelectorAll('#qList details').forEach(detail => {
+                    detail.addEventListener('toggle', function () {
+                        if (this.open && window.MathJax) {
+                            // Small delay so browser has time to show the hidden content
+                            setTimeout(() => {
+                                MathJax.typesetPromise([this])
+                                    .catch(err => console.error('MathJax toggle error:', err));
+                            }, 10);
+                        }
+                    });
+                });
             });
 
 

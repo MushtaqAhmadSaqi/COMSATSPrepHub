@@ -382,50 +382,75 @@
         }
 
         // ── Format Markdown ───────────────────────────
+        // ── SUPER AGGRESSIVE REPAIR for smashed ChatGPT model answers ──
+        function normalizeModelAnswer(text) {
+            if (!text || typeof text !== 'string') return '';
+
+            let fixed = text;
+
+            // 1. Fix common word-sticking patterns (Letu → Let u, Differentiatebothsides → Differentiate both sides)
+            fixed = fixed.replace(/Letu/g, 'Let u');
+            fixed = fixed.replace(/so\(tan/g, 'so tan');
+            fixed = fixed.replace(/Differentiatebothsidesw\.r\.t\.x/g, 'Differentiate both sides w.r.t. x');
+            fixed = fixed.replace(/fracdu dx/g, '\\frac{du}{dx}');
+            fixed = fixed.replace(/fracdy dx/g, '\\frac{dy}{dx}');
+            fixed = fixed.replace(/fracd([a-z])/g, '\\frac{d$1}');
+
+            // 2. Add spaces around math symbols and commands
+            fixed = fixed.replace(/([=+\-*/^()])/g, ' $1 ');
+            fixed = fixed.replace(/\s+/g, ' ');           // normalize multiple spaces
+
+            // 3. Force newlines before typical solution steps
+            fixed = fixed.replace(/(Let |Differentiate |so |Then |Thus |Now |Where |Therefore )/gi, '\n\n$1');
+            fixed = fixed.replace(/(\$\s*[^$]+?)\s*([=])\s*/g, '\n\n$1 $2 ');
+
+            // 4. Auto-wrap any equation-like line that doesn’t already have $
+            const lines = fixed.split('\n');
+            const cleanedLines = lines.map(line => {
+                const trimmed = line.trim();
+                if (!trimmed) return '';
+
+                // If it looks like math and doesn’t start with $
+                if ((trimmed.includes('=') || trimmed.includes('^') || trimmed.includes('y\'') || 
+                     trimmed.includes('\\tan') || trimmed.includes('\\sec') || trimmed.includes('\\frac')) &&
+                    !trimmed.startsWith('$') && !trimmed.startsWith('$$')) {
+                    
+                    return '$' + trimmed + '$';
+                }
+                return trimmed;
+            });
+
+            return cleanedLines.join('\n\n');
+        }
+
+        // ══════════════════════════════════════════════
+        //  SAFE Markdown + MathJax rendering (FINAL VERSION)
+        // ══════════════════════════════════════════════
         function formatMarkdown(text) {
-            if (!text) return '';
+            if (!text || typeof text !== 'string') return '';
 
-            // Step 1: Extract all math expressions and replace with placeholders
-            // This prevents marked.js from mangling LaTeX syntax
+            // ←←← NEW: First normalize the smashed model answer
+            let processed = text.includes('Letu') || text.includes('Differentiatebothsides') 
+                            ? normalizeModelAnswer(text) 
+                            : text;
+
             const mathBlocks = [];
-            let processed = text;
+            let counter = 0;
 
-            // Extract display math $$...$$ first
-            processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, (match) => {
-                mathBlocks.push(match);
-                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
+            // Extract all math blocks
+            processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, match => { mathBlocks.push(match); return `%%MATH_BLOCK_${counter++}%%`; });
+            processed = processed.replace(/\\\[([\s\S]*?)\\\]/g, match => { 
+                mathBlocks.push('$$' + match.slice(2, -2) + '$$'); return `%%MATH_BLOCK_${counter++}%%`; 
+            });
+            processed = processed.replace(/\$(.+?)\$/g, match => { mathBlocks.push(match); return `%%MATH_BLOCK_${counter++}%%`; });
+            processed = processed.replace(/\\\(([\s\S]*?)\\\)/g, match => { 
+                mathBlocks.push('$' + match.slice(2, -2) + '$'); return `%%MATH_BLOCK_${counter++}%%`; 
             });
 
-            // Extract display math \[...\]
-            processed = processed.replace(/\\\[([\s\S]*?)\\\]/g, (match) => {
-                const converted = '$$' + match.slice(2, -2) + '$$';
-                mathBlocks.push(converted);
-                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
-            });
-
-            // Extract inline math $...$
-            processed = processed.replace(/\$([^\$\n]+?)\$/g, (match) => {
-                mathBlocks.push(match);
-                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
-            });
-
-            // Extract inline math \(...\)
-            processed = processed.replace(/\\\(([\s\S]*?)\\\)/g, (match) => {
-                const converted = '$' + match.slice(2, -2) + '$';
-                mathBlocks.push(converted);
-                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
-            });
-
-            // Auto-wrap un-wrapped \underline{...} in $ delimiters
-            processed = processed.replace(/(\\underline\{[^{}]*\})/g, (match) => {
-                mathBlocks.push('$' + match + '$');
-                return `%%MATH_BLOCK_${mathBlocks.length - 1}%%`;
-            });
-
-            // Step 2: Run marked.js on the safe (math-free) text
+            // Run marked.js
             const html = marked.parse(processed, { breaks: true, gfm: true });
 
-            // Step 3: Restore math expressions
+            // Restore math
             let result = html;
             for (let i = 0; i < mathBlocks.length; i++) {
                 result = result.replace(`%%MATH_BLOCK_${i}%%`, mathBlocks[i]);
