@@ -1,22 +1,13 @@
 /**
  * js/layout.js
  * ─────────────────────────────────────────────────────────────────────────────
- * Injects the shared Header, Footer, and Mobile Bottom Nav into every page.
- * Also handles: session-aware nav button, AOS init, mobile scroll hide/show,
- * and swipe navigation.
- *
- * Usage (add to each HTML page before closing </body>):
- *   <script type="module" src="js/layout.js"></script>
+ * Injects the shared Header and Footer into every page.
+ * Handles: mobile responsive menu, session-aware buttons, 
+ * dark mode sync, and scroll transitions.
  */
 
-import { auth } from './core.js';
+import { auth, supabase } from './core.js';
 import { initAuthModal, openModal } from './auth-ui.js';
-
-// ── Page Config ───────────────────────────────────────────────────────────────
-// Each page declares its active route by setting data-page on <body>.
-// e.g. <body data-page="subjects.html">
-
-const ROUTES = ['index.html', 'subjects.html', 'quiz.html', 'about-us.html'];
 
 // ── Entry Point ───────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -26,84 +17,116 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   _injectHeader(currentPage, session, userName);
   _injectFooter();
-  _injectMobileNav(currentPage);
   _wireNavButton(session, userName);
-  if (!session) initAuthModal();
+  
+  // Initialization
+  _initHeaderToggles();
+  _initAOS();
+  initAuthModal();
+  
   _initSwipeNav(currentPage);
   _initScrollHideNav();
-  _initAOS();
+
+  // Mobile Menu Toggle (from user)
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  if (menuBtn && mobileMenu) {
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  }
 });
+
+// ── AOS (Animate On Scroll) ──────────────────────────────────────────────────
+function _initAOS() {
+  if (typeof AOS !== 'undefined') {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-out-cubic',
+      once: true,
+      offset: 50,
+      disable: false // Ensure content reveals on mobile as well
+    });
+  }
+}
 
 // ── Header ────────────────────────────────────────────────────────────────────
 function _injectHeader(currentPage, session, userName) {
   if (document.querySelector('header')) return;
 
   const isLoggedIn = !!session;
-  const initial = userName ? userName.charAt(0).toUpperCase() : '?';
 
   const header = document.createElement('header');
-  header.className = 'sticky top-0 z-50 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-xl border-b border-gray-100 dark:border-white/5 transition-all duration-300';
+  header.className = 'sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-gray-200 dark:border-white/10';
   header.innerHTML = `
-      <div class="max-w-7xl mx-auto px-6 py-4">
-        <div class="flex items-center justify-between">
-          
-          <!-- Logo -->
-          <a href="index.html" class="flex items-center gap-3 group">
-            <div class="w-10 h-10 rounded-2xl bg-[#2563eb] flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-              <span class="text-white font-black text-2xl">C</span>
-            </div>
-            <span class="font-black text-2xl tracking-tighter text-[#1e293b] dark:text-white">COMSATSPrepHub</span>
-          </a>
-
-          <!-- Center: Pill Navigation -->
-          <nav class="hidden md:flex items-center bg-[#f8fafc] dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl p-1 shadow-inner">
-            <a href="index.html" class="px-6 py-2 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'index.html' ? 'active-pill shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/5'}">
-              Home
-            </a>
-            <a href="subjects.html" class="px-6 py-2 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'subjects.html' ? 'active-pill shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/5'}">
-              Subjects
-            </a>
-            <a href="quiz.html" class="px-6 py-2 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'quiz.html' ? 'active-pill shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/5'}">
-              Quiz
-            </a>
-            <a href="dashboard.html" class="px-6 py-2 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'dashboard.html' ? 'active-pill shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/5'}">
-              Dashboard
-            </a>
-          </nav>
-
-          <!-- Right Side -->
-          <div class="flex items-center gap-3">
-            
-            <!-- Dark Mode Toggle -->
-            <button id="dark-mode-toggle"
-                    class="p-2.5 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all text-gray-600 dark:text-gray-400 hover:text-[#1e293b] dark:hover:text-white"
-                    aria-label="Toggle dark mode">
-              <span id="dark-mode-icon" class="block w-5 h-5 flex items-center justify-center"></span>
-            </button>
-
-            <!-- Auth Section -->
-            <button id="open-auth-modal" 
-                    class="flex items-center gap-2 bg-[#1e293b] dark:bg-white hover:bg-black dark:hover:bg-gray-100 text-white dark:text-[#1e293b] px-6 py-2.5 rounded-3xl text-sm font-bold transition-all active:scale-95 shadow-sm">
-              ${isLoggedIn ? `
-                <div class="w-6 h-6 rounded-lg bg-[#2563eb] flex items-center justify-center text-[10px] text-white ring-1 ring-white/30 hidden sm:flex">${initial}</div>
-                <span>Dashboard</span>
-              ` : `
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span>Sign In</span>
-              `}
-            </button>
-
-            <!-- Mobile Menu -->
-            <button class="md:hidden p-2 text-gray-600 dark:text-gray-400" aria-label="Menu">
-              <span class="material-symbols-outlined">menu</span>
-            </button>
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <div class="flex items-center justify-between">
+        
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-[#2563eb] flex items-center justify-center">
+            <span class="text-white font-black text-xl">C</span>
           </div>
+          <span class="font-black text-lg tracking-tight text-[#1e293b] dark:text-white hidden sm:block">COMSATSPrepHub</span>
+          <span class="font-black text-lg tracking-tight text-[#1e293b] dark:text-white sm:hidden">COMSATS</span>
+        </a>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden md:flex items-center bg-[#f8fafc] dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-1">
+          <a href="index.html" class="px-4 py-1.5 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'index.html' ? 'active-pill' : 'text-gray-600 dark:text-gray-300 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/10'}">Home</a>
+          <a href="subjects.html" class="px-4 py-1.5 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'subjects.html' ? 'active-pill' : 'text-gray-600 dark:text-gray-300 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/10'}">Subjects</a>
+          <a href="quiz.html" class="px-4 py-1.5 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'quiz.html' ? 'active-pill' : 'text-gray-600 dark:text-gray-300 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/10'}">Quiz</a>
+          <a href="dashboard.html" class="px-4 py-1.5 text-sm font-semibold rounded-3xl transition-all ${currentPage === 'dashboard.html' ? 'active-pill' : 'text-gray-600 dark:text-gray-300 hover:text-[#1e293b] dark:hover:text-white hover:bg-white dark:hover:bg-white/10'}">Dashboard</a>
+        </nav>
+
+        <!-- Right Side -->
+        <div class="flex items-center gap-2">
+          
+          <!-- Dark Mode Toggle -->
+          <button id="dark-mode-toggle" class="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300">
+            <span id="dark-mode-icon" class="block w-5 h-5 flex items-center justify-center"></span>
+          </button>
+
+          <!-- Sign In (Desktop) -->
+          <button id="open-auth-modal" class="hidden md:flex items-center gap-1.5 bg-[#1e293b] dark:bg-white text-white dark:text-[#1e293b] px-4 py-2 rounded-2xl text-sm font-bold transition-all active:scale-95 shadow-sm">
+            ${isLoggedIn ? 'Dashboard' : 'Sign In'}
+          </button>
+
+          <!-- Mobile Menu Button -->
+          <button id="mobile-menu-btn" class="md:hidden p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
         </div>
       </div>
-    `;
+
+      <!-- Mobile Menu -->
+      <div id="mobile-menu" class="hidden md:hidden mt-3 pb-3 border-t border-gray-200 dark:border-white/10 pt-3">
+        <div class="flex flex-col gap-1">
+          <a href="index.html" class="px-4 py-2.5 text-sm font-semibold rounded-xl transition-all ${currentPage === 'index.html' ? 'bg-[#f1f5f9] dark:bg-white/10 text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10'}">Home</a>
+          <a href="subjects.html" class="px-4 py-2.5 text-sm font-semibold rounded-xl transition-all ${currentPage === 'subjects.html' ? 'bg-[#f1f5f9] dark:bg-white/10 text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10'}">Subjects</a>
+          <a href="quiz.html" class="px-4 py-2.5 text-sm font-semibold rounded-xl transition-all ${currentPage === 'quiz.html' ? 'bg-[#f1f5f9] dark:bg-white/10 text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10'}">Quiz</a>
+          <a href="dashboard.html" class="px-4 py-2.5 text-sm font-semibold rounded-xl transition-all ${currentPage === 'dashboard.html' ? 'bg-[#f1f5f9] dark:bg-white/10 text-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10'}">Dashboard</a>
+          
+          <button id="mobile-signin-btn" class="mt-2 px-4 py-2.5 text-sm font-bold bg-[#1e293b] dark:bg-white text-white dark:text-[#1e293b] rounded-2xl text-center">
+            ${isLoggedIn ? 'Dashboard' : 'Sign In'}
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
   document.body.prepend(header);
+}
+
+// ── Header Controls (Dark Mode Sync) ──────────────────────────────────────────
+function _initHeaderToggles() {
+  const toggle = document.getElementById('dark-mode-toggle');
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      if (window.toggleDarkMode) window.toggleDarkMode();
+    });
+  }
 }
 
 // ── Footer ────────────────────────────────────────────────────────────────────
@@ -131,51 +154,24 @@ function _injectFooter() {
   document.body.appendChild(footer);
 }
 
-// ── Mobile Bottom Nav ─────────────────────────────────────────────────────────
-function _injectMobileNav(currentPage) {
-  if (document.getElementById('mobileBottomNav')) return; // already exists
-
-  const nav = document.createElement('nav');
-  nav.id = 'mobileBottomNav';
-  nav.className = 'mobile-nav-shell md:hidden';
-
-  const items = [
-    { route: 'index.html', icon: 'home', label: 'Home' },
-    { route: 'subjects.html', icon: 'menu_book', label: 'Subjects' },
-    { route: 'quiz.html', icon: 'quiz', label: 'Quiz' },
-    { route: 'about-us.html', icon: 'groups', label: 'Team' },
-  ];
-
-  nav.innerHTML = `
-      <div class="mobile-nav-grid">
-        ${items.map(item => `
-          <a href="${item.route}" data-route="${item.route}"
-             class="mobile-nav-item ${currentPage === item.route ? 'active' : ''}"
-             aria-label="Go to ${item.label}">
-            <span class="material-symbols-outlined"
-              style="${currentPage === item.route ? "font-variation-settings:'FILL' 1" : ''}">${item.icon}</span>
-            <span class="label">${item.label}</span>
-          </a>
-        `).join('')}
-      </div>
-    `;
-  document.body.appendChild(nav);
-}
-
 // ── Wire Nav Auth Button ──────────────────────────────────────────────────────
 function _wireNavButton(session, userName) {
-  const btn = document.getElementById('open-auth-modal');
-  if (!btn) return;
-
-  if (session) {
-    btn.addEventListener('click', () => { window.location.href = 'dashboard.html'; });
-  } else {
-    btn.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
-  }
+  const desktopBtn = document.getElementById('open-auth-modal');
+  const mobileBtn = document.getElementById('mobile-signin-btn');
+  
+  [desktopBtn, mobileBtn].forEach(btn => {
+    if (!btn) return;
+    if (session) {
+      btn.addEventListener('click', () => { window.location.href = 'dashboard.html'; });
+    } else {
+      btn.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
+    }
+  });
 }
 
 // ── Swipe Navigation ──────────────────────────────────────────────────────────
 function _initSwipeNav(currentPage) {
+  const ROUTES = ['index.html', 'subjects.html', 'quiz.html', 'dashboard.html'];
   const main = document.querySelector('main');
   if (!main) return;
 
@@ -193,13 +189,13 @@ function _initSwipeNav(currentPage) {
     const dy = t.clientY - touchStartY;
     if (Math.abs(dx) < 58 || Math.abs(dx) <= Math.abs(dy) * 1.25) return;
 
-    const idx = ROUTES.findIndex(r => r.toLowerCase() === currentPage);
+    const idx = ROUTES.findIndex(r => r === currentPage);
     const safeIdx = Math.max(0, Math.min((idx < 0 ? 0 : idx) + (dx < 0 ? 1 : -1), ROUTES.length - 1));
     if (safeIdx !== idx) window.location.href = ROUTES[safeIdx];
   }, { passive: true });
 }
 
-// ── Scroll Hide/Show Mobile Nav ───────────────────────────────────────────────
+// ── Scroll Hide/Show Header ───────────────────────────────────────────────────
 function _initScrollHideNav() {
   let lastScrollY = window.scrollY;
   let ticking = false;
@@ -207,29 +203,15 @@ function _initScrollHideNav() {
   window.addEventListener('scroll', () => {
     if (ticking) return;
     window.requestAnimationFrame(() => {
-      const nav = document.getElementById('mobileBottomNav');
       const header = document.querySelector('header');
       const curr = window.scrollY;
 
-      // Only act if there is a real change in scroll position
-      if (Math.abs(curr - lastScrollY) <= 5) {
-        ticking = false;
-        return;
-      }
+      if (Math.abs(curr - lastScrollY) <= 5) { ticking = false; return; }
 
-      // Hide/Show Mobile Nav
-      if (nav) {
-        if (curr > lastScrollY && curr > 60) {
-          nav.classList.add('nav-hidden');
-        } else if (curr < lastScrollY) {
-          nav.classList.remove('nav-hidden');
-        }
-      }
-
-      // Hide/Show Top Header
       if (header) {
         if (curr > lastScrollY && curr > 80) {
           header.classList.add('header-hidden');
+          document.getElementById('mobile-menu')?.classList.add('hidden');
         } else if (curr < lastScrollY) {
           header.classList.remove('header-hidden');
         }
@@ -238,11 +220,5 @@ function _initScrollHideNav() {
       lastScrollY = curr;
       ticking = false;
     });
-    ticking = true;
   }, { passive: true });
-}
-
-// ── AOS Init ──────────────────────────────────────────────────────────────────
-function _initAOS() {
-  if (window.AOS) AOS.init({ once: true, offset: 50, duration: 750, easing: 'ease-out-cubic' });
 }
