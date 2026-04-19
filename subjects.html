@@ -50,7 +50,7 @@
     <!-- Header injected by js/layout.js -->
 
 
-    <main class="max-w-7xl mx-auto px-6 pt-10 pb-20">
+    <main class="max-w-7xl mx-auto px-6 pt-10 pb-20 page-transition">
         <!-- Header + Search -->
         <section class="mb-12" data-aos="fade-down">
             <div class="flex flex-col md:flex-row items-end justify-between gap-8">
@@ -205,7 +205,7 @@
 
             const card = document.createElement('a');
             card.href = url;
-            card.className = `subject-card-uniform group glass-panel p-6 hover-glass flex flex-col items-start gap-4 h-full relative overflow-hidden transition-all duration-300`;
+            card.className = `subject-card-uniform card-hover group glass-panel p-6 hover-glass flex flex-col items-start gap-4 h-full relative overflow-hidden transition-all duration-300`;
             card.setAttribute('data-subject', s.subject_name);
 
             card.innerHTML = `
@@ -238,6 +238,9 @@
           grid.innerHTML = '';
           grid.appendChild(fragment);
           grid.style.display = '';
+
+          // Re-init 3D Tilt for dynamic cards
+          if (window.reinitVanillaTilt) window.reinitVanillaTilt();
 
         } catch (err) {
           loadingGrid.style.display = 'none';
@@ -277,10 +280,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Load Layout injecter -->
     <script type="module" src="js/layout.js"></script>
-
-    <script>
-        AOS.init({ once: true, offset: 30, duration: 800, easing: 'ease-out-cubic' });
-    </script>
 </body>
 
 </html>

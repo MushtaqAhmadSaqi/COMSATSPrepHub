@@ -95,7 +95,7 @@
     <!-- ═══════════════════════════════════════════════
          MAIN LAYOUT
     ═══════════════════════════════════════════════ -->
-    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 pt-10 pb-8 lg:pb-12 text-slate-700">
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-20 page-transition">
         <div class="max-w-4xl mx-auto">
 
             <!-- ================== STEP 1: QUIZ SELECT ================== -->
@@ -189,14 +189,14 @@
                         <!-- Footer Actions -->
                         <div class="mt-10 pt-8 border-t border-slate-100 flex items-center justify-between gap-4">
                             <button id="prevBtn" onclick="prevQuestion()"
-                                class="hidden h-11 px-6 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-100 transition-all items-center gap-2 group">
+                                class="button-press hidden h-11 px-6 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-100 transition-all items-center gap-2 group">
                                 <span
                                     class="material-symbols-outlined text-[20px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
                                 Back
                             </button>
                             <div class="flex-1"></div>
                             <button id="nextBtn" onclick="nextQuestion()" disabled
-                                class="h-11 px-8 rounded-xl bg-brand-600 text-white text-sm font-bold shadow-sm shadow-brand-500/20 hover:bg-brand-700 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed items-center gap-2 flex">
+                                class="button-press h-11 px-8 rounded-xl bg-brand-600 text-white text-sm font-bold shadow-sm shadow-brand-500/20 hover:bg-brand-700 hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed items-center gap-2 flex">
                                 Verify Logic <span class="material-symbols-outlined text-[20px]">send</span>
                             </button>
                         </div>
@@ -256,11 +256,11 @@
 
                         <div class="flex flex-col gap-3">
                             <button onclick="location.reload()"
-                                class="w-full h-12 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-black transition-all shadow-lg active:scale-95">
+                                class="button-press w-full h-12 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-black transition-all shadow-lg active:scale-95">
                                 Initiate New Cycle
                             </button>
                             <a href="subjects.html"
-                                class="w-full h-12 flex items-center justify-center text-sm font-bold text-slate-500 hover:text-slate-900 border border-slate-200 rounded-xl transition-all hover:bg-slate-50">
+                                class="button-press w-full h-12 flex items-center justify-center text-sm font-bold text-slate-500 hover:text-slate-900 border border-slate-200 rounded-xl transition-all hover:bg-slate-50">
                                 Browse Library
                             </a>
                         </div>
@@ -269,7 +269,7 @@
             </section>
 
         </div>
-    </div>
+    </main>
 
 
 
@@ -326,20 +326,13 @@
           // Create quiz cards
           data.forEach(quiz => {
             const btn = document.createElement('button');
-            btn.className = 'bg-white border border-slate-200 hover:border-brand-400 hover:shadow-xl hover:shadow-brand-500/5 transition-all p-6 text-left rounded-2xl group flex flex-col justify-between h-full group animate-fade-in relative overflow-hidden';
-
+            btn.className = 'button-press p-6 bg-white border-2 border-slate-100 rounded-3xl text-left hover:border-brand-500 transition-all group card-hover';
             btn.innerHTML = `
-              <div class="absolute -bottom-4 -right-4 text-slate-100 group-hover:text-brand-50 transition-colors duration-500 scale-150 group-hover:rotate-12 transform">
-                <span class="material-symbols-outlined text-[64px]">extension</span>
+              <div class="w-12 h-12 rounded-2xl bg-brand-50 dark:bg-brand-500/10 flex items-center justify-center text-brand-600 dark:text-brand-400 mb-6 group-hover:scale-110 transition-transform">
+                <span class="material-symbols-outlined">quiz</span>
               </div>
-              
-              <div class="relative z-10">
-                <div class="w-11 h-11 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-brand-50 group-hover:text-brand-600 flex items-center justify-center mb-6 transition-colors">
-                  <span class="material-symbols-outlined text-[24px]">terminal</span>
-                </div>
-                <h3 class="font-bold text-slate-900 text-[17px] mb-2 leading-tight group-hover:text-brand-700 transition-colors">${quiz.title}</h3>
-                <p class="text-[12px] font-bold text-slate-400 uppercase tracking-widest font-mono">${quiz.subject_code} Framework</p>
-              </div>
+              <h3 class="text-xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">${escHtml(quiz.title)}</h3>
+              <p class="text-sm text-slate-500 dark:text-gray-400 font-bold uppercase tracking-widest">${escHtml(quiz.subject_code)}</p>
               
               <div class="relative z-10 mt-8 pt-4 border-t border-slate-50 flex items-center justify-between">
                 <span class="text-[10px] font-black text-slate-300 uppercase tracking-[2px]">AI GENERATED</span>
@@ -433,7 +426,7 @@
 
         q.options.forEach((optText, index) => {
           const div = document.createElement('div');
-          div.className = 'quiz-option';
+          div.className = 'quiz-option card-hover';
 
           if (hasAnswered) {
             div.classList.add('pointer-events-none', 'opacity-80');

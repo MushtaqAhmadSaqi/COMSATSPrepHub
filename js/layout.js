@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Initialization
   _initHeaderToggles();
   _initAOS();
+  _initVanillaTilt();
   initAuthModal();
   
   _initSwipeNav(currentPage);
@@ -215,3 +216,32 @@ function _initScrollHideNav() {
     });
   }, { passive: true });
 }
+
+// ── 3D Effects (Vanilla Tilt) ────────────────────────────────────────────────
+function _initVanillaTilt() {
+  // Inject script if not present
+  if (!document.getElementById('vanilla-tilt-script')) {
+    const script = document.createElement('script');
+    script.id = 'vanilla-tilt-script';
+    script.src = 'https://cdn.jsdelivr.net/npm/vanilla-tilt@1.7.2/dist/vanilla-tilt.min.js';
+    script.onload = () => _applyVanillaTilt();
+    document.head.appendChild(script);
+  } else {
+    _applyVanillaTilt();
+  }
+}
+
+function _applyVanillaTilt() {
+  if (typeof VanillaTilt !== 'undefined') {
+    VanillaTilt.init(document.querySelectorAll(".card-hover"), {
+      max: 12,
+      speed: 400,
+      glare: true,
+      "max-glare": 0.2,
+      scale: 1.02
+    });
+  }
+}
+
+// Expose re-init for dynamic content
+window.reinitVanillaTilt = _applyVanillaTilt;
