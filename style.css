@@ -2821,3 +2821,15 @@ a,
 body.quiz-active .mobile-nav-shell {
   display: none !important;
 }
+
+/* --- Mobile Safety & Text Wrapping --- */
+.break-words {
+  word-break: break-all; /* More aggressive for mobile */
+  word-break: break-word; 
+  overflow-wrap: break-word;
+}
+
+/* Ensure paper cards respect container on mobile */
+#papersContainer a {
+  max-width: 100%;
+}

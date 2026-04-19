@@ -47,6 +47,11 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
       }
+
+      #subjectTitle {
+        line-height: 1.2;
+        word-break: break-word;
+      }
     </style>
 </head>
 
@@ -221,10 +226,11 @@
                     const cardsHTML = yearPapers.map(p => {
                         const qCount = qCountMap[p.id] || 0;
                         const isMid = p.exam_type.toLowerCase().includes('mid');
+                        const instructor = p.instructor_name || 'Instructor name not available';
                         
                         return `
                             <a href="paper-view.html?id=${p.id}" 
-                               class="group block bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 transition-all duration-300 card-hover active:scale-[0.985]">
+                               class="group block w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 sm:p-6 transition-all duration-300 card-hover active:scale-[0.985]">
                                 
                                 <div class="flex items-start justify-between mb-4">
                                     <div class="flex items-center gap-3">
@@ -235,26 +241,26 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="text-right">
+                                    <div class="text-right flex-shrink-0">
                                         <div class="text-sm font-black text-slate-900 dark:text-white tabular-nums">${p.year}</div>
-                                        <div class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">${escHtml(p.semester)}</div>
+                                        <div class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">${escHtml(p.semester)}</div>
                                     </div>
                                 </div>
 
-                                <div class="mb-4">
-                                    <div class="font-bold text-lg text-slate-800 dark:text-slate-100 mb-0.5 truncate uppercase tracking-tight">
-                                        ${escHtml(p.instructor_name || 'General Instructor')}
-                                    </div>
-                                    <div class="text-xs font-bold text-slate-400 dark:text-slate-500 inline-flex items-center gap-1.5 uppercase">
-                                        <span class="material-symbols-outlined text-[14px]">checklist</span> ${qCount} Questions 
-                                        <span class="text-slate-200 dark:text-slate-800">|</span> 
-                                        <span class="material-symbols-outlined text-[14px]">grade</span> ${p.total_marks} Marks
+                                <div class="mb-5">
+                                    <h3 class="font-bold text-[17px] sm:text-xl text-slate-900 dark:text-white mb-2 leading-snug break-words uppercase tracking-tight">
+                                        ${escHtml(instructor)}
+                                    </h3>
+                                    <div class="flex items-center gap-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                                        <span>${qCount} Questions</span>
+                                        <span class="text-slate-200 dark:text-slate-800">•</span>
+                                        <span>${p.total_marks} Marks</span>
                                     </div>
                                 </div>
 
                                 <div class="flex items-center justify-between pt-3 border-t border-slate-50 dark:border-white/5 mt-auto">
                                     <div class="flex items-center gap-1.5 text-primary-hover group-hover:gap-2.5 transition-all duration-300">
-                                        <span class="text-xs font-black uppercase tracking-wider">Start Revision</span>
+                                        <span class="text-[11px] font-black uppercase tracking-wider">Start Revision</span>
                                         <span class="material-symbols-outlined text-base">arrow_forward</span>
                                     </div>
                                     <div class="text-slate-300 dark:text-slate-700 group-hover:text-primary transition-colors">
