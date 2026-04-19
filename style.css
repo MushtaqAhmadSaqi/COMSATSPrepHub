@@ -2738,3 +2738,8 @@ a,
     border: 2px solid currentColor;
   }
 }
+
+/* Hide mobile nav during focused quiz mode */
+body.quiz-active .mobile-nav-shell {
+  display: none !important;
+}

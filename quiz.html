@@ -374,6 +374,13 @@
         document.getElementById('step1-select').classList.add('hidden');
         document.getElementById('step2-question').classList.remove('hidden');
 
+        // Hide mobile navigation during quiz
+        const mobileNav = document.querySelector('.mobile-nav-shell');
+        if (mobileNav) {
+          mobileNav.style.display = 'none';
+        }
+        document.body.classList.add('quiz-active');
+
         document.getElementById('questionText').innerHTML = 'Loading questions...';
         document.getElementById('optionsList').innerHTML = '';
         document.getElementById('quizBadgeLabel').textContent = subCode.toUpperCase();
@@ -498,6 +505,13 @@
       function showResults() {
         document.getElementById('step2-question').classList.add('hidden');
         document.getElementById('step3-results').classList.remove('hidden');
+
+        // Show mobile navigation again after quiz ends
+        const mobileNav = document.querySelector('.mobile-nav-shell');
+        if (mobileNav) {
+          mobileNav.style.display = 'flex';
+        }
+        document.body.classList.remove('quiz-active');
 
         let correctCount = 0;
         questions.forEach((q, i) => {
