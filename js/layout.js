@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   _initHeaderToggles();
   _initAOS();
   _initVanillaTilt();
+  if (window.refreshThemeIcons) window.refreshThemeIcons();
   initAuthModal();
   
   _initSwipeNav(currentPage);
@@ -78,7 +79,7 @@ function _injectHeader(currentPage, session, userName) {
             <button id="dark-mode-toggle"
                     class="p-2.5 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all text-gray-600 dark:text-gray-300"
                     aria-label="Toggle dark mode">
-              <span id="dark-mode-icon" class="block w-5 h-5 flex items-center justify-center"></span>
+              <span class="dark-mode-icon block w-5 h-5 flex items-center justify-center"></span>
             </button>
 
             <!-- Auth Section -->
@@ -127,6 +128,13 @@ function _injectMobileNav(currentPage) {
             </a>
           `;
         }).join('')}
+        
+        <!-- Bottom Bar Theme Toggle -->
+        <button onclick="if(window.toggleDarkMode) window.toggleDarkMode()"
+                class="flex flex-col items-center gap-1 px-4 py-2 rounded-2xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-all">
+          <span class="dark-mode-icon block w-6 h-6 flex items-center justify-center"></span>
+          <span class="text-[10px] font-bold">Theme</span>
+        </button>
       </div>
     </div>
   `;

@@ -11,8 +11,11 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet">
 
   <!-- Tailwind Play CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -64,6 +67,7 @@
       pointer-events: none;
       z-index: 0;
     }
+
     .hero-blob-b {
       position: absolute;
       width: 280px;
@@ -77,13 +81,29 @@
       pointer-events: none;
       z-index: 0;
     }
+
     @keyframes floatA {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50%       { transform: translateY(-18px) rotate(4deg); }
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(-18px) rotate(4deg);
+      }
     }
+
     @keyframes floatB {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50%       { transform: translateY(14px) rotate(-3deg); }
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(14px) rotate(-3deg);
+      }
     }
 
     /* Squiggly underline on hero highlight */
@@ -92,6 +112,7 @@
       display: inline-block;
       color: #1a73e8;
     }
+
     .hero-underline::after {
       content: '';
       position: absolute;
@@ -130,24 +151,42 @@
       display: inline-block;
       transform: rotate(-1.5deg);
     }
+
     .founder-card-tw::before {
       content: '';
       position: absolute;
-      top: 0; left: 0;
-      width: 0; height: 100%;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 100%;
       background: #0f766e;
       border-radius: 16px 0 0 16px;
-      transition: width 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .founder-card-tw:hover::before { width: 5px; }
+
+    .founder-card-tw:hover::before {
+      width: 5px;
+    }
+
     .founder-card-tw:hover {
       transform: translateY(-5px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.09), 0 4px 12px rgba(0,0,0,0.04);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.09), 0 4px 12px rgba(0, 0, 0, 0.04);
     }
 
     @media (max-width: 767px) {
-      .hero-blob-a { width: 200px; height: 200px; top: -60px; right: -40px; }
-      .hero-blob-b { width: 160px; height: 160px; bottom: -40px; left: -30px; }
+      .hero-blob-a {
+        width: 200px;
+        height: 200px;
+        top: -60px;
+        right: -40px;
+      }
+
+      .hero-blob-b {
+        width: 160px;
+        height: 160px;
+        bottom: -40px;
+        left: -30px;
+      }
     }
   </style>
 </head>
@@ -160,8 +199,8 @@
 
 
     <!-- ═══════════════════════════════════ HERO ═══════════════════════════════════ -->
-    <section id="home-section" class="relative overflow-hidden flex flex-col items-center justify-center text-center min-h-[90vh] px-6 py-24 md:px-16 isolate"
-
+    <section id="home-section"
+      class="relative overflow-hidden flex flex-col items-center justify-center text-center min-h-[90vh] px-6 py-24 md:px-16 isolate"
       style="background: radial-gradient(circle at 70% 60%, rgba(56,139,210,0.13), transparent 35%), radial-gradient(circle at 15% 10%, rgba(147,210,255,0.16), transparent 28%), linear-gradient(135deg, #f0f8ff 0%, #e8f4fd 45%, #ddeeff 100%);"
       data-aos="fade-in">
       <!-- Blobs -->
@@ -171,9 +210,11 @@
       <div class="relative z-10 max-w-2xl mx-auto" data-aos="zoom-in" data-aos-delay="100">
         <!-- Badge -->
         <div class="badge-tilted inline-block mb-7">
-          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-brand-50/50 dark:bg-brand-500/5 border border-brand-100 dark:border-brand-500/10 backdrop-blur-md">
+          <div
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-brand-50/50 dark:bg-brand-500/5 border border-brand-100 dark:border-brand-500/10 backdrop-blur-md">
             <div id="logo-3d" class="w-10 h-10"></div>
-            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-brand-600 dark:text-brand-400">Trusted by Students</span>
+            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-brand-600 dark:text-brand-400">Trusted
+              by Students</span>
           </div>
         </div>
 
@@ -185,7 +226,7 @@
 
         <!-- Subtext -->
         <p class="text-[#6b7280] text-base sm:text-lg leading-relaxed mb-10 max-w-md mx-auto">
-          Verified past papers, real-time practice quizzes,<br class="hidden sm:block"> and performance analytics — 
+          Verified past papers, real-time practice quizzes,<br class="hidden sm:block"> and performance analytics —
           built by students, for students.
         </p>
 
@@ -205,7 +246,8 @@
 
         <!-- Micro social proof -->
         <p class="mt-10 text-[12px] text-[#9ca3af] tracking-wide">
-          Trusted by <strong class="text-[#6b7280] font-semibold">1,000+</strong> COMSATS students &nbsp;·&nbsp; Free &amp; open
+          Trusted by <strong class="text-[#6b7280] font-semibold">1,000+</strong> COMSATS students &nbsp;·&nbsp; Free
+          &amp; open
         </p>
       </div>
     </section>
@@ -213,7 +255,7 @@
     <!-- ═══════════════════════════════════ STATS ═══════════════════════════════════ -->
     <section id="stats-section" class="bg-white py-10 px-6" data-aos="fade-up" data-aos-delay="150">
       <div class="max-w-3xl mx-auto">
-        
+
         <!-- Skeleton Loading (shows while page loads) -->
         <div id="stats-skeleton" class="flex items-center justify-center gap-8">
           <div class="flex-1 text-center">
@@ -240,21 +282,21 @@
             <div class="text-xs text-[#6b7280] font-medium mt-1.5 uppercase tracking-widest">Past Papers</div>
           </div>
           <div class="stat-divider hidden sm:block"></div>
-          
+
           <!-- Stat 2 -->
           <div class="flex-1 text-center py-4 px-2 border-x border-[#e2e8f0] sm:border-none">
             <div class="text-3xl sm:text-4xl font-black text-primary tracking-tight">50+</div>
             <div class="text-xs text-[#6b7280] font-medium mt-1.5 uppercase tracking-widest">Subjects</div>
           </div>
           <div class="stat-divider hidden sm:block"></div>
-          
+
           <!-- Stat 3 -->
           <div class="flex-1 text-center py-4 px-2">
             <div class="text-3xl sm:text-4xl font-black text-primary tracking-tight">1,000+</div>
             <div class="text-xs text-[#6b7280] font-medium mt-1.5 uppercase tracking-widest">Students</div>
           </div>
         </div>
-        
+
       </div>
     </section>
 
@@ -262,39 +304,47 @@
     <section class="py-24 px-6 bg-[#f8fafc]/50 dark:bg-slate-900/50">
       <div class="max-w-7xl mx-auto">
         <div class="text-center mb-16" data-aos="fade-up">
-          <h2 class="text-3xl sm:text-4xl font-black text-[#1a1a2e] dark:text-white tracking-tight mb-4">Powerful Features for Smarter Study</h2>
-          <p class="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">Everything you need to excel in your exams, streamlined into a single platform.</p>
+          <h2 class="text-3xl sm:text-4xl font-black text-[#1a1a2e] dark:text-white tracking-tight mb-4">Powerful
+            Features for Smarter Study</h2>
+          <p class="text-gray-500 dark:text-gray-400 max-w-xl mx-auto">Everything you need to excel in your exams,
+            streamlined into a single platform.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <!-- Real-time Analytics -->
-          <div data-aos="fade-up" data-aos-delay="100" 
-               class="card-hover group bg-white dark:bg-slate-800 p-8 rounded-[2rem] border border-gray-100 dark:border-white/5 relative shadow-sm transition-all">
-            <div class="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6 group-hover:scale-110 transition-transform">
+          <div data-aos="fade-up" data-aos-delay="100"
+            class="card-hover group bg-white dark:bg-slate-800 p-8 rounded-[2rem] border border-gray-100 dark:border-white/5 relative shadow-sm transition-all">
+            <div
+              class="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-6 group-hover:scale-110 transition-transform">
               <span class="material-symbols-outlined text-3xl">trending_up</span>
             </div>
             <h3 class="text-xl font-black text-gray-900 dark:text-white mb-3">Real-time Analytics</h3>
-            <p class="text-gray-500 dark:text-gray-400 leading-relaxed text-sm">Track your performance and identify areas that need improvement instantly.</p>
+            <p class="text-gray-500 dark:text-gray-400 leading-relaxed text-sm">Track your performance and identify
+              areas that need improvement instantly.</p>
           </div>
 
           <!-- Verified Materials -->
-          <div data-aos="fade-up" data-aos-delay="200" 
-               class="card-hover group bg-white dark:bg-slate-800 p-8 rounded-[2rem] border border-gray-100 dark:border-white/5 relative shadow-sm transition-all">
-            <div class="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6 group-hover:scale-110 transition-transform">
+          <div data-aos="fade-up" data-aos-delay="200"
+            class="card-hover group bg-white dark:bg-slate-800 p-8 rounded-[2rem] border border-gray-100 dark:border-white/5 relative shadow-sm transition-all">
+            <div
+              class="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-6 group-hover:scale-110 transition-transform">
               <span class="material-symbols-outlined text-3xl">verified</span>
             </div>
             <h3 class="text-xl font-black text-gray-900 dark:text-white mb-3">Verified Materials</h3>
-            <p class="text-gray-500 dark:text-gray-400 leading-relaxed text-sm">Every past paper and quiz is triple-checked by top-performing students.</p>
+            <p class="text-gray-500 dark:text-gray-400 leading-relaxed text-sm">Every past paper and quiz is
+              triple-checked by top-performing students.</p>
           </div>
 
           <!-- Smart Search -->
-          <div data-aos="fade-up" data-aos-delay="300" 
-               class="card-hover group bg-white dark:bg-slate-800 p-8 rounded-[2rem] border border-gray-100 dark:border-white/5 relative shadow-sm transition-all">
-            <div class="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-6 group-hover:scale-110 transition-transform">
+          <div data-aos="fade-up" data-aos-delay="300"
+            class="card-hover group bg-white dark:bg-slate-800 p-8 rounded-[2rem] border border-gray-100 dark:border-white/5 relative shadow-sm transition-all">
+            <div
+              class="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-6 group-hover:scale-110 transition-transform">
               <span class="material-symbols-outlined text-3xl">bolt</span>
             </div>
             <h3 class="text-xl font-black text-gray-900 dark:text-white mb-3">Smart Quizzes</h3>
-            <p class="text-gray-500 dark:text-gray-400 leading-relaxed text-sm">Boost your confidence with AI-powered practice sessions tailored to your needs.</p>
+            <p class="text-gray-500 dark:text-gray-400 leading-relaxed text-sm">Boost your confidence with AI-powered
+              practice sessions tailored to your needs.</p>
           </div>
         </div>
       </div>
@@ -310,15 +360,18 @@
         </div>
 
         <!-- Founder card -->
-        <div class="founder-card-tw bg-[#f8f9fb] rounded-2xl border border-[#e2e8f0] p-8 md:p-10 flex flex-col md:flex-row items-center gap-8 md:gap-10"
+        <div
+          class="founder-card-tw bg-[#f8f9fb] rounded-2xl border border-[#e2e8f0] p-8 md:p-10 flex flex-col md:flex-row items-center gap-8 md:gap-10"
           data-aos="fade-up">
           <!-- Badge absolutely positioned -->
           <div class="relative self-start md:self-auto flex-shrink-0">
-            <div class="w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg ring-2 ring-[#e2e8f0] transition-all duration-300">
+            <div
+              class="w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg ring-2 ring-[#e2e8f0] transition-all duration-300">
               <img src="My-image.png" alt="Mushtaq Ahmad Saqi" class="w-full h-full object-cover">
             </div>
             <!-- Founder badge tucked on the image -->
-            <span class="absolute -top-2 -right-2 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase bg-[#1a1a2e] text-white shadow-md transform rotate-2">
+            <span
+              class="absolute -top-2 -right-2 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase bg-[#1a1a2e] text-white shadow-md transform rotate-2">
               FOUNDER
             </span>
           </div>
@@ -327,13 +380,15 @@
             <p class="text-xs font-bold tracking-widest uppercase text-primary mb-1">Founder &amp; UI/UX Designer</p>
             <h4 class="text-2xl sm:text-3xl font-bold text-[#1a1a2e] mb-3 leading-tight">Mushtaq Ahmad Saqi</h4>
             <p class="text-[#6b7280] text-[15px] leading-relaxed mb-5 max-w-xl">
-              Dedicated to bridging the gap between academic pressure and digital efficiency. 
-              Mushtaq crafted this platform to ensure students have a premium, distraction-free environment to study and prepare.
+              Dedicated to bridging the gap between academic pressure and digital efficiency.
+              Mushtaq crafted this platform to ensure students have a premium, distraction-free environment to study and
+              prepare.
             </p>
             <div class="flex flex-wrap gap-2 justify-center md:justify-start">
               <span class="px-3 py-1 rounded-full bg-[#ccfbf1] text-primary text-xs font-semibold">UI/UX Design</span>
               <span class="px-3 py-1 rounded-full bg-[#dbeafe] text-blue-700 text-xs font-semibold">Frontend Dev</span>
-              <span class="px-3 py-1 rounded-full bg-[#f3e8ff] text-purple-700 text-xs font-semibold">Education Tech</span>
+              <span class="px-3 py-1 rounded-full bg-[#f3e8ff] text-purple-700 text-xs font-semibold">Education
+                Tech</span>
             </div>
           </div>
         </div>
@@ -346,9 +401,11 @@
         style="background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 60%, #0f766e 100%);">
         <!-- Background blob -->
         <div class="absolute top-0 right-0 w-72 h-72 rounded-full"
-          style="background: rgba(15,150,144,0.15); filter: blur(70px); transform: translate(40%,-40%); pointer-events:none;"></div>
+          style="background: rgba(15,150,144,0.15); filter: blur(70px); transform: translate(40%,-40%); pointer-events:none;">
+        </div>
         <div class="absolute bottom-0 left-0 w-48 h-48 rounded-full"
-          style="background: rgba(26,115,232,0.12); filter: blur(50px); transform: translate(-30%,30%); pointer-events:none;"></div>
+          style="background: rgba(26,115,232,0.12); filter: blur(50px); transform: translate(-30%,30%); pointer-events:none;">
+        </div>
 
         <div class="relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-10 justify-between">
           <div class="max-w-lg text-center md:text-left">
@@ -405,21 +462,21 @@
 
   <script>
     // Show real stats after page loads (removes skeleton)
-    window.addEventListener('load', function() {
+    window.addEventListener('load', function () {
       setTimeout(() => {
         const skeleton = document.getElementById('stats-skeleton');
         const realStats = document.getElementById('stats-real');
-        
+
         if (skeleton && realStats) {
           skeleton.style.transition = 'opacity 0.3s ease';
           skeleton.style.opacity = '0';
-          
+
           setTimeout(() => {
             skeleton.style.display = 'none';
             realStats.classList.remove('hidden');
             realStats.style.opacity = '0';
             realStats.style.transition = 'opacity 0.4s ease';
-            
+
             setTimeout(() => {
               realStats.style.opacity = '1';
             }, 50);
@@ -429,4 +486,5 @@
     });
   </script>
 </body>
+
 </html>
