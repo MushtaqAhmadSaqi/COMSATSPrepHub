@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subjects | COMSATSPrepHub</title>
     <meta name="description" content="Browse all COMSATS subjects and access past papers.">
-    
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -42,15 +41,15 @@
 
     <main class="max-w-7xl mx-auto px-6 pt-10 pb-20 page-transition">
         
-        <!-- Header Section -->
+        <!-- Header -->
         <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-10">
             <div>
                 <div class="inline-flex items-center px-3 py-1 rounded-full bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20 text-brand-600 dark:text-brand-400 text-xs font-bold mb-3">
                     STUDY MATERIALS
                 </div>
-                <h1 class="text-4xl sm:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-none">Academic Catalog</h1>
+                <h1 class="text-4xl sm:text-5xl font-black tracking-tighter text-slate-900 dark:text-white leading-none">Academic Catalog</h1>
                 <p class="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-md">
-                    Explore past papers organized by subject. High-quality materials for COMSATS students.
+                    Explore past papers organized by subject.
                 </p>
             </div>
 
@@ -59,23 +58,19 @@
                 <div class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-500 transition-colors">
                     <span class="material-symbols-outlined text-[24px]">search</span>
                 </div>
-                <input id="subjectSearchInput" 
-                       type="text" 
-                       oninput="filterSubjects()"
-                       class="w-full pl-14 pr-5 py-4 bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-[1.5rem] text-lg placeholder:text-gray-400 focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all shadow-sm"
+                <input id="subjectSearchInput" type="text" oninput="filterSubjects()"
+                       class="w-full pl-14 pr-5 py-4 bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-2xl text-lg placeholder:text-gray-400 focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all shadow-sm"
                        placeholder="Search subjects...">
             </div>
         </div>
 
         <!-- Stats Badge -->
-        <div id="subjectCountBadge" 
-             class="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-sm font-bold rounded-2xl mb-8"
-             style="display:none;">
+        <div id="subjectCountBadge" class="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-sm font-bold rounded-2xl mb-8" style="display:none;">
             <span class="material-symbols-outlined text-lg">school</span>
             <span id="subjectCountText">0 Subjects</span>
         </div>
 
-        <!-- Error Banner -->
+        <!-- Error -->
         <div id="errorBanner" class="hidden mb-8 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-400 px-5 py-4 rounded-2xl flex items-center gap-3">
             <span class="material-symbols-outlined">error</span>
             <div id="errorMessage"></div>
@@ -83,24 +78,24 @@
 
         <!-- Loading Skeletons -->
         <div id="loadingGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-6 animate-pulse">
-                <div class="w-14 h-14 bg-gray-200 dark:bg-white/10 rounded-2xl mb-5"></div>
-                <div class="h-5 bg-gray-200 dark:bg-white/10 rounded w-3/4 mb-3"></div>
+            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 animate-pulse">
+                <div class="w-11 h-11 bg-gray-200 dark:bg-white/10 rounded-2xl mb-4"></div>
+                <div class="h-5 bg-gray-200 dark:bg-white/10 rounded w-3/4 mb-2"></div>
                 <div class="h-3 bg-gray-200 dark:bg-white/10 rounded w-1/2"></div>
             </div>
-            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-6 animate-pulse">
-                <div class="w-14 h-14 bg-gray-200 dark:bg-white/10 rounded-2xl mb-5"></div>
-                <div class="h-5 bg-gray-200 dark:bg-white/10 rounded w-3/4 mb-3"></div>
+            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 animate-pulse">
+                <div class="w-11 h-11 bg-gray-200 dark:bg-white/10 rounded-2xl mb-4"></div>
+                <div class="h-5 bg-gray-200 dark:bg-white/10 rounded w-3/4 mb-2"></div>
                 <div class="h-3 bg-gray-200 dark:bg-white/10 rounded w-1/2"></div>
             </div>
-            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-6 animate-pulse">
-                <div class="w-14 h-14 bg-gray-200 dark:bg-white/10 rounded-2xl mb-5"></div>
-                <div class="h-5 bg-gray-200 dark:bg-white/10 rounded w-3/4 mb-3"></div>
+            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 animate-pulse">
+                <div class="w-11 h-11 bg-gray-200 dark:bg-white/10 rounded-2xl mb-4"></div>
+                <div class="h-5 bg-gray-200 dark:bg-white/10 rounded w-3/4 mb-2"></div>
                 <div class="h-3 bg-gray-200 dark:bg-white/10 rounded w-1/2"></div>
             </div>
-            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-6 animate-pulse">
-                <div class="w-14 h-14 bg-gray-200 dark:bg-white/10 rounded-2xl mb-5"></div>
-                <div class="h-5 bg-gray-200 dark:bg-white/10 rounded w-3/4 mb-3"></div>
+            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 animate-pulse">
+                <div class="w-11 h-11 bg-gray-200 dark:bg-white/10 rounded-2xl mb-4"></div>
+                <div class="h-5 bg-gray-200 dark:bg-white/10 rounded w-3/4 mb-2"></div>
                 <div class="h-3 bg-gray-200 dark:bg-white/10 rounded w-1/2"></div>
             </div>
         </div>
@@ -123,7 +118,7 @@
                 <span class="material-symbols-outlined text-5xl text-brand-600">folder_off</span>
             </div>
             <h3 class="text-2xl font-bold mb-2">No subjects available</h3>
-            <p class="text-gray-500 dark:text-gray-400 max-w-xs mx-auto">No past papers have been uploaded yet. Please check back later.</p>
+            <p class="text-gray-500 dark:text-gray-400 max-w-xs mx-auto">No past papers have been uploaded yet.</p>
         </div>
 
     </main>
@@ -166,28 +161,19 @@
                     return;
                 }
 
-                // Group by subject
                 const subjectMap = {};
                 papers.forEach(p => {
                     if (!subjectMap[p.subject_name]) {
-                        subjectMap[p.subject_name] = {
-                            subject_name: p.subject_name,
-                            subject_code: p.subject_code,
-                            count: 0
-                        };
+                        subjectMap[p.subject_name] = { subject_name: p.subject_name, subject_code: p.subject_code, count: 0 };
                     }
                     subjectMap[p.subject_name].count++;
                 });
 
-                const subjects = Object.values(subjectMap).sort((a, b) => 
-                    a.subject_name.localeCompare(b.subject_name)
-                );
+                const subjects = Object.values(subjectMap).sort((a, b) => a.subject_name.localeCompare(b.subject_name));
 
-                // Update badge
                 badgeText.textContent = `${subjects.length} Subject${subjects.length !== 1 ? 's' : ''}`;
                 badge.style.display = 'inline-flex';
 
-                // Create cards
                 const fragment = document.createDocumentFragment();
 
                 subjects.forEach((s, i) => {
@@ -196,24 +182,24 @@
 
                     const card = document.createElement('a');
                     card.href = url;
-                    card.className = `group block bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-7 hover:shadow-xl transition-all duration-300 card-hover`;
+                    card.className = `group block bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 hover:shadow-xl transition-all duration-300 card-hover`;
                     card.setAttribute('data-subject', s.subject_name);
 
                     card.innerHTML = `
-                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-black/5 dark:border-white/10" 
+                        <div class="w-11 h-11 rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-black/5 dark:border-white/10" 
                              style="background: ${p.bg}; color: ${p.color};">
-                            <span class="material-symbols-outlined text-[28px]">${p.icon}</span>
+                            <span class="material-symbols-outlined text-[22px]">${p.icon}</span>
                         </div>
                         
-                        <div class="mb-8">
-                            <h3 class="text-2xl font-black tracking-tight text-gray-900 dark:text-white mb-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+                        <div class="mb-5">
+                            <h3 class="text-xl font-black tracking-tight text-gray-900 dark:text-white mb-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-2">
                                 ${escHtml(s.subject_name)}
                             </h3>
                             <p class="font-mono text-sm text-gray-500 dark:text-gray-400">${escHtml(s.subject_code)}</p>
                         </div>
                         
                         <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/10">
-                            <div class="px-3 py-1 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs font-bold rounded-xl">
+                            <div class="px-3 py-1 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs font-bold rounded-2xl">
                                 ${s.count} Paper${s.count !== 1 ? 's' : ''}
                             </div>
                             <div class="text-brand-600 dark:text-brand-400 group-hover:translate-x-1 transition-transform">
@@ -237,14 +223,10 @@
             } catch (err) {
                 loading.style.display = 'none';
                 errorBanner.style.display = 'block';
-                document.getElementById('errorMessage').innerHTML = `
-                    <strong>Failed to load subjects</strong><br>
-                    <span class="text-sm">${err.message}</span>
-                `;
+                document.getElementById('errorMessage').innerHTML = `<strong>Failed to load subjects</strong><br><span class="text-sm">${err.message}</span>`;
             }
         }
 
-        // Search Filter
         window.filterSubjects = function () {
             const query = document.getElementById('subjectSearchInput').value.toLowerCase().trim();
             const cards = document.querySelectorAll('#subjectsGrid a');
