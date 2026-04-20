@@ -555,6 +555,16 @@ body {
 }
 
 @media (max-width: 1023px) {
-  .side { display: none !important; }
   .main { width: 100%; }
+}
+
+/* ── UTILITIES ── */
+.animate-spin {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

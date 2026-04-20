@@ -23,7 +23,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Initialization
   _initHeaderToggles();
   _initAOS();
-  _initVanillaTilt();
+  
+  // Only init Tilt if not on subjects page (too heavy for mobile)
+  if (currentPage !== 'subjects.html') {
+    _initVanillaTilt();
+  }
   if (window.refreshThemeIcons) window.refreshThemeIcons();
   initAuthModal();
   
@@ -225,6 +229,7 @@ function _initVanillaTilt() {
     const script = document.createElement('script');
     script.id = 'vanilla-tilt-script';
     script.src = 'https://cdn.jsdelivr.net/npm/vanilla-tilt@1.7.2/dist/vanilla-tilt.min.js';
+    script.defer = true; // Use defer for non-blocking load
     script.onload = () => _applyVanillaTilt();
     document.head.appendChild(script);
   } else {

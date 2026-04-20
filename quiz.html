@@ -19,9 +19,7 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         rel="stylesheet">
 
-    <!-- MathJax -->
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- MathJax deferred -->
 
     <!-- Global Styles for Nav -->
     <link rel="stylesheet" href="style.css">
@@ -87,7 +85,7 @@
             .quiz-option.wrong .radio-ui::after { @apply bg-white; }
         }
     </style>
-    <script src="js/dark-mode.js"></script>
+    <script src="js/dark-mode.js" defer></script>
 </head>
 
 <body class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300 antialiased min-h-screen">
@@ -301,7 +299,7 @@
 
           const fetchPromise = supabase
             .from('quizzes')
-            .select('*')
+            .select('id, title, subject_code, questions_count')
             .order('created_at', { ascending: false });
 
           // Wait for either data or timeout
@@ -369,6 +367,15 @@
 
       // ── Start a Quiz ──────────────────────────────
       async function startQuiz(quizId, title, subCode) {
+        // Load MathJax if not present
+        if (!document.getElementById('mathjax-script')) {
+          const script = document.createElement('script');
+          script.id = 'mathjax-script';
+          script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+          script.async = true;
+          document.head.appendChild(script);
+        }
+
         currentQuizName = subCode;
         document.getElementById('step1-select').classList.add('hidden');
         document.getElementById('step2-question').classList.remove('hidden');

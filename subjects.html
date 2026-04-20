@@ -215,10 +215,7 @@
                 grid.appendChild(fragment);
                 grid.style.display = 'grid';
 
-                // Initialize 3D Tilt via global helper
-                if (window.reinitVanillaTilt) {
-                    window.reinitVanillaTilt();
-                }
+                // 3D Tilt disabled on Subjects for performance
 
             } catch (err) {
                 loading.style.display = 'none';

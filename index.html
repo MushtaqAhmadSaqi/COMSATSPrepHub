@@ -367,7 +367,7 @@
           <div class="relative self-start md:self-auto flex-shrink-0">
             <div
               class="w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg ring-2 ring-[#e2e8f0] transition-all duration-300">
-              <img src="My-image.png" alt="Mushtaq Ahmad Saqi" class="w-full h-full object-cover">
+              <img src="My-image.png" loading="lazy" alt="Mushtaq Ahmad Saqi" class="w-full h-full object-cover">
             </div>
             <!-- Founder badge tucked on the image -->
             <span
@@ -431,12 +431,16 @@
   </main>
 
   <!-- ════════════════════════ SCRIPTS ════════════════════════ -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
   <script>
     // 3D Rotating Cube Logo for Hero
     function initHeroLogo() {
       const container = document.getElementById('logo-3d');
       if (!container) return;
+      if (typeof THREE === 'undefined') {
+        setTimeout(initHeroLogo, 100);
+        return;
+      }
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
       const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -456,8 +460,8 @@
     }
     window.addEventListener('load', initHeroLogo);
   </script>
-  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://unpkg.com/aos@next/dist/aos.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
   <script type="module" src="js/layout.js"></script>
 
   <script>

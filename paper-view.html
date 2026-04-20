@@ -20,26 +20,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         rel="stylesheet">
-    <!-- MathJax -->
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']]
-            },
-            options: {
-                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-            }
-        };
-    </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <!-- Chart.js for AI-generated graphs -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
-    <!-- Mermaid.js for flowcharts/diagrams -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-    <!-- Marked.js for Markdown rendering -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Heavy libraries deferred via dynamic loader in scripts section -->
 
     <script>
       tailwind.config = {
@@ -276,8 +257,43 @@
     <script type="module">
         import { supabase, escapeHtml } from './utils.js';
 
-        // Initialize Mermaid
-        mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
+        // ── Dependency Loader ──────────────────────
+        const DEPENDENCIES = [
+            { id: 'marked-js', src: 'https://cdn.jsdelivr.net/npm/marked/marked.min.js' },
+            { id: 'mathjax-js', src: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js', isMathJax: true },
+            { id: 'chart-js', src: 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js' },
+            { id: 'mermaid-js', src: 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js' }
+        ];
+
+        async function loadDependencies() {
+            const promises = DEPENDENCIES.map(dep => {
+                if (document.getElementById(dep.id)) return Promise.resolve();
+                
+                return new Promise((resolve, reject) => {
+                    if (dep.isMathJax) {
+                        window.MathJax = {
+                            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+                            options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+                        };
+                    }
+                    const script = document.createElement('script');
+                    script.id = dep.id;
+                    script.src = dep.src;
+                    script.async = true;
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            });
+            await Promise.all(promises);
+            // Initialize Mermaid after load
+            if (window.mermaid) {
+                mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
+            }
+        }
+
+        // Initialize Mermaid (deferred)
+        // mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
 
         // ── State ───────────────────────────────────
         const params = new URLSearchParams(window.location.search);
@@ -294,7 +310,11 @@
         // ── Load Paper ───────────────────────────────
         async function loadPaper() {
             try {
-                let query = supabase.from('past_papers').select('*');
+                // Load dependencies in parallel with initial query
+                const depPromise = loadDependencies();
+
+                let query = supabase.from('past_papers')
+                    .select('id, subject_name, subject_code, year, exam_type, instructor_name, semester, total_marks');
                 if (paperId) {
                     query = query.eq('id', paperId);
                 } else if (subjectCode && year && examType) {
@@ -303,7 +323,8 @@
                     query = query.eq('subject_code', 'CSC211').eq('year', 2024).eq('exam_type', 'Mid Term');
                 }
 
-                const { data: paper, error: paperError } = await query.single();
+                const [paperResult] = await Promise.all([query.single(), depPromise]);
+                const { data: paper, error: paperError } = paperResult;
                 if (paperError || !paper) throw new Error(paperError?.message || 'Paper not found.');
 
                 globalPaper = paper;
