@@ -25,6 +25,15 @@
     pointer-events: all;
 }
 
+.auth-modal-overlay[hidden] { 
+    display: none !important; 
+}
+
+*:focus-visible {
+    outline: 2px solid #5eead4; /* visible focus outline */
+    outline-offset: 2px;
+}
+
 /* ── AUTH MODAL CARD ── */
 .auth-modal {
     width: 100%;
@@ -349,6 +358,9 @@
     padding: 0;
     display: flex;
     align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    min-height: 48px;
     transition: color 0.2s;
 }
 

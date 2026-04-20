@@ -3,12 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenPrep - Student Dashboard</title>
+    <title>COMSATSPrepHub — Student Dashboard</title>
     <!-- Tailwind Script -->
-    <script src="tailwind-config.js"></script>
+    <script src="js/tailwind-config.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=typography,forms,aspect-ratio"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <script src="js/dark-mode.js" defer></script>
 </head>
@@ -37,8 +37,8 @@
         
         <div class="flex items-center gap-2 sm:gap-4">
             <!-- Theme Toggle Button -->
-            <button id="dark-mode-toggle" title="Toggle Theme" class="relative p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-                <span class="material-symbols-outlined rounded-full hover:bg-gray-100 dark:hover:bg-white/5 p-1.5 transition-colors" id="dark-mode-icon"></span>
+            <button id="dark-mode-toggle" title="Toggle Theme" aria-label="Toggle dark mode" class="relative p-3 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                <span id="dark-mode-icon" class="dark-mode-icon material-symbols-outlined rounded-full hover:bg-gray-100 dark:hover:bg-white/5 p-1.5 transition-colors"></span>
             </button>
             
             <!-- Notifications -->

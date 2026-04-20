@@ -6,8 +6,8 @@
     <title>Subjects | COMSATSPrepHub</title>
     <meta name="description" content="Browse all COMSATS subjects and access past papers.">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-    <script src="tailwind-config.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" rel="stylesheet">
+    <script src="js/tailwind-config.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="js/dark-mode.js"></script>
 </head>
@@ -35,7 +35,7 @@
                 <div class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-500 transition-colors">
                     <span class="material-symbols-outlined text-[24px]">search</span>
                 </div>
-                <input id="subjectSearchInput" type="text" oninput="filterSubjects()"
+                <input id="subjectSearchInput" type="text" oninput="filterSubjects()" aria-label="Search subjects"
                        class="w-full pl-14 pr-5 py-4 bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-2xl text-lg placeholder:text-gray-400 focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all shadow-sm"
                        placeholder="Search subjects...">
             </div>

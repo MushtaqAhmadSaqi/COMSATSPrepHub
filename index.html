@@ -14,11 +14,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet">
   <link
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
     rel="stylesheet">
 
   <!-- Tailwind Play CDN -->
-  <script src="tailwind-config.js"></script>
+  <script src="js/tailwind-config.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="js/dark-mode.js"></script>
 
@@ -79,6 +79,15 @@
       50% {
         transform: translateY(14px) rotate(-3deg);
       }
+    }
+
+    @media (max-width: 640px) {
+      .hero-blob-a { width: 300px; height: 300px; }
+      .hero-blob-b { width: 220px; height: 220px; }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      .hero-blob-a, .hero-blob-b { animation: none !important; }
     }
 
     /* Squiggly underline on hero highlight */
@@ -342,7 +351,7 @@
           <div class="relative self-start md:self-auto flex-shrink-0">
             <div
               class="w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-white shadow-lg ring-2 ring-[#e2e8f0] transition-all duration-300">
-              <img src="My-image.png" loading="lazy" alt="Mushtaq Ahmad Saqi" class="w-full h-full object-cover">
+              <img src="My-image.png" loading="lazy" decoding="async" fetchpriority="low" alt="Mushtaq Ahmad Saqi" class="w-full h-full object-cover">
             </div>
             <!-- Founder badge tucked on the image -->
             <span
@@ -406,37 +415,52 @@
   </main>
 
   <!-- ════════════════════════ SCRIPTS ════════════════════════ -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
   <script>
     // 3D Rotating Cube Logo for Hero
     function initHeroLogo() {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const conn = navigator.connection;
+      if (conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType))) return;
+      if (window.innerWidth < 640) return;
+
       const container = document.getElementById('logo-3d');
       if (!container) return;
-      if (typeof THREE === 'undefined') {
-        setTimeout(initHeroLogo, 100);
-        return;
+
+      const loadThree = () => {
+        if (typeof THREE !== 'undefined') { startThree(); return; }
+        const script = document.createElement('script');
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+        script.onload = startThree;
+        document.head.appendChild(script);
+      };
+
+      const startThree = () => {
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(40, 40);
+        container.appendChild(renderer.domElement);
+        const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+        const material = new THREE.MeshPhongMaterial({ color: 0x2563eb, shininess: 100 });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(10, 10, 10);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+        camera.position.z = 3.5;
+        function animate() { requestAnimationFrame(animate); cube.rotation.x += 0.01; cube.rotation.y += 0.015; renderer.render(scene, camera); }
+        animate();
+      };
+      
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(loadThree, { timeout: 2000 });
+      } else {
+        setTimeout(loadThree, 500);
       }
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-      renderer.setSize(40, 40);
-      container.appendChild(renderer.domElement);
-      const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-      const material = new THREE.MeshPhongMaterial({ color: 0x2563eb, shininess: 100 });
-      const cube = new THREE.Mesh(geometry, material);
-      scene.add(cube);
-      const light = new THREE.PointLight(0xffffff, 1, 100);
-      light.position.set(10, 10, 10);
-      scene.add(light);
-      scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-      camera.position.z = 3.5;
-      function animate() { requestAnimationFrame(animate); cube.rotation.x += 0.01; cube.rotation.y += 0.015; renderer.render(scene, camera); }
-      animate();
     }
     window.addEventListener('load', initHeroLogo);
   </script>
-  <script src="https://unpkg.com/aos@next/dist/aos.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
   <script type="module" src="js/layout.js"></script>
 
   <script>

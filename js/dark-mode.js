@@ -30,7 +30,7 @@
   
   // ── UI Updates ─────────────────────────────────────────────────────────────
   function _updateToggleIcon(theme) {
-    const iconContainers = document.querySelectorAll('.dark-mode-icon');
+    const iconContainers = document.querySelectorAll('.dark-mode-icon, #dark-mode-icon');
     if (iconContainers.length === 0) return;
     
     iconContainers.forEach(container => {

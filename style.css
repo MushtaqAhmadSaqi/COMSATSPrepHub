@@ -51,6 +51,35 @@ body {
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+button, a, input, select, textarea, [role="button"] {
+  touch-action: manipulation;
+}
+
+img[loading="lazy"] {
+  content-visibility: auto;
+}
+
+#dark-mode-toggle,
+#open-auth-modal,
+#mobileBottomNav a,
+.btn-icon,
+.auth-modal-close,
+.am-eye,
+.eye {
+  min-width: 48px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 body {

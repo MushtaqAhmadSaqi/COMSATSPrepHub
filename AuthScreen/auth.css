@@ -16,6 +16,11 @@ body {
   overflow-x: hidden;
 }
 
+*:focus-visible {
+  outline: 2px solid #002B5B;
+  outline-offset: 2px;
+}
+
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
@@ -333,6 +338,9 @@ body {
   padding: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
   transition: color 0.2s;
 }
 
