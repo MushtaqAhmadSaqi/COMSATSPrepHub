@@ -299,7 +299,7 @@
 
           const fetchPromise = supabase
             .from('quizzes')
-            .select('id, title, subject_code, questions_count')
+            .select('id, title, subject_code')
             .order('created_at', { ascending: false });
 
           // Wait for either data or timeout
