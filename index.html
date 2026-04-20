@@ -172,24 +172,6 @@
         left: -30px;
       }
     }
-    @media (max-width: 768px), (prefers-reduced-motion: reduce) {
-      .hero-blob-a,
-      .hero-blob-b,
-      .cta-decor {
-        display: none !important;
-        animation: none !important;
-      }
-
-      #home-section,
-      #stats-section,
-      #cta-section {
-        background-attachment: scroll !important;
-      }
-
-      #stats-skeleton .animate-pulse {
-        animation: none !important;
-      }
-    }
   </style>
 </head>
 
@@ -214,7 +196,7 @@
         <div class="badge-tilted inline-block mb-7">
           <div
             class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-brand-50/50 dark:bg-brand-500/5 border border-brand-100 dark:border-brand-500/10 backdrop-blur-md">
-            <div id="logo-3d" class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-white font-black shadow-sm">C</div>
+            <div id="logo-3d" class="w-10 h-10"></div>
             <span class="text-[10px] font-black uppercase tracking-[0.2em] text-brand-600 dark:text-brand-400">Trusted
               by Students</span>
           </div>
@@ -401,10 +383,11 @@
     <section id="cta-section" class="py-16 px-6 md:px-10" data-aos="zoom-in" data-aos-delay="100">
       <div class="max-w-5xl mx-auto relative overflow-hidden rounded-2xl px-8 py-14 md:px-16 md:py-16"
         style="background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 60%, #0f766e 100%);">
-        <div class="cta-decor absolute top-0 right-0 w-72 h-72 rounded-full"
+        <!-- Background blob -->
+        <div class="absolute top-0 right-0 w-72 h-72 rounded-full"
           style="background: rgba(15,150,144,0.15); filter: blur(70px); transform: translate(40%,-40%); pointer-events:none;">
         </div>
-        <div class="cta-decor absolute bottom-0 left-0 w-48 h-48 rounded-full"
+        <div class="absolute bottom-0 left-0 w-48 h-48 rounded-full"
           style="background: rgba(26,115,232,0.12); filter: blur(50px); transform: translate(-30%,30%); pointer-events:none;">
         </div>
 
@@ -432,7 +415,52 @@
   </main>
 
   <!-- ════════════════════════ SCRIPTS ════════════════════════ -->
+  <script>
+    // 3D Rotating Cube Logo for Hero
+    function initHeroLogo() {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const conn = navigator.connection;
+      if (conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType))) return;
+      if (window.innerWidth < 640) return;
 
+      const container = document.getElementById('logo-3d');
+      if (!container) return;
+
+      const loadThree = () => {
+        if (typeof THREE !== 'undefined') { startThree(); return; }
+        const script = document.createElement('script');
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+        script.onload = startThree;
+        document.head.appendChild(script);
+      };
+
+      const startThree = () => {
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(40, 40);
+        container.appendChild(renderer.domElement);
+        const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+        const material = new THREE.MeshPhongMaterial({ color: 0x2563eb, shininess: 100 });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(10, 10, 10);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+        camera.position.z = 3.5;
+        function animate() { requestAnimationFrame(animate); cube.rotation.x += 0.01; cube.rotation.y += 0.015; renderer.render(scene, camera); }
+        animate();
+      };
+      
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(loadThree, { timeout: 2000 });
+      } else {
+        setTimeout(loadThree, 500);
+      }
+    }
+    window.addEventListener('load', initHeroLogo);
+  </script>
   <script type="module" src="js/layout.js"></script>
 
   <script>
