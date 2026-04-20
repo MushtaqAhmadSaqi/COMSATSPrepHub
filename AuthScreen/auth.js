@@ -67,10 +67,8 @@ if (sForm) {
       return;
     }
 
-    // Reset error
     signUpError.style.display = "none";
 
-    // Show loading state
     const oldHtml = signUpBtn.innerHTML;
     signUpBtn.disabled = true;
     signUpBtn.innerHTML = `
@@ -80,7 +78,7 @@ if (sForm) {
     `;
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email: email,
         password: pass,
         options: { data: { full_name: name } }
@@ -91,7 +89,6 @@ if (sForm) {
       } else {
         alert("Account created! Check your email to confirm, then login.");
         sForm.reset();
-        // Switch to login view
         auth.classList.remove('toggled');
       }
     } catch (err) {
@@ -123,9 +120,6 @@ if (lForm) {
   });
 }
 
-/**
- * Improved Login Function
- */
 async function handleLogin(email, password) {
   const loginBtn = document.getElementById('loginBtn');
   const errorDiv = document.getElementById('loginError');
@@ -135,10 +129,8 @@ async function handleLogin(email, password) {
     return;
   }
 
-  // Clear previous error
   errorDiv.style.display = "none";
 
-  // Show loading state
   const oldHtml = loginBtn.innerHTML;
   loginBtn.disabled = true;
   loginBtn.innerHTML = `
@@ -148,13 +140,12 @@ async function handleLogin(email, password) {
   `;
 
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     });
 
     if (error) {
-      // Show user-friendly error
       let message = "Login failed. Please try again.";
       
       if (error.message.includes("Invalid login credentials")) {
@@ -162,19 +153,16 @@ async function handleLogin(email, password) {
       } else if (error.message.includes("Email not confirmed")) {
         message = "Please verify your email first.";
       } else {
-        message = error.message; // Fallback to Supabase error
+        message = error.message;
       }
       
       showAuthError(errorDiv, message);
-      
-      // Reset button
       loginBtn.disabled = false;
       loginBtn.innerHTML = oldHtml;
       return;
     }
 
-    // Success! Redirect to dashboard
-    window.location.href = '../dashboard.html';
+    window.location.href = 'dashboard.html';
 
   } catch (err) {
     console.error("Login error:", err);
@@ -185,14 +173,9 @@ async function handleLogin(email, password) {
   }
 }
 
-/**
- * Helper to show authentication errors nicely
- */
 function showAuthError(div, message) {
   if (!div) return;
   div.textContent = message;
   div.style.display = "block";
-  // Smooth scroll to the error if it's far
   div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-} 
-
+}

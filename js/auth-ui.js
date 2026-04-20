@@ -2,68 +2,146 @@
  * js/auth-ui.js
  * ─────────────────────────────────────────────────────────────────────────────
  * Auth Modal: HTML template + all UI event listeners (toggle, eye, close).
- * Business logic (Supabase calls) lives in auth.js.
- * Call initAuthModal() once per page.  Call openModal() to show it.
+ * Business logic (Supabase calls) lives here with lazy-loaded alert support.
  */
 
-import { supabase, auth } from './core.js';
+import { supabase } from './core.js';
 
-// ── Public API ────────────────────────────────────────────────────────────────
-export function initAuthModal() {
-    if (document.getElementById('auth-modal-overlay')) return; // already injected
-    
-    // Dynamically inject stylesheet if missing
-    if (!document.querySelector('link[href*="auth-modal.css"]')) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'auth-modal.css';
-        document.head.appendChild(link);
+let lastFocusedElement = null;
+let removeFocusTrap = null;
+
+async function ensureSwal() {
+  if (window.Swal) return window.Swal;
+  const existing = document.getElementById('swal-script');
+  if (!existing) {
+    const script = document.createElement('script');
+    script.id = 'swal-script';
+    script.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11';
+    script.defer = true;
+    document.head.appendChild(script);
+  }
+
+  await new Promise(resolve => {
+    const check = () => {
+      if (window.Swal) return resolve();
+      window.setTimeout(check, 50);
+    };
+    check();
+  });
+  return window.Swal;
+}
+
+async function notify(title, text, icon = 'info') {
+  try {
+    const Swal = await ensureSwal();
+    return Swal.fire(title, text, icon);
+  } catch (error) {
+    console.warn('SweetAlert failed to load.', error);
+    window.alert(`${title}\n\n${text}`);
+  }
+}
+
+function getFocusableElements(container) {
+  return [...container.querySelectorAll('a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])')]
+    .filter(element => !element.hasAttribute('hidden') && element.offsetParent !== null);
+}
+
+function trapFocus(container) {
+  const handler = event => {
+    if (event.key !== 'Tab') return;
+    const focusable = getFocusableElements(container);
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
     }
+  };
+  document.addEventListener('keydown', handler);
+  return () => document.removeEventListener('keydown', handler);
+}
 
-    _injectModalHTML();
-    _attachListeners();
+function focusActiveField(tab = 'login') {
+  const selector = tab === 'signup' ? '#am-s-name' : '#am-l-email';
+  const target = document.querySelector(selector);
+  if (target) window.setTimeout(() => target.focus(), 30);
+}
+
+export function initAuthModal() {
+  if (document.getElementById('auth-modal-overlay')) return;
+
+  if (!document.querySelector('link[href*="auth-modal.css"]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'auth-modal.css';
+    document.head.appendChild(link);
+  }
+
+  _injectModalHTML();
+  _attachListeners();
 }
 
 export function openModal(startTab = 'login') {
-    const overlay = document.getElementById('auth-modal-overlay');
-    const amAuth  = document.getElementById('am-auth');
-    if (!overlay) return;
-    overlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    amAuth.classList.toggle('toggled', startTab === 'signup');
+  const overlay = document.getElementById('auth-modal-overlay');
+  const amAuth = document.getElementById('am-auth');
+  if (!overlay || !amAuth) return;
+
+  lastFocusedElement = document.activeElement;
+  overlay.hidden = false;
+  overlay.style.display = 'flex';
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  amAuth.classList.toggle('toggled', startTab === 'signup');
+  removeFocusTrap?.();
+  removeFocusTrap = trapFocus(overlay);
+  focusActiveField(startTab);
 }
 
 export function closeModal() {
-    const overlay = document.getElementById('auth-modal-overlay');
-    if (!overlay) return;
-    overlay.classList.remove('open');
-    document.body.style.overflow = '';
+  const overlay = document.getElementById('auth-modal-overlay');
+  if (!overlay) return;
+
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+  removeFocusTrap?.();
+  removeFocusTrap = null;
+
+  window.setTimeout(() => {
+    overlay.hidden = true;
+    overlay.style.display = 'none';
+  }, 200);
+
+  if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+    lastFocusedElement.focus();
+  }
 }
 
-// ── HTML Template ─────────────────────────────────────────────────────────────
 function _injectModalHTML() {
-    const html = `
-    <div class="auth-modal-overlay" id="auth-modal-overlay" role="dialog" aria-modal="true" aria-label="Authentication" style="display: none;">
+  const html = `
+    <div class="auth-modal-overlay" id="auth-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" hidden style="display:none;">
       <div class="auth-modal am-auth" id="am-auth">
-
-        <button class="auth-modal-close" id="close-auth-modal" aria-label="Close">
-          <span class="material-symbols-outlined" style="font-size:20px;">close</span>
+        <button class="auth-modal-close" id="close-auth-modal" aria-label="Close authentication dialog" type="button">
+          <span class="material-symbols-outlined" style="font-size:20px;" aria-hidden="true">close</span>
         </button>
 
-        <!-- ══ LOGIN PANEL ══ -->
         <div class="am-panel am-login">
-          <section class="am-side am-l-side">
+          <section class="am-side am-l-side" aria-hidden="true">
             <div class="am-bg-wrap">
-              <img class="am-bg-img"
+              <img class="am-bg-img" loading="lazy" decoding="async"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZDdNBglJeWrhi1y9jHIye7HIzCaIJI2VjDX-tqDH8dlDCtls8eTrLe8AHu-8QNhXA2j51OpnRpksHOCmzKaSTGRVocinZu_g6kcjHVO-KmmMDRgKY9A5bjPCbTd74_QZ_b4E0mEa3s57hV_8PV1qoIcW1W1-cvoW50XK5HDsQXs-rmyiJQ9-eKURVp0nLXuzjPsJYIuZhEC6Sd_s8ZFgrUF-tG8TeuVUml81zCmnoAmSoX-XdJWNxIPpPGlURk9DNtY--FBNPa9HA"
-                alt="Background">
+                alt="">
             </div>
             <div class="am-logo">COMSATSPrepHub</div>
             <div class="am-hero">
               <span class="am-sub">Academic Excellence</span>
               <h2 class="am-h1">WELCOME BACK!</h2>
               <p class="am-p">Access your curated prep materials and continue your journey toward academic mastery at COMSATS.</p>
-              <div class="am-dots">
+              <div class="am-dots" aria-hidden="true">
                 <div class="am-dot active"></div>
                 <div class="am-dot"></div>
                 <div class="am-dot"></div>
@@ -74,15 +152,15 @@ function _injectModalHTML() {
             <div class="am-wrap">
               <div class="am-m-logo"><div class="am-m-name">COMSATSPrepHub</div></div>
               <div class="am-head">
-                <h3 class="am-h2">Login</h3>
+                <h3 class="am-h2" id="auth-modal-title">Login</h3>
                 <p class="am-h2-sub">Welcome back to your academic curator.</p>
               </div>
-              <form id="am-l-form">
+              <form id="am-l-form" novalidate>
                 <div class="am-item">
                   <label class="am-label" for="am-l-email">Email Address</label>
                   <div class="am-field">
-                    <span class="material-symbols-outlined am-icon">mail</span>
-                    <input class="am-in" id="am-l-email" name="email" type="email" placeholder="name@example.com" required>
+                    <span class="material-symbols-outlined am-icon" aria-hidden="true">mail</span>
+                    <input class="am-in" id="am-l-email" name="email" type="email" autocomplete="email" placeholder="name@example.com" required>
                   </div>
                 </div>
                 <div class="am-item">
@@ -91,10 +169,10 @@ function _injectModalHTML() {
                     <a class="am-label-link" href="#">Forgot Password?</a>
                   </div>
                   <div class="am-field">
-                    <span class="material-symbols-outlined am-icon">lock</span>
-                    <input class="am-in" id="am-l-pass" name="password" type="password" placeholder="••••••••" required>
-                    <button class="am-eye" type="button" aria-label="Toggle password">
-                      <span class="material-symbols-outlined" style="font-size:18px;">visibility</span>
+                    <span class="material-symbols-outlined am-icon" aria-hidden="true">lock</span>
+                    <input class="am-in" id="am-l-pass" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+                    <button class="am-eye" type="button" aria-label="Show or hide password">
+                      <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">visibility</span>
                     </button>
                   </div>
                 </div>
@@ -104,11 +182,11 @@ function _injectModalHTML() {
                 </div>
                 <button class="am-btn am-b-login" type="submit">
                   <span>Login</span>
-                  <span class="material-symbols-outlined" style="font-size:18px;">arrow_forward</span>
+                  <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">arrow_forward</span>
                 </button>
                 <div class="am-sep"><span>or</span></div>
-                <button class="am-btn-g" type="button" id="am-google-login">
-                  <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" alt="Google">
+                <button class="am-btn-g" type="button" id="am-google-login" aria-label="Continue with Google">
+                  <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" width="18" height="18" loading="lazy" decoding="async" alt="">
                   <span>Sign in with Google</span>
                 </button>
               </form>
@@ -117,13 +195,12 @@ function _injectModalHTML() {
           </section>
         </div>
 
-        <!-- ══ SIGNUP PANEL ══ -->
         <div class="am-panel am-signup">
-          <section class="am-side am-s-side">
+          <section class="am-side am-s-side" aria-hidden="true">
             <div class="am-bg-wrap">
-              <img class="am-bg-img"
+              <img class="am-bg-img" loading="lazy" decoding="async"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk3-sOvD_tJohcdxadxtZFJ10l6HyxAbSE4RauxdmJfHf2zs_u4P38ESTUhEgJwACMcTPz6pi5NSGYVW9uobohnmF9gZ2L4ftwzuQ_IVi8C9i5F5nZgsq-49YwZihRSNuU7xyqpNU7wTUnjp265IAJ1xC08Fkzj6pMEq1juhdk208VCUWDAvkIVlKiUvZALMeyoFUi9xXkGA82r8dJkKDLwCujzX1EtT1wGN0dijfpNbSMh1cay34o_4cztvQ85r3FGObPL80zGWU9"
-                alt="Background">
+                alt="">
             </div>
             <div class="am-hero">
               <div class="am-line"></div>
@@ -145,26 +222,26 @@ function _injectModalHTML() {
                 <h3 class="am-h2">Create your account</h3>
                 <p class="am-h2-sub">Sign up to access curated study materials and tracking.</p>
               </div>
-              <button class="am-btn-g am-btn-g-up" type="button" id="am-google-signup">
-                <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" alt="Google">
+              <button class="am-btn-g am-btn-g-up" type="button" id="am-google-signup" aria-label="Sign up with Google">
+                <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_128dp.png" width="18" height="18" loading="lazy" decoding="async" alt="">
                 <span>Continue with Google</span>
               </button>
               <div class="am-sep"><span>or email</span></div>
-              <form id="am-s-form">
+              <form id="am-s-form" novalidate>
                 <div class="am-item">
                   <label class="am-label" for="am-s-name">Full Name</label>
-                  <div class="am-field"><input class="am-in no-icon" id="am-s-name" name="name" type="text" placeholder="John Doe" required></div>
+                  <div class="am-field"><input class="am-in no-icon" id="am-s-name" name="name" type="text" autocomplete="name" placeholder="John Doe" required></div>
                 </div>
                 <div class="am-item">
                   <label class="am-label" for="am-s-email">Email Address</label>
-                  <div class="am-field"><input class="am-in no-icon" id="am-s-email" name="email" type="email" placeholder="student@university.edu" required></div>
+                  <div class="am-field"><input class="am-in no-icon" id="am-s-email" name="email" type="email" autocomplete="email" placeholder="student@university.edu" required></div>
                 </div>
                 <div class="am-item">
                   <label class="am-label" for="am-s-pass">Password</label>
                   <div class="am-field">
-                    <input class="am-in no-icon" id="am-s-pass" name="password" type="password" placeholder="••••••••" required>
-                    <button class="am-eye" type="button" aria-label="Toggle password">
-                      <span class="material-symbols-outlined" style="font-size:18px;">visibility</span>
+                    <input class="am-in no-icon" id="am-s-pass" name="password" type="password" autocomplete="new-password" placeholder="••••••••" required>
+                    <button class="am-eye" type="button" aria-label="Show or hide password">
+                      <span class="material-symbols-outlined" style="font-size:18px;" aria-hidden="true">visibility</span>
                     </button>
                   </div>
                 </div>
@@ -178,100 +255,129 @@ function _injectModalHTML() {
             </div>
           </section>
         </div>
-
-      </div><!-- /.auth-modal -->
-    </div><!-- /.auth-modal-overlay -->
+      </div>
+    </div>
     `;
-    document.body.insertAdjacentHTML('beforeend', html);
+  document.body.insertAdjacentHTML('beforeend', html);
 }
 
-// ── Event Listeners ───────────────────────────────────────────────────────────
 function _attachListeners() {
-    const overlay = document.getElementById('auth-modal-overlay');
-    const amAuth  = document.getElementById('am-auth');
+  const overlay = document.getElementById('auth-modal-overlay');
+  const amAuth = document.getElementById('am-auth');
 
-    // Close
-    document.getElementById('close-auth-modal').addEventListener('click', closeModal);
-    overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  document.getElementById('close-auth-modal').addEventListener('click', closeModal);
+  overlay.addEventListener('click', event => {
+    if (event.target === overlay) closeModal();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !overlay.hidden) closeModal();
+  });
 
-    // Panel toggle
-    document.querySelectorAll('.am-to-up').forEach(btn =>
-        btn.addEventListener('click', e => { e.preventDefault(); amAuth.classList.add('toggled'); })
-    );
-    document.querySelectorAll('.am-to-in').forEach(btn =>
-        btn.addEventListener('click', e => { e.preventDefault(); amAuth.classList.remove('toggled'); })
-    );
+  document.querySelectorAll('.am-to-up').forEach(button =>
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      amAuth.classList.add('toggled');
+      focusActiveField('signup');
+    })
+  );
+  document.querySelectorAll('.am-to-in').forEach(button =>
+    button.addEventListener('click', event => {
+      event.preventDefault();
+      amAuth.classList.remove('toggled');
+      focusActiveField('login');
+    })
+  );
 
-    // Password visibility
-    document.querySelectorAll('.am-eye').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const input = btn.parentElement.querySelector('input');
-            const icon  = btn.querySelector('.material-symbols-outlined');
-            if (input.type === 'password') { input.type = 'text';     icon.textContent = 'visibility_off'; }
-            else                           { input.type = 'password'; icon.textContent = 'visibility'; }
-        });
+  document.querySelectorAll('.am-eye').forEach(button => {
+    button.addEventListener('click', () => {
+      const input = button.parentElement.querySelector('input');
+      const icon = button.querySelector('.material-symbols-outlined');
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      button.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      icon.textContent = show ? 'visibility_off' : 'visibility';
     });
+  });
 
-    // Redirect URL helper
-    const _redirectUrl = () =>
-        window.location.origin +
-        window.location.pathname.replace(/\/[^/]*$/, '/dashboard.html');
+  const redirectUrl = () =>
+    window.location.origin +
+    window.location.pathname.replace(/\/[^/]*$/, '/dashboard.html');
 
-    // ── Sign Up ───────────────────────────────────────────────────────────────
-    const amSForm = document.getElementById('am-s-form');
-    if (amSForm) {
-        amSForm.addEventListener('submit', async e => {
-            e.preventDefault();
-            const name  = document.getElementById('am-s-name').value;
-            const email = document.getElementById('am-s-email').value;
-            const pass  = document.getElementById('am-s-pass').value;
-            const acc   = document.getElementById('am-acc-in').checked;
+  const amSForm = document.getElementById('am-s-form');
+  if (amSForm) {
+    amSForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      const name = document.getElementById('am-s-name').value.trim();
+      const email = document.getElementById('am-s-email').value.trim();
+      const pass = document.getElementById('am-s-pass').value;
+      const accepted = document.getElementById('am-acc-in').checked;
 
-            if (!acc)          { Swal.fire('Notice', 'Please accept the terms first.', 'warning'); return; }
-            if (pass.length < 8) { Swal.fire('Notice', 'Password must be at least 8 characters.', 'warning'); return; }
+      if (!accepted) {
+        await notify('Notice', 'Please accept the terms first.', 'warning');
+        return;
+      }
+      if (pass.length < 8) {
+        await notify('Notice', 'Password must be at least 8 characters.', 'warning');
+        return;
+      }
 
-            const btn = amSForm.querySelector('button[type="submit"]');
-            btn.textContent = 'Processing...'; btn.disabled = true;
+      const button = amSForm.querySelector('button[type="submit"]');
+      const originalText = button.textContent;
+      button.textContent = 'Processing...';
+      button.disabled = true;
 
-            const { error } = await supabase.auth.signUp({
-                email, password: pass,
-                options: { data: { full_name: name }, emailRedirectTo: _redirectUrl() }
-            });
+      const { error } = await supabase.auth.signUp({
+        email,
+        password: pass,
+        options: { data: { full_name: name }, emailRedirectTo: redirectUrl() }
+      });
 
-            btn.textContent = 'Create Account'; btn.disabled = false;
-            if (error) Swal.fire('Error', error.message, 'error');
-            else { Swal.fire('Success!', 'Check your email to confirm.', 'success'); amSForm.reset(); closeModal(); }
-        });
-    }
+      button.textContent = originalText;
+      button.disabled = false;
+      if (error) {
+        await notify('Error', error.message, 'error');
+      } else {
+        await notify('Success!', 'Check your email to confirm.', 'success');
+        amSForm.reset();
+        closeModal();
+      }
+    });
+  }
 
-    // ── Login ─────────────────────────────────────────────────────────────────
-    const amLForm = document.getElementById('am-l-form');
-    if (amLForm) {
-        amLForm.addEventListener('submit', async e => {
-            e.preventDefault();
-            const email = document.getElementById('am-l-email').value;
-            const pass  = document.getElementById('am-l-pass').value;
-            const btn   = amLForm.querySelector('button[type="submit"]');
+  const amLForm = document.getElementById('am-l-form');
+  if (amLForm) {
+    amLForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      const email = document.getElementById('am-l-email').value.trim();
+      const pass = document.getElementById('am-l-pass').value;
+      const button = amLForm.querySelector('button[type="submit"]');
+      const label = button.querySelector('span:first-child');
 
-            btn.querySelector('span:first-child').textContent = 'Entering...'; btn.disabled = true;
-            const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
-            btn.querySelector('span:first-child').textContent = 'Login'; btn.disabled = false;
+      label.textContent = 'Entering...';
+      button.disabled = true;
+      const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+      label.textContent = 'Login';
+      button.disabled = false;
 
-            if (error) Swal.fire('Error', error.message, 'error');
-            else { amLForm.reset(); closeModal(); window.location.href = 'dashboard.html'; }
-        });
-    }
+      if (error) {
+        await notify('Error', error.message, 'error');
+      } else {
+        amLForm.reset();
+        closeModal();
+        window.location.href = 'dashboard.html';
+      }
+    });
+  }
 
-    // ── Google OAuth ──────────────────────────────────────────────────────────
-    const handleGoogle = async e => {
-        e.preventDefault();
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: { redirectTo: _redirectUrl() }
-        });
-        if (error) Swal.fire('Error', error.message, 'error');
-    };
-    document.getElementById('am-google-login')?.addEventListener('click', handleGoogle);
-    document.getElementById('am-google-signup')?.addEventListener('click', handleGoogle);
+  const handleGoogle = async event => {
+    event.preventDefault();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: redirectUrl() }
+    });
+    if (error) await notify('Error', error.message, 'error');
+  };
+
+  document.getElementById('am-google-login')?.addEventListener('click', handleGoogle);
+  document.getElementById('am-google-signup')?.addEventListener('click', handleGoogle);
 }
