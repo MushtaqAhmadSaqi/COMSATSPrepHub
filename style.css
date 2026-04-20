@@ -2869,12 +2869,6 @@ body.quiz-active .mobile-nav-shell {
   transform: translateY(-120%);
 }
 
-body > header,
-#mobileBottomNav {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
 #mobileBottomNav {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;

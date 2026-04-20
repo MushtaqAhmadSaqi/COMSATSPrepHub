@@ -68,27 +68,29 @@ function stripAOSAttributes() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   const currentPage = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
 
-  // Static UI first
+  // 1. Immediate UI Injections (Static/Pre-Auth)
   _injectFooter();
   _injectMobileNav(currentPage);
-
-  // Auth-dependent header
-  const session = await auth.getSession();
-  const userName = session ? auth.getUserName(session.user) : null;
-
-  _injectHeader(currentPage, session, userName);
-  _wireNavButton(session);
-
-  if (window.refreshThemeIcons) window.refreshThemeIcons();
-  initAuthModal();
-  _initAOS();
-
-  // Init behaviors AFTER header/nav exist
+  
+  // 2. Initialize Core Behaviors immediately
   _initScrollHideNav();
   _initSwipeNav(currentPage);
+
+  // 3. Deferred/Auth-Dependent Injections
+  (async () => {
+    const session = await auth.getSession();
+    const userName = session ? auth.getUserName(session.user) : null;
+    
+    _injectHeader(currentPage, session, userName);
+    _wireNavButton(session);
+
+    if (window.refreshThemeIcons) window.refreshThemeIcons();
+    initAuthModal();
+    _initAOS();
+  })();
 });
 
 function _initAOS() {
@@ -133,7 +135,7 @@ function _injectHeader(currentPage, session, userName) {
   const initial = userName ? userName.charAt(0).toUpperCase() : '?';
 
   const header = document.createElement('header');
-  header.className = 'sticky top-0 z-50 w-full';
+  header.className = 'sticky top-0 z-50 transition-transform duration-300 will-change-transform w-full';
   header.innerHTML = `
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
       <div class="bg-white dark:bg-slate-900 md:bg-white/90 md:dark:bg-slate-900/90 md:backdrop-blur-2xl border border-gray-200/70 dark:border-white/10 rounded-[2rem] shadow-lg md:shadow-xl px-4 sm:px-8 py-3 flex items-center justify-between gap-3 transition-all duration-300">
@@ -183,7 +185,7 @@ function _injectMobileNav(currentPage) {
 
   const nav = document.createElement('nav');
   nav.id = 'mobileBottomNav';
-  nav.className = 'fixed bottom-4 left-4 right-4 z-[60] lg:hidden';
+  nav.className = 'fixed bottom-4 left-4 right-4 z-[60] lg:hidden transition-transform duration-300 will-change-transform';
   nav.setAttribute('aria-label', 'Bottom navigation');
 
   const items = [
@@ -280,91 +282,53 @@ function _initSwipeNav(currentPage) {
 }
 
 function _initScrollHideNav() {
-  let lastY = Math.max(window.pageYOffset, window.scrollY || 0);
+  const header = document.querySelector('header');
+  const bottomNav = document.getElementById('mobileBottomNav');
+  if (!header && !bottomNav) return;
+
+  let lastScrollY = window.scrollY;
   let ticking = false;
 
-  const TOP_SHOW = 20;
+  const TOP_SHOW_THRESHOLD = 16;
   const HIDE_AFTER = 90;
-  const MIN_DELTA = 6;
+  const MIN_DELTA = 8;
 
-  function getHeader() {
-    return document.querySelector('body > header') || document.querySelector('header');
-  }
+  const update = () => {
+    const currentScrollY = window.scrollY;
+    const delta = currentScrollY - lastScrollY;
 
-  function getBottomNav() {
-    return document.getElementById('mobileBottomNav');
-  }
-
-  function prepareElement(el, isBottom = false) {
-    if (!el) return;
-    el.style.willChange = 'transform';
-    el.style.transition = 'transform 280ms cubic-bezier(0.4, 0, 0.2, 1)';
-    if (!el.dataset.navPrepared) {
-      el.style.transform = isBottom ? 'translate3d(0,0,0)' : 'translate3d(0,0,0)';
-      el.dataset.navPrepared = 'true';
-    }
-  }
-
-  function showBars() {
-    const header = getHeader();
-    const bottomNav = getBottomNav();
-
-    prepareElement(header, false);
-    prepareElement(bottomNav, true);
-
-    if (header) header.style.transform = 'translate3d(0,0,0)';
-    if (bottomNav) bottomNav.style.transform = 'translate3d(0,0,0)';
-  }
-
-  function hideBars() {
-    const header = getHeader();
-    const bottomNav = getBottomNav();
-
-    prepareElement(header, false);
-    prepareElement(bottomNav, true);
-
-    if (header) header.style.transform = 'translate3d(0,-120%,0)';
-    if (bottomNav) bottomNav.style.transform = 'translate3d(0,calc(100% + 20px),0)';
-  }
-
-  function onFrame() {
-    const currentY = Math.max(window.pageYOffset, window.scrollY || 0);
-    const delta = currentY - lastY;
-
-    if (currentY <= TOP_SHOW) {
-      showBars();
-      lastY = currentY;
+    if (Math.abs(delta) <= MIN_DELTA) {
       ticking = false;
       return;
     }
 
-    if (Math.abs(delta) < MIN_DELTA) {
+    // Always show when near top
+    if (currentScrollY <= TOP_SHOW_THRESHOLD) {
+      if (header) header.classList.remove('header-hidden');
+      if (bottomNav) bottomNav.style.transform = 'translateY(0)';
+      lastScrollY = currentScrollY;
       ticking = false;
       return;
     }
 
-    if (delta > 0 && currentY > HIDE_AFTER) {
-      hideBars();
-    } else if (delta < 0) {
-      showBars();
+    // Hide on scroll down
+    if (delta > 0 && currentScrollY > HIDE_AFTER) {
+      if (header) header.classList.add('header-hidden');
+      if (bottomNav) bottomNav.style.transform = 'translateY(calc(100% + 24px))';
+    } 
+    // Show on scroll up
+    else if (delta < 0) {
+      if (header) header.classList.remove('header-hidden');
+      if (bottomNav) bottomNav.style.transform = 'translateY(0)';
     }
 
-    lastY = currentY;
+    lastScrollY = currentScrollY;
     ticking = false;
-  }
+  };
 
-  function requestTick() {
+  window.addEventListener('scroll', () => {
     if (ticking) return;
     ticking = true;
-    window.requestAnimationFrame(onFrame);
-  }
-
-  showBars();
-
-  window.addEventListener('scroll', requestTick, { passive: true });
-  window.addEventListener('touchmove', requestTick, { passive: true });
-  window.addEventListener('resize', () => {
-    showBars();
-    lastY = Math.max(window.pageYOffset, window.scrollY || 0);
+    window.requestAnimationFrame(update);
   }, { passive: true });
 }
