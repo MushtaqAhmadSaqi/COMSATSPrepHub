@@ -3310,6 +3310,7 @@ html.dark .mobile-nav-link.active {
   z-index: 120;
   opacity: 1;
   pointer-events: auto;
+  display: flex;
 }
 
 #mobileBottomNav.mobile-nav-shell.nav-hidden {

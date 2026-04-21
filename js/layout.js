@@ -208,6 +208,15 @@ function _injectMobileNav(currentPage) {
   } else {
     document.body.insertAdjacentHTML('beforeend', html);
   }
+
+  const nav = document.getElementById('mobileBottomNav');
+  if (nav) {
+    if (nav.style.display === 'none') {
+      nav.style.display = '';
+    }
+    nav.classList.remove('nav-hidden');
+    nav.style.transform = '';
+  }
 }
 
 function _injectGlobalFeedbackBox() {

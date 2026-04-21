@@ -191,8 +191,11 @@
   async function getQuestionCountsMap(paperIds = []) {
     if (!paperIds.length) return { totalQuestions: 0, questionCountMap: new Map() };
 
-    const { data, error } = await supabase.from('paper_questions').select('paper_id').in('paper_id', paperIds);
-    if (error) throw error;
+    const { data, error } = await supabase.from('questions').select('paper_id').in('paper_id', paperIds);
+    if (error) {
+       console.error("Failed fetching question counts:", error);
+       return { totalQuestions: 0, questionCountMap: new Map() };
+    }
 
     const questionCountMap = new Map();
 
