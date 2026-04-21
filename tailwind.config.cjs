@@ -2,7 +2,7 @@ module.exports = {
   darkMode: 'class',
   content: [
     './*.html',
-    './AuthScreen/**/*.html'
+    './auth.html'
   ],
   theme: {
     extend: {

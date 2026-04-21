@@ -357,8 +357,8 @@
     import { requireAuth, getDisplayName, getFirstName, signOutAndRedirect } from './user-state.js';
 
     (async () => {
-        // 1. Auth guard — bounces to /AuthScreen/auth.html if not logged in
-        const session = await requireAuth('AuthScreen/auth.html');
+        // 1. Auth guard — bounces to /auth.html if not logged in
+        const session = await requireAuth('auth.html');
         if (!session) return; // redirect already happened
 
         const user = session.user;

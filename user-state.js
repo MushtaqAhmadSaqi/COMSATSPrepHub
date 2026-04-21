@@ -54,7 +54,7 @@ export async function signOutAndRedirect(redirectPath = 'index.html') {
  * @param {string} loginPath - path to your login page
  * @returns {object|null} session object if authenticated
  */
-export async function requireAuth(loginPath = 'AuthScreen/auth.html') {
+export async function requireAuth(loginPath = 'auth.html') {
     const session = await getUserSession();
     if (!session) {
         window.location.href = loginPath;

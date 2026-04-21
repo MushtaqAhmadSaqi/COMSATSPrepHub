@@ -105,7 +105,7 @@
         });
 
         async function guardAdminAndInit() {
-            const session = await requireAuth('AuthScreen/auth.html');
+            const session = await requireAuth('auth.html');
             if (!session) return;
             if (!isAdminEmail(session.user?.email)) {
                 alert('Admin access only.');

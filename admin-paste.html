@@ -321,7 +321,7 @@ JSON FORMAT:
         mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict' });
 
         async function guardAdmin() {
-            const session = await requireAuth('AuthScreen/auth.html');
+            const session = await requireAuth('auth.html');
             if (!session) return false;
             if (!isAdminEmail(session.user?.email)) {
                 alert('Admin access only.');
