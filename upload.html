@@ -1,507 +1,548 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Upload Past Paper | COMSATSPrepHub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
     <script src="js/tailwind-config.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="js/dark-mode.js" defer></script>
-</head>
+  </head>
 
-<body class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300 min-h-screen flex flex-col">
+  <body
+    class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300 min-h-screen flex flex-col"
+  >
     <!-- Header injected by js/layout.js -->
 
     <main class="main-content container text-on-background">
-        <!-- Editorial Header Section -->
-        <div class="page-header" style="max-width: 672px;">
-            <div>
-                <span class="section-label" style="display: block; color: var(--primary);">Community Repository</span>
-                <h1 class="main-title text-on-surface">Upload Past Paper</h1>
-                <p class="question-desc" style="margin-top: 16px; font-size: 18px;">Your contribution helps fellow
-                    students master their courses. Join our network of academic curators by sharing high-quality
-                    resources.</p>
-            </div>
+      <!-- Editorial Header Section -->
+      <div class="page-header" style="max-width: 672px">
+        <div>
+          <span
+            class="section-label"
+            style="display: block; color: var(--primary)"
+            >Community Repository</span
+          >
+          <h1 class="main-title text-on-surface">Upload Past Paper</h1>
+          <p class="question-desc" style="margin-top: 16px; font-size: 18px">
+            Your contribution helps fellow students master their courses. Join
+            our network of academic curators by sharing high-quality resources.
+          </p>
+        </div>
+      </div>
+
+      <div class="upload-layout">
+        <!-- Form Section -->
+        <div class="upload-main">
+          <div class="upload-form-card">
+            <form id="uploadForm">
+              <div class="upload-form-grid">
+                <!-- Subject Name -->
+                <div class="form-group">
+                  <label class="form-label" for="subject">Subject Name</label>
+                  <input
+                    class="form-control"
+                    id="subject"
+                    type="text"
+                    list="subjectList"
+                    placeholder="e.g. Data Structures"
+                    required
+                  />
+                  <datalist id="subjectList">
+                    <option value="Loading subjects..."></option>
+                  </datalist>
+                </div>
+
+                <!-- Academic Year -->
+                <div class="form-group">
+                  <label class="form-label" for="year">Academic Year</label>
+                  <input
+                    class="form-control"
+                    id="year"
+                    min="2010"
+                    placeholder="e.g. 2024"
+                    type="number"
+                    required
+                  />
+                </div>
+
+                <!-- Exam Type -->
+                <div class="form-group">
+                  <label class="form-label">Exam Type</label>
+                  <div class="radio-group">
+                    <label class="radio-label">
+                      <input
+                        checked
+                        class="radio-input"
+                        id="exam-mid"
+                        name="exam_type"
+                        type="radio"
+                        value="Mid Term"
+                      />
+                      <div class="radio-button">Mid</div>
+                    </label>
+                    <label class="radio-label">
+                      <input
+                        class="radio-input"
+                        id="exam-final"
+                        name="exam_type"
+                        type="radio"
+                        value="Final Term"
+                      />
+                      <div class="radio-button">Final</div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Semester -->
+                <div class="form-group">
+                  <label class="form-label" for="semester">Semester</label>
+                  <select class="form-control" id="semester">
+                    <option>Spring</option>
+                    <option>Fall</option>
+                    <option>Summer</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Upload Zone -->
+              <div class="form-group">
+                <label class="form-label">Upload Document (PDF/Image)</label>
+                <div class="upload-zone text-on-surface">
+                  <input
+                    class="upload-input"
+                    type="file"
+                    id="fileInput"
+                    accept=".pdf,image/*"
+                  />
+                  <span
+                    class="material-symbols-outlined"
+                    style="
+                      font-size: 36px;
+                      color: var(--primary);
+                      margin-bottom: 16px;
+                    "
+                    >upload_file</span
+                  >
+                  <p style="font-weight: 500">
+                    Drag and drop file here, or
+                    <span
+                      style="color: var(--primary); text-decoration: underline"
+                      >browse</span
+                    >
+                  </p>
+                  <p
+                    class="question-desc"
+                    style="font-size: 14px; margin-top: 8px"
+                  >
+                    Maximum file size 5MB
+                  </p>
+                </div>
+              </div>
+
+              <div style="padding-top: 24px">
+                <button
+                  class="btn-primary"
+                  style="
+                    width: 100%;
+                    padding: 16px 40px;
+                    border-radius: 999px;
+                    box-shadow: var(--shadow-sm);
+                    font-size: 16px;
+                  "
+                  type="submit"
+                >
+                  Submit Contribution
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
 
-        <div class="upload-layout">
-            <!-- Form Section -->
-            <div class="upload-main">
-                <div class="upload-form-card">
-                    <form id="uploadForm">
-                        <div class="upload-form-grid">
-                            <!-- Subject Name -->
-                            <div class="form-group">
-                                <label class="form-label" for="subject">Subject Name</label>
-                                <select class="form-control" id="subject" required>
-                                    <option selected value="">Loading subjects...</option>
-                                </select>
-                            </div>
-
-                            <!-- Academic Year -->
-                            <div class="form-group">
-                                <label class="form-label" for="year">Academic Year</label>
-                                <input class="form-control" id="year" min="2010" placeholder="e.g. 2024"
-                                    type="number" required>
-                            </div>
-
-                            <!-- Exam Type -->
-                            <div class="form-group">
-                                <label class="form-label">Exam Type</label>
-                                <div class="radio-group">
-                                    <label class="radio-label">
-                                        <input checked class="radio-input" id="exam-mid" name="exam_type" type="radio" value="Mid Term">
-                                        <div class="radio-button">Mid</div>
-                                    </label>
-                                    <label class="radio-label">
-                                        <input class="radio-input" id="exam-final" name="exam_type" type="radio" value="Final Term">
-                                        <div class="radio-button">Final</div>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- Semester -->
-                            <div class="form-group">
-                                <label class="form-label" for="semester">Semester</label>
-                                <select class="form-control" id="semester">
-                                    <option>Spring</option>
-                                    <option>Fall</option>
-                                    <option>Summer</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Upload Zone -->
-                        <div class="form-group">
-                            <label class="form-label">Upload Document (PDF/Image)</label>
-                            <div class="upload-zone text-on-surface">
-                                <input class="upload-input" type="file" id="fileInput" accept=".pdf,image/*">
-                                <span class="material-symbols-outlined"
-                                    style="font-size: 36px; color: var(--primary); margin-bottom: 16px;">upload_file</span>
-                                <p style="font-weight: 500;">Drag and drop file here, or <span
-                                        style="color: var(--primary); text-decoration: underline;">browse</span></p>
-                                <p class="question-desc" style="font-size: 14px; margin-top: 8px;">Maximum file size 5MB
-                                </p>
-                            </div>
-                        </div>
-
-                        <div style="padding-top: 24px;">
-                            <button class="btn-primary"
-                                style="width: 100%; padding: 16px 40px; border-radius: 999px; box-shadow: var(--shadow-sm); font-size: 16px;"
-                                type="submit">
-                                Submit Contribution
-                            </button>
-                        </div>
-                    </form>
-                </div>
+        <!-- Guidelines Sidebar -->
+        <div class="upload-sidebar">
+          <div class="guidelines-card">
+            <h3 style="font-size: 20px; font-weight: 700">Submission Guide</h3>
+            <div style="display: flex; flex-direction: column; gap: 16px">
+              <div class="guideline-item">
+                <div class="guideline-number">1</div>
+                <p
+                  class="question-desc"
+                  style="font-size: 14px; line-height: 1.6"
+                >
+                  Ensure the document is clear and readable without digital
+                  noise.
+                </p>
+              </div>
+              <div class="guideline-item">
+                <div class="guideline-number">2</div>
+                <p
+                  class="question-desc"
+                  style="font-size: 14px; line-height: 1.6"
+                >
+                  Include all pages of the question paper in sequential order.
+                </p>
+              </div>
+              <div class="guideline-item">
+                <div class="guideline-number">3</div>
+                <p
+                  class="question-desc"
+                  style="font-size: 14px; line-height: 1.6"
+                >
+                  Redact any personal handwritten notes if necessary.
+                </p>
+              </div>
             </div>
 
-            <!-- Guidelines Sidebar -->
-            <div class="upload-sidebar">
-                <div class="guidelines-card">
-                    <h3 style="font-size: 20px; font-weight: 700;">Submission Guide</h3>
-                    <div style="display: flex; flex-direction: column; gap: 16px;">
-                        <div class="guideline-item">
-                            <div class="guideline-number">1</div>
-                            <p class="question-desc" style="font-size: 14px; line-height: 1.6;">Ensure the document is
-                                clear and readable without digital noise.</p>
-                        </div>
-                        <div class="guideline-item">
-                            <div class="guideline-number">2</div>
-                            <p class="question-desc" style="font-size: 14px; line-height: 1.6;">Include all pages of the
-                                question paper in sequential order.</p>
-                        </div>
-                        <div class="guideline-item">
-                            <div class="guideline-number">3</div>
-                            <p class="question-desc" style="font-size: 14px; line-height: 1.6;">Redact any personal
-                                handwritten notes if necessary.</p>
-                        </div>
-                    </div>
-
-                    <div class="perk-box">
-                        <div class="perk-header">
-                            <span class="material-symbols-outlined">verified</span>
-                            <span style="font-size: 12px; font-weight: 700; text-transform: uppercase;">Top Contributor
-                                Perk</span>
-                        </div>
-                        <p class="question-desc"
-                            style="font-size: 11px; margin-top: 12px; font-style: italic; line-height: 1.25;">
-                            Contributors with over 10 verified uploads receive a special "Archive Master" badge and
-                            priority leaderboard placement.</p>
-                    </div>
-                </div>
-
-                <!-- Preview Card -->
-                <div class="support-card">
-                    <div style="position: relative; z-index: 10;">
-                        <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Need Help?</h4>
-                        <p style="color: rgba(255, 255, 255, 0.7); font-size: 14px; margin-bottom: 16px;">Contact the
-                            moderation team for issues regarding file formatting.</p>
-                        <a href="feedback.html"
-                            style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(255, 255, 255, 0.3); padding-bottom: 4px; text-decoration: none;">Support
-                            Desk</a>
-                    </div>
-                    <span class="material-symbols-outlined support-bg-icon">contact_support</span>
-                </div>
+            <div class="perk-box">
+              <div class="perk-header">
+                <span class="material-symbols-outlined">verified</span>
+                <span
+                  style="
+                    font-size: 12px;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                  "
+                  >Top Contributor Perk</span
+                >
+              </div>
+              <p
+                class="question-desc"
+                style="
+                  font-size: 11px;
+                  margin-top: 12px;
+                  font-style: italic;
+                  line-height: 1.25;
+                "
+              >
+                Contributors with over 10 verified uploads receive a special
+                "Archive Master" badge and priority leaderboard placement.
+              </p>
             </div>
+          </div>
+
+          <!-- Preview Card -->
+          <div class="support-card">
+            <div style="position: relative; z-index: 10">
+              <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 8px">
+                Need Help?
+              </h4>
+              <p
+                style="
+                  color: rgba(255, 255, 255, 0.7);
+                  font-size: 14px;
+                  margin-bottom: 16px;
+                "
+              >
+                Contact the moderation team for issues regarding file
+                formatting.
+              </p>
+              <a
+                href="feedback.html"
+                style="
+                  font-size: 12px;
+                  font-weight: 700;
+                  text-transform: uppercase;
+                  letter-spacing: 1px;
+                  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+                  padding-bottom: 4px;
+                  text-decoration: none;
+                "
+                >Support Desk</a
+              >
+            </div>
+            <span class="material-symbols-outlined support-bg-icon"
+              >contact_support</span
+            >
+          </div>
         </div>
+      </div>
     </main>
 
     <!-- Footer injected by js/layout.js -->
 
     <script type="module">
-        import { supabase, escapeHtml } from './utils.js';
+      import { supabase, escapeHtml } from './utils.js';
 
-        /**
-         * Patch 7 notes
-         * ----------------------------------------------------------
-         * This upload flow stores:
-         * 1) the raw file in Supabase Storage
-         * 2) a moderation row in a submissions table
-         *
-         * If your backend uses different names, only change:
-         * - STORAGE_BUCKET
-         * - SUBMISSIONS_TABLE
-         */
-        const STORAGE_BUCKET = 'paper-submissions';
-        const SUBMISSIONS_TABLE = 'paper_submissions';
+      /**
+       * Patch 7 notes
+       * ----------------------------------------------------------
+       * This upload flow stores:
+       * 1) the raw file in Supabase Storage
+       * 2) a moderation row in a submissions table
+       *
+       * If your backend uses different names, only change:
+       * - STORAGE_BUCKET
+       * - SUBMISSIONS_TABLE
+       */
+      const STORAGE_BUCKET = 'paper-submissions';
+      const SUBMISSIONS_TABLE = 'paper_submissions';
 
-        const form = document.getElementById('uploadForm');
-        const subjectSelect = document.getElementById('subject');
-        const yearInput = document.getElementById('year');
-        const semesterSelect = document.getElementById('semester');
-        const fileInput = document.getElementById('fileInput');
-        const submitBtn = form.querySelector('button[type="submit"]');
+      const form = document.getElementById('uploadForm');
+      const subjectInput = document.getElementById('subject');
 
-        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-        const ALLOWED_TYPES = new Set([
-            'application/pdf',
-            'image/jpeg',
-            'image/png',
-            'image/webp'
-        ]);
+      form.addEventListener('submit', async event => {
+          event.preventDefault();
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            yearInput.max = String(new Date().getFullYear() + 1);
-            await populateSubjects();
-        });
+          clearMessages();
 
-        async function populateSubjects() {
-            const initialFallback = `
-                <option value="">Select Subject</option>
-                <option value="Data Structures" data-subject-name="Data Structures">Data Structures</option>
-                <option value="Operating Systems" data-subject-name="Operating Systems">Operating Systems</option>
-                <option value="Calculus III" data-subject-name="Calculus III">Calculus III</option>
-                <option value="Linear Algebra" data-subject-name="Linear Algebra">Linear Algebra</option>
-                <option value="Web Technologies" data-subject-name="Web Technologies">Web Technologies</option>
-            `;
+          const validation = validateForm();
+          if (!validation.ok) {
+              showError(validation.message);
+              return;
+          }
 
-            try {
-                const { data, error } = await supabase
-                    .from('past_papers')
-                    .select('subject_code, subject_name')
-                    .order('subject_name', { ascending: true });
+          const {
+              file,
+              subjectCode,
+              subjectName,
+              year,
+              examType,
+              semester
+          } = validation.values;
 
-                if (error) throw error;
+          const originalHtml = submitBtn.innerHTML;
+          setButtonLoading('Uploading...');
 
-                const unique = new Map();
+          let uploadedPath = null;
 
-                (data || []).forEach(row => {
-                    const subjectCode = String(row.subject_code || '').trim();
-                    const subjectName = String(row.subject_name || '').trim();
+          try {
+              const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+              if (sessionError) throw sessionError;
 
-                    if (!subjectName) return;
+              const session = sessionData?.session ?? null;
+              if (!session) {
+                  throw new Error('Please sign in before uploading a paper.');
+              }
 
-                    const key = `${subjectCode}__${subjectName}`;
-                    if (!unique.has(key)) {
-                        unique.set(key, { subjectCode, subjectName });
-                    }
-                });
+              const userId = session.user.id;
+              const fileExt = getFileExtension(file.name);
+              const safeExt = fileExt || inferExtensionFromMime(file.type) || 'bin';
 
-                if (unique.size === 0) {
-                    subjectSelect.innerHTML = initialFallback;
-                    return;
-                }
+              const safeSubjectCode = slugify(subjectCode || subjectName || 'subject');
+              const safeSemester = slugify(semester || 'semester');
+              const safeExamType = slugify(examType || 'exam');
+              const timestamp = Date.now();
 
-                subjectSelect.innerHTML = `
-                    <option value="">Select Subject</option>
-                    ${Array.from(unique.values()).map(subject => `
-                        <option
-                            value="${escapeHtml(subject.subjectCode || subject.subjectName)}"
-                            data-subject-name="${escapeHtml(subject.subjectName)}"
-                        >
-                            ${escapeHtml(subject.subjectCode ? `${subject.subjectCode} — ${subject.subjectName}` : subject.subjectName)}
-                        </option>
-                    `).join('')}
-                `;
-            } catch (error) {
-                console.error('Failed to load subjects:', error);
-                subjectSelect.innerHTML = initialFallback;
-                showError('Could not load subjects from the database. Fallback list loaded instead.');
-            }
-        }
+              uploadedPath = [
+                  'pending',
+                  safeSubjectCode,
+                  `${year}`,
+                  `${safeExamType}-${safeSemester}-${timestamp}.${safeExt}`
+              ].join('/');
 
-        form.addEventListener('submit', async event => {
-            event.preventDefault();
+              const { error: uploadError } = await supabase.storage
+                  .from(STORAGE_BUCKET)
+                  .upload(uploadedPath, file, {
+                      cacheControl: '3600',
+                      upsert: false,
+                      contentType: file.type
+                  });
 
-            clearMessages();
+              if (uploadError) throw uploadError;
 
-            const validation = validateForm();
-            if (!validation.ok) {
-                showError(validation.message);
-                return;
-            }
+              const submissionPayload = {
+                  subject_code: subjectCode || null,
+                  subject_name: subjectName,
+                  year,
+                  exam_type: examType,
+                  semester,
+                  file_name: file.name,
+                  file_size: file.size,
+                  mime_type: file.type,
+                  storage_bucket: STORAGE_BUCKET,
+                  storage_path: uploadedPath,
+                  status: 'pending_review',
+                  uploaded_by: userId
+              };
 
-            const {
-                file,
-                subjectCode,
-                subjectName,
-                year,
-                examType,
-                semester
-            } = validation.values;
+              const { error: insertError } = await supabase
+                  .from(SUBMISSIONS_TABLE)
+                  .insert([submissionPayload]);
 
-            const originalHtml = submitBtn.innerHTML;
-            setButtonLoading('Uploading...');
+              if (insertError) {
+                  await safeDeleteUploadedFile(uploadedPath);
+                  throw insertError;
+              }
 
-            let uploadedPath = null;
+              form.reset();
+              showSuccess('Thank you! Your paper has been uploaded and submitted for review.');
+          } catch (error) {
+              console.error('Upload failed:', error);
+              showError(getReadableUploadError(error));
+          } finally {
+              restoreButton(originalHtml);
+          }
+      });
 
-            try {
-                const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-                if (sessionError) throw sessionError;
+      function validateForm() {
+          const subjectValue = String(subjectInput.value || '').trim();
+          const subjectCode = ''; // Code is unknown from text input
+          const subjectName = subjectValue;
+          const year = Number(yearInput.value);
+          const examType = String(document.querySelector('input[name="exam_type"]:checked')?.value || '').trim();
+          const semester = String(semesterSelect.value || '').trim();
 
-                const session = sessionData?.session ?? null;
-                if (!session) {
-                    throw new Error('Please sign in before uploading a paper.');
-                }
+          if (!subjectValue) {
+              return { ok: false, message: 'Please enter a subject name.' };
+          }
 
-                const userId = session.user.id;
-                const fileExt = getFileExtension(file.name);
-                const safeExt = fileExt || inferExtensionFromMime(file.type) || 'bin';
+          if (!Number.isInteger(year) || year < 2010 || year > (new Date().getFullYear() + 1)) {
+              return { ok: false, message: 'Please enter a valid academic year.' };
+          }
 
-                const safeSubjectCode = slugify(subjectCode || subjectName || 'subject');
-                const safeSemester = slugify(semester || 'semester');
-                const safeExamType = slugify(examType || 'exam');
-                const timestamp = Date.now();
+          if (!examType) {
+              return { ok: false, message: 'Please select an exam type.' };
+          }
 
-                uploadedPath = [
-                    'pending',
-                    safeSubjectCode,
-                    `${year}`,
-                    `${safeExamType}-${safeSemester}-${timestamp}.${safeExt}`
-                ].join('/');
+          if (!semester) {
+              return { ok: false, message: 'Please select a semester.' };
+          }
 
-                const { error: uploadError } = await supabase.storage
-                    .from(STORAGE_BUCKET)
-                    .upload(uploadedPath, file, {
-                        cacheControl: '3600',
-                        upsert: false,
-                        contentType: file.type
-                    });
+          if (!fileInput.files || fileInput.files.length === 0) {
+              return { ok: false, message: 'Please select a file to upload.' };
+          }
 
-                if (uploadError) throw uploadError;
+          const file = fileInput.files[0];
 
-                const submissionPayload = {
-                    subject_code: subjectCode || null,
-                    subject_name: subjectName,
-                    year,
-                    exam_type: examType,
-                    semester,
-                    file_name: file.name,
-                    file_size: file.size,
-                    mime_type: file.type,
-                    storage_bucket: STORAGE_BUCKET,
-                    storage_path: uploadedPath,
-                    status: 'pending_review',
-                    uploaded_by: userId
-                };
+          if (file.size > MAX_FILE_SIZE) {
+              return { ok: false, message: 'File is too large. Maximum allowed size is 5MB.' };
+          }
 
-                const { error: insertError } = await supabase
-                    .from(SUBMISSIONS_TABLE)
-                    .insert([submissionPayload]);
+          if (!ALLOWED_TYPES.has(file.type)) {
+              return { ok: false, message: 'Only PDF and image files (JPG, PNG, WEBP) are allowed.' };
+          }
 
-                if (insertError) {
-                    await safeDeleteUploadedFile(uploadedPath);
-                    throw insertError;
-                }
+          return {
+              ok: true,
+              values: {
+                  file,
+                  subjectCode,
+                  subjectName,
+                  year,
+                  examType,
+                  semester
+              }
+          };
+      }
 
-                form.reset();
-                showSuccess('Thank you! Your paper has been uploaded and submitted for review.');
-            } catch (error) {
-                console.error('Upload failed:', error);
-                showError(getReadableUploadError(error));
-            } finally {
-                restoreButton(originalHtml);
-            }
-        });
+      async function safeDeleteUploadedFile(path) {
+          if (!path) return;
+          try {
+              await supabase.storage.from(STORAGE_BUCKET).remove([path]);
+          } catch (error) {
+              console.warn('Rollback delete failed:', error);
+          }
+      }
 
-        function validateForm() {
-            const selectedOption = subjectSelect.options[subjectSelect.selectedIndex];
-            const subjectCode = String(selectedOption?.value || '').trim();
-            const subjectName = String(selectedOption?.dataset?.subjectName || selectedOption?.textContent || '').trim();
-            const year = Number(yearInput.value);
-            const examType = String(document.querySelector('input[name="exam_type"]:checked')?.value || '').trim();
-            const semester = String(semesterSelect.value || '').trim();
+      function setButtonLoading(label) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = \`
+              <span class="flex items-center justify-center gap-2">
+                  <span class="animate-spin text-xl">⟳</span>
+                  <span>\${escapeHtml(label)}</span>
+              </span>
+          \`;
+      }
 
-            if (!subjectSelect.value) {
-                return { ok: false, message: 'Please select a subject.' };
-            }
+      function restoreButton(html) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = html;
+      }
 
-            if (!Number.isInteger(year) || year < 2010 || year > (new Date().getFullYear() + 1)) {
-                return { ok: false, message: 'Please enter a valid academic year.' };
-            }
+      function showError(message) {
+          removeMessage('upload-success');
+          removeMessage('upload-error');
 
-            if (!examType) {
-                return { ok: false, message: 'Please select an exam type.' };
-            }
+          const errorDiv = document.createElement('div');
+          errorDiv.id = 'upload-error';
+          errorDiv.className = 'mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-3 animate-fade-in';
+          errorDiv.innerHTML = \`
+              <span class="material-symbols-outlined text-red-500 mt-0.5">error</span>
+              <div>
+                  <p class="font-bold text-sm">Upload Error</p>
+                  <p class="text-xs opacity-90">\${escapeHtml(message)}</p>
+              </div>
+          \`;
 
-            if (!semester) {
-                return { ok: false, message: 'Please select a semester.' };
-            }
+          form.appendChild(errorDiv);
 
-            if (!fileInput.files || fileInput.files.length === 0) {
-                return { ok: false, message: 'Please select a file to upload.' };
-            }
+          setTimeout(() => {
+              if (errorDiv.parentNode) errorDiv.parentNode.removeChild(errorDiv);
+          }, 5000);
+      }
 
-            const file = fileInput.files[0];
+      function showSuccess(message) {
+          removeMessage('upload-error');
+          removeMessage('upload-success');
 
-            if (file.size > MAX_FILE_SIZE) {
-                return { ok: false, message: 'File is too large. Maximum allowed size is 5MB.' };
-            }
+          const successDiv = document.createElement('div');
+          successDiv.id = 'upload-success';
+          successDiv.className = 'mt-4 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl flex items-start gap-3 animate-fade-in';
+          successDiv.innerHTML = \`
+              <span class="material-symbols-outlined text-emerald-500 mt-0.5">check_circle</span>
+              <div>
+                  <p class="font-bold text-sm">Success!</p>
+                  <p class="text-xs opacity-90">\${escapeHtml(message)}</p>
+              </div>
+          \`;
 
-            if (!ALLOWED_TYPES.has(file.type)) {
-                return { ok: false, message: 'Only PDF and image files (JPG, PNG, WEBP) are allowed.' };
-            }
+          form.appendChild(successDiv);
+      }
 
-            return {
-                ok: true,
-                values: {
-                    file,
-                    subjectCode,
-                    subjectName,
-                    year,
-                    examType,
-                    semester
-                }
-            };
-        }
+      function clearMessages() {
+          removeMessage('upload-error');
+          removeMessage('upload-success');
+      }
 
-        async function safeDeleteUploadedFile(path) {
-            if (!path) return;
-            try {
-                await supabase.storage.from(STORAGE_BUCKET).remove([path]);
-            } catch (error) {
-                console.warn('Rollback delete failed:', error);
-            }
-        }
+      function removeMessage(id) {
+          const node = document.getElementById(id);
+          if (node) node.remove();
+      }
 
-        function setButtonLoading(label) {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = \`
-                <span class="flex items-center justify-center gap-2">
-                    <span class="animate-spin text-xl">⟳</span>
-                    <span>\${escapeHtml(label)}</span>
-                </span>
-            \`;
-        }
+      function getReadableUploadError(error) {
+          const raw = String(error?.message || error || '').trim();
+          const lower = raw.toLowerCase();
 
-        function restoreButton(html) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = html;
-        }
+          if (!raw) return 'Upload failed. Please try again.';
 
-        function showError(message) {
-            removeMessage('upload-success');
-            removeMessage('upload-error');
+          if (lower.includes('sign in')) return 'Please sign in before uploading a paper.';
+          if (lower.includes('row-level security')) return 'Upload permission is blocked by your database policy. Please check your Supabase RLS rules.';
+          if (lower.includes('bucket')) return 'Storage bucket is not configured correctly. Please check the Supabase bucket name and policies.';
+          if (lower.includes('duplicate')) return 'A file with the same name already exists. Please try again.';
+          if (lower.includes('mime')) return 'This file type is not allowed.';
+          if (lower.includes('network')) return 'Network issue detected. Please check your connection and try again.';
 
-            const errorDiv = document.createElement('div');
-            errorDiv.id = 'upload-error';
-            errorDiv.className = 'mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-3 animate-fade-in';
-            errorDiv.innerHTML = \`
-                <span class="material-symbols-outlined text-red-500 mt-0.5">error</span>
-                <div>
-                    <p class="font-bold text-sm">Upload Error</p>
-                    <p class="text-xs opacity-90">\${escapeHtml(message)}</p>
-                </div>
-            \`;
+          return raw;
+      }
 
-            form.appendChild(errorDiv);
+      function getFileExtension(fileName) {
+          const parts = String(fileName || '').split('.');
+          return parts.length > 1 ? parts.pop().toLowerCase() : '';
+      }
 
-            setTimeout(() => {
-                if (errorDiv.parentNode) errorDiv.parentNode.removeChild(errorDiv);
-            }, 5000);
-        }
+      function inferExtensionFromMime(mime) {
+          if (mime === 'application/pdf') return 'pdf';
+          if (mime === 'image/jpeg') return 'jpg';
+          if (mime === 'image/png') return 'png';
+          if (mime === 'image/webp') return 'webp';
+          return '';
+      }
 
-        function showSuccess(message) {
-            removeMessage('upload-error');
-            removeMessage('upload-success');
-
-            const successDiv = document.createElement('div');
-            successDiv.id = 'upload-success';
-            successDiv.className = 'mt-4 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl flex items-start gap-3 animate-fade-in';
-            successDiv.innerHTML = \`
-                <span class="material-symbols-outlined text-emerald-500 mt-0.5">check_circle</span>
-                <div>
-                    <p class="font-bold text-sm">Success!</p>
-                    <p class="text-xs opacity-90">\${escapeHtml(message)}</p>
-                </div>
-            \`;
-
-            form.appendChild(successDiv);
-        }
-
-        function clearMessages() {
-            removeMessage('upload-error');
-            removeMessage('upload-success');
-        }
-
-        function removeMessage(id) {
-            const node = document.getElementById(id);
-            if (node) node.remove();
-        }
-
-        function getReadableUploadError(error) {
-            const raw = String(error?.message || error || '').trim();
-            const lower = raw.toLowerCase();
-
-            if (!raw) return 'Upload failed. Please try again.';
-
-            if (lower.includes('sign in')) return 'Please sign in before uploading a paper.';
-            if (lower.includes('row-level security')) return 'Upload permission is blocked by your database policy. Please check your Supabase RLS rules.';
-            if (lower.includes('bucket')) return 'Storage bucket is not configured correctly. Please check the Supabase bucket name and policies.';
-            if (lower.includes('duplicate')) return 'A file with the same name already exists. Please try again.';
-            if (lower.includes('mime')) return 'This file type is not allowed.';
-            if (lower.includes('network')) return 'Network issue detected. Please check your connection and try again.';
-
-            return raw;
-        }
-
-        function getFileExtension(fileName) {
-            const parts = String(fileName || '').split('.');
-            return parts.length > 1 ? parts.pop().toLowerCase() : '';
-        }
-
-        function inferExtensionFromMime(mime) {
-            if (mime === 'application/pdf') return 'pdf';
-            if (mime === 'image/jpeg') return 'jpg';
-            if (mime === 'image/png') return 'png';
-            if (mime === 'image/webp') return 'webp';
-            return '';
-        }
-
-        function slugify(value) {
-            return String(value || '')
-                .toLowerCase()
-                .trim()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/^-+|-+$/g, '') || 'item';
-        }
+      function slugify(value) {
+          return String(value || '')
+              .toLowerCase()
+              .trim()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/^-+|-+$/g, '') || 'item';
+      }
     </script>
 
     <script type="module" src="js/layout.js"></script>
-</body>
-
+  </body>
 </html>
