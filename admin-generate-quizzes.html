@@ -80,6 +80,8 @@
                     class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition shadow-md hover:shadow-lg flex items-center justify-center gap-2">
                     <span>🚀 Launch Generator Pipeline</span>
                 </button>
+
+                <div id="generatorStatus" class="hidden mt-4 rounded-xl border px-4 py-3 text-sm leading-relaxed transition-all"></div>
             </div>
 
             <!-- Status Logs -->
@@ -110,12 +112,21 @@
         });
 
         window.saveApiKey = () => {
-            const key = document.getElementById('geminiApiKey').value.trim();
-            if (!key) return alert('Please enter a valid key.');
+            const key = document.getElementById('geminiApiKey')?.value.trim() || '';
             const status = document.getElementById('keyStatus');
-            status.classList.remove('hidden');
-            status.textContent = 'Key loaded for this session only.';
-            setTimeout(() => status.classList.add('hidden'), 3000);
+
+            if (!key) {
+                showGeneratorStatus('warning', 'Please enter a valid Gemini API key first.');
+                return;
+            }
+
+            if (status) {
+                status.classList.remove('hidden');
+                status.textContent = 'Key loaded for this session only.';
+                setTimeout(() => status.classList.add('hidden'), 3000);
+            }
+
+            showGeneratorStatus('success', 'Gemini API key accepted for this session.');
         };
 
         async function loadSubjects() {
@@ -138,41 +149,103 @@
             } catch (e) {
                 console.error('Error loading subjects:', e);
                 document.getElementById('subjectSelect').innerHTML = `<option>Error loading database</option>`;
+                showGeneratorStatus('error', 'Could not load subjects from the database.');
+                logMsg(`Subject load failed: ${e.message || e}`, true);
             }
         }
 
         function logMsg(msg, isError = false) {
             const container = document.getElementById('logContainer');
             const logs = document.getElementById('logs');
+            if (!container || !logs) return;
+
             container.classList.remove('hidden');
+
             const entry = document.createElement('div');
             entry.className = isError ? 'text-red-400' : 'text-emerald-400';
+
             const stamp = document.createElement('span');
             stamp.className = 'opacity-50';
             stamp.textContent = `[${new Date().toLocaleTimeString()}] `;
+
             entry.appendChild(stamp);
-            entry.appendChild(document.createTextNode(msg.replace(/<[^>]+>/g, '')));
+            entry.appendChild(document.createTextNode(String(msg || '').replace(/<[^>]+>/g, '')));
             logs.appendChild(entry);
             logs.scrollTop = logs.scrollHeight;
         }
 
+        function showGeneratorStatus(type, message) {
+            const box = document.getElementById('generatorStatus');
+            if (!box) return;
+
+            const styles = {
+                success: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+                error: 'bg-red-50 text-red-800 border-red-200',
+                info: 'bg-blue-50 text-blue-800 border-blue-200',
+                warning: 'bg-amber-50 text-amber-800 border-amber-200'
+            };
+
+            box.className = 'mt-4 rounded-xl border px-4 py-3 text-sm leading-relaxed transition-all';
+            box.classList.remove('hidden');
+            box.classList.add(...(styles[type] || styles.info).split(' '));
+            box.textContent = String(message || '');
+        }
+
+        function hideGeneratorStatus() {
+            const box = document.getElementById('generatorStatus');
+            if (!box) return;
+
+            box.classList.add('hidden');
+            box.textContent = '';
+        }
+
+        function setGenerateButtonBusy(isBusy, label = '🚀 Launch Generator Pipeline') {
+            const btn = document.getElementById('generateBtn');
+            if (!btn) return;
+
+            btn.disabled = !!isBusy;
+            btn.innerHTML = isBusy
+                ? `<span class="animate-pulse">⚙️ ${label}</span>`
+                : `<span>${label}</span>`;
+        }
+
+        function getSelectedSubjectMeta() {
+            const select = document.getElementById('subjectSelect');
+            if (!select) {
+                return { subjectCode: '', subjectName: '' };
+            }
+
+            const option = select.options[select.selectedIndex];
+            const subjectCode = String(select.value || '').trim();
+            const subjectName = String(option?.textContent || '')
+                .split('—')[1]?.trim() || '';
+
+            return { subjectCode, subjectName };
+        }
+
         window.generateQuiz = async () => {
-            const apiKey = document.getElementById('geminiApiKey').value.trim();
+            hideGeneratorStatus();
+
+            const apiKey = document.getElementById('geminiApiKey')?.value.trim() || '';
             if (!apiKey) {
-                alert('Please configure your Gemini API Key first.');
+                showGeneratorStatus('warning', 'Please configure your Gemini API Key first.');
                 return;
             }
 
-            const subjectCode = document.getElementById('subjectSelect').value;
-            const subjectName = document.getElementById('subjectSelect').options[document.getElementById('subjectSelect').selectedIndex].text.split('—')[1].trim();
-            const mcqCount = document.getElementById('questionCount').value;
+            const { subjectCode, subjectName } = getSelectedSubjectMeta();
+            const mcqCount = document.getElementById('questionCount')?.value || '10';
 
-            if (!subjectCode) return alert('Select a subject first');
+            if (!subjectCode) {
+                showGeneratorStatus('warning', 'Please select a subject first.');
+                return;
+            }
 
-            const btn = document.getElementById('generateBtn');
-            btn.disabled = true;
-            btn.innerHTML = `<span class="animate-pulse">⚙️ Working... DO NOT CLOSE PAGE</span>`;
-            document.getElementById('logs').innerHTML = ''; // Clear logs
+            setGenerateButtonBusy(true, 'Working... DO NOT CLOSE PAGE');
+
+            const logs = document.getElementById('logs');
+            if (logs) logs.innerHTML = '';
+
+            logMsg(`Starting quiz generation for ${subjectCode}${subjectName ? ` — ${subjectName}` : ''}...`);
 
             try {
                 // 1. Fetch papers for subject
@@ -291,20 +364,26 @@ ${truncatedText}`;
                 const { error: insertQErr } = await supabase.from('quiz_questions').insert(questionsToInsert);
                 if (insertQErr) throw insertQErr;
 
-                logMsg(`<strong>SUCCESS!</strong> Database finalized. Quiz is now LIVE and accessible to students.`, false);
-                btn.innerHTML = `✅ Successfully Generated!`;
+                setGenerateButtonBusy(false, '✅ Quiz Created Successfully');
+                const btn = document.getElementById('generateBtn');
+                btn?.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                btn?.classList.add('bg-emerald-600');
 
-                // Reset button after success
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.innerHTML = `<span>🚀 Launch Generator Pipeline</span>`;
-                }, 4000);
+                logMsg(`Quiz successfully saved to database with ${mcqs.length} questions.`);
+                logMsg(`Done. Refresh your quiz page to see it live.`);
+                showGeneratorStatus('success', `Quiz created successfully for ${subjectCode}${subjectName ? ` — ${subjectName}` : ''}.`);
 
+                window.setTimeout(() => {
+                    const freshBtn = document.getElementById('generateBtn');
+                    freshBtn?.classList.remove('bg-emerald-600');
+                    freshBtn?.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+                    setGenerateButtonBusy(false);
+                }, 1800);
             } catch (err) {
                 console.error(err);
-                logMsg(`<strong>ERROR:</strong> ${err.message}`, true);
-                btn.disabled = false;
-                btn.innerHTML = `<span>🚀 Launch Generator Pipeline</span>`;
+                logMsg(`ERROR: ${err.message}`, true);
+                showGeneratorStatus('error', `Generation failed: ${err.message}`);
+                setGenerateButtonBusy(false);
             }
         };
     </script>
