@@ -11,16 +11,15 @@
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
         rel="stylesheet">
+    <!-- Use built CSS instead -->
+    <link rel="stylesheet" href="styles/tailwind-built.css">
     <link rel="stylesheet" href="style.css">
-    <!-- Tailwind -->
-    <script src="js/tailwind-config.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="js/dark-mode.js" defer></script>
 </head>
 
 <body class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 min-h-screen flex flex-col font-sans transition-colors duration-300">
     
-    <!-- Header injected by js/layout.js -->
+    <div id="app-header"></div>
 
     <!-- Main Content utilizing Tailwind for Responsive Layout -->
     <!-- pt-32 prevents overlap with fixed navbar, flex-grow pushes footer down -->
@@ -137,6 +136,8 @@
 
     </main>
 
+    <div id="app-footer"></div>
+    <div id="app-mobile-nav"></div>
     <script type="module" src="js/layout.js"></script>
 </body>
 </html>

@@ -139,6 +139,11 @@ export function openModal(startTab = 'login') {
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
 
+  // [A11Y] Set inert on all siblings of the modal for focus trapping
+  Array.from(document.body.children).forEach(child => {
+    if (child !== overlay) child.setAttribute('inert', '');
+  });
+
   authCard.classList.toggle('toggled', startTab === 'signup');
 
   removeFocusTrap?.();
@@ -153,6 +158,11 @@ export function closeModal() {
 
   overlay.classList.remove('open');
   document.body.style.overflow = '';
+
+  // [A11Y] Restore access to siblings
+  Array.from(document.body.children).forEach(child => {
+    if (child !== overlay) child.removeAttribute('inert');
+  });
 
   removeFocusTrap?.();
   removeFocusTrap = null;

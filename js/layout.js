@@ -32,6 +32,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   const userName = session ? auth.getUserName(session.user) : null;
   const currentPage = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
 
+  _hydrateLayout(currentPage, session, userName);
+  initAuthModal();
+
+  runIdle(() => {
+    _initAOS();
+    _initVanillaTilt();
+    _initSwipeNav(currentPage);
+    _initScrollHideNav();
+  });
+});
+
+async function _hydrateLayout(currentPage, session, userName) {
   _injectHeader(currentPage, session, userName);
   _injectGlobalFeedbackBox();
   _injectFooter();
@@ -40,13 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   _wireNavButton(session);
 
   if (window.refreshThemeIcons) window.refreshThemeIcons();
-  initAuthModal();
-
-  _initAOS();
-  _initVanillaTilt();
-  _initSwipeNav(currentPage);
-  _initScrollHideNav();
-});
+}
 
 function _loadScript(src, { id, defer = true } = {}) {
   if (id && document.getElementById(id)) return Promise.resolve();
@@ -81,14 +87,14 @@ function _initAOS() {
 }
 
 function _injectHeader(currentPage, session, userName) {
-  if (document.querySelector('header')) return;
+  const container = document.getElementById('app-header');
+  if (!container && document.querySelector('header')) return;
 
   const isLoggedIn = !!session;
   const initial = userName ? userName.charAt(0).toUpperCase() : '?';
 
-  const header = document.createElement('header');
-  header.className = 'sticky top-0 z-50 transition-all duration-300 w-full';
-  header.innerHTML = `
+  const html = `
+    <header class="sticky top-0 z-50 transition-all duration-300 w-full">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
         <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-gray-200/50 dark:border-white/10 rounded-[2rem] shadow-xl px-4 sm:px-8 py-3 flex items-center justify-between transition-all duration-300 gap-3">
           <a href="index.html" class="flex items-center gap-3 group" aria-label="Go to home page">
@@ -127,18 +133,20 @@ function _injectHeader(currentPage, session, userName) {
           </div>
         </div>
       </div>
-    `;
-  document.body.prepend(header);
+    </header>
+  `;
+
+  if (container) {
+    container.innerHTML = html;
+  } else {
+    document.body.insertAdjacentHTML('afterbegin', html);
+  }
 }
 
 function _injectMobileNav(currentPage) {
   if (window.innerWidth > 1024) return;
-  if (document.getElementById('mobileBottomNav')) return;
-
-  const nav = document.createElement('nav');
-  nav.id = 'mobileBottomNav';
-  nav.className = 'fixed bottom-4 left-4 right-4 z-[60] lg:hidden transition-transform duration-300 will-change-transform';
-  nav.setAttribute('aria-label', 'Bottom navigation');
+  const container = document.getElementById('app-mobile-nav');
+  if (!container && document.getElementById('mobileBottomNav')) return;
 
   const items = [
     { id: 'index.html', label: 'Home', icon: 'home' },
@@ -147,26 +155,32 @@ function _injectMobileNav(currentPage) {
     { id: 'about-us.html', label: 'Team', icon: 'groups' }
   ];
 
-  nav.innerHTML = `
-    <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-[2rem] shadow-2xl px-2 py-2">
-      <div class="grid grid-cols-4 items-stretch gap-1">
-        ${items.map(item => {
-          const isActive = currentPage === item.id;
-          return `
-            <a href="${item.id}"
-               aria-label="Open ${item.label}"
-               title="${item.label}"
-               class="min-h-12 flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-2xl transition-all ${isActive ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5'}">
-              <span class="material-symbols-outlined text-[24px]" aria-hidden="true" style="${isActive ? "font-variation-settings:'FILL' 1" : ''}">${item.icon}</span>
-              <span class="text-[10px] font-bold leading-none">${item.label}</span>
-            </a>
-          `;
-        }).join('')}
+  const html = `
+    <nav id="mobileBottomNav" class="fixed bottom-4 left-4 right-4 z-[60] lg:hidden transition-transform duration-300 will-change-transform" aria-label="Bottom navigation">
+      <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-[2rem] shadow-2xl px-2 py-2">
+        <div class="grid grid-cols-4 items-stretch gap-1">
+          ${items.map(item => {
+            const isActive = currentPage === item.id;
+            return `
+              <a href="${item.id}"
+                 aria-label="Open ${item.label}"
+                 title="${item.label}"
+                 class="min-h-12 flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-2xl transition-all ${isActive ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5'}">
+                <span class="material-symbols-outlined text-[24px]" aria-hidden="true" style="${isActive ? "font-variation-settings:'FILL' 1" : ''}">${item.icon}</span>
+                <span class="text-[10px] font-bold leading-none">${item.label}</span>
+              </a>
+            `;
+          }).join('')}
+        </div>
       </div>
-    </div>
+    </nav>
   `;
 
-  document.body.appendChild(nav);
+  if (container) {
+    container.innerHTML = html;
+  } else {
+    document.body.insertAdjacentHTML('beforeend', html);
+  }
 }
 
 function _injectGlobalFeedbackBox() {
@@ -244,10 +258,11 @@ function _injectFeedbackContainer() {
 }
 
 function _injectFooter() {
-  if (document.querySelector('footer')) return;
-  const footer = document.createElement('footer');
-  footer.className = 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-100 dark:border-white/5 py-6 px-6 transition-colors duration-300 rounded-t-[2rem] mt-auto pb-24 lg:pb-6';
-  footer.innerHTML = `
+  const container = document.getElementById('app-footer');
+  if (!container && document.querySelector('footer')) return;
+
+  const html = `
+    <footer class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-100 dark:border-white/5 py-6 px-6 transition-colors duration-300 rounded-t-[2rem] mt-auto pb-24 lg:pb-6">
       <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
         <div class="space-y-0.5">
           <div class="font-black text-base tracking-tight text-[#1a1a2e] dark:text-white">COMSATSPrepHub</div>
@@ -262,8 +277,14 @@ function _injectFooter() {
           © 2026 Mushtaq Ahmad Saqi
         </div>
       </div>
-    `;
-  document.body.appendChild(footer);
+    </footer>
+  `;
+
+  if (container) {
+    container.innerHTML = html;
+  } else {
+    document.body.insertAdjacentHTML('beforeend', html);
+  }
 }
 
 function _wireNavButton(session) {

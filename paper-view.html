@@ -14,9 +14,9 @@
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap">
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap">
 
-    <!-- Tailwind CSS with Typography plugin -->
-    <script src="js/tailwind-config.js"></script>
-    <script src="https://cdn.tailwindcss.com?plugins=typography,forms,aspect-ratio"></script>
+    <!-- Use built CSS instead -->
+    <link rel="stylesheet" href="styles/tailwind-built.css">
+    <link rel="stylesheet" href="style.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <!-- Material Icons -->
@@ -34,53 +34,11 @@
 </head>
 
 <body class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300 antialiased min-h-screen">
+    <div id="app-header"></div>
 
     <!-- ═══════════════════════════════════════════════
-         STICKY TOP NAV
+         STICKY TOP NAV (Injected by layout.js)
     ═══════════════════════════════════════════════ -->
-    <header class="sticky top-0 z-50 glass shadow-sm border-t-0 border-l-0 border-r-0">
-        <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
-            <!-- Left: Logo + Back -->
-            <div class="flex items-center gap-3 min-w-0">
-                <a href="subjects.html"
-                    class="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 hover:text-slate-900 transition-all group"
-                    title="Back to Subjects">
-                    <span
-                        class="material-symbols-outlined text-[20px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
-                </a>
-                <a href="index.html" class="flex items-center gap-2 min-w-0 group">
-                    <div
-                        class="w-7 h-7 flex-shrink-0 rounded-lg bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow">
-                        C</div>
-                    <span
-                        class="hidden sm:block font-bold text-slate-900 text-[15px] tracking-tight truncate group-hover:text-brand-600 transition-colors">COMSATSPrepHub</span>
-                </a>
-            </div>
-
-            <!-- Center: Paper title (populated by JS) -->
-            <div class="flex-1 text-center min-w-0 hidden md:block">
-                <p id="navPaperTitle" class="text-sm font-semibold text-slate-700 truncate"></p>
-            </div>
-
-            <!-- Right: Actions -->
-            <div class="flex items-center gap-2 flex-shrink-0">
-                <button id="downloadBtn" onclick="handleDownload()" style="display:none;"
-                    class="hidden sm:inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm hover:shadow-md transition-all">
-                    <span class="material-symbols-outlined text-[18px]">download</span>
-                    <span>Word</span>
-                </button>
-                <!-- Mobile download icon only -->
-                <button id="downloadBtnMobile" onclick="handleDownload()" style="display:none;"
-                    class="sm:hidden flex items-center justify-center w-9 h-9 rounded-xl bg-brand-600 text-white shadow-sm">
-                    <span class="material-symbols-outlined text-[20px]">download</span>
-                </button>
-                <a href="subjects.html"
-                    class="hidden sm:flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 px-3 py-2 rounded-xl hover:bg-slate-100 transition-all">
-                    Subjects
-                </a>
-            </div>
-        </div>
-    </header>
 
     <!-- ═══════════════════════════════════════════════
          STICKY PROGRESS BAR (below nav, full width)
@@ -218,24 +176,8 @@
         </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════
-         FOOTER
-    ═══════════════════════════════════════════════ -->
-    <footer class="mt-16 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 transition-colors duration-300">
-        <div class="max-w-screen-xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="font-bold text-brand-600 dark:text-brand-400 text-sm uppercase tracking-widest transition-colors">
-                COMSATSPrepHub
-            </div>
-            <div class="flex gap-6 text-sm text-slate-500 dark:text-slate-400">
-                <a href="about-us.html" class="hover:text-slate-900 dark:hover:text-white transition-colors">About Us</a>
-                <a href="terms.html" class="hover:text-slate-900 dark:hover:text-white transition-colors">Terms</a>
-                <a href="feedback.html" class="hover:text-slate-900 dark:hover:text-white transition-colors">Feedback</a>
-            </div>
-            <div class="text-sm text-slate-400 dark:text-slate-500 italic transition-colors">
-                Made with ❤️ by Mushtaq Ahmad Saqi
-            </div>
-        </div>
-    </footer>
+    <div id="app-footer"></div>
+    <div id="app-mobile-nav"></div>
 
 
     <!-- ═══════════════════════════════════════════════
@@ -248,16 +190,17 @@
 
         // ── Dependency Loader ──────────────────────
         const CORE_DEPENDENCIES = [
-            { id: 'marked-js', src: 'https://cdn.jsdelivr.net/npm/marked/marked.min.js' },
-            { id: 'mathjax-js', src: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js', isMathJax: true }
+            { id: 'marked-js', src: 'https://cdn.jsdelivr.net/npm/marked/marked.min.js' }
         ];
+
+        const MATH_DEPENDENCY = { id: 'mathjax-js', src: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js', isMathJax: true };
 
         async function loadDependencies(deps = CORE_DEPENDENCIES) {
             const promises = deps.map(dep => {
                 if (document.getElementById(dep.id)) return Promise.resolve();
                 
                 return new Promise((resolve, reject) => {
-                    if (dep.isMathJax) {
+                    if (dep.isMathJax && !window.MathJax) {
                         window.MathJax = {
                             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
                             options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
@@ -738,15 +681,24 @@
 
             requestAnimationFrame(async () => {
                 const deferredDeps = [];
+                
+                // Detect math in questions
+                const fullText = questions.map(q => (q.question_text || '') + (q.model_answer || '') + (q.sub_parts?.join('') || '')).join(' ');
+                const hasMath = fullText.includes('$') || fullText.includes('\\(') || fullText.includes('\\[');
+                
+                if (hasMath) deferredDeps.push(MATH_DEPENDENCY);
                 if (hasCharts) deferredDeps.push({ id: 'chart-js', src: 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js' });
                 if (hasMermaid) deferredDeps.push({ id: 'mermaid-js', src: 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js' });
+                
                 if (deferredDeps.length) {
                     await loadDependencies(deferredDeps);
                 }
 
                 if (hasCharts && window.Chart) initializeCharts();
                 if (hasMermaid && window.mermaid) initializeMermaidDiagrams();
-                if (window.MathJax) MathJax.typesetPromise([container]).catch(err => logger.error('MathJax render failed', err));
+                if (hasMath && window.MathJax) {
+                    MathJax.typesetPromise([container]).catch(err => logger.error('MathJax render failed', err));
+                }
                 if (typeof autoHideProgressBar === 'function') autoHideProgressBar();
             });
         }

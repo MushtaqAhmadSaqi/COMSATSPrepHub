@@ -21,14 +21,13 @@
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
     rel="stylesheet">
 
-  <!-- Tailwind Play CDN -->
-  <script src="js/tailwind-config.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="js/dark-mode.js"></script>
-
-  <!-- Existing stylesheets -->
+  <!-- Use built CSS instead -->
+  <link rel="preload" href="styles/tailwind-built.css" as="style">
+  <link rel="stylesheet" href="styles/tailwind-built.css">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="auth-modal.css">
+
+  <script src="js/dark-mode.js" defer></script>
   <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 
   <style>
@@ -228,7 +227,7 @@
 
 <body class="font-sans bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300">
 
-  <!-- Header, Footer, Mobile Nav & Auth Modal injected by js/layout.js -->
+  <div id="app-header"></div>
 
   <main class="flex-1 pb-24 page-transition">
 
@@ -475,7 +474,10 @@
       </div>
     </section>
 
-  </main>
+  </div>
+
+  <div id="app-footer"></div>
+  <div id="app-mobile-nav"></div>
 
   <!-- ════════════════════════ SCRIPTS ════════════════════════ -->
 

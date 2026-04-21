@@ -2921,3 +2921,123 @@ body.quiz-active .mobile-nav-shell {
   transform: translateX(100%);
   opacity: 0;
 }
+
+/* --- Quiz Styles --- */
+.quiz-option {
+  position: relative;
+  display: flex;
+  align-items: start;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 2px solid var(--border);
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--surface);
+  font-family: 'Roboto Mono', monospace;
+  font-size: 14px;
+}
+
+.dark .quiz-option {
+  background-color: var(--surface);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.quiz-option:hover {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+}
+
+.quiz-option input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.quiz-option:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.quiz-option.selected {
+  border-color: var(--primary);
+  background-color: var(--primary-light);
+  color: var(--primary-hover);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+}
+
+.quiz-option.correct {
+  border-color: var(--success);
+  background-color: rgba(22, 163, 74, 0.05);
+  color: var(--success);
+}
+
+.quiz-option.wrong {
+  border-color: var(--error);
+  background-color: rgba(220, 38, 38, 0.05);
+  color: var(--error);
+}
+
+.radio-ui {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  transition: all 0.2s ease;
+  background-color: white;
+}
+
+.dark .radio-ui {
+  border-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--surface);
+}
+
+.quiz-option.selected .radio-ui {
+  border-color: var(--primary);
+}
+
+.quiz-option.selected .radio-ui::after {
+  content: "";
+  width: 0.625rem;
+  height: 0.625rem;
+  background-color: var(--primary);
+  border-radius: 9999px;
+}
+
+.quiz-option.correct .radio-ui {
+  border-color: var(--success);
+  background-color: var(--success);
+}
+
+.quiz-option.correct .radio-ui::after {
+  content: "";
+  width: 0.625rem;
+  height: 0.625rem;
+  background-color: white;
+  border-radius: 9999px;
+}
+
+.quiz-option.wrong .radio-ui {
+  border-color: var(--error);
+  background-color: var(--error);
+}
+
+.quiz-option.wrong .radio-ui::after {
+  content: "";
+  width: 0.625rem;
+  height: 0.625rem;
+  background-color: white;
+  border-radius: 9999px;
+}
+
+
+.feedback-toast.translate-x-full {
+  transform: translateX(100%);
+  opacity: 0;
+}

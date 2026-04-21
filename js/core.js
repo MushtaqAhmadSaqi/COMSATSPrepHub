@@ -130,3 +130,12 @@ export function escapeHtml(str) {
         .replace(/>/g,  '&gt;')
         .replace(/"/g,  '&quot;');
 }
+
+// ── Utility: Debounce ────────────────────────────────────────────────────────
+export function debounce(fn, wait) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn.apply(this, args), wait);
+    };
+}
