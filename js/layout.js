@@ -49,7 +49,7 @@ async function _hydrateLayout(currentPage, session, userName) {
   _injectHeader(currentPage, session, userName);
   _injectGlobalFeedbackBox();
   _injectFooter();
-  _injectMobileNav(currentPage);
+  _reinitializeMobileNavOnPageLoad(currentPage);
   _injectFeedbackContainer();
   _wireNavButton(session);
 
@@ -169,14 +169,17 @@ function _injectHeader(currentPage, session, userName) {
 }
 
 function _injectMobileNav(currentPage) {
+  // Ensure it's only applied on mobile or tablet
   if (window.innerWidth > 1024) return;
 
   const container = document.getElementById('app-mobile-nav');
   if (!container && document.getElementById('mobileBottomNav')) return;
 
   const isSubjectsActive = ['subjects.html', 'subject-papers.html', 'paper-view.html'].includes(currentPage);
+  const isQuizActive = currentPage === 'quiz.html';
   const isDashboardActive = currentPage === 'dashboard.html';
 
+  // Inject mobile bottom nav HTML
   const html = `
     <nav id="mobileBottomNav" aria-label="Mobile navigation" class="mobile-nav-shell">
       <div class="mobile-nav-grid">
@@ -190,7 +193,7 @@ function _injectMobileNav(currentPage) {
           <span class="label">Subjects</span>
         </a>
 
-        <a href="quiz.html" class="mobile-nav-item ${currentPage === 'quiz.html' ? 'active' : ''}">
+        <a href="quiz.html" class="mobile-nav-item ${isQuizActive ? 'active' : ''}">
           <span class="material-symbols-outlined">quiz</span>
           <span class="label">Quiz</span>
         </a>
@@ -209,14 +212,22 @@ function _injectMobileNav(currentPage) {
     document.body.insertAdjacentHTML('beforeend', html);
   }
 
+  // Show mobile nav for all pages
   const nav = document.getElementById('mobileBottomNav');
   if (nav) {
-    if (nav.style.display === 'none') {
-      nav.style.display = '';
-    }
-    nav.classList.remove('nav-hidden');
-    nav.style.transform = '';
+    nav.style.display = 'block';
   }
+}
+
+// Ensure proper handling when navigating from the quiz section or other sections
+function _reinitializeMobileNavOnPageLoad(currentPage) {
+  // For the home page, we need to force the display of the mobile nav
+  if (currentPage === 'index.html') {
+    document.getElementById('mobileBottomNav')?.style.display = 'block';
+  }
+
+  // Call the method to inject and show the mobile navigation
+  _injectMobileNav(currentPage);
 }
 
 function _injectGlobalFeedbackBox() {

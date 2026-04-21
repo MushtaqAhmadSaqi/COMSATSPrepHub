@@ -575,92 +575,6 @@ html.dark .active-pill {
   }
 }
 
-/* IMPROVED MOBILE NAVIGATION */
-.mobile-nav-shell {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 24px);
-  max-width: 420px;
-  bottom: 12px;
-  z-index: 100;
-  border-radius: 9999px;
-  background: #0f172a;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  display: flex !important;
-  padding: 6px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.mobile-nav-shell.nav-hidden {
-  transform: translate(-50%, 120%);
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Desktop Hidden Controller */
-@media (min-width: 768px) {
-  .mobile-nav-shell {
-    display: none !important;
-  }
-}
-
-.mobile-nav-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 4px;
-  width: 100%;
-}
-
-.mobile-nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  min-height: 48px;
-  min-width: 48px;
-  padding: 6px 4px;
-  border-radius: 9999px;
-  color: #94a3b8;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.mobile-nav-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #e2e8f0;
-}
-
-.mobile-nav-item.active {
-  background: #0f766e;
-  color: white;
-  box-shadow: 0 4px 15px rgba(15, 118, 110, 0.4);
-}
-
-.mobile-nav-item .material-symbols-outlined {
-  font-size: 22px;
-  margin-bottom: 2px;
-}
-
-.mobile-nav-item .label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-}
-
-/* Extra padding on very small screens */
-@media (max-width: 380px) {
-  .mobile-nav-item {
-    min-height: 52px;
-    padding: 6px 2px;
-  }
-}
 
 @media (max-width: 768px) {
   .nav-links {
@@ -3300,7 +3214,7 @@ html.dark .mobile-nav-link.active {
   box-shadow: 0 12px 28px rgba(37, 99, 235, 0.28);
 }
 
-/* --- Mobile Nav Positioning Hotfix --- */
+/* Fix for consistent mobile nav across pages */
 #mobileBottomNav.mobile-nav-shell {
   position: fixed;
   left: 50%;
@@ -3317,6 +3231,18 @@ html.dark .mobile-nav-link.active {
   transform: translate(-50%, calc(100% + 1rem));
   opacity: 0;
   pointer-events: none;
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  #mobileBottomNav.mobile-nav-shell {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  #mobileBottomNav.mobile-nav-shell {
+    display: none !important;
+  }
 }
 
 #mobileBottomNav .mobile-nav-grid {
@@ -3340,16 +3266,4 @@ html.dark .mobile-nav-link.active {
 
 body.quiz-active #mobileBottomNav.mobile-nav-shell {
   display: none !important;
-}
-
-@media (min-width: 768px) and (max-width: 1023.98px) {
-  #mobileBottomNav.mobile-nav-shell {
-    display: flex !important;
-  }
-}
-
-@media (min-width: 1024px) {
-  #mobileBottomNav.mobile-nav-shell {
-    display: none !important;
-  }
 }
