@@ -44,6 +44,7 @@
     <!-- Tailwind CSS -->
     <script src="js/tailwind-config.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=typography,forms,aspect-ratio"></script>
+    <script src="js/dark-mode.js" defer></script>
 
     <!-- Custom Styles -->
     <style>
@@ -179,9 +180,17 @@
         </nav>
         <div class="flex items-center gap-3">
             <!-- Dark Mode Toggle -->
-            <button id="darkToggle" onclick="toggleDarkMode()"
+            <button
+                id="darkToggle"
+                type="button"
+                data-theme-toggle
                 class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 transition text-lg"
-                title="Toggle Dark Mode">🌙</button>
+                title="Toggle Dark Mode"
+                aria-label="Toggle dark mode"
+                data-current-theme="light"
+            >
+                <span data-theme-icon="emoji">🌙</span>
+            </button>
             <div
                 class="text-sm font-bold text-slate-500 bg-slate-100 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200">
                 🔐 Admin Panel
@@ -316,6 +325,18 @@ JSON FORMAT:
 
         let parsedData = null;
 
+        function syncAdminThemeVisuals() {
+            if (window.refreshThemeIcons) {
+                window.refreshThemeIcons();
+            }
+        }
+
+        document.addEventListener('comsatsprephub:themechange', () => {
+            syncAdminThemeVisuals();
+        });
+
+        syncAdminThemeVisuals();
+
 
         // Initialize Mermaid
         mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict' });
@@ -332,18 +353,6 @@ JSON FORMAT:
         }
 
 
-        // ── Dark Mode Toggle ──
-        window.toggleDarkMode = function () {
-            document.documentElement.classList.toggle('dark');
-            const isDark = document.documentElement.classList.contains('dark');
-            localStorage.setItem('darkMode', isDark);
-            document.getElementById('darkToggle').textContent = isDark ? '☀️' : '🌙';
-        };
-        // Load saved preference
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.documentElement.classList.add('dark');
-            document.getElementById('darkToggle').textContent = '☀️';
-        }
 
 
         // ── Live JSON Validation ──
