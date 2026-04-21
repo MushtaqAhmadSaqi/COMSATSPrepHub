@@ -117,23 +117,70 @@
       background: #e2e8f0;
     }
 
-    /* Slightly tilted badge */
+    /* Hero Badge Cube (CSS-only) */
     .badge-tilted {
       display: inline-block;
       transform: rotate(-1.5deg);
     }
 
-    /* Stats divider */
-    .stat-divider {
-      width: 1px;
+    .hero-badge-logo {
+      width: 40px;
       height: 40px;
-      background: #e2e8f0;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
     }
 
-    /* Slightly tilted badge */
-    .badge-tilted {
-      display: inline-block;
-      transform: rotate(-1.5deg);
+    .hero-badge-cube {
+      position: relative;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      box-shadow:
+        0 8px 16px rgba(37, 99, 235, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      transform: rotate(-18deg) skew(-8deg, -8deg);
+      animation: heroCubeFloat 4.5s ease-in-out infinite;
+      will-change: transform;
+    }
+
+    .hero-badge-cube::before,
+    .hero-badge-cube::after {
+      content: '';
+      position: absolute;
+      display: block;
+    }
+
+    .hero-badge-cube::before {
+      left: 3px;
+      top: -6px;
+      width: 18px;
+      height: 6px;
+      border-radius: 4px 4px 0 0;
+      background: linear-gradient(90deg, #93c5fd 0%, #60a5fa 100%);
+      transform: skewX(-45deg);
+      opacity: 0.95;
+    }
+
+    .hero-badge-cube::after {
+      top: -3px;
+      right: -6px;
+      width: 6px;
+      height: 18px;
+      border-radius: 0 4px 4px 0;
+      background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%);
+      transform: skewY(-45deg);
+      opacity: 0.98;
+    }
+
+    @keyframes heroCubeFloat {
+      0%, 100% {
+        transform: rotate(-18deg) skew(-8deg, -8deg) translateY(0);
+      }
+      50% {
+        transform: rotate(-14deg) skew(-8deg, -8deg) translateY(-2px);
+      }
     }
 
     .founder-card-tw::before {
@@ -196,7 +243,9 @@
         <div class="badge-tilted inline-block mb-7">
           <div
             class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-brand-50/50 dark:bg-brand-500/5 border border-brand-100 dark:border-brand-500/10 backdrop-blur-md">
-            <div id="logo-3d" class="w-10 h-10"></div>
+            <div class="hero-badge-logo" aria-hidden="true">
+              <div class="hero-badge-cube"></div>
+            </div>
             <span class="text-[10px] font-black uppercase tracking-[0.2em] text-brand-600 dark:text-brand-400">Trusted
               by Students</span>
           </div>
@@ -415,52 +464,7 @@
   </main>
 
   <!-- ════════════════════════ SCRIPTS ════════════════════════ -->
-  <script>
-    // 3D Rotating Cube Logo for Hero
-    function initHeroLogo() {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      const conn = navigator.connection;
-      if (conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType))) return;
-      if (window.innerWidth < 640) return;
 
-      const container = document.getElementById('logo-3d');
-      if (!container) return;
-
-      const loadThree = () => {
-        if (typeof THREE !== 'undefined') { startThree(); return; }
-        const script = document.createElement('script');
-        script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
-        script.onload = startThree;
-        document.head.appendChild(script);
-      };
-
-      const startThree = () => {
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setSize(40, 40);
-        container.appendChild(renderer.domElement);
-        const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-        const material = new THREE.MeshPhongMaterial({ color: 0x2563eb, shininess: 100 });
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
-        const light = new THREE.PointLight(0xffffff, 1, 100);
-        light.position.set(10, 10, 10);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-        camera.position.z = 3.5;
-        function animate() { requestAnimationFrame(animate); cube.rotation.x += 0.01; cube.rotation.y += 0.015; renderer.render(scene, camera); }
-        animate();
-      };
-      
-      if ('requestIdleCallback' in window) {
-        window.requestIdleCallback(loadThree, { timeout: 2000 });
-      } else {
-        setTimeout(loadThree, 500);
-      }
-    }
-    window.addEventListener('load', initHeroLogo);
-  </script>
   <script type="module" src="js/layout.js"></script>
 
   <script>
