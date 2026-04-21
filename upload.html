@@ -150,6 +150,7 @@
 
               <div style="padding-top: 24px">
                 <button
+                  id="submitBtn"
                   class="btn-primary"
                   style="
                     width: 100%;
@@ -162,6 +163,7 @@
                 >
                   Submit Contribution
                 </button>
+                <div id="feedbackMessage" class="hidden text-sm mt-3 px-4 py-3 rounded-xl border animate-fade-in text-center"></div>
               </div>
             </form>
           </div>
@@ -192,6 +194,7 @@
                 </p>
               </div>
               <div class="guideline-item">
+                <div class="guideline-number">3</div>
                 <div class="guideline-number">3</div>
                 <p
                   class="question-desc"
@@ -270,28 +273,22 @@
     <!-- Footer injected by js/layout.js -->
 
     <script type="module">
-      import { supabase, escapeHtml } from './utils.js';
+      import { supabase, escapeHtml } from './js/core.js';
 
-      /**
-       * Patch 7 notes
-       * ----------------------------------------------------------
-       * This upload flow stores:
-       * 1) the raw file in Supabase Storage
-       * 2) a moderation row in a submissions table
-       *
-       * If your backend uses different names, only change:
-       * - STORAGE_BUCKET
-       * - SUBMISSIONS_TABLE
-       */
       const STORAGE_BUCKET = 'paper-submissions';
       const SUBMISSIONS_TABLE = 'paper_submissions';
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+      const ALLOWED_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
 
       const form = document.getElementById('uploadForm');
       const subjectInput = document.getElementById('subject');
+      const yearInput = document.getElementById('year');
+      const semesterSelect = document.getElementById('semester');
+      const fileInput = document.getElementById('fileInput');
+      const submitBtn = document.getElementById('submitBtn');
 
       form.addEventListener('submit', async event => {
           event.preventDefault();
-
           clearMessages();
 
           const validation = validateForm();
@@ -300,15 +297,7 @@
               return;
           }
 
-          const {
-              file,
-              subjectCode,
-              subjectName,
-              year,
-              examType,
-              semester
-          } = validation.values;
-
+          const { file, subjectCode, subjectName, year, examType, semester } = validation.values;
           const originalHtml = submitBtn.innerHTML;
           setButtonLoading('Uploading...');
 
@@ -374,7 +363,7 @@
               }
 
               form.reset();
-              showSuccess('Thank you! Your paper has been uploaded and submitted for review.');
+              showSuccess('Thank you! Your paper has been submitted for review.');
           } catch (error) {
               console.error('Upload failed:', error);
               showError(getReadableUploadError(error));
@@ -385,72 +374,38 @@
 
       function validateForm() {
           const subjectValue = String(subjectInput.value || '').trim();
-          const subjectCode = ''; // Code is unknown from text input
+          const subjectCode = '';
           const subjectName = subjectValue;
           const year = Number(yearInput.value);
           const examType = String(document.querySelector('input[name="exam_type"]:checked')?.value || '').trim();
           const semester = String(semesterSelect.value || '').trim();
 
-          if (!subjectValue) {
-              return { ok: false, message: 'Please enter a subject name.' };
-          }
-
-          if (!Number.isInteger(year) || year < 2010 || year > (new Date().getFullYear() + 1)) {
-              return { ok: false, message: 'Please enter a valid academic year.' };
-          }
-
-          if (!examType) {
-              return { ok: false, message: 'Please select an exam type.' };
-          }
-
-          if (!semester) {
-              return { ok: false, message: 'Please select a semester.' };
-          }
-
-          if (!fileInput.files || fileInput.files.length === 0) {
-              return { ok: false, message: 'Please select a file to upload.' };
-          }
+          if (!subjectValue) return { ok: false, message: 'Please enter a subject name.' };
+          if (!Number.isInteger(year) || year < 2010 || year > (new Date().getFullYear() + 1)) return { ok: false, message: 'Please enter a valid academic year.' };
+          if (!examType) return { ok: false, message: 'Please select an exam type.' };
+          if (!semester) return { ok: false, message: 'Please select a semester.' };
+          if (!fileInput.files || fileInput.files.length === 0) return { ok: false, message: 'Please select a file to upload.' };
 
           const file = fileInput.files[0];
+          if (file.size > MAX_FILE_SIZE) return { ok: false, message: 'File is too large (max 5MB).' };
+          if (!ALLOWED_TYPES.has(file.type)) return { ok: false, message: 'Only PDF and images allowed.' };
 
-          if (file.size > MAX_FILE_SIZE) {
-              return { ok: false, message: 'File is too large. Maximum allowed size is 5MB.' };
-          }
-
-          if (!ALLOWED_TYPES.has(file.type)) {
-              return { ok: false, message: 'Only PDF and image files (JPG, PNG, WEBP) are allowed.' };
-          }
-
-          return {
-              ok: true,
-              values: {
-                  file,
-                  subjectCode,
-                  subjectName,
-                  year,
-                  examType,
-                  semester
-              }
-          };
+          return { ok: true, values: { file, subjectCode, subjectName, year, examType, semester } };
       }
 
       async function safeDeleteUploadedFile(path) {
           if (!path) return;
-          try {
-              await supabase.storage.from(STORAGE_BUCKET).remove([path]);
-          } catch (error) {
-              console.warn('Rollback delete failed:', error);
-          }
+          try { await supabase.storage.from(STORAGE_BUCKET).remove([path]); } catch (e) {}
       }
 
       function setButtonLoading(label) {
           submitBtn.disabled = true;
-          submitBtn.innerHTML = \`
+          submitBtn.innerHTML = `
               <span class="flex items-center justify-center gap-2">
                   <span class="animate-spin text-xl">⟳</span>
-                  <span>\${escapeHtml(label)}</span>
+                  <span>${escapeHtml(label)}</span>
               </span>
-          \`;
+          `;
       }
 
       function restoreButton(html) {
@@ -459,81 +414,45 @@
       }
 
       function showError(message) {
-          if (window.handleApiError) {
-              window.handleApiError(new Error(message), 'Submission Failed');
-              return;
+          if (window.updateGlobalFeedback) {
+              window.updateGlobalFeedback({ type: 'error', message: `Upload Failed: ${message}`, duration: 8000 });
           }
-          removeMessage('upload-success');
-          removeMessage('upload-error');
-
-          const errorDiv = document.createElement('div');
-          errorDiv.id = 'upload-error';
-          errorDiv.className = 'mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-start gap-3 animate-fade-in';
-          errorDiv.innerHTML = \`
-              <span class="material-symbols-outlined text-red-500 mt-0.5">error</span>
-              <div>
-                  <p class="font-bold text-sm">Upload Error</p>
-                  <p class="text-xs opacity-90">\${escapeHtml(message)}</p>
-              </div>
-          \`;
-
-          form.appendChild(errorDiv);
-
-          setTimeout(() => {
-              if (errorDiv.parentNode) errorDiv.parentNode.removeChild(errorDiv);
-          }, 5000);
+          const fb = document.getElementById('feedbackMessage');
+          if (fb) {
+              fb.textContent = message;
+              fb.className = 'text-sm mt-3 px-4 py-3 rounded-xl border animate-fade-in bg-red-50 border-red-200 text-red-700 text-center';
+              fb.classList.remove('hidden');
+              setTimeout(() => fb.classList.add('hidden'), 8000);
+          }
       }
 
       function showSuccess(message) {
           if (window.showFeedbackStatus) {
-              window.showFeedbackStatus({
-                  type: 'success',
-                  message: message,
-                  duration: 6000
-              });
-              return;
+              window.showFeedbackStatus({ type: 'success', message: 'File shared successfully!', duration: 6000 });
           }
-          removeMessage('upload-error');
-          removeMessage('upload-success');
-
-          const successDiv = document.createElement('div');
-          successDiv.id = 'upload-success';
-          successDiv.className = 'mt-4 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl flex items-start gap-3 animate-fade-in';
-          successDiv.innerHTML = \`
-              <span class="material-symbols-outlined text-emerald-500 mt-0.5">check_circle</span>
-              <div>
-                  <p class="font-bold text-sm">Success!</p>
-                  <p class="text-xs opacity-90">\${escapeHtml(message)}</p>
-              </div>
-          \`;
-
-          form.appendChild(successDiv);
+          if (window.updateGlobalFeedback) {
+              window.updateGlobalFeedback({ type: 'success', message: message, duration: 10000 });
+          }
+          const fb = document.getElementById('feedbackMessage');
+          if (fb) {
+              fb.textContent = message;
+              fb.className = 'text-sm mt-3 px-4 py-3 rounded-xl border animate-fade-in bg-emerald-50 border-emerald-200 text-emerald-700 text-center';
+              fb.classList.remove('hidden');
+              setTimeout(() => fb.classList.add('hidden'), 10000);
+          }
       }
 
       function clearMessages() {
-          removeMessage('upload-error');
-          removeMessage('upload-success');
-      }
-
-      function removeMessage(id) {
-          const node = document.getElementById(id);
-          if (node) node.remove();
+          const fb = document.getElementById('feedbackMessage');
+          if (fb) fb.classList.add('hidden');
       }
 
       function getReadableUploadError(error) {
           const raw = String(error?.message || error || '').trim();
           const lower = raw.toLowerCase();
-
-          if (!raw) return 'Upload failed. Please try again.';
-
-          if (lower.includes('sign in')) return 'Please sign in before uploading a paper.';
-          if (lower.includes('row-level security')) return 'Upload permission is blocked by your database policy. Please check your Supabase RLS rules.';
-          if (lower.includes('bucket')) return 'Storage bucket is not configured correctly. Please check the Supabase bucket name and policies.';
-          if (lower.includes('duplicate')) return 'A file with the same name already exists. Please try again.';
-          if (lower.includes('mime')) return 'This file type is not allowed.';
-          if (lower.includes('network')) return 'Network issue detected. Please check your connection and try again.';
-
-          return raw;
+          if (lower.includes('sign in')) return 'Please sign in first.';
+          if (lower.includes('duplicate')) return 'File already exists.';
+          return raw || 'Upload failed.';
       }
 
       function getFileExtension(fileName) {
@@ -544,17 +463,11 @@
       function inferExtensionFromMime(mime) {
           if (mime === 'application/pdf') return 'pdf';
           if (mime === 'image/jpeg') return 'jpg';
-          if (mime === 'image/png') return 'png';
-          if (mime === 'image/webp') return 'webp';
-          return '';
+          return 'bin';
       }
 
       function slugify(value) {
-          return String(value || '')
-              .toLowerCase()
-              .trim()
-              .replace(/[^a-z0-9]+/g, '-')
-              .replace(/^-+|-+$/g, '') || 'item';
+          return String(value || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'item';
       }
     </script>
 

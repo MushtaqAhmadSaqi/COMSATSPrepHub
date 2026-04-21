@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const currentPage = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
 
   _injectHeader(currentPage, session, userName);
+  _injectGlobalFeedbackBox();
   _injectFooter();
   _injectMobileNav(currentPage);
   _injectFeedbackContainer();
@@ -167,6 +168,72 @@ function _injectMobileNav(currentPage) {
 
   document.body.appendChild(nav);
 }
+
+function _injectGlobalFeedbackBox() {
+  if (document.getElementById('globalFeedbackBox')) return;
+  const box = document.createElement('div');
+  box.id = 'globalFeedbackBox';
+  box.className = 'hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sticky top-[72px] z-40 transition-all duration-300';
+  box.innerHTML = `
+    <div id="globalFeedbackInner" class="rounded-2xl border px-6 py-4 text-sm font-medium leading-relaxed shadow-lg flex items-center justify-between gap-4 transition-all duration-300">
+      <div id="globalFeedbackContent" class="flex items-center gap-3"></div>
+      <button onclick="window.updateGlobalFeedback({ hidden: true })" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+  `;
+  // Insert after header
+  const header = document.querySelector('header');
+  if (header) {
+    header.insertAdjacentElement('afterend', box);
+  } else {
+    document.body.prepend(box);
+  }
+}
+
+/**
+ * Updates the global feedback banner.
+ * @param {Object} options { type, message, hidden, duration }
+ */
+window.updateGlobalFeedback = function({ type = 'info', message = '', hidden = false, duration = 0 }) {
+  const box = document.getElementById('globalFeedbackBox');
+  const inner = document.getElementById('globalFeedbackInner');
+  const content = document.getElementById('globalFeedbackContent');
+  if (!box || !inner || !content) return;
+
+  if (hidden) {
+    box.classList.add('hidden');
+    return;
+  }
+
+  const styles = {
+    success: 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400',
+    error: 'bg-red-50 border-red-200 text-red-800 dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-400',
+    warning: 'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400',
+    info: 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-500/10 dark:border-blue-500/20 dark:text-blue-400'
+  };
+
+  const icons = {
+    success: 'check_circle',
+    error: 'error',
+    warning: 'warning',
+    info: 'info'
+  };
+
+  inner.className = `rounded-2xl border px-6 py-4 text-sm font-medium leading-relaxed shadow-lg flex items-center justify-between gap-4 transition-all duration-300 ${styles[type] || styles.info}`;
+  content.innerHTML = `
+    <span class="material-symbols-outlined">${icons[type] || icons.info}</span>
+    <span>${message}</span>
+  `;
+
+  box.classList.remove('hidden');
+
+  if (duration > 0) {
+    setTimeout(() => {
+      box.classList.add('hidden');
+    }, duration);
+  }
+};
 
 function _injectFeedbackContainer() {
   if (document.getElementById('feedback-container')) return;

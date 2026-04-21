@@ -179,15 +179,25 @@ function wireSignUpForm() {
     }
 
     signUpForm.reset();
+    
+    // Show Toast
     if (window.showFeedbackStatus) {
       window.showFeedbackStatus({
         type: 'success',
-        message: 'Account created! Please check your email to confirm your account, then sign in.',
-        duration: 8000
+        message: 'Account created! Welcome to the hub.',
+        duration: 5000
       });
-    } else {
-      alert('Account created! Please check your email to confirm your account, then sign in.');
     }
+
+    // Show Global Banner (Critical Instructions)
+    if (window.updateGlobalFeedback) {
+      window.updateGlobalFeedback({
+        type: 'success',
+        message: 'Registration successful! Please check your email to confirm your account before signing in.',
+        duration: 15000
+      });
+    }
+
     authRoot?.classList.remove('toggled');
     restoreButton(signUpBtn, oldHtml);
     focusLoginEmail();
@@ -273,9 +283,20 @@ function restoreButton(button, html) {
 
 function showAuthError(target, message) {
   if (!target) return;
+  
+  // Show Inline Error
   target.textContent = message;
   target.style.display = 'block';
   target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  // Show Global Banner for serious errors
+  if (window.updateGlobalFeedback) {
+    window.updateGlobalFeedback({
+      type: 'error',
+      message: message,
+      duration: 6000
+    });
+  }
 }
 
 function clearAllMessages() {

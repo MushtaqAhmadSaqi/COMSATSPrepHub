@@ -41,9 +41,9 @@ export const auth = {
 // ── Feedback System (Toast Notifications) ─────────────────────────────────────
 /**
  * Shows a non-intrusive feedback message (toast).
- * @param {Object} options { type, message, duration }
+ * @param {Object} options { type, message, duration, banner }
  */
-export function showFeedbackStatus({ type = 'info', message = '', duration = 4000 }) {
+export function showFeedbackStatus({ type = 'info', message = '', duration = 4000, banner = false }) {
     const container = document.getElementById('feedback-container');
     if (!container) {
         console.warn('Feedback container missing. Falling back to console.');
@@ -82,6 +82,15 @@ export function showFeedbackStatus({ type = 'info', message = '', duration = 400
     requestAnimationFrame(() => {
         toast.classList.remove('translate-x-full', 'opacity-0');
     });
+
+    // Optional Global Banner
+    if (banner && window.updateGlobalFeedback) {
+        window.updateGlobalFeedback({
+            type,
+            message,
+            duration: duration > 0 ? duration + 2000 : 0
+        });
+    }
 
     // Auto-remove
     if (duration > 0) {
