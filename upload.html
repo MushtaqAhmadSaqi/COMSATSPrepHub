@@ -456,6 +456,10 @@
       }
 
       function showError(message) {
+          if (window.handleApiError) {
+              window.handleApiError(new Error(message), 'Submission Failed');
+              return;
+          }
           removeMessage('upload-success');
           removeMessage('upload-error');
 
@@ -478,6 +482,14 @@
       }
 
       function showSuccess(message) {
+          if (window.showFeedbackStatus) {
+              window.showFeedbackStatus({
+                  type: 'success',
+                  message: message,
+                  duration: 6000
+              });
+              return;
+          }
           removeMessage('upload-error');
           removeMessage('upload-success');
 

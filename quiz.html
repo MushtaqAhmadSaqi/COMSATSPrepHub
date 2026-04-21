@@ -312,6 +312,11 @@
       }
 
       function showQuizCatalogMessage({ type = 'error', title, message, actionText = 'Try Again', action } = {}) {
+        // Forward to global system if it's an error
+        if (type === 'error' && window.handleApiError) {
+            window.handleApiError(new Error(message || title), 'Failed to load quizzes');
+        }
+
         const { grid } = getQuizElements();
         if (!grid) return;
 

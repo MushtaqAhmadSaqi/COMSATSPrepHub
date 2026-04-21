@@ -51,11 +51,20 @@ async function ensureSwal() {
 
 async function notify(title, text, icon = 'info') {
   try {
+    // We favor the non-blocking showFeedbackStatus system for standard notifications
+    if (window.showFeedbackStatus) {
+        window.showFeedbackStatus({
+            type: icon,
+            message: text || title,
+            duration: icon === 'error' ? 6000 : 4000
+        });
+        return;
+    }
+    
     const Swal = await ensureSwal();
     return Swal.fire(title, text, icon);
   } catch (error) {
-    console.warn('SweetAlert failed to load.', error);
-    window.alert(`${title}\n\n${text}`);
+    console.warn('Notification fallback failed.', error);
   }
 }
 

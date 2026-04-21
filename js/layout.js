@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   _injectHeader(currentPage, session, userName);
   _injectFooter();
   _injectMobileNav(currentPage);
+  _injectFeedbackContainer();
   _wireNavButton(session);
 
   if (window.refreshThemeIcons) window.refreshThemeIcons();
@@ -165,6 +166,14 @@ function _injectMobileNav(currentPage) {
   `;
 
   document.body.appendChild(nav);
+}
+
+function _injectFeedbackContainer() {
+  if (document.getElementById('feedback-container')) return;
+  const container = document.createElement('div');
+  container.id = 'feedback-container';
+  container.className = 'fixed top-6 right-6 z-[100] flex flex-col items-end pointer-events-none w-full sm:w-auto px-6 overflow-hidden';
+  document.body.appendChild(container);
 }
 
 function _injectFooter() {

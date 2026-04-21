@@ -297,6 +297,11 @@
         }
 
         function showPaperError(message) {
+            // Forward to global system
+            if (window.handleApiError) {
+                window.handleApiError(new Error(message), 'Access Denied or Connection Lost');
+            }
+
             const skeleton = document.getElementById('paperLoadingSkeleton');
             const titleBlock = document.getElementById('paperTitleBlock');
             const errorState = document.getElementById('errorState');

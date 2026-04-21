@@ -856,6 +856,15 @@ JSON FORMAT:
 
 
         function showStatus(type, html) {
+            // Forward to guest global feedback if available
+            if (window.showFeedbackStatus) {
+                window.showFeedbackStatus({
+                    type: type === 'loading' ? 'info' : type,
+                    message: html.replace(/<[^>]*>?/gm, ''), // strip HTML for toast
+                    duration: type === 'error' ? 8000 : 4000
+                });
+            }
+
             const box = document.getElementById('statusBox');
             if (!box) return;
 

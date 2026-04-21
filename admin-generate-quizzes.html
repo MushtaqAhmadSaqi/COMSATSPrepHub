@@ -175,6 +175,15 @@
         }
 
         function showGeneratorStatus(type, message) {
+            // Forward to global system
+            if (window.showFeedbackStatus) {
+                window.showFeedbackStatus({
+                    type: type,
+                    message: message,
+                    duration: type === 'error' ? 8000 : 4000
+                });
+            }
+
             const box = document.getElementById('generatorStatus');
             if (!box) return;
 

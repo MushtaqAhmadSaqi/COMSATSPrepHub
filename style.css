@@ -2876,3 +2876,48 @@ body.quiz-active .mobile-nav-shell {
 #papersContainer a {
   max-width: 100%;
 }
+/* -- Feedback System (Toasts) ------------------------------------------------ */
+#feedback-container {
+  pointer-events: none;
+}
+
+.feedback-toast {
+  pointer-events: auto;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.feedback-success {
+  background: rgba(236, 253, 245, 0.9);
+  border-left: 4px solid #10b981 !important;
+}
+
+.feedback-error {
+  background: rgba(254, 242, 242, 0.9);
+  border-left: 4px solid #ef4444 !important;
+}
+
+.feedback-warning {
+  background: rgba(255, 251, 235, 0.9);
+  border-left: 4px solid #f59e0b !important;
+}
+
+.feedback-info {
+  background: rgba(240, 249, 255, 0.9);
+  border-left: 4px solid #3b82f6 !important;
+}
+
+/* Dark mode overrides for toasts */
+.dark .feedback-toast {
+  background: rgba(15, 23, 42, 0.9) !important;
+}
+
+.dark .feedback-success { border-color: #10b981 !important; }
+.dark .feedback-error { border-color: #ef4444 !important; }
+.dark .feedback-warning { border-color: #f59e0b !important; }
+.dark .feedback-info { border-color: #3b82f6 !important; }
+
+.feedback-toast.translate-x-full {
+  transform: translateX(100%);
+  opacity: 0;
+}

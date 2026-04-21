@@ -281,13 +281,18 @@
                 }
 
             } catch (err) {
+                if (window.handleApiError) {
+                    window.handleApiError(err, 'Failed to sync papers');
+                }
                 document.getElementById('loadingSkeleton').style.display = 'none';
                 const banner = document.getElementById('errorBanner');
-                banner.style.display = 'block';
-                document.getElementById('errorMessage').innerHTML = `
-                    <strong>Failed to load papers</strong><br>
-                    <span class="text-sm">${err.message}</span>
-                `;
+                if (banner) {
+                    banner.style.display = 'block';
+                    document.getElementById('errorMessage').innerHTML = `
+                        <strong>Failed to load papers</strong><br>
+                        <span class="text-sm">${err.message}</span>
+                    `;
+                }
             }
         }
 

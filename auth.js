@@ -179,7 +179,15 @@ function wireSignUpForm() {
     }
 
     signUpForm.reset();
-    alert('Account created! Please check your email to confirm your account, then sign in.');
+    if (window.showFeedbackStatus) {
+      window.showFeedbackStatus({
+        type: 'success',
+        message: 'Account created! Please check your email to confirm your account, then sign in.',
+        duration: 8000
+      });
+    } else {
+      alert('Account created! Please check your email to confirm your account, then sign in.');
+    }
     authRoot?.classList.remove('toggled');
     restoreButton(signUpBtn, oldHtml);
     focusLoginEmail();
