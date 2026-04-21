@@ -79,6 +79,16 @@
     <!-- ═══════════════════════════════════════════════
          STICKY PROGRESS BAR (below nav, full width)
     ═══════════════════════════════════════════════ -->
+    <!-- Export Status -->
+    <div id="downloadStatus"
+        class="hidden bg-white border-b border-slate-200 transition-all">
+        <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-2.5">
+            <div id="downloadStatusInner"
+                class="rounded-xl border px-4 py-3 text-sm leading-relaxed transition-all">
+            </div>
+        </div>
+    </div>
+
     <!-- Progress Bar (non-sticky + auto-hide) -->
     <div id="progressWrap"
         class="bg-white border-b border-slate-200 transition-all"
@@ -773,97 +783,169 @@
         // ── Progress ──────────────────────────────────
         function updateProgress() {
             const pct = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
-            document.getElementById('progressFill').style.width = pct + '%';
-            document.getElementById('progressText').textContent = `${answeredCount} / ${totalQuestions}`;
+            const fill = document.getElementById('progressFill');
+            const text = document.getElementById('progressText');
+            if (fill) fill.style.width = pct + '%';
+            if (text) text.textContent = `${answeredCount} / ${totalQuestions}`;
+        }
+
+        const formatContentAsync = async (text) => {
+            if (!text) return '';
+
+            // Fix literal '\n' which might be present in db entries
+            let processed = text.replace(/\\n/g, '\n');
+
+            // Extract math blocks to avoid Markdown parser messing them up
+            const blockRegex = /\\\[([\s\S]*?)\\\]/g;
+            const inlineRegex = /\\\(([\s\S]*?)\\\)/g;
+
+            let mathBlocks = [];
+
+            processed = processed.replace(blockRegex, (_, eq) => {
+                let id = mathBlocks.length;
+                mathBlocks.push({ eq: eq.trim(), display: true });
+                return `__MATH_${id}__`;
+            });
+
+            processed = processed.replace(inlineRegex, (_, eq) => {
+                let id = mathBlocks.length;
+                mathBlocks.push({ eq: eq.trim(), display: false });
+                return `__MATH_${id}__`;
+            });
+
+            // Parse markdown to HTML using marked.js
+            let html = marked.parse(processed);
+
+            // Re-insert math as MathML which MS Word natively converts to Equations!
+            for (let i = 0; i < mathBlocks.length; i++) {
+                let mml = '';
+                try {
+                    if (window.MathJax) {
+                        if (MathJax.tex2mmlPromise) {
+                            mml = await MathJax.tex2mmlPromise(mathBlocks[i].eq, { display: mathBlocks[i].display });
+                        } else if (MathJax.tex2mml) {
+                            mml = MathJax.tex2mml(mathBlocks[i].eq, { display: mathBlocks[i].display });
+                        } else {
+                            mml = escapeHtml('\\(' + mathBlocks[i].eq + '\\)');
+                        }
+
+                        // Ensure xmlns is present so Word recognizes it as MathML
+                        if (mml.startsWith('<math') && !mml.includes('xmlns=')) {
+                            mml = mml.replace('<math', '<math xmlns="http://www.w3.org/1998/Math/MathML"');
+                        }
+                    } else {
+                        mml = escapeHtml('\\(' + mathBlocks[i].eq + '\\)');
+                    }
+                } catch (err) {
+                    mml = escapeHtml('\\(' + mathBlocks[i].eq + '\\)');
+                }
+                html = html.replace(`__MATH_${i}__`, mml);
+            }
+
+            // Inject inline CSS so MS Word renders tables and code blocks correctly
+            html = html.replace(/<table/g, '<table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%; margin: 15px 0; border: 1px solid #cbd5e1;"');
+            html = html.replace(/<th([^>]*)>/g, '<th$1 style="background-color: #f8fafc; font-weight: bold; text-align: left; border: 1px solid #cbd5e1;">');
+            html = html.replace(/<td([^>]*)>/g, '<td$1 style="border: 1px solid #cbd5e1;">');
+            html = html.replace(/<ul/g, '<ul style="margin-left: 20px;"');
+            html = html.replace(/<ol/g, '<ol style="margin-left: 20px;"');
+            html = html.replace(/<li/g, '<li style="margin-bottom: 5px;"');
+            html = html.replace(/<pre><code/g, '<pre style="background-color: #f1f5f9; padding: 12px; border: 1px solid #e2e8f0; font-family: Consolas, monospace; white-space: pre-wrap;"><code');
+
+            return html;
+        };
+
+        function showDownloadStatus(type, message) {
+            const wrap = document.getElementById('downloadStatus');
+            const inner = document.getElementById('downloadStatusInner');
+            if (!wrap || !inner) return;
+
+            const styles = {
+                success: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+                error: 'bg-red-50 text-red-800 border-red-200',
+                info: 'bg-blue-50 text-blue-800 border-blue-200'
+            };
+
+            wrap.classList.remove('hidden');
+            wrap.style.display = 'block';
+
+            inner.className = 'rounded-xl border px-4 py-3 text-sm leading-relaxed transition-all';
+            inner.classList.add(...(styles[type] || styles.info).split(' '));
+            inner.textContent = String(message || '');
+
+            window.clearTimeout(window.__paperDownloadStatusTimer);
+            window.__paperDownloadStatusTimer = window.setTimeout(() => {
+                hideDownloadStatus();
+            }, 4000);
+        }
+
+        function hideDownloadStatus() {
+            const wrap = document.getElementById('downloadStatus');
+            const inner = document.getElementById('downloadStatusInner');
+            if (!wrap || !inner) return;
+
+            wrap.classList.add('hidden');
+            wrap.style.display = 'none';
+            inner.textContent = '';
         }
 
         // ── Download as Word ──────────────────────────
         window.handleDownload = async function () {
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (!session) {
-                    alert('🔒 You must be signed in to download past papers.\n\nPlease go to the Home page and log in.');
-                    return;
+            const desktopBtn = document.getElementById('downloadBtn');
+            const mobileBtn = document.getElementById('downloadBtnMobile');
+
+            if (!globalPaper || !globalQuestions || !globalQuestions.length) {
+                showDownloadStatus('error', 'Paper content is not ready for export yet.');
+                return;
+            }
+
+            const originalDesktopHtml = desktopBtn ? desktopBtn.innerHTML : '';
+            const originalMobileHtml = mobileBtn ? mobileBtn.innerHTML : '';
+
+            const setBusy = (busy) => {
+                if (desktopBtn) {
+                    desktopBtn.disabled = busy;
+                    desktopBtn.innerHTML = busy
+                        ? `<span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span><span>Preparing...</span>`
+                        : originalDesktopHtml;
                 }
-                if (!globalPaper || !globalQuestions.length) return;
 
-                const formatContentAsync = async (text) => {
-                    if (!text) return '';
+                if (mobileBtn) {
+                    mobileBtn.disabled = busy;
+                    mobileBtn.innerHTML = busy
+                        ? `<span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>`
+                        : originalMobileHtml;
+                }
+            };
 
-                    // Fix literal '\n' which might be present in db entries
-                    let processed = text.replace(/\\n/g, '\n');
-
-                    // Extract math blocks to avoid Markdown parser messing them up
-                    const blockRegex = /\\\[([\s\S]*?)\\\]/g;
-                    const inlineRegex = /\\\(([\s\S]*?)\\\)/g;
-
-                    let mathBlocks = [];
-
-                    processed = processed.replace(blockRegex, (_, eq) => {
-                        let id = mathBlocks.length;
-                        mathBlocks.push({ eq: eq.trim(), display: true });
-                        return `__MATH_${id}__`;
-                    });
-
-                    processed = processed.replace(inlineRegex, (_, eq) => {
-                        let id = mathBlocks.length;
-                        mathBlocks.push({ eq: eq.trim(), display: false });
-                        return `__MATH_${id}__`;
-                    });
-
-                    // Parse markdown to HTML using marked.js
-                    let html = marked.parse(processed);
-
-                    // Re-insert math as MathML which MS Word natively converts to Equations!
-                    for (let i = 0; i < mathBlocks.length; i++) {
-                        let mml = '';
-                        try {
-                            if (window.MathJax) {
-                                if (MathJax.tex2mmlPromise) {
-                                    mml = await MathJax.tex2mmlPromise(mathBlocks[i].eq, { display: mathBlocks[i].display });
-                                } else if (MathJax.tex2mml) {
-                                    mml = MathJax.tex2mml(mathBlocks[i].eq, { display: mathBlocks[i].display });
-                                } else {
-                                    mml = escapeHtml('\\(' + mathBlocks[i].eq + '\\)');
-                                }
-
-                                // Ensure xmlns is present so Word recognizes it as MathML
-                                if (mml.startsWith('<math') && !mml.includes('xmlns=')) {
-                                    mml = mml.replace('<math', '<math xmlns="http://www.w3.org/1998/Math/MathML"');
-                                }
-                            } else {
-                                mml = escapeHtml('\\(' + mathBlocks[i].eq + '\\)');
-                            }
-                        } catch (err) {
-                            mml = escapeHtml('\\(' + mathBlocks[i].eq + '\\)');
-                        }
-                        html = html.replace(`__MATH_${i}__`, mml);
-                    }
-
-                    // Inject inline CSS so MS Word renders tables and code blocks correctly
-                    html = html.replace(/<table/g, '<table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%; margin: 15px 0; border: 1px solid #cbd5e1;"');
-                    html = html.replace(/<th([^>]*)>/g, '<th$1 style="background-color: #f8fafc; font-weight: bold; text-align: left; border: 1px solid #cbd5e1;">');
-                    html = html.replace(/<td([^>]*)>/g, '<td$1 style="border: 1px solid #cbd5e1;">');
-                    html = html.replace(/<ul/g, '<ul style="margin-left: 20px;"');
-                    html = html.replace(/<ol/g, '<ol style="margin-left: 20px;"');
-                    html = html.replace(/<li/g, '<li style="margin-bottom: 5px;"');
-                    html = html.replace(/<pre><code/g, '<pre style="background-color: #f1f5f9; padding: 12px; border: 1px solid #e2e8f0; font-family: Consolas, monospace; white-space: pre-wrap;"><code');
-
-                    return html;
-                };
+            try {
+                setBusy(true);
+                hideDownloadStatus();
+                showDownloadStatus('info', 'Preparing your Word export...');
 
                 let html = `
-                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns:m="http://schemas.microsoft.com/office/2004/12/omml" xmlns="http://www.w3.org/TR/REC-html40">
-                <head><meta charset="utf-8"><title>${escapeHtml(globalPaper.subject_name)}</title>
-                <style>body{font-family:'Segoe UI',Arial,sans-serif;line-height:1.7;color:#1a1a2e;max-width:800px;margin:0 auto;}h1{color:#0369a1;}h3{color:#475569;margin-top:0}.q-meta{font-weight:bold;color:#0369a1;margin-bottom:6px}.q-box{margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid #e2e8f0}.model-ans{background:#f0fdfa;border-left:4px solid #14b8a6;padding:14px 18px;margin-top:10px;border-radius:4px}</style>
-                <` + `/head><body>
-                <div style="text-align:center;border-bottom:2px solid #0369a1;padding-bottom:14px;margin-bottom:28px">
-                  <h1>${escapeHtml(globalPaper.subject_name)}</h1>
-                  <h3>${escapeHtml(globalPaper.exam_type)} ${globalPaper.year}</h3>
-                  <p><b>Instructor:</b> ${escapeHtml(globalPaper.instructor_name || '—')} &nbsp;|&nbsp; <b>Code:</b> ${escapeHtml(globalPaper.subject_code)} &nbsp;|&nbsp; <b>Total Marks:</b> ${globalPaper.total_marks}</p>
-                </div>`;
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>${escapeHtml(globalPaper.subject_name)} ${escapeHtml(globalPaper.exam_type)} ${globalPaper.year}</title>
+<style>
+body { font-family: Arial, sans-serif; padding: 28px; line-height: 1.55; color: #111827; }
+.paper-head { margin-bottom: 24px; border-bottom: 2px solid #e5e7eb; padding-bottom: 16px; }
+.paper-head h1 { margin: 0 0 8px 0; font-size: 26px; }
+.paper-head h3 { margin: 0 0 10px 0; font-size: 18px; color: #2563eb; }
+.paper-head p { margin: 0; font-size: 14px; color: #374151; }
+.q-box { margin: 0 0 24px 0; padding: 18px; border: 1px solid #e5e7eb; border-radius: 12px; page-break-inside: avoid; }
+.q-meta { margin: 0 0 10px 0; font-weight: bold; color: #0f172a; }
+.model-ans { margin-top: 16px; padding: 14px; border-radius: 10px; background: #f8fafc; border-left: 4px solid #0ea5e9; }
+</style>
+</head>
+<body>
+<div class="paper-head">
+<h1>${escapeHtml(globalPaper.subject_name)}</h1>
+<h3>${escapeHtml(globalPaper.exam_type)} ${globalPaper.year}</h3>
+<p><b>Instructor:</b> ${escapeHtml(globalPaper.instructor_name || '—')} &nbsp;|&nbsp; <b>Code:</b> ${escapeHtml(globalPaper.subject_code)} &nbsp;|&nbsp; <b>Total Marks:</b> ${globalPaper.total_marks}</p>
+</div>`;
 
-                // Await processing linearly
                 for (const q of globalQuestions) {
                     const qText = await formatContentAsync(q.question_text);
                     const mAns = await formatContentAsync(q.model_answer);
@@ -876,19 +958,25 @@
                     </div>`;
                 }
 
-                html += '<' + '/body><' + '/html>';
+                html += '</body></html>';
 
                 const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
+
                 link.href = url;
                 link.download = `${globalPaper.subject_code}_${globalPaper.exam_type.replace(/\s+/g, '')}_${globalPaper.year}.doc`;
+
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
                 URL.revokeObjectURL(url);
+
+                showDownloadStatus('success', 'Word export started successfully.');
             } catch (err) {
-                alert('Could not start download: ' + err.message);
+                showDownloadStatus('error', `Could not start download: ${err?.message || 'Unknown error'}`);
+            } finally {
+                setBusy(false);
             }
         };
 
