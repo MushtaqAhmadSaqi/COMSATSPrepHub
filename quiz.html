@@ -219,7 +219,7 @@
                         </div>
 
                         <div class="flex flex-col gap-3">
-                            <button onclick="location.reload()"
+                            <button type="button" onclick="returnToQuizCatalog({ reloadList: true })"
                                 class="button-press w-full h-12 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-black transition-all shadow-lg active:scale-95">
                                 Initiate New Cycle
                             </button>
@@ -252,6 +252,144 @@
       let currentQuestionIndex = 0;
       let selectedAnswers = {};
 
+      function getQuizElements() {
+        return {
+          step1: document.getElementById('step1-select'),
+          step2: document.getElementById('step2-question'),
+          step3: document.getElementById('step3-results'),
+          grid: document.getElementById('quizGrid'),
+          questionText: document.getElementById('questionText'),
+          optionsList: document.getElementById('optionsList'),
+          explanationBox: document.getElementById('explanationBox'),
+          progressBar: document.getElementById('quizProgressBar'),
+          scoreProgress: document.getElementById('scoreProgress'),
+          mobileNav: document.getElementById('mobileBottomNav')
+        };
+      }
+
+      function setQuizChromeHidden(hidden) {
+        const { mobileNav } = getQuizElements();
+
+        if (mobileNav) {
+          mobileNav.style.display = hidden ? 'none' : '';
+          mobileNav.style.transform = hidden ? 'translateY(calc(100% + 1rem))' : 'translateY(0)';
+        }
+
+        document.body.classList.toggle('quiz-active', hidden);
+      }
+
+      function resetQuizRuntimeState() {
+        currentQuizName = '';
+        questions = [];
+        currentQuestionIndex = 0;
+        selectedAnswers = {};
+      }
+
+      function clearQuestionErrorState() {
+        const { questionText, explanationBox, optionsList, progressBar, scoreProgress } = getQuizElements();
+
+        if (questionText) {
+          questionText.classList.remove('text-red-500');
+          questionText.textContent = '';
+        }
+
+        if (optionsList) {
+          optionsList.innerHTML = '';
+        }
+
+        if (explanationBox) {
+          explanationBox.classList.add('hidden');
+        }
+
+        if (progressBar) {
+          progressBar.style.width = '0%';
+          progressBar.setAttribute('aria-valuenow', '0');
+        }
+
+        if (scoreProgress) {
+          scoreProgress.style.strokeDashoffset = '502.65';
+        }
+      }
+
+      function showQuizCatalogMessage({ type = 'error', title, message, actionText = 'Try Again', action } = {}) {
+        const { grid } = getQuizElements();
+        if (!grid) return;
+
+        const palette = {
+          error: {
+            card: 'bg-red-50 border-red-200',
+            icon: 'text-red-500',
+            title: 'text-red-700',
+            body: 'text-red-600',
+            button: 'bg-red-600 hover:bg-red-700 text-white'
+          },
+          info: {
+            card: 'bg-white border-slate-200',
+            icon: 'text-slate-400',
+            title: 'text-slate-900',
+            body: 'text-slate-500',
+            button: 'bg-slate-900 hover:bg-black text-white'
+          }
+        };
+
+        const colors = palette[type] || palette.error;
+
+        grid.innerHTML = '';
+
+        const card = document.createElement('div');
+        card.className = `col-span-full border rounded-2xl p-8 text-center shadow-sm ${colors.card}`;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'flex flex-col items-center';
+
+        const icon = document.createElement('span');
+        icon.className = `material-symbols-outlined text-[48px] mb-4 ${colors.icon}`;
+        icon.textContent = type === 'info' ? 'deployed_code' : 'error';
+
+        const titleEl = document.createElement('p');
+        titleEl.className = `font-bold text-lg mb-2 ${colors.title}`;
+        titleEl.textContent = title || (type === 'info' ? 'Nothing available yet' : 'Something went wrong');
+
+        const bodyEl = document.createElement('p');
+        bodyEl.className = `text-sm mb-6 ${colors.body}`;
+        bodyEl.textContent = message || '';
+
+        wrap.appendChild(icon);
+        wrap.appendChild(titleEl);
+        wrap.appendChild(bodyEl);
+
+        if (typeof action === 'function') {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = `px-6 py-3 font-bold rounded-xl flex items-center gap-2 transition-all ${colors.button}`;
+          button.innerHTML = `
+            <span class="material-symbols-outlined">refresh</span>
+            <span>${actionText}</span>
+          `;
+          button.addEventListener('click', action);
+          wrap.appendChild(button);
+        }
+
+        card.appendChild(wrap);
+        grid.appendChild(card);
+      }
+
+      window.returnToQuizCatalog = function ({ reloadList = false } = {}) {
+        const { step1, step2, step3 } = getQuizElements();
+
+        resetQuizRuntimeState();
+        clearQuestionErrorState();
+        setQuizChromeHidden(false);
+
+        if (step2) step2.classList.add('hidden');
+        if (step3) step3.classList.add('hidden');
+        if (step1) step1.classList.remove('hidden');
+
+        if (reloadList) {
+          loadQuizzes();
+        }
+      };
+
       // Load quizzes when page opens
       document.addEventListener('DOMContentLoaded', loadQuizzes);
 
@@ -278,12 +416,11 @@
           grid.innerHTML = '';
 
           if (!data || data.length === 0) {
-            grid.innerHTML = `
-              <div class="col-span-full bg-white border border-slate-200 rounded-2xl p-12 text-center text-slate-400 shadow-sm">
-                <span class="material-symbols-outlined text-[48px] mb-4 opacity-50">deployed_code</span>
-                <p class="font-bold text-slate-900 text-lg mb-1">No Quizzes Available Yet</p>
-                <p class="text-[14px] font-medium">Admin needs to create some quizzes first.</p>
-              </div>`;
+            showQuizCatalogMessage({
+              type: 'info',
+              title: 'No Quizzes Available Yet',
+              message: 'Admin needs to create some quizzes first.'
+            });
             return;
           }
 
@@ -320,20 +457,14 @@
 
         } catch (err) {
           logger.error('Failed to load quizzes', err);
-          grid.innerHTML = `
-            <div class="col-span-full bg-red-50 border border-red-200 rounded-2xl p-8 text-center shadow-sm">
-              <div class="flex flex-col items-center">
-                <span class="material-symbols-outlined text-red-500 text-[48px] mb-4">error</span>
-                <p class="font-bold text-red-700 text-lg mb-2">Failed to load quizzes</p>
-                <p class="text-red-600 text-sm mb-6">Something went wrong. Please try again.</p>
-                
-                <button onclick="location.reload()" 
-                        class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl flex items-center gap-2 transition-all">
-                  <span class="material-symbols-outlined">refresh</span>
-                  Try Again
-                </button>
-              </div>
-            </div>`;
+
+          showQuizCatalogMessage({
+            type: 'error',
+            title: 'Failed to load quizzes',
+            message: 'Something went wrong. Please try again.',
+            actionText: 'Try Again',
+            action: () => loadQuizzes()
+          });
         }
       }
 
@@ -349,18 +480,18 @@
         }
 
         currentQuizName = subCode;
-        document.getElementById('step1-select').classList.add('hidden');
-        document.getElementById('step2-question').classList.remove('hidden');
 
-        // Hide mobile navigation during quiz
-        const mobileNav = document.getElementById('mobileBottomNav');
-        if (mobileNav) {
-          mobileNav.style.display = 'none';
-        }
-        document.body.classList.add('quiz-active');
+        const { step1, step2, questionText, optionsList } = getQuizElements();
 
-        document.getElementById('questionText').textContent = 'Loading questions...';
-        document.getElementById('optionsList').innerHTML = '';
+        if (step1) step1.classList.add('hidden');
+        if (step2) step2.classList.remove('hidden');
+
+        setQuizChromeHidden(true);
+        clearQuestionErrorState();
+
+        if (questionText) questionText.textContent = 'Loading questions.';
+        if (optionsList) optionsList.innerHTML = '';
+
         document.getElementById('quizBadgeLabel').textContent = subCode.toUpperCase();
 
         try {
@@ -372,9 +503,16 @@
           if (error) throw error;
 
           if (!data || data.length === 0) {
-            const qEl = document.getElementById('questionText');
-            qEl.textContent = 'No questions found for this quiz.';
-            qEl.classList.add('text-red-500');
+            returnToQuizCatalog();
+
+            showQuizCatalogMessage({
+              type: 'error',
+              title: 'No questions found',
+              message: 'This quiz exists, but it does not have any questions yet.',
+              actionText: 'Reload Quizzes',
+              action: () => loadQuizzes()
+            });
+
             return;
           }
 
@@ -385,9 +523,16 @@
 
         } catch (err) {
           logger.error('Failed to load quiz questions', err, { quizId });
-          const qEl = document.getElementById('questionText');
-          qEl.textContent = `Error loading questions: ${err.message}`;
-          qEl.classList.add('text-red-500');
+
+          returnToQuizCatalog();
+
+          showQuizCatalogMessage({
+            type: 'error',
+            title: 'Failed to load quiz questions',
+            message: err?.message || 'Something went wrong while loading this quiz.',
+            actionText: 'Back to Modules',
+            action: () => loadQuizzes()
+          });
         }
       }
 
@@ -489,12 +634,7 @@
         document.getElementById('step2-question').classList.add('hidden');
         document.getElementById('step3-results').classList.remove('hidden');
 
-        // Show mobile navigation again after quiz ends
-        const mobileNav = document.getElementById('mobileBottomNav');
-        if (mobileNav) {
-          mobileNav.style.display = 'block';
-        }
-        document.body.classList.remove('quiz-active');
+        setQuizChromeHidden(false);
 
         let correctCount = 0;
         questions.forEach((q, i) => {
