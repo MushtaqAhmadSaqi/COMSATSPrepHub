@@ -247,6 +247,7 @@
         let answeredCount = 0;
         let globalPaper = null;
         let globalQuestions = [];
+        let studyOpenPersisted = false;
 
         function hasDirectPaperLookup() {
             return !!paperId;
@@ -320,16 +321,75 @@
         }
 
         // ── Load Paper ───────────────────────────────
-        async function loadPaper() {
-            try {
-                // Load dependencies in parallel with initial query
-                const depPromise = loadDependencies();
+        async function getSignedInUserId() {
+          const { data, error } = await supabase.auth.getSession();
+          if (error) throw error;
+          return data?.session?.user?.id || null;
+        }
 
+        async function savePaperStudyOpen(paper) {
+          if (!paper || studyOpenPersisted) return;
+
+          try {
+            const userId = await getSignedInUserId();
+            if (!userId) return;
+
+            const { data: existing, error: fetchError } = await supabase
+              .from('user_subject_progress')
+              .select('id, sessions_count, mastery_percent')
+              .eq('user_id', userId)
+              .eq('subject_code', paper.subject_code)
+              .is('topic_name', null)
+              .maybeSingle();
+
+            if (fetchError) throw fetchError;
+
+            if (existing?.id) {
+              const { error: updateError } = await supabase
+                .from('user_subject_progress')
+                .update({
+                  subject_name: paper.subject_name,
+                  sessions_count: Number(existing.sessions_count || 0) + 1,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', existing.id);
+
+              if (updateError) throw updateError;
+            } else {
+              const { error: insertError } = await supabase
+                .from('user_subject_progress')
+                .insert([{
+                  user_id: userId,
+                  subject_code: paper.subject_code,
+                  subject_name: paper.subject_name,
+                  topic_name: null,
+                  mastery_percent: 15,
+                  sessions_count: 1
+                }]);
+
+              if (insertError) throw insertError;
+            }
+
+            studyOpenPersisted = true;
+          } catch (error) {
+            console.error('Failed to save paper study progress:', error);
+          }
+        }
+
+        async function loadPaper() {
+            console.log('[Paper-View] loadPaper started');
+            try {
+                // Parallel: dependencies + paper query
+                const depPromise = loadDependencies();
                 hidePaperError();
+
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Paper request timed out after 10 seconds.')), 10000)
+                );
 
                 let query = supabase
                     .from('past_papers')
-                    .select('id, subject_name, subject_code, year, exam_type, instructor_name, semester, total_marks');
+                    .select('*');
 
                 if (hasDirectPaperLookup()) {
                     query = query.eq('id', paperId);
@@ -339,46 +399,45 @@
                         .eq('year', year)
                         .eq('exam_type', examType);
                 } else {
-                    throw new Error('Missing paper identifier in URL. Please open this page from a valid paper link.');
+                    throw new Error('Missing paper identifier in URL.');
                 }
 
                 const container = document.getElementById('questionsContainer');
                 if (container) container.setAttribute('aria-busy', 'true');
 
-                const [paperResult] = await Promise.all([query.maybeSingle(), depPromise]);
+                const paperResult = await Promise.race([query.maybeSingle(), timeoutPromise]);
                 const { data: paper, error: paperError } = paperResult;
-                if (paperError) {
-                    throw new Error(paperError.message || 'Failed to load paper metadata.');
-                }
 
-                if (!paper) {
-                    throw new Error('Paper not found. It may have been removed or the link is incomplete.');
-                }
+                if (paperError) throw paperError;
+                if (!paper) throw new Error('Paper not found.');
 
                 globalPaper = paper;
+                savePaperStudyOpen(paper);
 
-                // ── Update page metadata ──────────────
+                // Sync UI
                 const fullTitle = `${paper.subject_name} — ${paper.exam_type} ${paper.year}`;
                 document.title = `${fullTitle} | COMSATSPrepHub`;
                 document.getElementById('paperTitle').textContent = fullTitle;
-                document.getElementById('navPaperTitle').textContent = fullTitle;
-                document.getElementById('quickMarks').textContent = paper.total_marks;
-                hidePaperSkeleton();
+                if (document.getElementById('navPaperTitle')) {
+                    document.getElementById('navPaperTitle').textContent = fullTitle;
+                }
+                document.getElementById('quickMarks').textContent = paper.total_marks || '—';
 
-                // Chips in header
-                document.getElementById('paperChips').innerHTML = [
+                // Render Header Metadata
+                const chips = [
                     ['school', paper.subject_code],
                     ['person', paper.instructor_name || '—'],
                     ['calendar_today', `${paper.semester || ''} ${paper.year}`.trim()],
                     ['assignment', paper.exam_type],
-                ].map(([icon, label]) => `
+                ];
+                document.getElementById('paperChips').innerHTML = chips.map(([icon, label]) => `
                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 rounded-full text-xs font-bold text-slate-600 dark:text-slate-400 shadow-sm transition-all hover:bg-white dark:hover:bg-white/10">
                         <span class="material-symbols-outlined text-[14px] text-slate-400 dark:text-slate-500 font-variation-light">${icon}</span>${label}
                     </span>
                 `).join('');
 
                 // Sidebar meta
-                document.getElementById('sidebarMeta').innerHTML = [
+                const meta = [
                     ['school', 'Subject', paper.subject_name],
                     ['tag', 'Code', paper.subject_code],
                     ['person', 'Instructor', paper.instructor_name || '—'],
@@ -386,7 +445,8 @@
                     ['assignment', 'Exam', paper.exam_type],
                     ['auto_stories', 'Semester', paper.semester || '—'],
                     ['grade', 'Total Marks', paper.total_marks],
-                ].map(([icon, label, val]) => `
+                ];
+                document.getElementById('sidebarMeta').innerHTML = meta.map(([icon, label, val]) => `
                     <div class="flex items-start gap-2.5">
                         <span class="material-symbols-outlined text-[16px] text-slate-400 mt-0.5 flex-shrink-0">${icon}</span>
                         <div class="min-w-0">
@@ -396,13 +456,7 @@
                     </div>
                 `).join('');
 
-                // Show download
-                ['downloadBtn', 'downloadBtnMobile'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.style.display = '';
-                });
-
-                // ── Fetch Questions ───────────────────
+                // Fetch Questions
                 const { data: questions, error: qError } = await supabase
                     .from('questions')
                     .select('*')
@@ -410,30 +464,22 @@
                     .order('question_number', { ascending: true });
 
                 if (qError) throw qError;
-                if (!questions?.length) throw new Error('No questions found for this paper.');
+                if (!questions || questions.length === 0) throw new Error('No questions found.');
 
                 globalQuestions = questions;
                 totalQuestions = questions.length;
-
-                // updateProgress is called below
+                
                 document.getElementById('progressWrap').style.display = '';
                 updateProgress();
-
                 renderQuestions(questions);
-                const qContainer = document.getElementById('questionsContainer');
-                if (qContainer) {
-                    qContainer.classList.remove('hidden');
-                    qContainer.setAttribute('aria-busy', 'false');
-                }
 
             } catch (err) {
-                logger.error('Failed to load paper', err, {
-                    paperId,
-                    subjectCode,
-                    year,
-                    examType
-                });
-                showPaperError(err?.message || 'Failed to load paper.');
+                console.error('[Paper-View] Load error:', err);
+                showPaperError(err.message || 'Connection failed.');
+            } finally {
+                hidePaperSkeleton();
+                const qContainer = document.getElementById('questionsContainer');
+                if (qContainer) qContainer.setAttribute('aria-busy', 'false');
             }
         }
 

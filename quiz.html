@@ -248,12 +248,13 @@
 
       // State variables
       let quizzes = [];
-      let currentQuizId = '';
+      let currentQuizId = null;
       let currentQuizTitle = '';
       let currentQuizName = '';
       let questions = [];
       let currentQuestionIndex = 0;
       let selectedAnswers = {};
+      let resultsPersisted = false;
 
       function getQuizElements() {
         return {
@@ -282,10 +283,13 @@
       }
 
       function resetQuizRuntimeState() {
+        currentQuizId = null;
+        currentQuizTitle = '';
         currentQuizName = '';
         questions = [];
         currentQuestionIndex = 0;
         selectedAnswers = {};
+        resultsPersisted = false;
       }
 
       function clearQuestionErrorState() {
@@ -507,8 +511,9 @@
       // ── Start a Quiz ──────────────────────────────
       async function startQuiz(quizId, title, subCode) {
         currentQuizId = quizId;
-        currentQuizTitle = title;
-        currentQuizName = subCode;
+        currentQuizTitle = title || 'Untitled Quiz';
+        currentQuizName = subCode || 'SUBJECT';
+        resultsPersisted = false;
         // Load MathJax if not present
         if (!document.getElementById('mathjax-script')) {
           const script = document.createElement('script');
@@ -672,7 +677,140 @@
         }
       };
 
-      function showResults() {
+      async function getSignedInUserId() {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        return data?.session?.user?.id || null;
+      }
+
+      async function saveQuizAttempt({
+        userId,
+        quizId,
+        quizTitle,
+        subjectCode,
+        correctAnswers,
+        totalQuestions
+      }) {
+        const scorePercent = totalQuestions
+          ? Math.round((correctAnswers / totalQuestions) * 100)
+          : 0;
+
+        const payload = {
+          user_id: userId,
+          quiz_id: quizId,
+          quiz_title: quizTitle,
+          subject_code: subjectCode,
+          score_percent: scorePercent,
+          correct_answers: correctAnswers,
+          total_questions: totalQuestions
+        };
+
+        const { error } = await supabase
+          .from('user_quiz_attempts')
+          .insert([payload]);
+
+        if (error) throw error;
+      }
+
+      async function upsertSubjectProgress({
+        userId,
+        subjectCode,
+        subjectName,
+        masteryPercent,
+        topicName = null
+      }) {
+        const query = supabase
+          .from('user_subject_progress')
+          .select('id, sessions_count, mastery_percent')
+          .eq('user_id', userId)
+          .eq('subject_code', subjectCode);
+
+        const scopedQuery = topicName
+          ? query.eq('topic_name', topicName)
+          : query.is('topic_name', null);
+
+        const { data: existing, error: fetchError } = await scopedQuery.maybeSingle();
+        if (fetchError) throw fetchError;
+
+        if (existing?.id) {
+          const currentMastery = Number(existing.mastery_percent || 0);
+          const nextMastery = Math.round((currentMastery + masteryPercent) / 2);
+
+          const { error: updateError } = await supabase
+            .from('user_subject_progress')
+            .update({
+              subject_name: subjectName,
+              mastery_percent: nextMastery,
+              sessions_count: Number(existing.sessions_count || 0) + 1,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', existing.id);
+
+          if (updateError) throw updateError;
+          return;
+        }
+
+        const { error: insertError } = await supabase
+          .from('user_subject_progress')
+          .insert([{
+            user_id: userId,
+            subject_code: subjectCode,
+            subject_name: subjectName,
+            topic_name: topicName,
+            mastery_percent: masteryPercent,
+            sessions_count: 1
+          }]);
+
+        if (insertError) throw insertError;
+      }
+
+      async function persistQuizCompletion({
+        quizId,
+        quizTitle,
+        subjectCode,
+        correctAnswers,
+        totalQuestions
+      }) {
+        if (resultsPersisted) return;
+
+        try {
+          const userId = await getSignedInUserId();
+          if (!userId) return;
+
+          const percent = totalQuestions
+            ? Math.round((correctAnswers / totalQuestions) * 100)
+            : 0;
+
+          await saveQuizAttempt({
+            userId,
+            quizId,
+            quizTitle,
+            subjectCode,
+            correctAnswers,
+            totalQuestions
+          });
+
+          await upsertSubjectProgress({
+            userId,
+            subjectCode,
+            subjectName: subjectCode,
+            masteryPercent: percent
+          });
+
+          resultsPersisted = true;
+        } catch (error) {
+          console.error('Failed to persist quiz completion:', error);
+          if (window.showFeedbackStatus) {
+            window.showFeedbackStatus({
+              type: 'warning',
+              message: 'Quiz finished, but progress sync failed.',
+              duration: 5000
+            });
+          }
+        }
+      }
+
+      async function showResults() {
         document.getElementById('step2-question').classList.add('hidden');
         document.getElementById('step3-results').classList.remove('hidden');
 
@@ -700,47 +838,26 @@
         const desc = document.getElementById('insightsDesc');
 
         if (percent >= 90) {
-          badge.textContent = "EXCELLENT";
-          badge.className = "inline-block px-3 py-1 rounded-full text-[11px] font-black tracking-widest mb-3 border border-teal-200 bg-teal-50 text-teal-700 uppercase";
+          badge.textContent = 'EXCELLENT';
+          badge.className = 'inline-block px-3 py-1 rounded-full text-[11px] font-black tracking-widest mb-3 border border-teal-200 bg-teal-50 text-teal-700 uppercase';
           desc.textContent = `Amazing work! You really understand ${currentQuizName}.`;
         } else if (percent >= 70) {
-          badge.textContent = "GOOD";
-          badge.className = "inline-block px-3 py-1 rounded-full text-[11px] font-black tracking-widest mb-3 border border-brand-200 bg-brand-50 text-brand-700 uppercase";
+          badge.textContent = 'GOOD';
+          badge.className = 'inline-block px-3 py-1 rounded-full text-[11px] font-black tracking-widest mb-3 border border-brand-200 bg-brand-50 text-brand-700 uppercase';
           desc.textContent = `Good job! You have a solid understanding of ${currentQuizName}.`;
         } else {
-          badge.textContent = "NEEDS PRACTICE";
-          badge.className = "inline-block px-3 py-1 rounded-full text-[11px] font-black tracking-widest mb-3 border border-red-200 bg-red-50 text-red-700 uppercase";
+          badge.textContent = 'NEEDS PRACTICE';
+          badge.className = 'inline-block px-3 py-1 rounded-full text-[11px] font-black tracking-widest mb-3 border border-red-200 bg-red-50 text-red-700 uppercase';
           desc.textContent = `Keep practicing ${currentQuizName}. Review the questions you got wrong.`;
         }
 
-        // Save Attempt to Supabase
-        saveUserQuizAttempt(correctCount, total);
-      }
-
-      async function saveUserQuizAttempt(score, total) {
-        const session = await auth.getSession();
-        const userId = session?.user?.id;
-
-        if (!userId) return;
-
-        const scorePercent = total ? Math.round((score / total) * 100) : 0;
-
-        const { error } = await supabase
-          .from('user_quiz_attempts')
-          .insert({
-            user_id: userId,
-            quiz_id: currentQuizId,
-            quiz_title: currentQuizTitle,
-            subject_code: currentQuizName,
-            score_percent: scorePercent,
-            correct_answers: score,
-            total_questions: total
-          });
-
-        if (error) {
-          console.error('Failed to save quiz attempt:', error);
-        }
-      }
+        await persistQuizCompletion({
+          quizId: currentQuizId,
+          quizTitle: currentQuizTitle,
+          subjectCode: currentQuizName,
+          correctAnswers: correctCount,
+          totalQuestions: total
+        });
       }
     </script>
     
