@@ -195,7 +195,7 @@
          SCRIPTS
     ═══════════════════════════════════════════════ -->
     <script type="module">
-        import { supabase, escapeHtml } from './utils.js';
+        import { supabase, auth, escapeHtml } from './utils.js';
         import { sanitizeHtml } from './js/render-safety.js';
         import { logger } from './js/logger.js';
 
@@ -778,6 +778,9 @@
             // Progress
             answeredCount++;
             updateProgress();
+            
+            // TRACK MASTERY: Reveal answer = learning
+            trackMastery();
 
             if (answeredCount === totalQuestions) {
                 setTimeout(() => {
@@ -795,6 +798,49 @@
             const text = document.getElementById('progressText');
             if (fill) fill.style.width = pct + '%';
             if (text) text.textContent = `${answeredCount} / ${totalQuestions}`;
+        }
+
+        async function trackMastery() {
+            const session = await auth.getSession();
+            const userId = session?.user?.id;
+            if (!userId || !globalPaper) return;
+
+            const code = globalPaper.subject_code;
+            const name = globalPaper.subject_name;
+
+            try {
+                const { data: existing } = await supabase
+                    .from('user_subject_progress')
+                    .select('id, mastery_percent')
+                    .eq('user_id', userId)
+                    .eq('subject_code', code)
+                    .maybeSingle();
+
+                if (existing) {
+                    const current = existing.mastery_percent || 0;
+                    if (current < 100) {
+                        await supabase
+                            .from('user_subject_progress')
+                            .update({ 
+                                mastery_percent: Math.min(100, current + 2), // 2% per question reveal
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('id', existing.id);
+                    }
+                } else {
+                    await supabase
+                        .from('user_subject_progress')
+                        .insert({
+                            user_id: userId,
+                            subject_code: code,
+                            subject_name: name,
+                            sessions_count: 1,
+                            mastery_percent: 2
+                        });
+                }
+            } catch (err) {
+                console.warn('Mastery tracking failed:', err);
+            }
         }
 
         const formatContentAsync = async (text) => {

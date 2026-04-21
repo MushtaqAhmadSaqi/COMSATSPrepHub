@@ -135,7 +135,7 @@
     <div id="app-mobile-nav"></div>
 
     <script type="module">
-        import { supabase, escapeHtml as escHtml } from './utils.js';
+        import { supabase, auth, escapeHtml as escHtml } from './utils.js';
 
         const params = new URLSearchParams(window.location.search);
         const subjectName = params.get('subject') || '';
@@ -158,10 +158,25 @@
         iconEl.textContent = subjectIcons[subjectName] || '📘';
 
         async function loadPapers() {
+            const loadingEl = document.getElementById('loadingSkeleton');
+            const papersContainer = document.getElementById('papersContainer');
+            const emptyState = document.getElementById('emptyState');
+            const errorBanner = document.getElementById('errorBanner');
+            const errorMessage = document.getElementById('errorMessage');
+
+            console.log('%c[Subjects-Papers] 🚀 loadPapers started', 'color: #10b981; font-weight: bold');
+            console.log('Subject:', subjectName, ' | Code:', subjectCode);
+
             try {
+                // Timeout protection (same as subjects.html)
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Request timed out after 10 seconds')), 10000)
+                );
+
+                // Use .select('*') so it never breaks again after model changes
                 let query = supabase
                     .from('past_papers')
-                    .select('id, subject_code, subject_name, instructor_name, year, exam_type, semester, total_marks')
+                    .select('*')
                     .order('year', { ascending: false });
 
                 if (subjectCode) {
@@ -170,60 +185,56 @@
                     query = query.eq('subject_name', subjectName);
                 }
 
-                const { data: papers, error } = await query;
+                const fetchPromise = query;
+                const { data: papers, error } = await Promise.race([fetchPromise, timeoutPromise]);
+
+                console.log('✅ Query result:', { papersFound: papers?.length || 0, error });
 
                 if (error) throw error;
 
-                document.getElementById('loadingSkeleton').style.display = 'none';
+                // Hide loading
+                loadingEl.style.display = 'none';
 
                 if (!papers || papers.length === 0) {
-                    document.getElementById('emptyState').style.display = 'block';
+                    emptyState.style.display = 'block';
+                    console.log('No papers found for this subject');
                     return;
                 }
 
-                // Get question counts
-                const paperIds = papers.map(p => p.id);
-                const { data: questions } = await supabase
-                    .from('questions')
-                    .select('id, paper_id')
-                    .in('paper_id', paperIds);
+                console.log('📋 Sample paper object (check column names):', papers[0]);
 
-                const qCountMap = {};
-                if (questions) {
-                    questions.forEach(q => {
-                        qCountMap[q.paper_id] = (qCountMap[q.paper_id] || 0) + 1;
-                    });
-                }
-
-                // Stats
-                const totalQuestions = Object.values(qCountMap).reduce((s, c) => s + c, 0);
-                const years = [...new Set(papers.map(p => p.year))];
-                
+                // === STATS ===
+                const years = [...new Set(papers.map(p => p.year).filter(Boolean))];
                 document.getElementById('statPapers').textContent = papers.length;
-                document.getElementById('statQuestions').textContent = totalQuestions;
                 document.getElementById('statYears').textContent = years.length > 1 
                     ? `${Math.min(...years)}–${Math.max(...years)}` 
-                    : years[0];
+                    : (years[0] || '—');
                 document.getElementById('statsRow').classList.remove('opacity-60');
 
-                // Group by year
+                // === GROUP BY YEAR + RENDER CARDS ===
                 const byYear = {};
                 papers.forEach(p => {
-                    if (!byYear[p.year]) byYear[p.year] = [];
-                    byYear[p.year].push(p);
+                    const year = p.year || 'Unknown';
+                    if (!byYear[year]) byYear[year] = [];
+                    byYear[year].push(p);
                 });
 
                 const sortedYears = Object.keys(byYear).sort((a, b) => b - a);
-                const container = document.getElementById('papersContainer');
 
-                container.innerHTML = sortedYears.map(year => {
+                let html = '';
+                sortedYears.forEach(year => {
                     const yearPapers = byYear[year];
-                    
+
                     const cardsHTML = yearPapers.map(p => {
-                        const qCount = qCountMap[p.id] || 0;
-                        const isMid = (p.exam_type || '').toLowerCase().includes('mid');
-                        const instructor = p.instructor_name || 'Instructor name not available';
-                        
+                        // Use fallbacks so it works even if column names changed
+                        const examType = p.exam_type || p.type || p.exam || 'Exam';
+                        const semester = p.semester || '';
+                        const instructor = p.instructor_name || p.instructor || p.teacher || 'Instructor not available';
+                        const totalMarks = p.total_marks || p.marks || p.total || '?';
+                        const qCount = 0; // we'll improve this later once we know the questions table structure
+
+                        const isMid = String(examType).toLowerCase().includes('mid');
+
                         return `
                             <a href="paper-view.html?id=${p.id}" 
                                class="group block w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 sm:p-6 transition-all duration-300 card-hover active:scale-[0.985]">
@@ -233,28 +244,28 @@
                                         <div class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${isMid 
                                             ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' 
                                             : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400'}">
-                                            ${escHtml(p.exam_type)}
+                                            ${escHtml(examType)}
                                         </div>
                                     </div>
                                     
                                     <div class="text-right flex-shrink-0">
-                                        <div class="text-sm font-black text-slate-900 dark:text-white tabular-nums">${p.year}</div>
-                                        <div class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">${escHtml(p.semester)}</div>
+                                        <div class="text-sm font-black text-slate-900 dark:text-white tabular-nums">${year}</div>
+                                        <div class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">${escHtml(semester)}</div>
                                     </div>
                                 </div>
 
                                 <div class="mb-5">
-                                    <h3 class="font-bold text-[17px] sm:text-xl text-slate-900 dark:text-white mb-2 leading-snug break-words uppercase tracking-tight">
+                                    <h3 class="font-bold text-[17px] sm:text-xl text-slate-900 dark:text-white mb-2 leading-snug break-words">
                                         ${escHtml(instructor)}
                                     </h3>
                                     <div class="flex items-center gap-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                                         <span>${qCount} Questions</span>
                                         <span class="text-slate-200 dark:text-slate-800">•</span>
-                                        <span>${p.total_marks} Marks</span>
+                                        <span>${totalMarks} Marks</span>
                                     </div>
                                 </div>
 
-                                <div class="flex items-center justify-between pt-3 border-t border-slate-50 dark:border-white/5 mt-auto">
+                                <div class="flex items-center justify-between pt-3 border-t border-slate-50 dark:border-white/5">
                                     <div class="flex items-center gap-1.5 text-primary-hover group-hover:gap-2.5 transition-all duration-300">
                                         <span class="text-[11px] font-black uppercase tracking-wider">Start Revision</span>
                                         <span class="material-symbols-outlined text-base">arrow_forward</span>
@@ -267,8 +278,8 @@
                         `;
                     }).join('');
 
-                    return `
-                        <div class="animate-slide-up">
+                    html += `
+                        <div class="animate-slide-up mb-10">
                             <div class="flex items-center gap-3 mb-3">
                                 <div class="px-3 py-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-xl flex items-center gap-2 shadow-sm">
                                     <span class="material-symbols-outlined text-[18px] text-primary">calendar_today</span>
@@ -277,39 +288,78 @@
                                 <div class="flex-1 h-px bg-slate-200 dark:bg-white/10"></div>
                                 <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">${yearPapers.length} papers</span>
                             </div>
-                            
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 ${cardsHTML}
                             </div>
                         </div>
                     `;
-                }).join('');
+                });
 
-                container.style.display = 'block';
-                container.classList.remove('hidden');
+                papersContainer.innerHTML = html;
+                papersContainer.style.display = 'block';
+                papersContainer.classList.remove('hidden');
 
-                // Re-init Vanilla Tilt for premium effects
-                if (window.reinitVanillaTilt) {
-                    window.reinitVanillaTilt();
-                }
+                console.log('%c✅ Papers loaded successfully!', 'color: #10b981; font-weight: bold');
+
+                // TRACK PROGRESS: Accessing a subject
+                saveSubjectAccess(subjectCode, subjectName);
 
             } catch (err) {
-                if (window.handleApiError) {
-                    window.handleApiError(err, 'Failed to sync papers');
-                }
-                document.getElementById('loadingSkeleton').style.display = 'none';
-                const banner = document.getElementById('errorBanner');
-                if (banner) {
-                    banner.style.display = 'block';
-                    document.getElementById('errorMessage').innerHTML = `
+                console.error('❌ loadPapers failed:', err);
+                loadingEl.style.display = 'none';
+
+                if (errorBanner && errorMessage) {
+                    errorBanner.style.display = 'flex';
+                    errorMessage.innerHTML = `
                         <strong>Failed to load papers</strong><br>
-                        <span class="text-sm">${err.message}</span>
+                        <span class="text-sm">${err.message || err}</span>
                     `;
+                } else {
+                    alert('Error: ' + (err.message || err));
                 }
             }
         }
 
+        // Start loading
         loadPapers();
+
+        async function saveSubjectAccess(code, name) {
+            const session = await auth.getSession();
+            const userId = session?.user?.id;
+            if (!userId || !code) return;
+
+            try {
+                // Check if already exists
+                const { data: existing } = await supabase
+                    .from('user_subject_progress')
+                    .select('id, sessions_count')
+                    .eq('user_id', userId)
+                    .eq('subject_code', code)
+                    .maybeSingle();
+
+                if (existing) {
+                    await supabase
+                        .from('user_subject_progress')
+                        .update({ 
+                            sessions_count: (existing.sessions_count || 0) + 1,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', existing.id);
+                } else {
+                    await supabase
+                        .from('user_subject_progress')
+                        .insert({
+                            user_id: userId,
+                            subject_code: code,
+                            subject_name: name,
+                            sessions_count: 1,
+                            mastery_percent: 5 // initial boost for starting
+                        });
+                }
+            } catch (err) {
+                console.warn('Silent progress tracking failed:', err);
+            }
+        }
     </script>
 
     <script type="module" src="js/layout.js"></script>

@@ -242,12 +242,14 @@
          SCRIPTS
     ═══════════════════════════════════════════════ -->
     <script type="module">
-      import { supabase, escapeHtml } from './utils.js';
+      import { supabase, auth, escapeHtml } from './utils.js';
       import { nl2brSafe } from './js/render-safety.js';
       import { logger } from './js/logger.js';
 
       // State variables
       let quizzes = [];
+      let currentQuizId = '';
+      let currentQuizTitle = '';
       let currentQuizName = '';
       let questions = [];
       let currentQuestionIndex = 0;
@@ -504,6 +506,9 @@
 
       // ── Start a Quiz ──────────────────────────────
       async function startQuiz(quizId, title, subCode) {
+        currentQuizId = quizId;
+        currentQuizTitle = title;
+        currentQuizName = subCode;
         // Load MathJax if not present
         if (!document.getElementById('mathjax-script')) {
           const script = document.createElement('script');
@@ -707,6 +712,35 @@
           badge.className = "inline-block px-3 py-1 rounded-full text-[11px] font-black tracking-widest mb-3 border border-red-200 bg-red-50 text-red-700 uppercase";
           desc.textContent = `Keep practicing ${currentQuizName}. Review the questions you got wrong.`;
         }
+
+        // Save Attempt to Supabase
+        saveUserQuizAttempt(correctCount, total);
+      }
+
+      async function saveUserQuizAttempt(score, total) {
+        const session = await auth.getSession();
+        const userId = session?.user?.id;
+
+        if (!userId) return;
+
+        const scorePercent = total ? Math.round((score / total) * 100) : 0;
+
+        const { error } = await supabase
+          .from('user_quiz_attempts')
+          .insert({
+            user_id: userId,
+            quiz_id: currentQuizId,
+            quiz_title: currentQuizTitle,
+            subject_code: currentQuizName,
+            score_percent: scorePercent,
+            correct_answers: score,
+            total_questions: total
+          });
+
+        if (error) {
+          console.error('Failed to save quiz attempt:', error);
+        }
+      }
       }
     </script>
     

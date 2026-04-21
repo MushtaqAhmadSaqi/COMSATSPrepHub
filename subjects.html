@@ -157,32 +157,52 @@
         const grid = document.getElementById('subjectsGrid');
         const badge = document.getElementById('subjectCountBadge');
         const badgeText = document.getElementById('subjectCountText');
-        const errorBanner = document.getElementById('errorBanner');
+
+        console.log('[Subjects] loadSubjects started');
+        console.log('Grid element:', document.getElementById('subjectsGrid'));
+        console.log('Loading element:', document.getElementById('loadingGrid'));
 
         try {
-            const { data: papers, error } = await supabase
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Subjects request timed out after 8 seconds.')), 8000)
+            );
+
+            const fetchPromise = supabase
                 .from('past_papers')
                 .select('id, subject_code, subject_name')
                 .order('subject_name', { ascending: true });
 
+            const result = await Promise.race([fetchPromise, timeoutPromise]);
+
+            const { data: papers, error } = result;
+
+            console.log('[Subjects] Supabase result:', result);
+
             if (error) throw error;
 
-            loading.style.display = 'none';
-
             if (!papers || papers.length === 0) {
-                document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('emptyState').classList.remove('hidden');
                 return;
             }
 
             const subjectMap = {};
             papers.forEach(p => {
-                if (!subjectMap[p.subject_name]) {
-                    subjectMap[p.subject_name] = { subject_name: p.subject_name, subject_code: p.subject_code, count: 0 };
+                const safeName = p.subject_name || 'Untitled Subject';
+                const safeCode = p.subject_code || 'NO-CODE';
+
+                if (!subjectMap[safeName]) {
+                    subjectMap[safeName] = {
+                        subject_name: safeName,
+                        subject_code: safeCode,
+                        count: 0
+                    };
                 }
-                subjectMap[p.subject_name].count++;
+                subjectMap[safeName].count++;
             });
 
-            const subjects = Object.values(subjectMap).sort((a, b) => a.subject_name.localeCompare(b.subject_name));
+            const subjects = Object.values(subjectMap).sort((a, b) =>
+                String(a.subject_name).localeCompare(String(b.subject_name))
+            );
 
             badgeText.textContent = `${subjects.length} Subject${subjects.length !== 1 ? 's' : ''}`;
             badge.style.display = 'inline-flex';
@@ -195,22 +215,22 @@
 
                 const card = document.createElement('a');
                 card.href = url;
-                card.className = `group block bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 hover:shadow-xl transition-all duration-300 card-hover`;
+                card.className = 'group block bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 hover:shadow-xl transition-all duration-300 card-hover';
                 card.setAttribute('data-subject', s.subject_name);
 
                 card.innerHTML = `
-                    <div class="w-11 h-11 rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-black/5 dark:border-white/10" 
+                    <div class="w-11 h-11 rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-black/5 dark:border-white/10"
                          style="background: ${p.bg}; color: ${p.color};">
                         <span class="material-symbols-outlined text-[22px]">${p.icon}</span>
                     </div>
-                    
+
                     <div class="mb-5">
                         <h3 class="text-xl font-black tracking-tight text-gray-900 dark:text-white mb-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-2">
                             ${escHtml(s.subject_name)}
                         </h3>
                         <p class="font-mono text-sm text-gray-500 dark:text-gray-400">${escHtml(s.subject_code)}</p>
                     </div>
-                    
+
                     <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/10">
                         <div class="px-3 py-1 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs font-bold rounded-2xl">
                             ${s.count} Paper${s.count !== 1 ? 's' : ''}
@@ -229,8 +249,10 @@
             grid.style.display = 'grid';
 
         } catch (err) {
-            loading.style.display = 'none';
+            console.error('[Subjects] load failed:', err);
             showSubjectsError(err?.message || 'Something went wrong while loading subjects.');
+        } finally {
+            if (loading) loading.style.display = 'none';
         }
     }
 
