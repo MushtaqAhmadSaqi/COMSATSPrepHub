@@ -148,30 +148,35 @@ function _injectMobileNav(currentPage) {
   const container = document.getElementById('app-mobile-nav');
   if (!container && document.getElementById('mobileBottomNav')) return;
 
-  const items = [
-    { id: 'index.html', label: 'Home', icon: 'home' },
-    { id: 'subjects.html', label: 'Subjects', icon: 'menu_book' },
-    { id: 'quiz.html', label: 'Quiz', icon: 'quiz' },
-    { id: 'about-us.html', label: 'Team', icon: 'groups' }
-  ];
-
   const html = `
-    <nav id="mobileBottomNav" class="fixed bottom-4 left-4 right-4 z-[60] lg:hidden transition-transform duration-300 will-change-transform" aria-label="Bottom navigation">
-      <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-[2rem] shadow-2xl px-2 py-2">
-        <div class="grid grid-cols-4 items-stretch gap-1">
-          ${items.map(item => {
-            const isActive = currentPage === item.id;
-            return `
-              <a href="${item.id}"
-                 aria-label="Open ${item.label}"
-                 title="${item.label}"
-                 class="min-h-12 flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-2xl transition-all ${isActive ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5'}">
-                <span class="material-symbols-outlined text-[24px]" aria-hidden="true" style="${isActive ? "font-variation-settings:'FILL' 1" : ''}">${item.icon}</span>
-                <span class="text-[10px] font-bold leading-none">${item.label}</span>
-              </a>
-            `;
-          }).join('')}
-        </div>
+    <nav
+      aria-label="Mobile navigation"
+      class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[120] w-[calc(100%-24px)] max-w-sm lg:hidden"
+    >
+      <div class="grid grid-cols-4 items-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-[28px] shadow-2xl px-2 py-2">
+        <a href="index.html"
+           class="mobile-nav-link ${currentPage === 'index.html' ? 'active' : ''}">
+          <span class="material-symbols-outlined">home</span>
+          <span>Home</span>
+        </a>
+
+        <a href="subjects.html"
+           class="mobile-nav-link ${currentPage === 'subjects.html' || currentPage === 'subject-papers.html' || currentPage === 'paper-view.html' ? 'active' : ''}">
+          <span class="material-symbols-outlined">menu_book</span>
+          <span>Subjects</span>
+        </a>
+
+        <a href="quiz.html"
+           class="mobile-nav-link ${currentPage === 'quiz.html' ? 'active' : ''}">
+          <span class="material-symbols-outlined">quiz</span>
+          <span>Quiz</span>
+        </a>
+
+        <a href="about-us.html"
+           class="mobile-nav-link ${currentPage === 'about-us.html' ? 'active' : ''}">
+          <span class="material-symbols-outlined">groups</span>
+          <span>Team</span>
+        </a>
       </div>
     </nav>
   `;
@@ -262,7 +267,7 @@ function _injectFooter() {
   if (!container && document.querySelector('footer')) return;
 
   const html = `
-    <footer class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-100 dark:border-white/5 py-4 px-4 sm:px-6 transition-colors duration-300 rounded-t-[1.5rem] mt-auto pb-16 lg:pb-4">
+    <footer class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-100 dark:border-white/5 py-4 px-4 sm:px-6 transition-colors duration-300 rounded-t-[1.5rem] mt-auto pb-24 lg:pb-4">
       <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
         <div class="space-y-0">
           <div class="font-black text-sm tracking-tight text-[#1a1a2e] dark:text-white">COMSATSPrepHub</div>
