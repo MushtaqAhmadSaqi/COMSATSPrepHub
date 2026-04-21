@@ -105,6 +105,31 @@
     <script type="module">
         import { supabase, escapeHtml as escHtml } from './utils.js';
 
+        function showSubjectsError(message) {
+            const errorBanner = document.getElementById('errorBanner');
+            const errorMessage = document.getElementById('errorMessage');
+
+            if (!errorBanner || !errorMessage) return;
+
+            errorBanner.style.display = 'flex';
+            errorBanner.classList.remove('hidden');
+
+            errorMessage.innerHTML = '';
+
+            const title = document.createElement('strong');
+            title.textContent = 'Failed to load subjects';
+
+            const lineBreak = document.createElement('br');
+
+            const detail = document.createElement('span');
+            detail.className = 'text-sm';
+            detail.textContent = String(message || 'Unknown error');
+
+            errorMessage.appendChild(title);
+            errorMessage.appendChild(lineBreak);
+            errorMessage.appendChild(detail);
+        }
+
         const palette = [
             { bg: '#e0e7ff', color: '#4338ca', icon: 'data_object' },
             { bg: '#dcfce7', color: '#15803d', icon: 'database' },
@@ -196,8 +221,7 @@
 
             } catch (err) {
                 loading.style.display = 'none';
-                errorBanner.style.display = 'block';
-                document.getElementById('errorMessage').innerHTML = `<strong>Failed to load subjects</strong><br><span class="text-sm">${err.message}</span>`;
+                showSubjectsError(err?.message || 'Something went wrong while loading subjects.');
             }
         }
 

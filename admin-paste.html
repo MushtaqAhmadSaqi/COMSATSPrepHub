@@ -317,47 +317,26 @@ JSON FORMAT:
 
     <script type="module">
         import { supabase, escapeHtml as escHtml } from './utils.js';
-        import { requireAuth } from './user-state.js';
         import { sanitizeHtml } from './js/render-safety.js';
-
-        const ADMIN_ALLOWLIST = new Set(['mushtaqsaqi00@gmail.com']);
-        const isAdminEmail = (email) => ADMIN_ALLOWLIST.has(String(email || '').toLowerCase());
+        import { guardAdminPage } from './js/admin-guard.js';
 
         let parsedData = null;
-
-        function syncAdminThemeVisuals() {
-            if (window.refreshThemeIcons) {
-                window.refreshThemeIcons();
-            }
-        }
-
-        document.addEventListener('comsatsprephub:themechange', () => {
-            syncAdminThemeVisuals();
-        });
-
-        syncAdminThemeVisuals();
 
 
         // Initialize Mermaid
         mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict' });
 
-        async function guardAdmin() {
-            const session = await requireAuth('auth.html');
-            if (!session) return false;
-            if (!isAdminEmail(session.user?.email)) {
-                alert('Admin access only.');
-                window.location.href = 'index.html';
-                return false;
-            }
-            return true;
-        }
-
 
 
 
         // ── Live JSON Validation ──
-        const isAllowed = await guardAdmin();
-        if (!isAllowed) throw new Error('Unauthorized admin access');
+        const access = await guardAdminPage({
+            authRedirect: 'auth.html',
+            unauthorizedRedirect: 'index.html',
+            unauthorizedMessage: 'Admin access only.'
+        });
+
+        if (!access.ok) throw new Error(`Unauthorized admin access: ${access.reason || 'unknown'}`);
 
         const jsonTextarea = document.getElementById('jsonPaste');
         const jsonValidation = document.getElementById('jsonValidation');
@@ -878,17 +857,33 @@ JSON FORMAT:
 
         function showStatus(type, html) {
             const box = document.getElementById('statusBox');
-            box.className = 'mt-5 p-4 rounded-xl text-sm leading-relaxed border transition-all';
+            if (!box) return;
+
             const styles = {
                 success: 'bg-emerald-50 text-emerald-800 border-emerald-200',
                 error: 'bg-red-50 text-red-800 border-red-200',
                 loading: 'bg-blue-50 text-blue-800 border-blue-200'
             };
-            box.classList.add(...(styles[type] || styles.loading).split(' '));
+
+            const toneClasses = (styles[type] || styles.loading).split(' ');
+
+            box.className = 'mt-5 p-4 rounded-xl text-sm leading-relaxed border transition-all';
+            box.classList.remove('hidden');
+            box.classList.add(...toneClasses);
             box.innerHTML = html;
         }
-        function hideStatus() { document.getElementById('statusBox').classList.add('hidden'); }
+
+        function hideStatus() {
+            const box = document.getElementById('statusBox');
+            if (!box) return;
+
+            box.classList.add('hidden');
+            box.innerHTML = '';
+        }
+
         function resetBtn(btn) {
+            if (!btn) return;
+
             btn.disabled = false;
             btn.innerHTML = '🚀 Upload to Database';
             btn.classList.replace('from-emerald-600', 'from-blue-600');

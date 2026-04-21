@@ -95,25 +95,19 @@
 
     <script type="module">
         import { supabase } from './utils.js';
-        import { requireAuth } from './user-state.js';
+        import { guardAdminPage } from './js/admin-guard.js';
 
-        const ADMIN_ALLOWLIST = new Set(['mushtaqsaqi00@gmail.com']);
-        const isAdminEmail = (email) => ADMIN_ALLOWLIST.has(String(email || '').toLowerCase());
+        document.addEventListener('DOMContentLoaded', async () => {
+            const access = await guardAdminPage({
+                authRedirect: 'auth.html',
+                unauthorizedRedirect: 'index.html',
+                unauthorizedMessage: 'Admin access only.'
+            });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            guardAdminAndInit();
-        });
+            if (!access.ok) return;
 
-        async function guardAdminAndInit() {
-            const session = await requireAuth('auth.html');
-            if (!session) return;
-            if (!isAdminEmail(session.user?.email)) {
-                alert('Admin access only.');
-                window.location.href = 'index.html';
-                return;
-            }
             loadSubjects();
-        }
+        });
 
         window.saveApiKey = () => {
             const key = document.getElementById('geminiApiKey').value.trim();
