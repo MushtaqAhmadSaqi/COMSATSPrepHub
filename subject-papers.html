@@ -159,11 +159,18 @@
 
         async function loadPapers() {
             try {
-                const { data: papers, error } = await supabase
+                let query = supabase
                     .from('past_papers')
                     .select('id, subject_code, subject_name, instructor_name, year, exam_type, semester, total_marks')
-                    .eq('subject_name', subjectName)
                     .order('year', { ascending: false });
+
+                if (subjectCode) {
+                    query = query.eq('subject_code', subjectCode);
+                } else if (subjectName) {
+                    query = query.eq('subject_name', subjectName);
+                }
+
+                const { data: papers, error } = await query;
 
                 if (error) throw error;
 
@@ -214,7 +221,7 @@
                     
                     const cardsHTML = yearPapers.map(p => {
                         const qCount = qCountMap[p.id] || 0;
-                        const isMid = p.exam_type.toLowerCase().includes('mid');
+                        const isMid = (p.exam_type || '').toLowerCase().includes('mid');
                         const instructor = p.instructor_name || 'Instructor name not available';
                         
                         return `
@@ -279,6 +286,7 @@
                 }).join('');
 
                 container.style.display = 'block';
+                container.classList.remove('hidden');
 
                 // Re-init Vanilla Tilt for premium effects
                 if (window.reinitVanillaTilt) {

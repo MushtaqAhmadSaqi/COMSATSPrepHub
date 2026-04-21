@@ -10,6 +10,37 @@
     <!-- External Styles -->
     <link rel="stylesheet" href="styles/tailwind-built.css">
     <link rel="stylesheet" href="style.css">
+    <style type="text/tailwindcss">
+      @layer utilities {
+        .glass { @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/10; }
+
+        .quiz-option {
+          @apply flex items-start gap-4 p-5 border-2 rounded-2xl cursor-pointer transition-all duration-200 font-mono text-[14px]
+          bg-white dark:bg-slate-900
+          border-slate-200 dark:border-white/10
+          text-slate-900 dark:text-slate-100
+          hover:border-brand-500 dark:hover:border-brand-400
+          hover:bg-brand-50 dark:hover:bg-slate-800;
+        }
+
+        .quiz-option.selected {
+          @apply border-sky-500 bg-sky-50 text-sky-900 dark:border-sky-400 dark:bg-sky-500/15 dark:text-sky-100;
+          box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+        }
+
+        .quiz-option.correct {
+          @apply border-emerald-500 bg-emerald-50 text-emerald-800 dark:border-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-100;
+        }
+
+        .quiz-option.wrong {
+          @apply border-red-500 bg-red-50 text-red-800 dark:border-red-400 dark:bg-red-500/15 dark:text-red-100;
+        }
+
+        .radio-ui {
+          @apply w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-500 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all bg-white dark:bg-slate-800;
+        }
+      }
+    </style>
     
     <script src="js/dark-mode.js" defer></script>
 </head>
@@ -52,9 +83,18 @@
 
             <!-- ================== STEP 2: ACTIVE QUESTION ================== -->
             <section id="step2-question" class="hidden animate-fade-in space-y-6">
+                <!-- Back Button -->
+                <div class="flex items-center">
+                    <button type="button" onclick="returnToQuizCatalog()" 
+                       class="nav-link-premium inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+                        <span class="material-symbols-outlined text-lg">arrow_back</span>
+                        <span class="font-bold">Back to Quizzes</span>
+                    </button>
+                </div>
+                
                 <!-- Question Stats Bar -->
                 <div
-                    class="bg-white border border-slate-200 rounded-2xl p-4 sm:px-6 flex items-center justify-between gap-4 shadow-sm">
+                    class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl p-4 sm:px-6 flex items-center justify-between gap-4 shadow-sm">
                     <div class="flex items-center gap-3">
                         <span id="quizBadgeLabel"
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 border border-brand-100 rounded-full text-[11px] font-bold tracking-widest text-brand-600 uppercase">
@@ -78,7 +118,7 @@
 
                 <!-- Main Question Card -->
                 <div
-                    class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm relative overflow-hidden transition-all">
+                    class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-10 shadow-sm relative overflow-hidden transition-all">
                     <!-- Large Background Graphic -->
                     <div id="bgQuestionNum"
                         class="absolute -top-10 -right-4 text-[120px] font-black text-slate-50 select-none z-0 tracking-tighter italic opacity-50">
@@ -87,7 +127,7 @@
 
                     <div class="relative z-10 w-full">
                         <h2 id="questionText"
-                            class="text-xl sm:text-2xl font-bold text-slate-900 leading-snug mb-8 tracking-tight font-mono">
+                            class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-snug mb-8 tracking-tight font-mono">
                         </h2>
 
                         <!-- Options List -->
@@ -98,7 +138,7 @@
                         <!-- Explanation - Premium Reveal -->
                         <div id="explanationBox" class="hidden mt-8 animate-slide-up">
                             <div
-                                class="relative bg-gradient-to-br from-slate-50 to-white border border-slate-200 rounded-2xl p-6 overflow-hidden">
+                                class="relative bg-gradient-to-br from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl p-6 overflow-hidden">
                                 <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-teal-500"></div>
                                 <div class="flex items-center gap-2 mb-3">
                                     <span
@@ -107,7 +147,7 @@
                                         Heuristic</h4>
                                 </div>
                                 <p id="explanationText"
-                                    class="text-slate-600 text-[14.5px] leading-relaxed italic font-mono"></p>
+                                    class="text-slate-600 dark:text-slate-300 text-[14.5px] leading-relaxed italic font-mono"></p>
                             </div>
                         </div>
 
@@ -184,10 +224,10 @@
                                 class="button-press w-full h-12 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-black transition-all shadow-lg active:scale-95">
                                 Initiate New Cycle
                             </button>
-                            <a href="subjects.html"
+                            <button type="button" onclick="returnToQuizCatalog({ reloadList: false })"
                                 class="button-press w-full h-12 flex items-center justify-center text-sm font-bold text-slate-500 hover:text-slate-900 border border-slate-200 rounded-xl transition-all hover:bg-slate-50">
-                                Browse Library
-                            </a>
+                                Back to Quiz Catalog
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -340,7 +380,7 @@
         grid.appendChild(card);
       }
 
-      window.returnToQuizCatalog = function ({ reloadList = false } = {}) {
+      function showQuizCatalog(push = false) {
         const { step1, step2, step3 } = getQuizElements();
 
         resetQuizRuntimeState();
@@ -351,6 +391,34 @@
         if (step3) step3.classList.add('hidden');
         if (step1) step1.classList.remove('hidden');
 
+        if (push) {
+          history.pushState({ view: 'catalog' }, '', 'quiz.html');
+        }
+      }
+
+      function showQuizRunner(quizId) {
+        const { step1, step2 } = getQuizElements();
+        if (step1) step1.classList.add('hidden');
+        if (step2) step2.classList.remove('hidden');
+        setQuizChromeHidden(true);
+
+        history.pushState({ view: 'quiz', quizId }, '', `quiz.html?quiz=${quizId}`);
+      }
+
+      window.addEventListener('popstate', () => {
+        const url = new URL(window.location.href);
+        const quizId = url.searchParams.get('quiz');
+
+        if (quizId) {
+          // stay in quiz mode if URL has quiz param
+          return;
+        }
+
+        showQuizCatalog(false);
+      });
+
+      window.returnToQuizCatalog = function ({ reloadList = false } = {}) {
+        showQuizCatalog(true);
         if (reloadList) {
           loadQuizzes();
         }
@@ -445,16 +513,11 @@
           document.head.appendChild(script);
         }
 
+        showQuizRunner(quizId);
         currentQuizName = subCode;
-
-        const { step1, step2, questionText, optionsList } = getQuizElements();
-
-        if (step1) step1.classList.add('hidden');
-        if (step2) step2.classList.remove('hidden');
-
-        setQuizChromeHidden(true);
         clearQuestionErrorState();
 
+        const { questionText, optionsList } = getQuizElements();
         if (questionText) questionText.textContent = 'Loading questions.';
         if (optionsList) optionsList.innerHTML = '';
 

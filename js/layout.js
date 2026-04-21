@@ -96,7 +96,7 @@ function _injectHeader(currentPage, session, userName) {
   const html = `
     <header class="sticky top-0 z-50 transition-all duration-300 w-full">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-        <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-gray-200/50 dark:border-white/10 rounded-[2rem] shadow-xl px-4 sm:px-8 py-3 flex items-center justify-between transition-all duration-300 gap-3">
+        <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-gray-200/50 dark:border-white/10 rounded-[1.5rem] shadow-xl px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between transition-all duration-300 gap-2 sm:gap-3">
           <a href="index.html" class="flex items-center gap-3 group" aria-label="Go to home page">
             <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#3b82f6] to-[#1e40af] flex items-center justify-center text-white font-black text-xl shadow-md group-hover:scale-105 transition-transform ring-1 ring-white/20">C</div>
             <span class="font-black text-xl tracking-tighter text-[#1a1a2e] dark:text-white hidden sm:block">COMSATSPrepHub</span>
@@ -112,22 +112,22 @@ function _injectHeader(currentPage, session, userName) {
 
           <div class="flex items-center gap-2 sm:gap-3">
             <button id="dark-mode-toggle"
-                    class="p-3 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all text-gray-600 dark:text-gray-300"
+                    class="flex items-center justify-center w-11 h-11 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-all text-gray-600 dark:text-gray-300"
                     type="button"
                     aria-label="Toggle dark mode">
               <span class="dark-mode-icon block w-5 h-5 flex items-center justify-center" aria-hidden="true"></span>
             </button>
 
             <button id="open-auth-modal"
-                    class="flex items-center gap-2 bg-[#1e1e2e] dark:bg-white hover:bg-black dark:hover:bg-gray-100 text-white dark:text-[#1e1e2e] px-5 py-3 rounded-full text-xs font-bold transition-all active:scale-95 shadow-md"
+                    class="flex items-center gap-2 bg-[#1e1e2e] dark:bg-white hover:bg-black dark:hover:bg-gray-100 text-white dark:text-[#1e1e2e] px-3 sm:px-5 py-2.5 sm:py-3 rounded-full text-xs font-bold transition-all active:scale-95 shadow-md"
                     type="button"
                     aria-label="${isLoggedIn ? 'Open dashboard' : 'Open sign in dialog'}">
               ${isLoggedIn ? `
-                <div class="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center text-[10px] text-white hidden sm:flex font-black" aria-hidden="true">${initial}</div>
-                <span>Dashboard</span>
+                <div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-[10px] text-white font-black" aria-hidden="true">${initial}</div>
+                <span class="hidden sm:inline">Dashboard</span>
               ` : `
                 <span class="material-symbols-outlined text-[18px]" aria-hidden="true">person</span>
-                <span>Sign In</span>
+                <span class="hidden sm:inline">Sign In</span>
               `}
             </button>
           </div>
@@ -262,19 +262,19 @@ function _injectFooter() {
   if (!container && document.querySelector('footer')) return;
 
   const html = `
-    <footer class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-100 dark:border-white/5 py-6 px-6 transition-colors duration-300 rounded-t-[2rem] mt-auto pb-24 lg:pb-6">
-      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-        <div class="space-y-0.5">
-          <div class="font-black text-base tracking-tight text-[#1a1a2e] dark:text-white">COMSATSPrepHub</div>
-          <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Verified academic resources for success.</p>
+    <footer class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-100 dark:border-white/5 py-4 px-4 sm:px-6 transition-colors duration-300 rounded-t-[1.5rem] mt-auto pb-16 lg:pb-4">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+        <div class="space-y-0">
+          <div class="font-black text-sm tracking-tight text-[#1a1a2e] dark:text-white">COMSATSPrepHub</div>
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Verified academic resources.</p>
         </div>
-        <div class="flex items-center justify-center gap-6">
+        <div class="flex items-center justify-center gap-4">
           <a href="about-us.html" class="nav-link-premium text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">About</a>
           <a href="terms.html" class="nav-link-premium text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">Terms</a>
           <a href="https://github.com/MushtaqAhmadSaqi" target="_blank" rel="noopener noreferrer" class="nav-link-premium text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-primary transition-colors">Github</a>
         </div>
         <div class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest opacity-60">
-          © 2026 Mushtaq Ahmad Saqi
+          © 2026
         </div>
       </div>
     </footer>
