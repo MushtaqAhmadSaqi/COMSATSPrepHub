@@ -274,25 +274,82 @@
         let globalPaper = null;
         let globalQuestions = [];
 
+        function hasDirectPaperLookup() {
+            return !!paperId;
+        }
+
+        function hasCompositePaperLookup() {
+            return !!subjectCode && Number.isFinite(year) && !!examType;
+        }
+
+        function showPaperError(message) {
+            const skeleton = document.getElementById('paperLoadingSkeleton');
+            const titleBlock = document.getElementById('paperTitleBlock');
+            const errorState = document.getElementById('errorState');
+            const errorMsg = document.getElementById('errorMsg');
+            const questionsContainer = document.getElementById('questionsContainer');
+            const progressWrap = document.getElementById('progressWrap');
+            const doneBanner = document.getElementById('doneBanner');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const downloadBtnMobile = document.getElementById('downloadBtnMobile');
+
+            if (skeleton) skeleton.style.display = 'none';
+            if (titleBlock) titleBlock.classList.add('hidden');
+            if (questionsContainer) questionsContainer.classList.add('hidden');
+            if (doneBanner) doneBanner.classList.add('hidden');
+
+            if (progressWrap) {
+                progressWrap.style.display = 'none';
+                progressWrap.style.opacity = '1';
+            }
+
+            if (downloadBtn) downloadBtn.style.display = 'none';
+            if (downloadBtnMobile) downloadBtnMobile.style.display = 'none';
+
+            if (errorState) errorState.classList.remove('hidden');
+            if (errorMsg) errorMsg.textContent = String(message || 'Something went wrong while loading the paper.');
+        }
+
+        function hidePaperError() {
+            const errorState = document.getElementById('errorState');
+            const errorMsg = document.getElementById('errorMsg');
+
+            if (errorState) errorState.classList.add('hidden');
+            if (errorMsg) errorMsg.textContent = '';
+        }
+
         // ── Load Paper ───────────────────────────────
         async function loadPaper() {
             try {
                 // Load dependencies in parallel with initial query
                 const depPromise = loadDependencies();
 
-                let query = supabase.from('past_papers')
+                hidePaperError();
+
+                let query = supabase
+                    .from('past_papers')
                     .select('id, subject_name, subject_code, year, exam_type, instructor_name, semester, total_marks');
-                if (paperId) {
+
+                if (hasDirectPaperLookup()) {
                     query = query.eq('id', paperId);
-                } else if (subjectCode && year && examType) {
-                    query = query.eq('subject_code', subjectCode).eq('year', year).eq('exam_type', examType);
+                } else if (hasCompositePaperLookup()) {
+                    query = query
+                        .eq('subject_code', subjectCode)
+                        .eq('year', year)
+                        .eq('exam_type', examType);
                 } else {
-                    query = query.eq('subject_code', 'CSC211').eq('year', 2024).eq('exam_type', 'Mid Term');
+                    throw new Error('Missing paper identifier in URL. Please open this page from a valid paper link.');
                 }
 
-                const [paperResult] = await Promise.all([query.single(), depPromise]);
+                const [paperResult] = await Promise.all([query.maybeSingle(), depPromise]);
                 const { data: paper, error: paperError } = paperResult;
-                if (paperError || !paper) throw new Error(paperError?.message || 'Paper not found.');
+                if (paperError) {
+                    throw new Error(paperError.message || 'Failed to load paper metadata.');
+                }
+
+                if (!paper) {
+                    throw new Error('Paper not found. It may have been removed or the link is incomplete.');
+                }
 
                 globalPaper = paper;
 
@@ -361,10 +418,13 @@
                 renderQuestions(questions);
 
             } catch (err) {
-                const skeleton = document.getElementById('paperLoadingSkeleton');
-                if (skeleton) skeleton.style.display = 'none';
-                document.getElementById('errorState').classList.remove('hidden');
-                document.getElementById('errorMsg').textContent = err.message;
+                logger.error('Failed to load paper', err, {
+                    paperId,
+                    subjectCode,
+                    year,
+                    examType
+                });
+                showPaperError(err?.message || 'Failed to load paper.');
             }
         }
 

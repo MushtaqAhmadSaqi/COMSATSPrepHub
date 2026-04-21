@@ -17,7 +17,8 @@
 import { requireAuth } from '../user-state.js';
 
 const DEFAULT_ADMIN_ALLOWLIST = [
-  'mushtaqsaqi00@gmail.com'
+  'mushtaqsaqi00@gmail.com',
+  'saqijanitormiki@gmail.com'
 ];
 
 function normalizeEmail(email) {
