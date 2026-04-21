@@ -19,7 +19,7 @@
         
         <!-- Welcome Header -->
         <header class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8" data-aos="fade-in">
-            <div>
+            <div class="flex-1">
                 <p class="text-brand-600 dark:text-brand-400 font-semibold tracking-wider text-sm uppercase mb-1 flex items-center gap-2">
                     <span class="material-symbols-outlined text-[16px]">calendar_today</span>
                     <span id="currentDate">Fall Semester 2024</span>
@@ -28,10 +28,54 @@
                 <p class="text-gray-500 dark:text-gray-400 mt-2 max-w-2xl text-sm md:text-base" id="welcomeSubtext">Loading your profile...</p>
             </div>
             
-            <a href="quiz.html" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold py-2.5 px-6 rounded-xl shadow-md hover:shadow-lg dark:shadow-[0_4px_15px_rgba(14,165,233,0.3)] dark:hover:shadow-[0_6px_20px_rgba(14,165,233,0.4)] transition-all flex items-center gap-2 w-max" aria-label="Resume practice in quizzes">
-                <span class="material-symbols-outlined text-[20px]">play_arrow</span>
-                Resume Practice
-            </a>
+            <div class="flex items-center gap-4">
+                <!-- Profile Area -->
+                <div class="relative">
+                    <button
+                        id="profileBadge"
+                        type="button"
+                        class="block w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 dark:border-white/10 hover:border-brand-500 transition-colors shrink-0 shadow-sm"
+                        aria-haspopup="menu"
+                        aria-expanded="false"
+                        aria-controls="profileMenu"
+                    >
+                        <span class="sr-only">Open profile menu</span>
+                        <div id="profileAvatarLetter" class="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-500 to-indigo-600 text-white font-bold text-lg">?</div>
+                        <img alt="" id="profileAvatarImg" loading="lazy" src="" referrerpolicy="no-referrer" class="w-full h-full object-cover hidden">
+                    </button>
+
+                    <div
+                        id="profileMenu"
+                        role="menu"
+                        aria-labelledby="profileBadge"
+                        class="hidden absolute top-full right-0 mt-2 w-56 bg-white dark:bg-dark-surface rounded-xl p-2 shadow-xl border border-gray-100 dark:border-white/10 z-50"
+                    >
+                        <div class="px-3 py-2 border-b border-gray-100 dark:border-white/5 mb-1 text-slate-900 dark:text-white">
+                            <p class="text-sm font-semibold truncate" id="tooltipName">Loading...</p>
+                            <p class="text-xs text-brand-600 dark:text-brand-400 truncate" id="tooltipRole">Student</p>
+                        </div>
+
+                        <button type="button" role="menuitem" class="w-full text-left flex items-center gap-2 px-3 py-2 text-sm rounded-lg opacity-50 cursor-not-allowed text-slate-600 dark:text-slate-400" disabled>
+                            <span class="material-symbols-outlined text-[18px]">person</span> Profile (Disabled)
+                        </button>
+
+                        <button type="button" role="menuitem" id="settingsBtn"
+                            class="w-full text-left flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 rounded-lg transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">settings</span> Settings
+                        </button>
+
+                        <button type="button" role="menuitem" id="logoutBtn"
+                            class="w-full text-left flex items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg mt-1 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">logout</span> Log out
+                        </button>
+                    </div>
+                </div>
+
+                <a href="quiz.html" class="bg-brand-500 hover:bg-brand-600 text-white font-semibold py-2.5 px-6 rounded-xl shadow-md hover:shadow-lg dark:shadow-[0_4px_15px_rgba(14,165,233,0.3)] dark:hover:shadow-[0_6px_20px_rgba(14,165,233,0.4)] transition-all flex items-center gap-2 w-max" aria-label="Resume practice in quizzes">
+                    <span class="material-symbols-outlined text-[20px]">play_arrow</span>
+                    Resume Practice
+                </a>
+            </div>
         </header>
 
         <!-- KPI Summary Cards -->
@@ -282,6 +326,11 @@
         </div>
     </main>
 
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+        <div class="hidden md:block absolute top-[-10%] left-[-5%] w-[360px] h-[360px] rounded-full bg-brand-300/20 dark:bg-brand-900/10 blur-[110px] motion-safe:animate-pulse-slow"></div>
+        <div class="hidden md:block absolute bottom-[-10%] right-[-5%] w-[420px] h-[420px] rounded-full bg-indigo-300/15 dark:bg-indigo-900/10 blur-[110px]"></div>
+    </div>
+
     <div id="app-footer"></div>
     <div id="app-mobile-nav"></div>
 
@@ -347,14 +396,53 @@
         if (tooltipNameEl) tooltipNameEl.textContent = fullName;
         if (tooltipRoleEl) tooltipRoleEl.textContent  = email;
 
-        // 5. Logout button
+        // 5. Setup Profile Disclosure Menu
+        const profileBadge = document.getElementById('profileBadge');
+        const profileMenu = document.getElementById('profileMenu');
         const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', async (e) => {
-                e.preventDefault();
-                await signOutAndRedirect('index.html');
-            });
+
+        function closeProfileMenu() {
+            profileMenu?.classList.add('hidden');
+            profileBadge?.setAttribute('aria-expanded', 'false');
         }
+
+        function openProfileMenu() {
+            profileMenu?.classList.remove('hidden');
+            profileBadge?.setAttribute('aria-expanded', 'true');
+        }
+
+        profileBadge?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const expanded = profileBadge.getAttribute('aria-expanded') === 'true';
+            expanded ? closeProfileMenu() : openProfileMenu();
+        });
+
+        profileBadge?.addEventListener('keydown', event => {
+            if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openProfileMenu();
+                profileMenu?.querySelector('[role="menuitem"]')?.focus();
+            }
+        });
+
+        document.addEventListener('click', event => {
+            if (!profileMenu?.contains(event.target) && !profileBadge?.contains(event.target)) {
+                closeProfileMenu();
+            }
+        });
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                closeProfileMenu();
+                profileBadge?.focus();
+            }
+        });
+
+        logoutBtn?.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await signOutAndRedirect('index.html');
+        });
 
         // 6. KPI cards — zero stats for new users (no backend tracking yet)
         //    Leave as 0 / —  (already set in HTML)
@@ -387,136 +475,7 @@
     })();
     </script>
 
-    <script>
-        // 1. Initialize AOS Animation Library
-        if (
-            typeof window.AOS !== 'undefined' &&
-            !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        ) {
-            window.AOS.init({
-                once: true,
-                offset: 30,
-                duration: 800,
-                easing: 'ease-out-cubic'
-            });
-        }
 
-        // 2. Set Current Date/Time
-        const dateEl = document.getElementById('currentDate');
-        if(dateEl) {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            dateEl.textContent = new Date().toLocaleDateString('en-US', options);
-        }
-
-        // 3. Accessible Profile Tooltip Toggle
-        const profileBadge = document.getElementById('profileBadge');
-        const profileTooltip = document.getElementById('profileTooltip');
-
-        if (profileBadge && profileTooltip) {
-            let closeTimer = null;
-
-            profileBadge.setAttribute('role', 'button');
-            profileBadge.setAttribute('tabindex', '0');
-            profileBadge.setAttribute('aria-haspopup', 'menu');
-            profileBadge.setAttribute('aria-expanded', 'false');
-
-            function openTooltip() {
-                window.clearTimeout(closeTimer);
-                profileTooltip.classList.remove('hidden');
-                profileBadge.setAttribute('aria-expanded', 'true');
-
-                requestAnimationFrame(() => {
-                    profileTooltip.classList.remove('opacity-0');
-                    profileTooltip.classList.add('opacity-100');
-                });
-            }
-
-            function closeTooltip({ immediate = false } = {}) {
-                window.clearTimeout(closeTimer);
-
-                const runClose = () => {
-                    profileTooltip.classList.remove('opacity-100');
-                    profileTooltip.classList.add('opacity-0');
-                    profileBadge.setAttribute('aria-expanded', 'false');
-
-                    window.setTimeout(() => {
-                        if (!profileTooltip.classList.contains('opacity-100')) {
-                            profileTooltip.classList.add('hidden');
-                        }
-                    }, 200);
-                };
-
-                if (immediate) {
-                    runClose();
-                } else {
-                    closeTimer = window.setTimeout(runClose, 180);
-                }
-            }
-
-            function toggleTooltip() {
-                const isHidden = profileTooltip.classList.contains('hidden');
-                if (isHidden) {
-                    openTooltip();
-                } else {
-                    closeTooltip({ immediate: true });
-                }
-            }
-
-            // Desktop pointer support
-            profileBadge.addEventListener('mouseenter', openTooltip);
-            profileBadge.addEventListener('mouseleave', () => closeTooltip());
-            profileTooltip.addEventListener('mouseenter', openTooltip);
-            profileTooltip.addEventListener('mouseleave', () => closeTooltip());
-
-            // Touch / click support
-            profileBadge.addEventListener('click', event => {
-                event.preventDefault();
-                event.stopPropagation();
-                toggleTooltip();
-            });
-
-            // Keyboard support
-            profileBadge.addEventListener('keydown', event => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    toggleTooltip();
-                }
-
-                if (event.key === 'Escape') {
-                    closeTooltip({ immediate: true });
-                    profileBadge.focus();
-                }
-            });
-
-            profileTooltip.addEventListener('keydown', event => {
-                if (event.key === 'Escape') {
-                    closeTooltip({ immediate: true });
-                    profileBadge.focus();
-                }
-            });
-
-            // Outside click close
-            document.addEventListener('click', event => {
-                if (
-                    !profileTooltip.classList.contains('hidden') &&
-                    !profileTooltip.contains(event.target) &&
-                    !profileBadge.contains(event.target)
-                ) {
-                    closeTooltip({ immediate: true });
-                }
-            });
-
-            // Focus leaving both elements
-            document.addEventListener('focusin', event => {
-                if (
-                    !profileTooltip.classList.contains('hidden') &&
-                    !profileTooltip.contains(event.target) &&
-                    !profileBadge.contains(event.target)
-                ) {
-                    closeTooltip({ immediate: true });
-                }
-            });
-        }
 
         // 4. Setup Advanced Chart.js Graph
         const ctx = document.getElementById('learningChart');

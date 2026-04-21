@@ -433,20 +433,25 @@ async function handleSignUpSubmit(event) {
   }
 
   const originalHtml = submitButton?.innerHTML ?? '';
-  setButtonLoading(submitButton, 'Processing...', false);
+  setButtonLoading(submitButton, 'Processing...', true);
 
-  const result = await signUpWithEmail(validation.values);
+  try {
+    const result = await signUpWithEmail(validation.values);
 
-  restoreButton(submitButton, originalHtml);
+    if (!result.ok) {
+      await notify('Error', result.message, 'error');
+      return;
+    }
 
-  if (!result.ok) {
-    await notify('Error', result.message, 'error');
-    return;
+    form.reset();
+    await notify('Success!', 'Account created successfully. Please check your email to confirm your account.', 'success');
+    closeModal();
+  } catch (error) {
+    console.error('Sign up unexpected error:', error);
+    await notify('Error', 'An unexpected error occurred during sign up.', 'error');
+  } finally {
+    restoreButton(submitButton, originalHtml);
   }
-
-  form.reset();
-  await notify('Success!', 'Account created successfully. Please check your email to confirm your account.', 'success');
-  closeModal();
 }
 
 async function handleLoginSubmit(event) {
@@ -466,20 +471,25 @@ async function handleLoginSubmit(event) {
   }
 
   const originalHtml = submitButton?.innerHTML ?? '';
-  setButtonLoading(submitButton, 'Entering...', false);
+  setButtonLoading(submitButton, 'Entering...', true);
 
-  const result = await signInWithEmail(validation.values);
+  try {
+    const result = await signInWithEmail(validation.values);
 
-  restoreButton(submitButton, originalHtml);
+    if (!result.ok) {
+      await notify('Error', result.message, 'error');
+      return;
+    }
 
-  if (!result.ok) {
-    await notify('Error', result.message, 'error');
-    return;
+    form.reset();
+    closeModal();
+    redirectToDashboard();
+  } catch (error) {
+    console.error('Login unexpected error:', error);
+    await notify('Error', 'An unexpected error occurred during login.', 'error');
+  } finally {
+    restoreButton(submitButton, originalHtml);
   }
-
-  form.reset();
-  closeModal();
-  redirectToDashboard();
 }
 
 async function handleGoogleAuth(event) {
@@ -488,36 +498,54 @@ async function handleGoogleAuth(event) {
   const button = event.currentTarget;
   const originalHtml = button?.innerHTML ?? '';
 
-  setButtonLoading(button, 'Redirecting...', false);
+  setButtonLoading(button, 'Redirecting...', true);
 
-  const result = await signInWithGoogle();
+  try {
+    const result = await signInWithGoogle();
 
-  if (!result.ok) {
+    if (!result.ok) {
+      await notify('Error', result.message, 'error');
+    }
+    // On success, Supabase normally redirects away automatically.
+  } catch (error) {
+    console.error('Google Auth unexpected error:', error);
+    await notify('Error', 'Could not initiate Google Authentication.', 'error');
+  } finally {
     restoreButton(button, originalHtml);
-    await notify('Error', result.message, 'error');
   }
-  // On success, Supabase normally redirects away automatically.
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
  * Button Helpers
  * ────────────────────────────────────────────────────────────────────────── */
-function setButtonLoading(button, label, withSpinner = false) {
+function setButtonLoading(button, label, withSpinner = true) {
   if (!button) return;
 
   button.disabled = true;
-  button.innerHTML = withSpinner
-    ? `
-      <span class="flex items-center justify-center gap-2">
-        <span class="animate-spin">⟳</span>
-        <span>${label}</span>
-      </span>
-    `
-    : `<span>${label}</span>`;
+  button.setAttribute('aria-busy', 'true');
+  
+  const span = document.createElement('span');
+  span.className = 'flex items-center justify-center gap-2';
+
+  if (withSpinner) {
+    const spinner = document.createElement('span');
+    spinner.className = 'animate-spin inline-block';
+    spinner.setAttribute('aria-hidden', 'true');
+    spinner.textContent = '⟳';
+    span.appendChild(spinner);
+  }
+
+  const text = document.createElement('span');
+  text.textContent = label;
+  span.appendChild(text);
+
+  button.innerHTML = '';
+  button.appendChild(span);
 }
 
 function restoreButton(button, html) {
   if (!button) return;
   button.disabled = false;
+  button.removeAttribute('aria-busy');
   button.innerHTML = html;
 }

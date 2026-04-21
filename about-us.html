@@ -9,10 +9,11 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Preload Critical Fonts -->
+    
+    <!-- LCP Optimizations -->
+    <link rel="preload" as="image" href="My-image.webp" type="image/webp" fetchpriority="high">
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap">
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap">
-
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
@@ -103,9 +104,9 @@
                                 <img src="My-image.png" 
                                      srcset="My-image.png 1x" 
                                      sizes="(max-width: 640px) 160px, 192px"
-                                     loading="lazy" 
+                                     loading="eager" 
                                      decoding="async" 
-                                     fetchpriority="low" 
+                                     fetchpriority="high" 
                                      alt="Mushtaq Ahmad Saqi" 
                                      class="w-full h-full object-cover" 
                                      onerror="this.style.display='none'; this.closest('picture').nextElementSibling.style.display='flex';">

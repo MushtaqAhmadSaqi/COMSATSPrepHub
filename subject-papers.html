@@ -74,7 +74,7 @@
                 </div>
 
                 <!-- Stats Row (Horizontally scrollable on mobile) -->
-                <div id="statsRow" class="hidden flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1 sm:pb-0 sm:mx-0 sm:px-0">
+                <div id="statsRow" class="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1 sm:pb-0 sm:mx-0 sm:px-0 min-h-[58px] opacity-60" aria-live="polite">
                     <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5 flex items-center gap-2 shadow-sm flex-shrink-0">
                         <span class="text-base">📄</span>
                         <div>
@@ -197,7 +197,7 @@
                 document.getElementById('statYears').textContent = years.length > 1 
                     ? `${Math.min(...years)}–${Math.max(...years)}` 
                     : years[0];
-                document.getElementById('statsRow').style.display = 'flex';
+                document.getElementById('statsRow').classList.remove('opacity-60');
 
                 // Group by year
                 const byYear = {};

@@ -19,12 +19,29 @@
   const MEDIA_QUERY = '(prefers-color-scheme: dark)';
   const media = window.matchMedia(MEDIA_QUERY);
 
+  function safeStorage() {
+    try {
+      const x = '__storage_test__';
+      localStorage.setItem(x, x);
+      localStorage.removeItem(x);
+      return localStorage;
+    } catch (e) {
+      return {
+        getItem: () => null,
+        setItem: () => null,
+        removeItem: () => null
+      };
+    }
+  }
+
+  const storage = safeStorage();
+
   function normalizeTheme(value) {
     return value === 'dark' ? 'dark' : 'light';
   }
 
   function getStoredTheme() {
-    const value = localStorage.getItem(THEME_KEY);
+    const value = storage.getItem(THEME_KEY);
     if (!value) return null;
     return normalizeTheme(value);
   }
@@ -130,7 +147,7 @@
     setHtmlTheme(normalized);
 
     if (persist) {
-      localStorage.setItem(THEME_KEY, normalized);
+      storage.setItem(THEME_KEY, normalized);
     }
 
     updateToggleIcons(normalized);
@@ -160,7 +177,7 @@
   }
 
   function clearStoredTheme() {
-    localStorage.removeItem(THEME_KEY);
+    storage.removeItem(THEME_KEY);
     const theme = getSystemTheme();
     applyTheme(theme, { persist: false, dispatch: true });
     return theme;

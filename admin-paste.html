@@ -11,36 +11,6 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
 
-    <!-- MathJax Config (BEFORE loading MathJax) -->
-    <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                processEscapes: true,
-                processEnvironments: true,
-                tags: 'ams'
-            },
-            options: {
-                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
-                ignoreHtmlClass: 'no-mathjax'
-            },
-            startup: {
-                pageReady: () => MathJax.startup.defaultPageReady()
-            }
-        };
-    </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
-    <!-- Marked.js for Markdown -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
-
-    <!-- Chart.js for AI-generated graphs -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" defer></script>
-
-    <!-- Mermaid.js for flowcharts/diagrams -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js" defer></script>
-
     <!-- Use built CSS instead -->
     <link rel="stylesheet" href="styles/tailwind-built.css">
     <script src="js/dark-mode.js" defer></script>
@@ -167,8 +137,8 @@
 
     <main class="max-w-4xl mx-auto p-4 md:p-8 mb-16">
         <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-10 shadow-sm">
-            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">⚙️ Paste & Upload Whole Paper</h1>
-            <p class="text-slate-500 text-sm md:text-base leading-relaxed mb-8">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2 dark:text-white">⚙️ Paste & Upload Whole Paper</h1>
+            <p class="text-slate-500 text-sm md:text-base leading-relaxed mb-8 dark:text-gray-400">
                 Copy the <strong>ChatGPT prompt below</strong> → paste your paper into ChatGPT → copy the JSON it gives
                 you → paste it here → click Upload. <strong>One go. No manual filling.</strong>
             </p>
@@ -218,18 +188,19 @@ JSON FORMAT:
   ]
 }
 
-[PASTE YOUR PAPER HERE]</code> <button
+[PASTE YOUR PAPER HERE]</code> 
+                <button
                     class="copy-btn mt-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-5 py-2 rounded-full text-sm font-bold transition shadow-sm flex items-center gap-2"
-                    onclick="copyPrompt()"> 📋 Copy Prompt </button>
+                    id="copyPromptBtn"> 📋 Copy Prompt </button>
             </div>
 
 
             <!-- Paste Area -->
-            <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-500 mb-2">📝 Step 2 — Paste
+            <label class="block text-[13px] font-bold uppercase tracking-wide text-slate-500 mb-2" for="jsonPaste">📝 Step 2 — Paste
                 JSON from ChatGPT</label>
             <div class="relative">
                 <textarea id="jsonPaste" placeholder='{"subject_code": "CSC211", ...}'
-                    class="w-full min-h-[280px] p-4 border-2 border-slate-200 rounded-xl font-mono text-[13.5px] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition resize-y bg-slate-50/50 text-slate-800 leading-relaxed shadow-inner"
+                    class="w-full min-h-[280px] p-4 border-2 border-slate-200 rounded-xl font-mono text-[13.5px] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition resize-y bg-slate-50/50 text-slate-800 leading-relaxed shadow-inner dark:bg-slate-800/50 dark:border-slate-700 dark:text-gray-200"
                     spellcheck="false"></textarea>
                 <!-- JSON line count indicator -->
                 <div id="jsonInfo" class="absolute bottom-3 right-3 text-[11px] font-mono text-slate-400"></div>
@@ -237,33 +208,33 @@ JSON FORMAT:
 
 
             <!-- JSON Validation Indicator -->
-            <div id="jsonValidation" class="mt-2 text-[12px] font-medium h-5"></div>
+            <div id="jsonValidation" class="mt-2 text-[12px] font-medium h-5" role="status" aria-live="polite"></div>
 
 
             <!-- Buttons -->
             <div class="flex flex-col sm:flex-row gap-3 mt-5">
-                <button onclick="parsePaper()"
-                    class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 border-2 border-blue-500 font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2">
-                    🔍 Parse & Preview
+                <button id="parseBtn"
+                    class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 border-2 border-blue-500 font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2 dark:bg-blue-500/10 dark:hover:bg-blue-500/20">
+                    🔍 <span class="btn-label">Parse & Preview</span>
                 </button>
-                <button id="uploadBtn" onclick="uploadPaper()"
+                <button id="uploadBtn"
                     class="hidden flex-[2] bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 rounded-xl transition shadow-md hover:shadow-lg flex items-center justify-center gap-2">
-                    🚀 Upload to Database
+                    🚀 <span class="btn-label">Upload to Database</span>
                 </button>
-                <button id="exportBtn" onclick="exportJSON()"
-                    class="hidden flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border-2 border-slate-300 font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2">
-                    💾 Export JSON
+                <button id="exportBtn"
+                    class="hidden flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border-2 border-slate-300 font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2 dark:bg-slate-800 dark:border-slate-700 dark:text-gray-300">
+                    💾 <span class="btn-label">Export JSON</span>
                 </button>
             </div>
 
 
             <!-- Preview -->
-            <div id="preview" class="hidden mt-10 border-t border-slate-100 pt-8">
+            <div id="preview" class="hidden mt-10 border-t border-slate-100 pt-8 dark:border-white/5">
                 <div class="flex items-center justify-between mb-4">
                     <div class="text-[13px] font-bold uppercase tracking-wide text-slate-500">📑 Paper Preview — Check
                         before uploading</div>
                     <span id="questionCount"
-                        class="text-[12px] font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200"></span>
+                        class="text-[12px] font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200 dark:bg-blue-500/10 dark:border-blue-500/20"></span>
                 </div>
                 <div id="metaGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8"></div>
                 <div id="qList" class="flex flex-col gap-5"></div>
@@ -271,7 +242,7 @@ JSON FORMAT:
 
 
             <!-- Status Box -->
-            <div id="statusBox" class="hidden mt-5 p-4 rounded-xl text-sm leading-relaxed border transition-all"></div>
+            <div id="statusBox" class="hidden mt-5 p-4 rounded-xl text-sm leading-relaxed border transition-all" role="status" aria-live="assertive"></div>
         </div>
     </main>
 
@@ -287,16 +258,85 @@ JSON FORMAT:
         import { sanitizeHtml } from './js/render-safety.js';
         import { guardAdminPage } from './js/admin-guard.js';
 
+        // ── Dependency Manager ───────────────────────────────────────────
+        const DEPS = {
+            mathjax: {
+                ready: false,
+                loaded: false,
+                load: () => {
+                   window.MathJax = {
+                        tex: {
+                            inlineMath: [['$', '$'], ['\\(', '\\)']],
+                            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                            processEscapes: true,
+                            processEnvironments: true,
+                            tags: 'ams'
+                        },
+                        options: {
+                            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+                            ignoreHtmlClass: 'no-mathjax'
+                        },
+                        startup: {
+                            pageReady: () => {
+                                DEPS.mathjax.ready = true;
+                                return MathJax.startup.defaultPageReady();
+                            }
+                        }
+                    };
+                    return importScript('https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js', 'MathJax-script');
+                }
+            },
+            marked: {
+                load: () => importScript('https://cdn.jsdelivr.net/npm/marked/marked.min.js', 'marked-script')
+            },
+            chartjs: {
+                load: () => importScript('https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js', 'chart-script')
+            },
+            mermaid: {
+                ready: false,
+                load: async () => {
+                    await importScript('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js', 'mermaid-script');
+                    mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict' });
+                    DEPS.mermaid.ready = true;
+                }
+            }
+        };
+
+        function importScript(src, id) {
+            return new Promise((resolve, reject) => {
+                if (document.getElementById(id)) return resolve();
+                const s = document.createElement('script');
+                s.id = id;
+                s.src = src;
+                s.onload = resolve;
+                s.onerror = reject;
+                document.head.appendChild(s);
+            });
+        }
+
+        async function ensurePreviewDeps(data) {
+            const promises = [];
+            
+            // marked is always needed for markdown
+            promises.push(DEPS.marked.load());
+            
+            const hasMath = JSON.stringify(data).includes('$');
+            if (hasMath) promises.push(DEPS.mathjax.load());
+            
+            const hasGraphs = data.questions.some(q => q.graph);
+            if (hasGraphs) {
+                const hasMermaid = data.questions.some(q => q.graph?.type === 'mermaid');
+                const hasChart = data.questions.some(q => q.graph && q.graph.type !== 'mermaid');
+                if (hasMermaid) promises.push(DEPS.mermaid.load());
+                if (hasChart) promises.push(DEPS.chartjs.load());
+            }
+
+            await Promise.all(promises);
+        }
+
+        // ── State & Initialization ───────────────────────────────────────
         let parsedData = null;
 
-
-        // Initialize Mermaid
-        mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict' });
-
-
-
-
-        // ── Live JSON Validation ──
         const access = await guardAdminPage({
             authRedirect: 'auth.html',
             unauthorizedRedirect: 'index.html',
@@ -308,14 +348,17 @@ JSON FORMAT:
         const jsonTextarea = document.getElementById('jsonPaste');
         const jsonValidation = document.getElementById('jsonValidation');
         const jsonInfo = document.getElementById('jsonInfo');
+        const parseBtn = document.getElementById('parseBtn');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const copyPromptBtn = document.getElementById('copyPromptBtn');
 
-
-        jsonTextarea.addEventListener('input', function () {
-            const val = this.value.trim();
+        // ── Event Handlers ───────────────────────────────────────────────
+        jsonTextarea.addEventListener('input', () => {
+            const val = jsonTextarea.value.trim();
             const lines = val.split('\n').length;
             const chars = val.length;
             jsonInfo.textContent = `${lines} lines · ${chars.toLocaleString()} chars`;
-
 
             if (!val) {
                 jsonValidation.innerHTML = '';
@@ -324,24 +367,22 @@ JSON FORMAT:
             const cleaned = val.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
             try {
                 JSON.parse(cleaned);
-                jsonValidation.innerHTML = '<span class="text-emerald-600">✅ Valid JSON syntax</span>';
+                jsonValidation.innerHTML = '<span class="text-emerald-600 font-bold">✅ Valid JSON syntax</span>';
             } catch (e) {
-                jsonValidation.innerHTML = `<span class="text-red-500">❌ ${e.message}</span>`;
+                jsonValidation.innerHTML = `<span class="text-red-500 font-bold">❌ ${e.message}</span>`;
             }
         });
 
-        // ── Copy prompt ──
-        window.copyPrompt = function () {
-            const text = document.getElementById('promptText').innerText;
+        copyPromptBtn.addEventListener('click', () => {
+            const text = document.getElementById('promptText').textContent;
             navigator.clipboard.writeText(text).then(() => {
-                const btn = document.querySelector('.copy-btn');
-                btn.innerHTML = '✅ Copied!';
-                setTimeout(() => { btn.innerHTML = '📋 Copy Prompt'; }, 2000);
+                const original = copyPromptBtn.innerHTML;
+                copyPromptBtn.innerHTML = '✅ Copied!';
+                setTimeout(() => { copyPromptBtn.innerHTML = original; }, 2000);
             });
-        };
+        });
 
-        // ── Export JSON ──
-        window.exportJSON = function () {
+        exportBtn.addEventListener('click', () => {
             if (!parsedData) return;
             const blob = new Blob([JSON.stringify(parsedData, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -350,238 +391,20 @@ JSON FORMAT:
             a.download = `${parsedData.subject_code}_${parsedData.year}_${parsedData.exam_type.replace(/\s/g, '_')}.json`;
             a.click();
             URL.revokeObjectURL(url);
-        };
+        });
 
-        // ══════════════════════════════════════════════
-        //  CORE FIX: Safe Markdown + MathJax rendering
-        // ══════════════════════════════════════════════
-        // ── SUPER AGGRESSIVE REPAIR for smashed ChatGPT model answers ──
-        function normalizeModelAnswer(text) {
-            if (!text || typeof text !== 'string') return '';
-
-            let fixed = text;
-
-            // 1. Fix common word-sticking patterns (Letu → Let u, Differentiatebothsides → Differentiate both sides)
-            fixed = fixed.replace(/Letu/g, 'Let u');
-            fixed = fixed.replace(/so\(tan/g, 'so tan');
-            fixed = fixed.replace(/Differentiatebothsidesw\.r\.t\.x/g, 'Differentiate both sides w.r.t. x');
-            fixed = fixed.replace(/fracdu dx/g, '\\frac{du}{dx}');
-            fixed = fixed.replace(/fracdy dx/g, '\\frac{dy}{dx}');
-            fixed = fixed.replace(/fracd([a-z])/g, '\\frac{d$1}');
-
-            // 2. Add spaces around math symbols and commands
-            fixed = fixed.replace(/([=+\-*/^()])/g, ' $1 ');
-            fixed = fixed.replace(/\s+/g, ' ');           // normalize multiple spaces
-
-            // 3. Force newlines before typical solution steps
-            fixed = fixed.replace(/(Let |Differentiate |so |Then |Thus |Now |Where |Therefore )/gi, '\n\n$1');
-            fixed = fixed.replace(/(\$\s*[^$]+?)\s*([=])\s*/g, '\n\n$1 $2 ');
-
-            // 4. Auto-wrap any equation-like line that doesn’t already have $
-            const lines = fixed.split('\n');
-            const cleanedLines = lines.map(line => {
-                const trimmed = line.trim();
-                if (!trimmed) return '';
-
-                // If it looks like math and doesn’t start with $
-                if ((trimmed.includes('=') || trimmed.includes('^') || trimmed.includes('y\'') || 
-                     trimmed.includes('\\tan') || trimmed.includes('\\sec') || trimmed.includes('\\frac')) &&
-                    !trimmed.startsWith('$') && !trimmed.startsWith('$$')) {
-                    
-                    return '$' + trimmed + '$';
-                }
-                return trimmed;
-            });
-
-            return cleanedLines.join('\n\n');
-        }
-
-        // ══════════════════════════════════════════════
-        //  SAFE Markdown + MathJax rendering (FINAL VERSION)
-        // ══════════════════════════════════════════════
-        function formatMarkdown(text) {
-            if (!text || typeof text !== 'string') return '';
-
-            // ←←← NEW: First normalize the smashed model answer
-            let processed = text.includes('Letu') || text.includes('Differentiatebothsides') 
-                            ? normalizeModelAnswer(text) 
-                            : text;
-
-            const mathBlocks = [];
-            let counter = 0;
-
-            // Extract all math blocks
-            processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, match => { mathBlocks.push(match); return `%%MATH_BLOCK_${counter++}%%`; });
-            processed = processed.replace(/\\\[([\s\S]*?)\\\]/g, match => { 
-                mathBlocks.push('$$' + match.slice(2, -2) + '$$'); return `%%MATH_BLOCK_${counter++}%%`; 
-            });
-            processed = processed.replace(/\$(.+?)\$/g, match => { mathBlocks.push(match); return `%%MATH_BLOCK_${counter++}%%`; });
-            processed = processed.replace(/\\\(([\s\S]*?)\\\)/g, match => { 
-                mathBlocks.push('$' + match.slice(2, -2) + '$'); return `%%MATH_BLOCK_${counter++}%%`; 
-            });
-
-            // Run marked.js
-            const html = marked.parse(processed, { breaks: true, gfm: true });
-
-            // Restore math
-            let result = html;
-            for (let i = 0; i < mathBlocks.length; i++) {
-                result = result.replace(`%%MATH_BLOCK_${i}%%`, mathBlocks[i]);
-            }
-
-            return sanitizeHtml(result);
-        }
-
-        // ══════════════════════════════════════════
-        //  Graph/Chart Rendering
-        // ══════════════════════════════════════════
-        function renderGraph(graphData, containerId) {
-            if (!graphData || !graphData.type) return '';
-
-            // Mermaid diagrams
-            if (graphData.type === 'mermaid') {
-                return `<div class="my-4 flex justify-center">
-                <div class="mermaid" id="${containerId}">${graphData.code || ''}</div>
-            </div>`;
-            }
-
-            // Color palette
-            const colors = [
-                'rgba(59,130,246,0.8)', 'rgba(99,102,241,0.8)',
-                'rgba(168,85,247,0.8)', 'rgba(236,72,153,0.8)',
-                'rgba(245,158,11,0.8)', 'rgba(16,185,129,0.8)'
-            ];
-            const borderColors = colors.map(c => c.replace('0.8', '1'));
-
-            const isScatter = graphData.type === 'scatter';
-
-            const datasets = (graphData.datasets || []).map((ds, i) => ({
-                ...ds,
-                backgroundColor: ds.backgroundColor || (graphData.type === 'pie' || graphData.type === 'doughnut' ? colors : colors[i % colors.length]),
-                borderColor: ds.borderColor || (graphData.type === 'pie' || graphData.type === 'doughnut' ? borderColors : borderColors[i % borderColors.length]),
-                borderWidth: ds.borderWidth || (isScatter ? 2.5 : 2),
-                tension: ds.tension || 0.3,
-                showLine: isScatter ? (ds.showLine !== false) : undefined,
-                pointRadius: isScatter ? (ds.pointRadius ?? 2) : undefined,
-                fill: ds.fill ?? false,
-            }));
-
-            // Build Chart.js config — embed axis bounds as custom fields
-            const chartConfig = {
-                type: graphData.type,
-                data: {
-                    labels: graphData.labels || [],
-                    datasets: datasets
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { position: 'bottom' } }
-                },
-                // Custom fields for our initializeCharts() to consume
-                _isFunction: isScatter,
-                _xMin: graphData.xMin ?? null,
-                _xMax: graphData.xMax ?? null,
-                _yMin: graphData.yMin ?? null,
-                _yMax: graphData.yMax ?? null,
-            };
-
-            return `
-            <div class="chart-container my-5 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-                ${graphData.title ? `<div class="text-center font-semibold text-slate-700 mb-3 text-sm">${graphData.title}</div>` : ''}
-                <canvas id="${containerId}" 
-                    data-chart='${JSON.stringify(chartConfig).replace(/'/g, "&#39;")}'
-                    style="max-height: 400px;">
-                </canvas>
-            </div>`;
-        }
-
-        function initializeCharts() {
-            document.querySelectorAll('canvas[data-chart]').forEach(canvas => {
-                try {
-                    const config = JSON.parse(canvas.getAttribute('data-chart'));
-
-                    // If scatter/function plot, configure proper axes
-                    if (config.type === 'scatter' || config._isFunction) {
-                        // Enable line drawing for scatter datasets
-                        config.data.datasets.forEach(ds => {
-                            if (ds.showLine !== false) ds.showLine = true;
-                            ds.pointRadius = ds.pointRadius ?? 2;
-                            ds.borderWidth = ds.borderWidth ?? 2.5;
-                            ds.tension = ds.tension ?? 0.3;
-                            ds.fill = ds.fill ?? false;
-                        });
-
-                        // Set axis ranges from graph metadata
-                        config.options = config.options || {};
-                        config.options.scales = {
-                            x: {
-                                type: 'linear',
-                                position: 'center',
-                                min: config._xMin ?? undefined,
-                                max: config._xMax ?? undefined,
-                                title: { display: true, text: 'x' },
-                                grid: { color: 'rgba(0,0,0,0.06)' }
-                            },
-                            y: {
-                                type: 'linear',
-                                position: 'center',
-                                min: config._yMin ?? undefined,
-                                max: config._yMax ?? undefined,
-                                title: { display: true, text: 'y' },
-                                grid: { color: 'rgba(0,0,0,0.06)' }
-                            }
-                        };
-
-                        // Clean up custom props before passing to Chart.js
-                        delete config._xMin;
-                        delete config._xMax;
-                        delete config._yMin;
-                        delete config._yMax;
-                        delete config._isFunction;
-                    }
-
-                    config.options = config.options || {};
-                    config.options.responsive = true;
-                    config.options.plugins = config.options.plugins || {};
-                    config.options.plugins.legend = { position: 'bottom' };
-
-                    new Chart(canvas, config);
-                } catch (e) {
-                    console.error('Chart init error:', e);
-                    canvas.parentElement.innerHTML = `
-                    <div class="text-red-500 text-sm p-4 text-center">
-                        ⚠️ Chart rendering failed: ${e.message}
-                    </div>`;
-                }
-            });
-        }
-
-        async function initializeMermaidDiagrams() {
-            const mermaidEls = document.querySelectorAll('.mermaid');
-            if (mermaidEls.length > 0) {
-                try { await mermaid.run({ nodes: mermaidEls }); }
-                catch (e) { console.error('Mermaid error:', e); }
-            }
-        }
-
-        // ── Parse JSON from textarea ──
-        window.parsePaper = function () {
-            const raw = document.getElementById('jsonPaste').value.trim();
+        parseBtn.addEventListener('click', async () => {
+            const raw = jsonTextarea.value.trim();
             if (!raw) return showStatus('error', '⚠️ Please paste the JSON from ChatGPT first.');
 
             const cleaned = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
 
-
             let data;
             try { 
                 data = JSON.parse(cleaned); 
-                console.log('%cModel Answer Sample (check backslashes)', 'color:orange;font-weight:bold');
-                console.log(JSON.stringify(data.questions[0]?.model_answer || '', null, 2));
-            }
-            catch (e) {
+            } catch (e) {
                 return showStatus('error', `❌ <strong>Invalid JSON.</strong> Ensure no trailing commas and proper backslashes.<br><small class="opacity-80 mt-1 block">Error: ${e.message}</small>`);
             }
-
 
             const required = ['subject_code', 'subject_name', 'instructor_name', 'year', 'exam_type', 'semester', 'total_marks', 'questions'];
             for (const f of required) {
@@ -589,157 +412,32 @@ JSON FORMAT:
             }
             if (!Array.isArray(data.questions) || !data.questions.length) return showStatus('error', '❌ Questions array is empty or missing.');
 
-
-            // Auto-replace multiple instructors with "Central Paper"
             if (data.instructor_name && (data.instructor_name.includes(',') || data.instructor_name.includes('&') || data.instructor_name.toLowerCase().includes(' and '))) {
                 data.instructor_name = 'Central Paper';
             }
 
+            setLoading(parseBtn, true);
+            try {
+                await ensurePreviewDeps(data);
+                parsedData = data;
+                renderPreview(data);
+                hideStatus();
+                showStatus('success', `✅ Parsed successfully! <strong>${data.questions.length} questions</strong> found. Review below and click Upload.`);
+            } catch (err) {
+                showStatus('error', `❌ Failed to load rendering dependencies: ${err.message}`);
+            } finally {
+                setLoading(parseBtn, false);
+            }
+        });
 
-            parsedData = data;
-            renderPreview(data);
-            hideStatus();
-            showStatus('success', `✅ Parsed successfully! <strong>${data.questions.length} questions</strong> found. Review below and click Upload.`);
-        };
-
-
-        // ── Render Preview ──
-        function renderPreview(d) {
-            document.getElementById('questionCount').textContent = `${d.questions.length} Questions · ${d.total_marks} Marks`;
-
-
-            document.getElementById('metaGrid').innerHTML = [
-                ['📚', 'Subject Code', d.subject_code],
-                ['📖', 'Subject Name', d.subject_name],
-                ['👨🏫', 'Instructor', d.instructor_name],
-                ['📅', 'Year', d.year],
-                ['📝', 'Exam Type', d.exam_type],
-                ['🗓️', 'Semester', d.semester],
-                ['🎯', 'Total Marks', d.total_marks],
-                ['❓', 'Questions', d.questions.length]
-            ].map(([icon, k, v]) => `
-            <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-3.5 border border-slate-200 hover:shadow-sm transition">
-                <div class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold flex items-center gap-1">${icon} ${k}</div>
-                <strong class="block text-[15px] font-bold text-slate-900 mt-1 capitalize">${v}</strong>
-            </div>
-        `).join('');
-
-
-            let chartIndex = 0;
-
-
-            document.getElementById('qList').innerHTML = d.questions.map((q, idx) => {
-                const graphHtml = q.graph ? renderGraph(q.graph, `chart_${idx}_${chartIndex++}`) : '';
-
-
-                return `
-            <div class="question-card border border-slate-200 rounded-xl p-5 md:p-6 text-sm bg-white shadow-sm hover:shadow-md">
-                <!-- Question Header -->
-                <div class="flex items-start justify-between mb-4">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <span class="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg">Q.${q.question_number}</span>
-                        ${q.clo ? `<span class="bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-lg text-xs font-semibold border border-indigo-100">${q.clo}</span>` : ''}
-                    </div>
-                    ${q.marks ? `<span class="bg-amber-50 text-amber-700 px-3 py-1 rounded-lg text-xs font-bold border border-amber-200">${q.marks} Marks</span>` : ''}
-                </div>
-                
-                <!-- Question Text -->
-                <div class="question-prose text-slate-800 text-[15.5px] leading-[1.9]">
-                    ${formatMarkdown(q.question_text)}
-                </div>
-
-
-                <!-- Graph/Chart -->
-                ${graphHtml}
-
-
-                <!-- Sub Parts -->
-                ${q.sub_parts && q.sub_parts.length ? `
-                <div class="mt-5 space-y-3 pl-4 border-l-[3px] border-indigo-300 rounded-sm">
-                    ${q.sub_parts.map(sp => `
-                        <div class="question-prose text-slate-800 text-[15px] leading-[1.8] py-1">${formatMarkdown(sp)}</div>
-                    `).join('')}
-                </div>` : ''}
-
-
-                <!-- MCQ Options -->
-                ${q.options && q.options.length ? `
-                <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    ${q.options.map((opt, i) => `
-                    <div class="flex items-start gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl hover:bg-blue-50/50 hover:border-blue-200 transition cursor-default">
-                        <div class="flex items-center justify-center w-7 h-7 rounded-full bg-white border-2 border-slate-300 text-xs font-bold text-slate-600 flex-shrink-0 mt-0.5">${String.fromCharCode(65 + i)}</div>
-                        <div class="text-[14.5px] text-slate-700 leading-relaxed question-prose">${formatMarkdown(opt)}</div>
-                    </div>
-                    `).join('')}
-                </div>` : ''}
-                
-                <!-- Model Answer (Collapsible) -->
-                ${q.model_answer ? `
-                <details class="mt-5 group">
-                    <summary class="cursor-pointer text-sm font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg px-4 py-2.5 transition flex items-center gap-2 select-none">
-                        <span class="transition-transform group-open:rotate-90">▶</span>
-                        📖 Model Answer
-                    </summary>
-                    <div class="mt-3 bg-gradient-to-br from-emerald-50/50 to-white border border-emerald-200 rounded-xl p-5 question-prose text-slate-800 overflow-x-auto text-[15px] leading-[1.9]">
-                        ${formatMarkdown(q.model_answer)}
-                    </div>
-                </details>` : ''}
-            </div>`;
-            }).join('');
-
-
-            document.getElementById('preview').classList.remove('hidden');
-            document.getElementById('uploadBtn').classList.remove('hidden');
-            document.getElementById('exportBtn').classList.remove('hidden');
-
-
-            // Re-render MathJax when user opens a Model Answer (critical fix!)
-            requestAnimationFrame(() => {
-                initializeCharts();
-                initializeMermaidDiagrams();
-
-                const qList = document.getElementById('qList');
-                if (window.MathJax && qList) {
-                    MathJax.typesetPromise([qList]).catch(err => console.error('MathJax error:', err));
-                }
-
-                // ── CRITICAL FIX for collapsible Model Answers ──
-                document.querySelectorAll('#qList details').forEach(detail => {
-                    detail.addEventListener('toggle', function () {
-                        if (this.open && window.MathJax) {
-                            // Small delay so browser has time to show the hidden content
-                            setTimeout(() => {
-                                MathJax.typesetPromise([this])
-                                    .catch(err => console.error('MathJax toggle error:', err));
-                            }, 10);
-                        }
-                    });
-                });
-            });
-
-
-            setTimeout(() => {
-                document.getElementById('preview').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
-        }
-
-
-        // ── Upload to Supabase ──
-        window.uploadPaper = async function () {
+        uploadBtn.addEventListener('click', async () => {
             if (!parsedData) return showStatus('error', '⚠️ Please parse the JSON first.');
-
-
             if (!confirm(`Upload ${parsedData.questions.length} questions for ${parsedData.subject_code} ${parsedData.exam_type} ${parsedData.year}?`)) return;
 
-
-            const btn = document.getElementById('uploadBtn');
-            btn.disabled = true;
-            btn.innerHTML = `<span class="spinner"></span> Uploading...`;
-
+            setLoading(uploadBtn, true);
 
             const d = parsedData;
             const subjectCode = String(d.subject_code).toUpperCase();
-
 
             try {
                 showStatus('loading', '🔍 Checking for existing paper...');
@@ -750,9 +448,7 @@ JSON FORMAT:
                     .eq('semester', d.semester)
                     .maybeSingle();
 
-
                 let paperId;
-
 
                 if (existing) {
                     showStatus('loading', '🔄 Existing paper found. Updating & removing old questions...');
@@ -763,7 +459,6 @@ JSON FORMAT:
                         total_marks: d.total_marks
                     }).eq('id', paperId);
                     if (updateErr) throw updateErr;
-
 
                     const { error: delErr } = await supabase.from('questions').delete().eq('paper_id', paperId);
                     if (delErr) throw delErr;
@@ -782,8 +477,6 @@ JSON FORMAT:
                     paperId = paper.id;
                 }
 
-
-                // Batch insert all questions at once (faster than one-by-one)
                 showStatus('loading', `📤 Inserting ${d.questions.length} questions...`);
                 const questionsPayload = d.questions.map((q, i) => ({
                     paper_id: paperId,
@@ -797,53 +490,159 @@ JSON FORMAT:
                     graph: q.graph ?? null
                 }));
 
-
                 const { error: qErr } = await supabase.from('questions').insert(questionsPayload);
                 if (qErr) throw qErr;
 
-
-                btn.innerHTML = '✅ Uploaded!';
-                btn.classList.replace('from-blue-600', 'from-emerald-600');
-                btn.classList.replace('to-indigo-600', 'to-emerald-600');
-
-
-                showStatus('success', `
-                <strong>✅ ${existing ? 'Update' : 'Upload'} Complete!</strong><br><br>
-                ${existing ? 'Replaced' : 'Inserted'} <strong>${d.questions.length} questions</strong> for 
-                <strong class="text-emerald-900">${subjectCode} — ${d.subject_name}</strong>.<br><br>
-                <div class="mt-3 bg-emerald-100/50 border border-emerald-200 rounded-lg p-3 flex items-center gap-2">
-                    🔗 <a href="paper-view.html?subject=${subjectCode}&year=${d.year}&exam=${encodeURIComponent(d.exam_type)}" target="_blank" class="text-emerald-700 font-bold break-all hover:underline">View Paper on Website →</a>
-                </div>
-            `);
+                showStatus('success', `<strong>✅ ${existing ? 'Update' : 'Upload'} Complete!</strong><br><br>${existing ? 'Replaced' : 'Inserted'} <strong>${d.questions.length} questions</strong> for <strong class="text-emerald-900">${subjectCode} — ${d.subject_name}</strong>.`);
+                
+                uploadBtn.innerHTML = '✅ Uploaded!';
+                uploadBtn.classList.add('bg-emerald-600');
             } catch (err) {
-                resetBtn(btn);
-                showStatus('error', `❌ <strong>Error:</strong> ${err.message}<br><small class="opacity-80">Make sure past_papers & questions tables exist with a "graph" JSONB column.</small>`);
+                showStatus('error', `❌ <strong>Error:</strong> ${err.message}`);
+            } finally {
+                setLoading(uploadBtn, false);
             }
-        };
+        });
 
+        // ── Helper Logic ────────────────────────────────────────────────
+        
+        function setLoading(btn, isLoading) {
+            const label = btn.querySelector('.btn-label');
+            if (!label) return;
+            
+            if (isLoading) {
+                btn.disabled = true;
+                btn.dataset.original = label.textContent;
+                label.innerHTML = '<span class="spinner"></span> Working...';
+            } else {
+                btn.disabled = false;
+                label.textContent = btn.dataset.original || label.textContent;
+            }
+        }
+
+        function normalizeModelAnswer(text) {
+            if (!text || typeof text !== 'string') return '';
+            let fixed = text;
+            fixed = fixed.replace(/Letu/g, 'Let u').replace(/so\(tan/g, 'so tan').replace(/Differentiatebothsidesw\.r\.t\.x/g, 'Differentiate both sides w.r.t. x');
+            fixed = fixed.replace(/fracdu dx/g, '\\frac{du}{dx}').replace(/fracdy dx/g, '\\frac{dy}{dx}').replace(/fracd([a-z])/g, '\\frac{d$1}');
+            fixed = fixed.replace(/([=+\-*/^()])/g, ' $1 ').replace(/\s+/g, ' ');
+            fixed = fixed.replace(/(Let |Differentiate |so |Then |Thus |Now |Where |Therefore )/gi, '\n\n$1');
+            fixed = fixed.replace(/(\$\s*[^$]+?)\s*([=])\s*/g, '\n\n$1 $2 ');
+            const lines = fixed.split('\n');
+            const cleanedLines = lines.map(line => {
+                const trimmed = line.trim();
+                if (!trimmed) return '';
+                if ((trimmed.includes('=') || trimmed.includes('^') || trimmed.includes('y\'') || trimmed.includes('\\tan') || trimmed.includes('\\sec') || trimmed.includes('\\frac')) && !trimmed.startsWith('$') && !trimmed.startsWith('$$')) {
+                    return '$' + trimmed + '$';
+                }
+                return trimmed;
+            });
+            return cleanedLines.join('\n\n');
+        }
+
+        function formatMarkdown(text) {
+            if (!text || typeof text !== 'string') return '';
+            let processed = text.includes('Letu') || text.includes('Differentiatebothsides') ? normalizeModelAnswer(text) : text;
+            const mathBlocks = [];
+            let counter = 0;
+            processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, m => { mathBlocks.push(m); return `%%MATH_BLOCK_${counter++}%%`; });
+            processed = processed.replace(/\\\[([\s\S]*?)\\\]/g, m => { mathBlocks.push('$$' + m.slice(2, -2) + '$$'); return `%%MATH_BLOCK_${counter++}%%`; });
+            processed = processed.replace(/\$(.+?)\$/g, m => { mathBlocks.push(m); return `%%MATH_BLOCK_${counter++}%%`; });
+            processed = processed.replace(/\\\(([\s\S]*?)\\\)/g, m => { mathBlocks.push('$' + m.slice(2, -2) + '$'); return `%%MATH_BLOCK_${counter++}%%`; });
+            const html = marked.parse(processed, { breaks: true, gfm: true });
+            let result = html;
+            for (let i = 0; i < mathBlocks.length; i++) result = result.replace(`%%MATH_BLOCK_${i}%%`, mathBlocks[i]);
+            return sanitizeHtml(result);
+        }
+
+        function renderGraph(graphData, containerId) {
+            if (!graphData || !graphData.type) return '';
+            if (graphData.type === 'mermaid') return `<div class="my-4 flex justify-center"><div class="mermaid" id="${containerId}">${graphData.code || ''}</div></div>`;
+            const colors = ['rgba(59,130,246,0.8)', 'rgba(99,102,241,0.8)', 'rgba(168,85,247,0.8)', 'rgba(236,72,153,0.8)', 'rgba(245,158,11,0.8)', 'rgba(16,185,129,0.8)'];
+            const borderColors = colors.map(c => c.replace('0.8', '1'));
+            const isScatter = graphData.type === 'scatter';
+            const datasets = (graphData.datasets || []).map((ds, i) => ({ ...ds, backgroundColor: ds.backgroundColor || (graphData.type === 'pie' || graphData.type === 'doughnut' ? colors : colors[i % colors.length]), borderColor: ds.borderColor || (graphData.type === 'pie' || graphData.type === 'doughnut' ? borderColors : borderColors[i % borderColors.length]), borderWidth: ds.borderWidth || (isScatter ? 2.5 : 2), tension: ds.tension || 0.3, showLine: isScatter ? (ds.showLine !== false) : undefined, pointRadius: isScatter ? (ds.pointRadius ?? 2) : undefined, fill: ds.fill ?? false }));
+            const chartConfig = { type: graphData.type, data: { labels: graphData.labels || [], datasets: datasets }, options: { responsive: true, plugins: { legend: { position: 'bottom' } } }, _isFunction: isScatter, _xMin: graphData.xMin ?? null, _xMax: graphData.xMax ?? null, _yMin: graphData.yMin ?? null, _yMax: graphData.yMax ?? null };
+            return `<div class="chart-container my-5 bg-white border border-slate-200 rounded-xl p-4 shadow-sm dark:bg-slate-800 dark:border-slate-700">${graphData.title ? `<div class="text-center font-semibold text-slate-700 dark:text-gray-300 mb-3 text-sm">${graphData.title}</div>` : ''}<canvas id="${containerId}" data-chart='${JSON.stringify(chartConfig).replace(/'/g, "&#39;")}' style="max-height: 400px;"></canvas></div>`;
+        }
+
+        function initializeCharts() {
+            if (!window.Chart) return;
+            document.querySelectorAll('canvas[data-chart]').forEach(canvas => {
+                try {
+                    const config = JSON.parse(canvas.getAttribute('data-chart'));
+                    if (config.type === 'scatter' || config._isFunction) {
+                        config.data.datasets.forEach(ds => { if (ds.showLine !== false) ds.showLine = true; ds.pointRadius = ds.pointRadius ?? 2; ds.borderWidth = ds.borderWidth ?? 2.5; ds.tension = ds.tension ?? 0.3; ds.fill = ds.fill ?? false; });
+                        config.options.scales = { x: { type: 'linear', position: 'center', min: config._xMin ?? undefined, max: config._xMax ?? undefined, title: { display: true, text: 'x' }, grid: { color: 'rgba(0,0,0,0.06)' } }, y: { type: 'linear', position: 'center', min: config._yMin ?? undefined, max: config._yMax ?? undefined, title: { display: true, text: 'y' }, grid: { color: 'rgba(0,0,0,0.06)' } } };
+                        delete config._xMin; delete config._xMax; delete config._yMin; delete config._yMax; delete config._isFunction;
+                    }
+                    new Chart(canvas, config);
+                } catch (e) { console.error('Chart init error:', e); }
+            });
+        }
+
+        function renderPreview(d) {
+            document.getElementById('questionCount').textContent = `${d.questions.length} Questions · ${d.total_marks} Marks`;
+            document.getElementById('metaGrid').innerHTML = [
+                ['📚', 'Subject', d.subject_code], ['👨🏫', 'Instructor', d.instructor_name], ['📅', 'Year', d.year], ['📝', 'Exam', d.exam_type]
+            ].map(([icon, k, v]) => `<div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 border border-slate-200 dark:border-slate-700"><div class="text-[10px] text-slate-500 uppercase font-bold">${icon} ${k}</div><strong class="block text-sm mt-1 dark:text-gray-200">${v}</strong></div>`).join('');
+            
+            let cIdx = 0;
+            document.getElementById('qList').innerHTML = d.questions.map((q, i) => `
+                <div class="question-card border border-slate-200 dark:border-slate-700 rounded-xl p-5 bg-white dark:bg-slate-800/20 shadow-sm mb-4">
+                    <div class="flex justify-between mb-4">
+                        <span class="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg">Q.${q.question_number}</span>
+                        <span class="text-slate-400 text-[10px] font-bold">${q.marks} Marks</span>
+                    </div>
+                    <div class="question-prose text-[15px] dark:text-gray-300">${formatMarkdown(q.question_text)}</div>
+                    ${q.graph ? renderGraph(q.graph, `chart_${i}_${cIdx++}`) : ''}
+                    ${q.sub_parts?.length ? `<div class="mt-4 pl-4 border-l-2 border-blue-500 space-y-3 font-medium">${q.sub_parts.map(sp => `<div>${formatMarkdown(sp)}</div>`).join('')}</div>` : ''}
+                    ${q.model_answer ? `
+                    <details class="mt-4">
+                        <summary class="cursor-pointer text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-2 rounded-lg">View Solution</summary>
+                        <div class="mt-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg text-[14px] leading-relaxed">${formatMarkdown(q.model_answer)}</div>
+                    </details>` : ''}
+                </div>
+            `).join('');
+
+            document.getElementById('preview').classList.remove('hidden');
+            uploadBtn.classList.remove('hidden');
+            exportBtn.classList.remove('hidden');
+
+            requestAnimationFrame(() => {
+                initializeCharts();
+                if (DEPS.mermaid.ready) mermaid.run();
+                if (window.MathJax) MathJax.typesetPromise([document.getElementById('qList')]);
+                
+                document.querySelectorAll('details').forEach(d => {
+                    d.addEventListener('toggle', () => {
+                        if (d.open && window.MathJax) MathJax.typesetPromise([d]);
+                    });
+                });
+            });
+        }
 
         function showStatus(type, html) {
-            // Forward to guest global feedback if available
-            if (window.showFeedbackStatus) {
-                window.showFeedbackStatus({
-                    type: type === 'loading' ? 'info' : type,
-                    message: html.replace(/<[^>]*>?/gm, ''), // strip HTML for toast
-                    duration: type === 'error' ? 8000 : 4000
-                });
-            }
-
             const box = document.getElementById('statusBox');
             if (!box) return;
-
             const styles = {
-                success: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-                error: 'bg-red-50 text-red-800 border-red-200',
-                loading: 'bg-blue-50 text-blue-800 border-blue-200'
+                success: 'bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
+                error: 'bg-red-50 text-red-800 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20',
+                loading: 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20'
             };
+            box.className = `mt-5 p-4 rounded-xl text-sm leading-relaxed border transition-all ${styles[type] || styles.loading}`;
+            box.classList.remove('hidden');
+            box.innerHTML = html;
+        }
 
-            const toneClasses = (styles[type] || styles.loading).split(' ');
-
-            box.className = 'mt-5 p-4 rounded-xl text-sm leading-relaxed border transition-all';
+        function hideStatus() {
+            const box = document.getElementById('statusBox');
+            if (box) box.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
+-sm leading-relaxed border transition-all';
             box.classList.remove('hidden');
             box.classList.add(...toneClasses);
             box.innerHTML = html;

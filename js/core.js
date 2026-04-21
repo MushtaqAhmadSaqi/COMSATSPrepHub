@@ -53,6 +53,8 @@ export function showFeedbackStatus({ type = 'info', message = '', duration = 400
 
     const toast = document.createElement('div');
     toast.className = `feedback-toast feedback-${type} transform translate-x-full opacity-0 transition-all duration-300 ease-out flex items-center gap-3 px-6 py-4 rounded-2xl shadow-xl border mb-3 min-w-[320px] max-w-md bg-white dark:bg-slate-900 border-gray-200 dark:border-white/10`;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
     
     const icons = {
         success: 'check_circle',
@@ -68,14 +70,31 @@ export function showFeedbackStatus({ type = 'info', message = '', duration = 400
         info: 'text-blue-500'
     };
 
-    toast.innerHTML = `
-        <span class="material-symbols-outlined ${colors[type] || colors.info}">${icons[type] || icons.info}</span>
-        <div class="flex-1 text-sm font-semibold text-slate-800 dark:text-slate-100">${message}</div>
-        <button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors ml-2" onclick="this.parentElement.remove()">
-            <span class="material-symbols-outlined text-[18px]">close</span>
-        </button>
-    `;
+    const iconSpan = document.createElement('span');
+    iconSpan.className = `material-symbols-outlined ${colors[type] || colors.info}`;
+    iconSpan.setAttribute('aria-hidden', 'true');
+    iconSpan.textContent = icons[type] || icons.info;
 
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'flex-1 text-sm font-semibold text-slate-800 dark:text-slate-100';
+    messageDiv.textContent = String(message || '');
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors ml-2';
+    closeBtn.setAttribute('aria-label', 'Dismiss notification');
+    closeBtn.onclick = () => {
+        toast.classList.add('translate-x-full', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+    };
+
+    const closeIcon = document.createElement('span');
+    closeIcon.className = 'material-symbols-outlined text-[18px]';
+    closeIcon.setAttribute('aria-hidden', 'true');
+    closeIcon.textContent = 'close';
+    
+    closeBtn.appendChild(closeIcon);
+    toast.append(iconSpan, messageDiv, closeBtn);
     container.appendChild(toast);
 
     // Animate in
@@ -95,8 +114,10 @@ export function showFeedbackStatus({ type = 'info', message = '', duration = 400
     // Auto-remove
     if (duration > 0) {
         setTimeout(() => {
-            toast.classList.add('translate-x-full', 'opacity-0');
-            setTimeout(() => toast.remove(), 300);
+            if (toast.parentElement) {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }
         }, duration);
     }
 }
