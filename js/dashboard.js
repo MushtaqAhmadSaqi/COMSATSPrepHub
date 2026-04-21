@@ -1,4 +1,4 @@
-import { supabase, auth } from './core.js';
+import { supabase, auth, escapeHtml } from './core.js';
 
 let learningChart = null;
 
@@ -23,126 +23,177 @@ function initDashboardDate() {
 
 async function initDashboard() {
   try {
-    const session = await auth.getSession?.();
+    const session = await auth.getSession();
     const user = session?.user;
 
     if (!user) {
-        console.warn('No active session found for dashboard.');
-        return;
+      setGuestFallback();
+      return;
     }
 
-    // Set User Name
-    const firstName = user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'Student';
-    const firstNameEl = document.getElementById('userFirstName');
-    if (firstNameEl) firstNameEl.textContent = firstName;
+    const firstName =
+      user?.user_metadata?.full_name?.split(' ')[0] ||
+      user?.email?.split('@')[0] ||
+      'Student';
 
-    const welcomeSubtextEl = document.getElementById('welcomeSubtext');
-    if (welcomeSubtextEl) {
-        welcomeSubtextEl.textContent = `Great to have you back, ${firstName}. Keep building momentum with your quizzes and subject practice.`;
-    }
+    const fullName =
+      user?.user_metadata?.full_name ||
+      user?.email?.split('@')[0] ||
+      'Student';
 
-    // Fetch and Render Stats
-    const stats = await getDashboardStats(user.id);
-    renderDashboardStats(stats);
-    renderWeakTopics(stats.weakTopics);
-    renderRecentActivity(stats.recentActivity);
-    renderSubjectMastery(stats.subjectMastery);
-    renderLearningChart(stats.chartLabels, stats.chartScores);
+    setText('userFirstName', firstName);
+    setText(
+      'welcomeSubtext',
+      `Great to have you back, ${fullName}. Keep building momentum with your quizzes and subject practice.`
+    );
+
+    await loadDashboardData(user.id);
   } catch (error) {
     console.error('Dashboard init failed:', error);
+    setGuestFallback();
   }
 }
 
-async function getDashboardStats(userId) {
-  // Use try/catch for Supabase calls to handle missing tables gracefully during Phase 2
-  try {
-    const { data: attempts = [], error: attemptError } = await supabase
+function setGuestFallback() {
+  setText('userFirstName', 'Student');
+  setText(
+    'welcomeSubtext',
+    'Track your study progress, quiz performance, and subject mastery in one clean dashboard.'
+  );
+
+  renderDashboardStats({
+    quizCount: 0,
+    averageScore: 0,
+    subjectsStudied: 0,
+    studySessions: 0
+  });
+
+  renderWeakTopics([]);
+  renderRecentActivity([]);
+  renderSubjectMastery([]);
+  renderLearningChart([], []);
+}
+
+async function loadDashboardData(userId) {
+  const [quizAttemptsResult, subjectProgressResult] = await Promise.allSettled([
+    supabase
       .from('user_quiz_attempts')
       .select('*')
       .eq('user_id', userId)
-      .order('completed_at', { ascending: false });
+      .order('completed_at', { ascending: false }),
 
-    if (attemptError) throw attemptError;
-
-    const { data: subjects = [], error: subjectError } = await supabase
+    supabase
       .from('user_subject_progress')
       .select('*')
       .eq('user_id', userId)
-      .order('updated_at', { ascending: false });
+      .order('updated_at', { ascending: false })
+  ]);
 
-    if (subjectError) throw subjectError;
+  const quizAttempts =
+    quizAttemptsResult.status === 'fulfilled' && !quizAttemptsResult.value.error
+      ? quizAttemptsResult.value.data || []
+      : [];
 
-    const quizCount = attempts.length;
-    const averageScore = quizCount
-      ? Math.round(attempts.reduce((sum, a) => sum + (a.score_percent || 0), 0) / quizCount)
-      : 0;
+  const subjectProgress =
+    subjectProgressResult.status === 'fulfilled' && !subjectProgressResult.value.error
+      ? subjectProgressResult.value.data || []
+      : [];
 
-    const subjectsStudied = new Set(subjects.map(s => s.subject_code)).size;
-    const studySessions = subjects.reduce((sum, s) => sum + (s.sessions_count || 0), 0);
+  if (quizAttemptsResult.status === 'fulfilled' && quizAttemptsResult.value.error) {
+    console.error('Quiz attempts load error:', quizAttemptsResult.value.error);
+  }
 
-    const recentActivity = attempts.slice(0, 5).map(a => ({
-      title: `Completed ${a.quiz_title || 'Quiz'}`,
-      meta: `${a.subject_code || 'Subject'} • ${a.score_percent || 0}%`,
-      date: a.completed_at
+  if (subjectProgressResult.status === 'fulfilled' && subjectProgressResult.value.error) {
+    console.error('Subject progress load error:', subjectProgressResult.value.error);
+  }
+
+  const stats = buildDashboardStats(quizAttempts, subjectProgress);
+
+  renderDashboardStats(stats);
+  renderWeakTopics(stats.weakTopics);
+  renderRecentActivity(stats.recentActivity);
+  renderSubjectMastery(stats.subjectMastery);
+  renderLearningChart(stats.chartLabels, stats.chartScores);
+}
+
+function buildDashboardStats(quizAttempts, subjectProgress) {
+  const quizCount = quizAttempts.length;
+
+  const averageScore = quizCount
+    ? Math.round(
+        quizAttempts.reduce((sum, item) => sum + Number(item.score_percent || 0), 0) / quizCount
+      )
+    : 0;
+
+  const subjectsStudied = new Set(
+    subjectProgress
+      .map(item => item.subject_code || item.subject_name)
+      .filter(Boolean)
+  ).size;
+
+  const studySessions = subjectProgress.reduce(
+    (sum, item) => sum + Number(item.sessions_count || 0),
+    0
+  );
+
+  const weakTopics = subjectProgress
+    .filter(item => Number(item.mastery_percent || 0) < 50)
+    .sort((a, b) => Number(a.mastery_percent || 0) - Number(b.mastery_percent || 0))
+    .slice(0, 5)
+    .map(item => ({
+      name: item.topic_name || item.subject_name || item.subject_code || 'Untitled Topic',
+      score: Number(item.mastery_percent || 0),
+      subject: item.subject_code || item.subject_name || 'Subject'
     }));
 
-    const weakTopics = subjects
-      .filter(s => (s.mastery_percent || 0) < 50)
-      .slice(0, 5)
-      .map(s => ({
-        name: s.topic_name || s.subject_name || s.subject_code,
-        score: s.mastery_percent || 0
-      }));
+  const recentActivity = quizAttempts.slice(0, 5).map(item => ({
+    title: `Completed ${item.quiz_title || 'Quiz'}`,
+    meta: `${item.subject_code || 'Subject'} • ${Number(item.score_percent || 0)}% score`,
+    date: item.completed_at
+  }));
 
-    const subjectMastery = subjects
-      .reduce((acc, item) => {
-        const key = item.subject_code || item.subject_name;
-        if (!acc[key]) {
-          acc[key] = {
-            name: item.subject_name || item.subject_code,
-            code: item.subject_code,
-            mastery: 0,
-            count: 0
-          };
-        }
-        acc[key].mastery += item.mastery_percent || 0;
-        acc[key].count += 1;
-        return acc;
-      }, {});
+  const masteryMap = {};
 
-    const subjectMasteryList = Object.values(subjectMastery).map(item => ({
+  subjectProgress.forEach(item => {
+    const key = item.subject_code || item.subject_name || 'UNKNOWN';
+
+    if (!masteryMap[key]) {
+      masteryMap[key] = {
+        name: item.subject_name || item.subject_code || 'Untitled Subject',
+        code: item.subject_code || '',
+        total: 0,
+        count: 0
+      };
+    }
+
+    masteryMap[key].total += Number(item.mastery_percent || 0);
+    masteryMap[key].count += 1;
+  });
+
+  const subjectMastery = Object.values(masteryMap)
+    .map(item => ({
       name: item.name,
       code: item.code,
-      mastery: Math.round(item.mastery / item.count)
-    }));
+      mastery: Math.round(item.total / item.count)
+    }))
+    .sort((a, b) => b.mastery - a.mastery)
+    .slice(0, 6);
 
-    const chartData = attempts.slice(0, 6).reverse();
+  const chartItems = quizAttempts.slice(0, 6).reverse();
+  const chartLabels = chartItems.map((item, index) => item.quiz_title || `Quiz ${index + 1}`);
+  const chartScores = chartItems.map(item => Number(item.score_percent || 0));
 
-    return {
-      quizCount,
-      averageScore,
-      subjectsStudied,
-      studySessions,
-      weakTopics,
-      recentActivity,
-      subjectMastery: subjectMasteryList,
-      chartLabels: chartData.length > 0 ? chartData.map((_, i) => `Quiz ${i + 1}`) : ['Start'],
-      chartScores: chartData.length > 0 ? chartData.map(item => item.score_percent || 0) : [0]
-    };
-  } catch (err) {
-    console.warn('Supabase stats fetch failed (tables might not exist yet):', err.message);
-    return {
-        quizCount: 0,
-        averageScore: 0,
-        subjectsStudied: 0,
-        studySessions: 0,
-        weakTopics: [],
-        recentActivity: [],
-        subjectMastery: [],
-        chartLabels: ['Orientation'],
-        chartScores: [0]
-    };
-  }
+  return {
+    quizCount,
+    averageScore,
+    subjectsStudied,
+    studySessions,
+    weakTopics,
+    recentActivity,
+    subjectMastery,
+    chartLabels,
+    chartScores
+  };
 }
 
 function renderDashboardStats(stats) {
@@ -157,19 +208,27 @@ function renderWeakTopics(items) {
   if (!el) return;
 
   if (!items.length) {
-    el.innerHTML = `<p class="text-slate-500 dark:text-slate-400 text-sm">No weak topics yet.</p>`;
+    el.innerHTML = `
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        No weak topics yet. Complete more quizzes to detect low-performing areas.
+      </p>
+    `;
     return;
   }
 
-  el.innerHTML = items.map(item => `
-    <div class="flex items-center justify-between rounded-2xl border border-slate-200 dark:border-white/10 px-4 py-3">
-      <div>
-        <p class="font-semibold text-slate-900 dark:text-white">${escapeHtml(item.name)}</p>
-        <p class="text-sm text-red-500">${item.score}% mastery</p>
-      </div>
-      <span class="text-sm font-bold text-red-500">Needs Work</span>
-    </div>
-  `).join('');
+  el.innerHTML = items
+    .map(
+      item => `
+        <div class="flex items-center justify-between rounded-2xl border border-slate-200 dark:border-white/10 px-4 py-3 bg-slate-50/70 dark:bg-slate-800/40">
+          <div class="min-w-0">
+            <p class="font-semibold text-slate-900 dark:text-white truncate">${escapeHtml(item.name)}</p>
+            <p class="text-sm text-slate-500 dark:text-slate-400 truncate">${escapeHtml(item.subject)}</p>
+          </div>
+          <span class="ml-4 shrink-0 text-sm font-bold text-red-500">${item.score}%</span>
+        </div>
+      `
+    )
+    .join('');
 }
 
 function renderRecentActivity(items) {
@@ -177,16 +236,25 @@ function renderRecentActivity(items) {
   if (!el) return;
 
   if (!items.length) {
-    el.innerHTML = `<p class="text-slate-500 dark:text-slate-400 text-sm">No activity recorded yet.</p>`;
+    el.innerHTML = `
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        No activity recorded yet. Your latest completed quizzes will appear here.
+      </p>
+    `;
     return;
   }
 
-  el.innerHTML = items.map(item => `
-    <div class="rounded-2xl border border-slate-200 dark:border-white/10 px-4 py-3">
-      <p class="font-semibold text-slate-900 dark:text-white">${escapeHtml(item.title)}</p>
-      <p class="text-sm text-slate-500 dark:text-slate-400">${escapeHtml(item.meta)}</p>
-    </div>
-  `).join('');
+  el.innerHTML = items
+    .map(
+      item => `
+        <div class="rounded-2xl border border-slate-200 dark:border-white/10 px-4 py-3 bg-slate-50/70 dark:bg-slate-800/40">
+          <p class="font-semibold text-slate-900 dark:text-white">${escapeHtml(item.title)}</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400">${escapeHtml(item.meta)}</p>
+          <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">${formatRelativeDate(item.date)}</p>
+        </div>
+      `
+    )
+    .join('');
 }
 
 function renderSubjectMastery(items) {
@@ -194,67 +262,127 @@ function renderSubjectMastery(items) {
   if (!el) return;
 
   if (!items.length) {
-    el.innerHTML = `<p class="text-slate-500 dark:text-slate-400 text-sm">No subject progress yet.</p>`;
+    el.innerHTML = `
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        No subject progress yet. Start studying papers or completing quizzes.
+      </p>
+    `;
     return;
   }
 
-  el.innerHTML = items.map(item => `
-    <div>
-      <div class="flex items-center justify-between mb-1">
+  el.innerHTML = items
+    .map(
+      item => `
         <div>
-          <p class="font-semibold text-slate-900 dark:text-white">${escapeHtml(item.name)}</p>
-          <p class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(item.code || '')}</p>
+          <div class="flex items-center justify-between mb-1.5 gap-3">
+            <div class="min-w-0">
+              <p class="font-semibold text-slate-900 dark:text-white truncate">${escapeHtml(item.name)}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(item.code || '')}</p>
+            </div>
+            <span class="shrink-0 text-sm font-bold text-brand-600 dark:text-brand-400">${item.mastery}%</span>
+          </div>
+          <div class="h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-sky-500 to-brand-500 transition-all duration-500" style="width:${item.mastery}%"></div>
+          </div>
         </div>
-        <span class="text-sm font-bold text-brand-600 dark:text-brand-400">${item.mastery}%</span>
-      </div>
-      <div class="h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-        <div class="h-full rounded-full bg-brand-500" style="width:${item.mastery}%"></div>
-      </div>
-    </div>
-  `).join('');
+      `
+    )
+    .join('');
 }
 
 async function renderLearningChart(labels, data) {
   const canvas = document.getElementById('learningChart');
   if (!canvas) return;
 
-  try {
-      const { Chart, registerables } = await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm');
-      Chart.register(...registerables);
-      
-      const ctx = canvas.getContext('2d');
-    
-      if (learningChart) {
-        learningChart.destroy();
-      }
-    
-      learningChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Score',
-            data,
-            borderColor: '#0ea5e9',
-            backgroundColor: 'rgba(14,165,233,0.12)',
-            fill: true,
-            tension: 0.35,
-            borderWidth: 3,
-            pointRadius: 4
-          }]
+  const { Chart } = await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm');
+  const ctx = canvas.getContext('2d');
+
+  if (learningChart) {
+    learningChart.destroy();
+  }
+
+  const isDark = document.documentElement.classList.contains('dark');
+
+  const borderColor = isDark ? '#38bdf8' : '#0ea5e9';
+  const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.06)';
+  const textColor = isDark ? '#cbd5e1' : '#64748b';
+  const pointBg = isDark ? '#0f172a' : '#ffffff';
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+  gradient.addColorStop(0, isDark ? 'rgba(56,189,248,0.25)' : 'rgba(14,165,233,0.18)');
+  gradient.addColorStop(1, isDark ? 'rgba(56,189,248,0.02)' : 'rgba(14,165,233,0.01)');
+
+  learningChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels.length ? labels : ['No Data'],
+      datasets: [
+        {
+          label: 'Score',
+          data: data.length ? data : [0],
+          borderColor,
+          backgroundColor: gradient,
+          fill: true,
+          tension: 0.35,
+          borderWidth: 3,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointBackgroundColor: pointBg,
+          pointBorderColor: borderColor,
+          pointBorderWidth: 3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 550
+      },
+      plugins: {
+        legend: {
+          display: false
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { beginAtZero: true, max: 100 }
+        tooltip: {
+          displayColors: false,
+          backgroundColor: isDark ? 'rgba(15,23,42,0.96)' : 'rgba(255,255,255,0.98)',
+          titleColor: isDark ? '#ffffff' : '#0f172a',
+          bodyColor: isDark ? '#cbd5e1' : '#475569',
+          borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.06)',
+          borderWidth: 1,
+          padding: 12
+        }
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false
+          },
+          ticks: {
+            color: textColor
+          },
+          border: {
+            display: false
+          }
+        },
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: {
+            color: textColor,
+            stepSize: 20
+          },
+          grid: {
+            color: gridColor,
+            drawTicks: false
+          },
+          border: {
+            display: false
           }
         }
-      });
-  } catch (err) {
-      console.error('Failed to render chart:', err);
-  }
+      }
+    }
+  });
 }
 
 function setText(id, value) {
@@ -262,11 +390,23 @@ function setText(id, value) {
   if (el) el.textContent = value;
 }
 
-function escapeHtml(str = '') {
-  return String(str)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
+function formatRelativeDate(value) {
+  if (!value) return 'Recently';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Recently';
+
+  const diffMs = Date.now() - date.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffHours < 1) return 'Just now';
+  if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? '' : 's'} ago`;
+  if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
 }

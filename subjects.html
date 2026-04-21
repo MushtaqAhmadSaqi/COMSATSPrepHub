@@ -109,152 +109,157 @@
     <div id="app-mobile-nav"></div>
 
     <script type="module">
-        import { supabase, escapeHtml as escHtml, debounce } from './utils.js';
+        import { supabase, escapeHtml as escHtml } from './utils.js';
 
-    function showSubjectsError(message) {
-        if (window.handleApiError) {
-            window.handleApiError(new Error(message), 'Failed to load catalog');
-            return;
+        function debounce(fn, delay) {
+            let timeoutId;
+            return function (...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => fn.apply(this, args), delay);
+            };
         }
 
-        const errorBanner = document.getElementById('errorBanner');
-        const errorMessage = document.getElementById('errorMessage');
-
-        if (!errorBanner || !errorMessage) return;
-
-        errorBanner.style.display = 'flex';
-        errorBanner.classList.remove('hidden');
-
-        errorMessage.innerHTML = '';
-
-        const title = document.createElement('strong');
-        title.textContent = 'Failed to load subjects';
-
-        const lineBreak = document.createElement('br');
-
-        const detail = document.createElement('span');
-        detail.className = 'text-sm';
-        detail.textContent = String(message || 'Unknown error');
-
-        errorMessage.appendChild(title);
-        errorMessage.appendChild(lineBreak);
-        errorMessage.appendChild(detail);
-    }
-
-    const palette = [
-        { bg: '#dbeafe', color: '#2563eb', icon: 'menu_book' },
-        { bg: '#dcfce7', color: '#15803d', icon: 'database' },
-        { bg: '#fef3c7', color: '#b45309', icon: 'function' },
-        { bg: '#f3e8ff', color: '#7e22ce', icon: 'scatter_plot' },
-        { bg: '#ccfbf1', color: '#0f766e', icon: 'terminal' },
-        { bg: '#e0f2fe', color: '#0369a1', icon: 'code' },
-        { bg: '#fce7f3', color: '#be185d', icon: 'psychology' },
-        { bg: '#fee2e2', color: '#b91c1c', icon: 'science' },
-    ];
-
-    async function loadSubjects() {
-        const loading = document.getElementById('loadingGrid');
-        const grid = document.getElementById('subjectsGrid');
-        const badge = document.getElementById('subjectCountBadge');
-        const badgeText = document.getElementById('subjectCountText');
-
-        console.log('[Subjects] loadSubjects started');
-        console.log('Grid element:', document.getElementById('subjectsGrid'));
-        console.log('Loading element:', document.getElementById('loadingGrid'));
-
-        try {
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Subjects request timed out after 8 seconds.')), 8000)
-            );
-
-            const fetchPromise = supabase
-                .from('past_papers')
-                .select('id, subject_code, subject_name')
-                .order('subject_name', { ascending: true });
-
-            const result = await Promise.race([fetchPromise, timeoutPromise]);
-
-            const { data: papers, error } = result;
-
-            console.log('[Subjects] Supabase result:', result);
-
-            if (error) throw error;
-
-            if (!papers || papers.length === 0) {
-                document.getElementById('emptyState').classList.remove('hidden');
+        function showSubjectsError(message) {
+            if (window.handleApiError) {
+                window.handleApiError(new Error(message), 'Failed to load catalog');
                 return;
             }
 
-            const subjectMap = {};
-            papers.forEach(p => {
-                const safeName = p.subject_name || 'Untitled Subject';
-                const safeCode = p.subject_code || 'NO-CODE';
+            const errorBanner = document.getElementById('errorBanner');
+            const errorMessage = document.getElementById('errorMessage');
 
-                if (!subjectMap[safeName]) {
-                    subjectMap[safeName] = {
-                        subject_name: safeName,
-                        subject_code: safeCode,
-                        count: 0
-                    };
-                }
-                subjectMap[safeName].count++;
-            });
+            if (!errorBanner || !errorMessage) return;
 
-            const subjects = Object.values(subjectMap).sort((a, b) =>
-                String(a.subject_name).localeCompare(String(b.subject_name))
-            );
+            errorBanner.style.display = 'flex';
+            errorBanner.classList.remove('hidden');
 
-            badgeText.textContent = `${subjects.length} Subject${subjects.length !== 1 ? 's' : ''}`;
-            badge.style.display = 'inline-flex';
+            errorMessage.innerHTML = '';
 
-            const fragment = document.createDocumentFragment();
+            const title = document.createElement('strong');
+            title.textContent = 'Failed to load subjects';
 
-            subjects.forEach((s, i) => {
-                const p = palette[i % palette.length];
-                const url = `subject-papers.html?subject=${encodeURIComponent(s.subject_name)}&code=${encodeURIComponent(s.subject_code)}`;
+            const lineBreak = document.createElement('br');
 
-                const card = document.createElement('a');
-                card.href = url;
-                card.className = 'group block bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 hover:shadow-xl transition-all duration-300 card-hover';
-                card.setAttribute('data-subject', s.subject_name);
+            const detail = document.createElement('span');
+            detail.className = 'text-sm';
+            detail.textContent = String(message || 'Unknown error');
 
-                card.innerHTML = `
-                    <div class="w-11 h-11 rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-black/5 dark:border-white/10"
-                         style="background: ${p.bg}; color: ${p.color};">
-                        <span class="material-symbols-outlined text-[22px]">${p.icon}</span>
-                    </div>
-
-                    <div class="mb-5">
-                        <h3 class="text-xl font-black tracking-tight text-gray-900 dark:text-white mb-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-2">
-                            ${escHtml(s.subject_name)}
-                        </h3>
-                        <p class="font-mono text-sm text-gray-500 dark:text-gray-400">${escHtml(s.subject_code)}</p>
-                    </div>
-
-                    <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/10">
-                        <div class="px-3 py-1 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs font-bold rounded-2xl">
-                            ${s.count} Paper${s.count !== 1 ? 's' : ''}
-                        </div>
-                        <div class="text-brand-600 dark:text-brand-400 group-hover:translate-x-1 transition-transform">
-                            <span class="material-symbols-outlined">arrow_forward</span>
-                        </div>
-                    </div>
-                `;
-
-                fragment.appendChild(card);
-            });
-
-            grid.innerHTML = '';
-            grid.appendChild(fragment);
-            grid.style.display = 'grid';
-
-        } catch (err) {
-            console.error('[Subjects] load failed:', err);
-            showSubjectsError(err?.message || 'Something went wrong while loading subjects.');
-        } finally {
-            if (loading) loading.style.display = 'none';
+            errorMessage.appendChild(title);
+            errorMessage.appendChild(lineBreak);
+            errorMessage.appendChild(detail);
         }
-    }
+
+        const palette = [
+            { bg: '#dbeafe', color: '#2563eb', icon: 'menu_book' },
+            { bg: '#dcfce7', color: '#15803d', icon: 'database' },
+            { bg: '#fef3c7', color: '#b45309', icon: 'function' },
+            { bg: '#f3e8ff', color: '#7e22ce', icon: 'scatter_plot' },
+            { bg: '#ccfbf1', color: '#0f766e', icon: 'terminal' },
+            { bg: '#e0f2fe', color: '#0369a1', icon: 'code' },
+            { bg: '#fce7f3', color: '#be185d', icon: 'psychology' },
+            { bg: '#fee2e2', color: '#b91c1c', icon: 'science' },
+        ];
+
+        async function loadSubjects() {
+            const loading = document.getElementById('loadingGrid');
+            const grid = document.getElementById('subjectsGrid');
+            const badge = document.getElementById('subjectCountBadge');
+            const badgeText = document.getElementById('subjectCountText');
+
+            console.log('%c[Subjects] 🚀 loadSubjects started', 'color: #10b981; font-weight: bold');
+
+            try {
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Subjects request timed out after 8 seconds.')), 8000)
+                );
+
+                const fetchPromise = supabase
+                    .from('past_papers')
+                    .select('id, subject_code, subject_name')
+                    .order('subject_name', { ascending: true });
+
+                const result = await Promise.race([fetchPromise, timeoutPromise]);
+                const { data: papers, error } = result;
+
+                if (error) throw error;
+
+                if (!papers || papers.length === 0) {
+                    document.getElementById('emptyState').classList.remove('hidden');
+                    return;
+                }
+
+                const subjectMap = {};
+                papers.forEach(p => {
+                    const safeName = p.subject_name || 'Untitled Subject';
+                    const safeCode = p.subject_code || 'NO-CODE';
+
+                    if (!subjectMap[safeName]) {
+                        subjectMap[safeName] = {
+                            subject_name: safeName,
+                            subject_code: safeCode,
+                            count: 0
+                        };
+                    }
+                    subjectMap[safeName].count++;
+                });
+
+                const subjects = Object.values(subjectMap).sort((a, b) =>
+                    String(a.subject_name).localeCompare(String(b.subject_name))
+                );
+
+                badgeText.textContent = `${subjects.length} Subject${subjects.length !== 1 ? 's' : ''}`;
+                badge.style.display = 'inline-flex';
+
+                const fragment = document.createDocumentFragment();
+
+                subjects.forEach((s, i) => {
+                    const p = palette[i % palette.length];
+                    const url = `subject-papers.html?subject=${encodeURIComponent(s.subject_name)}&code=${encodeURIComponent(s.subject_code)}`;
+
+                    const card = document.createElement('a');
+                    card.href = url;
+                    card.className = 'group block bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 hover:shadow-xl transition-all duration-300 card-hover';
+                    card.setAttribute('data-subject', s.subject_name);
+
+                    card.innerHTML = `
+                        <div class="w-11 h-11 rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-black/5 dark:border-white/10"
+                             style="background: ${p.bg}; color: ${p.color};">
+                            <span class="material-symbols-outlined text-[22px]">${p.icon}</span>
+                        </div>
+
+                        <div class="mb-5">
+                            <h3 class="text-xl font-black tracking-tight text-gray-900 dark:text-white mb-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-2">
+                                ${escHtml(s.subject_name)}
+                            </h3>
+                            <p class="font-mono text-sm text-gray-500 dark:text-gray-400">${escHtml(s.subject_code)}</p>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/10">
+                            <div class="px-3 py-1 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs font-bold rounded-2xl">
+                                ${s.count} Paper${s.count !== 1 ? 's' : ''}
+                            </div>
+                            <div class="text-brand-600 dark:text-brand-400 group-hover:translate-x-1 transition-transform">
+                                <span class="material-symbols-outlined">arrow_forward</span>
+                            </div>
+                        </div>
+                    `;
+
+                    fragment.appendChild(card);
+                });
+
+                grid.innerHTML = '';
+                grid.appendChild(fragment);
+                grid.style.display = 'grid';
+
+                console.log('%c✅ Subjects loaded successfully!', 'color: #10b981; font-weight: bold');
+
+            } catch (err) {
+                console.error('❌ loadSubjects failed:', err);
+                showSubjectsError(err?.message || 'Something went wrong while loading subjects.');
+            } finally {
+                if (loading) loading.style.display = 'none';
+            }
+        }
 
         const filterGrid = function () {
             const query = document.getElementById('subjectSearchInput').value.toLowerCase().trim();
@@ -278,7 +283,7 @@
             }
         };
 
-        // Apply debounce to search
+        // Apply debounce to search (now using local function)
         const debouncedFilter = debounce(filterGrid, 150);
         document.getElementById('subjectSearchInput').addEventListener('input', debouncedFilter);
 
