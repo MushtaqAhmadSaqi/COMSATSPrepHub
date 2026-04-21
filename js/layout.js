@@ -135,7 +135,7 @@ function _injectMobileNav(currentPage) {
 
   const nav = document.createElement('nav');
   nav.id = 'mobileBottomNav';
-  nav.className = 'fixed bottom-4 left-4 right-4 z-[60] lg:hidden transition-transform duration-300';
+  nav.className = 'fixed bottom-4 left-4 right-4 z-[60] lg:hidden transition-transform duration-300 will-change-transform';
   nav.setAttribute('aria-label', 'Bottom navigation');
 
   const items = [
@@ -206,34 +206,130 @@ function _wireNavButton(session) {
   }
 }
 
+function _getSwipeRoutes() {
+  // Match the actual mobile navigation order
+  return ['index.html', 'subjects.html', 'quiz.html', 'about-us.html'];
+}
+
+function _isTouchDevice() {
+  return 'ontouchstart' in window || (navigator.maxTouchPoints || 0) > 0;
+}
+
+function _isModalOpen() {
+  const overlay = document.getElementById('auth-modal-overlay');
+  return !!overlay && !overlay.hidden;
+}
+
+function _isQuizInteractiveState() {
+  const step2 = document.getElementById('step2-question');
+  const step3 = document.getElementById('step3-results');
+  return (
+    (step2 && !step2.classList.contains('hidden')) ||
+    (step3 && !step3.classList.contains('hidden')) ||
+    document.body.classList.contains('quiz-active')
+  );
+}
+
+function _hasHorizontalScrollableAncestor(target, root) {
+  let node = target instanceof Element ? target : null;
+
+  while (node && node !== root && node !== document.body) {
+    if (node.id === 'statsRow') return true;
+
+    const style = window.getComputedStyle(node);
+    const canScrollX = /(auto|scroll)/.test(style.overflowX);
+
+    if (canScrollX && node.scrollWidth > node.clientWidth + 8) {
+      return true;
+    }
+
+    node = node.parentElement;
+  }
+
+  return false;
+}
+
+function _shouldIgnoreSwipeStart(target, root) {
+  if (!(target instanceof Element)) return false;
+
+  if (
+    target.closest(
+      'a,button,input,textarea,select,label,[role="button"],[contenteditable="true"],summary,[data-disable-swipe-nav]'
+    )
+  ) {
+    return true;
+  }
+
+  if (_hasHorizontalScrollableAncestor(target, root)) {
+    return true;
+  }
+
+  return false;
+}
+
 function _initSwipeNav(currentPage) {
-  if (currentPage === 'quiz.html' || currentPage === 'paper-view.html') return;
-  const routes = ['index.html', 'subjects.html', 'quiz.html', 'dashboard.html'];
+  if (!_isTouchDevice()) return;
+  if (window.innerWidth > 1024) return;
+
+  // Disable completely on pages where swipe navigation is too risky
+  if (currentPage === 'paper-view.html' || currentPage === 'subject-papers.html') return;
+
+  const routes = _getSwipeRoutes();
+  const currentIndex = routes.findIndex(route => route === currentPage);
+  if (currentIndex === -1) return;
+
   const main = document.querySelector('main');
   if (!main) return;
 
   let touchStartX = 0;
   let touchStartY = 0;
-  let startedOnInteractive = false;
+  let ignoreGesture = false;
+  let tracking = false;
 
   main.addEventListener('touchstart', event => {
+    if (!event.changedTouches || event.changedTouches.length !== 1) {
+      ignoreGesture = true;
+      tracking = false;
+      return;
+    }
+
+    if (_isModalOpen()) {
+      ignoreGesture = true;
+      tracking = false;
+      return;
+    }
+
+    if (currentPage === 'quiz.html' && _isQuizInteractiveState()) {
+      ignoreGesture = true;
+      tracking = false;
+      return;
+    }
+
     const target = event.target;
-    startedOnInteractive = !!target.closest('a,button,input,textarea,select,label,[role="button"],[contenteditable="true"]');
+    ignoreGesture = _shouldIgnoreSwipeStart(target, main);
+    tracking = !ignoreGesture;
+
+    if (!tracking) return;
+
     touchStartX = event.changedTouches[0].clientX;
     touchStartY = event.changedTouches[0].clientY;
   }, { passive: true });
 
   main.addEventListener('touchend', event => {
-    if (startedOnInteractive) return;
-    const dx = event.changedTouches[0].clientX - touchStartX;
-    const dy = event.changedTouches[0].clientY - touchStartY;
-    if (Math.abs(dx) <= Math.abs(dy) * 1.25) return;
-    if (Math.abs(dx) < 80) return;
+    if (!tracking || ignoreGesture) return;
+    if (!event.changedTouches || event.changedTouches.length !== 1) return;
 
-    const currentIndex = routes.findIndex(route => route === currentPage);
-    if (currentIndex === -1) return;
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - touchStartX;
+    const dy = touch.clientY - touchStartY;
 
-    const nextIndex = Math.max(0, Math.min(currentIndex + (dx < 0 ? 1 : -1), routes.length - 1));
+    // Require a strong horizontal gesture
+    if (Math.abs(dx) <= Math.abs(dy) * 1.35) return;
+    if (Math.abs(dx) < 90) return;
+
+    const direction = dx < 0 ? 1 : -1;
+    const nextIndex = Math.max(0, Math.min(currentIndex + direction, routes.length - 1));
+
     if (nextIndex !== currentIndex) {
       window.location.href = routes[nextIndex];
     }
@@ -241,35 +337,70 @@ function _initSwipeNav(currentPage) {
 }
 
 function _initScrollHideNav() {
+  const header = document.querySelector('header');
+  const bottomNav = document.getElementById('mobileBottomNav');
+
+  if (!header && !bottomNav) return;
+
   let lastScrollY = window.scrollY;
   let ticking = false;
+
+  const showChrome = () => {
+    if (header) header.classList.remove('header-hidden');
+    if (bottomNav && bottomNav.style.display !== 'none') {
+      bottomNav.style.transform = 'translateY(0)';
+    }
+  };
+
+  const hideChrome = () => {
+    if (header) header.classList.add('header-hidden');
+    if (bottomNav && bottomNav.style.display !== 'none') {
+      bottomNav.style.transform = 'translateY(calc(100% + 1rem))';
+    }
+  };
+
+  showChrome();
 
   window.addEventListener('scroll', () => {
     if (ticking) return;
 
-    window.requestAnimationFrame(() => {
-      const header = document.querySelector('header');
-      const bottomNav = document.getElementById('mobileBottomNav');
-      const current = window.scrollY;
+    ticking = true;
 
-      if (Math.abs(current - lastScrollY) <= 16) {
+    window.requestAnimationFrame(() => {
+      const current = window.scrollY;
+      const delta = current - lastScrollY;
+
+      // Always keep nav visible near the top
+      if (current < 24) {
+        showChrome();
+        lastScrollY = current;
         ticking = false;
         return;
       }
 
-      if (current > lastScrollY && current > 100) {
-        if (header) header.classList.add('header-hidden');
-        if (bottomNav) bottomNav.style.transform = 'translateY(120%)';
+      // Never hide while modal is open
+      if (_isModalOpen()) {
+        showChrome();
+        lastScrollY = current;
+        ticking = false;
+        return;
+      }
+
+      // Ignore tiny scroll changes to reduce jitter
+      if (Math.abs(delta) < 12) {
+        ticking = false;
+        return;
+      }
+
+      if (delta > 0 && current > 120) {
+        hideChrome();
       } else {
-        if (header) header.classList.remove('header-hidden');
-        if (bottomNav) bottomNav.style.transform = 'translateY(0)';
+        showChrome();
       }
 
       lastScrollY = current;
       ticking = false;
     });
-
-    ticking = true;
   }, { passive: true });
 }
 
