@@ -95,22 +95,32 @@
 
     <script type="module">
         import { supabase } from './utils.js';
+        import { requireAuth } from './user-state.js';
 
-        // Load existing key
+        const ADMIN_ALLOWLIST = new Set(['mushtaqsaqi00@gmail.com']);
+        const isAdminEmail = (email) => ADMIN_ALLOWLIST.has(String(email || '').toLowerCase());
+
         document.addEventListener('DOMContentLoaded', () => {
-            const savedKey = localStorage.getItem('gemini_api_key');
-            if (savedKey) {
-                document.getElementById('geminiApiKey').value = savedKey;
+            guardAdminAndInit();
+        });
+
+        async function guardAdminAndInit() {
+            const session = await requireAuth('AuthScreen/auth.html');
+            if (!session) return;
+            if (!isAdminEmail(session.user?.email)) {
+                alert('Admin access only.');
+                window.location.href = 'index.html';
+                return;
             }
             loadSubjects();
-        });
+        }
 
         window.saveApiKey = () => {
             const key = document.getElementById('geminiApiKey').value.trim();
             if (!key) return alert('Please enter a valid key.');
-            localStorage.setItem('gemini_api_key', key);
             const status = document.getElementById('keyStatus');
             status.classList.remove('hidden');
+            status.textContent = 'Key loaded for this session only.';
             setTimeout(() => status.classList.add('hidden'), 3000);
         };
 
@@ -143,7 +153,11 @@
             container.classList.remove('hidden');
             const entry = document.createElement('div');
             entry.className = isError ? 'text-red-400' : 'text-emerald-400';
-            entry.innerHTML = `<span class="opacity-50">[${new Date().toLocaleTimeString()}]</span> ${msg}`;
+            const stamp = document.createElement('span');
+            stamp.className = 'opacity-50';
+            stamp.textContent = `[${new Date().toLocaleTimeString()}] `;
+            entry.appendChild(stamp);
+            entry.appendChild(document.createTextNode(msg.replace(/<[^>]+>/g, '')));
             logs.appendChild(entry);
             logs.scrollTop = logs.scrollHeight;
         }

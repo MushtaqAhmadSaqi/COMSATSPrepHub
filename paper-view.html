@@ -223,17 +223,17 @@
     ═══════════════════════════════════════════════ -->
     <script type="module">
         import { supabase, escapeHtml } from './utils.js';
+        import { sanitizeHtml } from './js/render-safety.js';
+        import { logger } from './js/logger.js';
 
         // ── Dependency Loader ──────────────────────
-        const DEPENDENCIES = [
+        const CORE_DEPENDENCIES = [
             { id: 'marked-js', src: 'https://cdn.jsdelivr.net/npm/marked/marked.min.js' },
-            { id: 'mathjax-js', src: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js', isMathJax: true },
-            { id: 'chart-js', src: 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js' },
-            { id: 'mermaid-js', src: 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js' }
+            { id: 'mathjax-js', src: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js', isMathJax: true }
         ];
 
-        async function loadDependencies() {
-            const promises = DEPENDENCIES.map(dep => {
+        async function loadDependencies(deps = CORE_DEPENDENCIES) {
+            const promises = deps.map(dep => {
                 if (document.getElementById(dep.id)) return Promise.resolve();
                 
                 return new Promise((resolve, reject) => {
@@ -254,8 +254,8 @@
             });
             await Promise.all(promises);
             // Initialize Mermaid after load
-            if (window.mermaid) {
-                mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
+            if (deps.some(dep => dep.id === 'mermaid-js') && window.mermaid) {
+                mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict' });
             }
         }
 
@@ -443,7 +443,7 @@
                 result = result.replace(`%%MATH_BLOCK_${i}%%`, mathBlocks[i]);
             }
 
-            return result;
+            return sanitizeHtml(result);
         }
 
         // ── Graph/Chart Rendering ─────────────────────
@@ -451,7 +451,7 @@
             if (!graphData || !graphData.type) return '';
 
             if (graphData.type === 'mermaid') {
-                return `<div class="my-6 flex justify-center"><div class="mermaid" id="${containerId}">${graphData.code || ''}</div></div>`;
+                return `<div class="my-6 flex justify-center"><div class="mermaid" id="${containerId}">${escapeHtml(graphData.code || '')}</div></div>`;
             }
 
             const colors = [
@@ -528,7 +528,7 @@
                     config.options.plugins = config.options.plugins || { legend: { position: 'bottom' } };
                     new Chart(canvas, config);
                 } catch (e) {
-                    console.error('Chart init error:', e);
+                    logger.error('Chart init error', e);
                 }
             });
         }
@@ -537,7 +537,7 @@
             const mEls = document.querySelectorAll('.mermaid');
             if (mEls.length > 0) {
                 try { await mermaid.run({ nodes: mEls }); }
-                catch (e) { console.error('Mermaid error:', e); }
+                catch (e) { logger.error('Mermaid render failed', e); }
             }
         }
 
@@ -647,11 +647,21 @@
                 container.appendChild(card);
             });
 
-            // Trigger Charts, Mermaid, and MathJax
-            requestAnimationFrame(() => {
-                initializeCharts();
-                initializeMermaidDiagrams();
-                if (window.MathJax) MathJax.typesetPromise([container]).catch(console.error);
+            const hasGraphs = questions.some(q => !!q.graph);
+            const hasMermaid = questions.some(q => q.graph?.type === 'mermaid');
+            const hasCharts = questions.some(q => q.graph && q.graph.type !== 'mermaid');
+
+            requestAnimationFrame(async () => {
+                const deferredDeps = [];
+                if (hasCharts) deferredDeps.push({ id: 'chart-js', src: 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js' });
+                if (hasMermaid) deferredDeps.push({ id: 'mermaid-js', src: 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js' });
+                if (deferredDeps.length) {
+                    await loadDependencies(deferredDeps);
+                }
+
+                if (hasCharts && window.Chart) initializeCharts();
+                if (hasMermaid && window.mermaid) initializeMermaidDiagrams();
+                if (window.MathJax) MathJax.typesetPromise([container]).catch(err => logger.error('MathJax render failed', err));
                 if (typeof autoHideProgressBar === 'function') autoHideProgressBar();
             });
         }
@@ -681,7 +691,7 @@
                 btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">check_circle</span> Submitted`;
 
                 // Trigger MathJax on newly visible model answer
-                if (window.MathJax) MathJax.typesetPromise([model]).catch(console.error);
+                if (window.MathJax) MathJax.typesetPromise([model]).catch(err => logger.error('MathJax model render failed', err));
 
                 // Smooth scroll to model answer
                 model.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

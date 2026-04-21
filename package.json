@@ -1,0 +1,13 @@
+{
+  "name": "comsatsprephub-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build:css": "tailwindcss -c tailwind.config.cjs -i ./styles/tailwind-input.css -o ./styles/tailwind-built.css --minify",
+    "watch:css": "tailwindcss -c tailwind.config.cjs -i ./styles/tailwind-input.css -o ./styles/tailwind-built.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}
+

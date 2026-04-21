@@ -242,6 +242,8 @@
     ═══════════════════════════════════════════════ -->
     <script type="module">
       import { supabase, escapeHtml } from './utils.js';
+      import { nl2brSafe } from './js/render-safety.js';
+      import { logger } from './js/logger.js';
 
       // State variables
       let quizzes = [];
@@ -288,32 +290,36 @@
           quizzes = data;
 
           // Create quiz cards
-          grid.innerHTML = quizzes.map(q => `
-            <div data-aos="fade-up" 
-                 class="card-hover group bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl p-6 hover:shadow-xl transition-all cursor-pointer"
-                 onclick="startQuiz('${q.id}', '${q.title}', '${q.subject_code}')">
+          quizzes.forEach(q => {
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.setAttribute('data-aos', 'fade-up');
+            card.className = 'card-hover group bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl p-6 hover:shadow-xl transition-all text-left w-full';
+            card.innerHTML = `
               <div class="flex items-start justify-between mb-4">
                 <div class="w-12 h-12 rounded-xl bg-brand-50 dark:bg-brand-500/10 flex items-center justify-center text-brand-600 dark:text-brand-400 group-hover:scale-110 transition-transform">
                   <span class="material-symbols-outlined">quiz</span>
                 </div>
                 <div class="px-2 py-1 rounded-md bg-slate-100 dark:bg-white/5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                  ${q.questions_count || 0} Questions
+                  ${Number.isFinite(q.questions_count) ? q.questions_count : 0} Questions
                 </div>
               </div>
-              <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-brand-600 transition-colors">${q.title}</h3>
-              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">${q.subject_code}</p>
+              <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-brand-600 transition-colors">${escapeHtml(q.title || '')}</h3>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">${escapeHtml(q.subject_code || '')}</p>
               <div class="mt-6 flex items-center gap-2 text-brand-600 dark:text-brand-400 font-bold text-xs">
                 <span>Attempt Module</span>
                 <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
               </div>
-            </div>
-          `).join('');
+            `;
+            card.addEventListener('click', () => startQuiz(q.id, q.title, q.subject_code));
+            grid.appendChild(card);
+          });
 
           // Re-init 3D Tilt for dynamic cards
           if (window.reinitVanillaTilt) window.reinitVanillaTilt();
 
         } catch (err) {
-          console.error(err);
+          logger.error('Failed to load quizzes', err);
           grid.innerHTML = `
             <div class="col-span-full bg-red-50 border border-red-200 rounded-2xl p-8 text-center shadow-sm">
               <div class="flex flex-col items-center">
@@ -353,7 +359,7 @@
         }
         document.body.classList.add('quiz-active');
 
-        document.getElementById('questionText').innerHTML = 'Loading questions...';
+        document.getElementById('questionText').textContent = 'Loading questions...';
         document.getElementById('optionsList').innerHTML = '';
         document.getElementById('quizBadgeLabel').textContent = subCode.toUpperCase();
 
@@ -366,8 +372,9 @@
           if (error) throw error;
 
           if (!data || data.length === 0) {
-            document.getElementById('questionText').innerHTML = 
-              '<span class="text-red-500">No questions found for this quiz.</span>';
+            const qEl = document.getElementById('questionText');
+            qEl.textContent = 'No questions found for this quiz.';
+            qEl.classList.add('text-red-500');
             return;
           }
 
@@ -377,9 +384,10 @@
           renderQuestion();
 
         } catch (err) {
-          console.error(err);
-          document.getElementById('questionText').innerHTML = 
-            `<span class="text-red-500">Error loading questions: ${err.message}</span>`;
+          logger.error('Failed to load quiz questions', err, { quizId });
+          const qEl = document.getElementById('questionText');
+          qEl.textContent = `Error loading questions: ${err.message}`;
+          qEl.classList.add('text-red-500');
         }
       }
 
@@ -396,7 +404,7 @@
         document.getElementById('quizProgressBar').style.width = `${progressPct}%`;
 
         const qText = document.getElementById('questionText');
-        qText.innerHTML = q.question_text.replace(/\\n/g, '<br/>');
+        qText.innerHTML = nl2brSafe(q.question_text);
 
         const optsList = document.getElementById('optionsList');
         optsList.innerHTML = '';
@@ -418,7 +426,7 @@
 
           div.innerHTML = `
             <div class="radio-ui"></div>
-            <div class="flex-1 leading-relaxed capitalize">${optText}</div>
+            <div class="flex-1 leading-relaxed capitalize">${nl2brSafe(optText)}</div>
           `;
 
           if (!hasAnswered) {
@@ -446,7 +454,7 @@
 
         const explanationBox = document.getElementById('explanationBox');
         if (hasAnswered && q.explanation) {
-          document.getElementById('explanationText').innerHTML = q.explanation.replace(/\\n/g, '<br/>');
+          document.getElementById('explanationText').innerHTML = nl2brSafe(q.explanation);
           explanationBox.classList.remove('hidden');
         } else {
           explanationBox.classList.add('hidden');
@@ -454,7 +462,7 @@
 
         // Render math if needed
         if (window.MathJax) {
-          MathJax.typesetPromise([qText, optsList, explanationBox]).catch(console.error);
+          MathJax.typesetPromise([qText, optsList, explanationBox]).catch(err => logger.error('MathJax render failed', err));
         }
       }
 

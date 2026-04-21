@@ -1,10 +1,13 @@
-window.tailwind = window.tailwind || {};
-window.tailwind.config = {
+module.exports = {
   darkMode: 'class',
+  content: [
+    './*.html',
+    './AuthScreen/**/*.html'
+  ],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Inter', 'sans-serif']
       },
       colors: {
         primary: '#0f766e',
@@ -17,12 +20,11 @@ window.tailwind.config = {
           100: '#e0f2fe',
           400: '#38bdf8',
           500: '#0ea5e9',
-          600: '#0284c7',
+          600: '#0284c7'
         }
       }
     }
-  }
+  },
+  plugins: []
 };
-if (typeof tailwind !== 'undefined') {
-  tailwind.config = window.tailwind.config;
-}
+

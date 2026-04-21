@@ -308,13 +308,28 @@ JSON FORMAT:
 
     <script type="module">
         import { supabase, escapeHtml as escHtml } from './utils.js';
+        import { requireAuth } from './user-state.js';
+        import { sanitizeHtml } from './js/render-safety.js';
 
+        const ADMIN_ALLOWLIST = new Set(['mushtaqsaqi00@gmail.com']);
+        const isAdminEmail = (email) => ADMIN_ALLOWLIST.has(String(email || '').toLowerCase());
 
         let parsedData = null;
 
 
         // Initialize Mermaid
-        mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
+        mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict' });
+
+        async function guardAdmin() {
+            const session = await requireAuth('AuthScreen/auth.html');
+            if (!session) return false;
+            if (!isAdminEmail(session.user?.email)) {
+                alert('Admin access only.');
+                window.location.href = 'index.html';
+                return false;
+            }
+            return true;
+        }
 
 
         // ── Dark Mode Toggle ──
@@ -332,6 +347,9 @@ JSON FORMAT:
 
 
         // ── Live JSON Validation ──
+        const isAllowed = await guardAdmin();
+        if (!isAllowed) throw new Error('Unauthorized admin access');
+
         const jsonTextarea = document.getElementById('jsonPaste');
         const jsonValidation = document.getElementById('jsonValidation');
         const jsonInfo = document.getElementById('jsonInfo');
@@ -456,7 +474,7 @@ JSON FORMAT:
                 result = result.replace(`%%MATH_BLOCK_${i}%%`, mathBlocks[i]);
             }
 
-            return result;
+            return sanitizeHtml(result);
         }
 
         // ══════════════════════════════════════════

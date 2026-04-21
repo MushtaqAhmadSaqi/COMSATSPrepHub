@@ -207,18 +207,27 @@ function _wireNavButton(session) {
 }
 
 function _initSwipeNav(currentPage) {
+  if (currentPage === 'quiz.html' || currentPage === 'paper-view.html') return;
   const routes = ['index.html', 'subjects.html', 'quiz.html', 'dashboard.html'];
   const main = document.querySelector('main');
   if (!main) return;
 
   let touchStartX = 0;
+  let touchStartY = 0;
+  let startedOnInteractive = false;
 
   main.addEventListener('touchstart', event => {
+    const target = event.target;
+    startedOnInteractive = !!target.closest('a,button,input,textarea,select,label,[role="button"],[contenteditable="true"]');
     touchStartX = event.changedTouches[0].clientX;
+    touchStartY = event.changedTouches[0].clientY;
   }, { passive: true });
 
   main.addEventListener('touchend', event => {
+    if (startedOnInteractive) return;
     const dx = event.changedTouches[0].clientX - touchStartX;
+    const dy = event.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) <= Math.abs(dy) * 1.25) return;
     if (Math.abs(dx) < 80) return;
 
     const currentIndex = routes.findIndex(route => route === currentPage);
@@ -243,7 +252,7 @@ function _initScrollHideNav() {
       const bottomNav = document.getElementById('mobileBottomNav');
       const current = window.scrollY;
 
-      if (Math.abs(current - lastScrollY) <= 10) {
+      if (Math.abs(current - lastScrollY) <= 16) {
         ticking = false;
         return;
       }

@@ -1,15 +1,12 @@
 /**
  * user-state.js
  * Shared Supabase auth helpers used across all pages.
- * Source of truth for Supabase config (do not duplicate in other files).
+ * Auth/session helpers that reuse the shared Supabase core client.
  */
 
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/+esm';
+import { supabase, SUPABASE_URL, SUPABASE_KEY } from './js/core.js';
 
-export const SUPABASE_URL = 'https://xylyiscatznexduatjmg.supabase.co';
-export const SUPABASE_KEY = 'sb_publishable_K0t4H7M3LU96jy8_z_TJHg_ok_u-7HC';
-
-export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+export { supabase, SUPABASE_URL, SUPABASE_KEY };
 
 /**
  * Returns the current Supabase session, or null if not logged in.

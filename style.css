@@ -146,6 +146,20 @@ html.dark .active-pill {
               0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
+@media (max-width: 1024px) {
+  header {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .card-hover,
+  .card-hover:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    will-change: auto;
+  }
+}
+
 .button-press {
   transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1),
               background-color 0.2s ease;
