@@ -470,26 +470,13 @@
   <script>
     // Show real stats after page loads (removes skeleton)
     window.addEventListener('load', function () {
-      setTimeout(() => {
-        const skeleton = document.getElementById('stats-skeleton');
-        const realStats = document.getElementById('stats-real');
+      const skeleton = document.getElementById('stats-skeleton');
+      const realStats = document.getElementById('stats-real');
 
-        if (skeleton && realStats) {
-          skeleton.style.transition = 'opacity 0.3s ease';
-          skeleton.style.opacity = '0';
-
-          setTimeout(() => {
-            skeleton.style.display = 'none';
-            realStats.classList.remove('hidden');
-            realStats.style.opacity = '0';
-            realStats.style.transition = 'opacity 0.4s ease';
-
-            setTimeout(() => {
-              realStats.style.opacity = '1';
-            }, 50);
-          }, 300);
-        }
-      }, 800); // Show skeleton for 800ms then reveal real stats
+      if (skeleton && realStats) {
+        skeleton.style.display = 'none';
+        realStats.classList.remove('hidden');
+      }
     });
   </script>
 </body>
