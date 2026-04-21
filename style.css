@@ -2809,6 +2809,201 @@ html.dark .active-pill {
 
 .no-results .material-symbols-outlined {
   font-size: 48px;
+}
+
+.skills-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.skill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skill-tag {
+  padding: 6px 14px;
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 999px;
+}
+
+.skill-tag-highlight {
+  background: #dcfce7;
+  color: var(--success);
+  font-weight: 700;
+}
+
+.focus-card {
+  background: linear-gradient(135deg, #1a1a2e, #0f3460);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.focus-fg {
+  position: relative;
+  z-index: 10;
+}
+
+.focus-headline {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.focus-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.focus-icon-bg {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.focus-bg-circle {
+  position: absolute;
+  right: -16px;
+  bottom: -16px;
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+}
+
+.btn-block-outline {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-block-outline:hover {
+  background: var(--surface-alt);
+}
+
+/* --- Activity/Dashboard --- */
+.search-bar {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.search-input {
+  padding: 8px 16px 8px 36px;
+  background: var(--surface-alt);
+  border: none;
+  border-radius: 999px;
+  font-size: 14px;
+  outline: none;
+  transition: var(--transition);
+  width: 180px;
+}
+
+.search-input:focus {
+  background: var(--surface);
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+.section-header {
+  margin-bottom: 28px;
+}
+
+.page-description {
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.6;
+  max-width: 560px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes heroFloatA {
+
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+
+  33% {
+    transform: translateY(-18px) scale(1.04);
+  }
+
+  66% {
+    transform: translateY(10px) scale(0.97);
+  }
+}
+
+@keyframes heroFloatB {
+
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+  }
+
+  40% {
+    transform: translateY(16px) scale(1.05);
+  }
+
+  75% {
+    transform: translateY(-12px) scale(0.96);
+  }
+}
+
+/* No results message */
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.no-results .material-symbols-outlined {
+  font-size: 48px;
   margin-bottom: 12px;
   display: block;
   color: var(--border);
@@ -2817,8 +3012,26 @@ html.dark .active-pill {
 /* -----------------------------------------------
    ACCESSIBILITY IMPROVEMENTS
    ----------------------------------------------- */
+.skip-link {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 200;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+  transform: translateY(-200%);
+  transition: transform 0.2s ease;
+}
 
-/* Better focus states for keyboard users */
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -2826,38 +3039,22 @@ select:focus-visible,
 textarea:focus-visible {
   outline: 3px solid #0f766e;
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.2);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.16);
 }
 
-/* Make sure interactive elements have visible focus */
-.quiz-option:focus-visible {
+.quiz-option:focus-within {
   outline: 3px solid #0f766e;
   outline-offset: 3px;
 }
 
-.quiz-option.wrong {
-  border-color: #dc2626;
-  background-color: #fee2e2;
-  color: #dc2626;
-}
-
-/* Make sure all buttons and links have good touch targets on mobile */
 button,
-a,
-.nav-link,
-.mobile-nav-item {
+#dark-mode-toggle,
+#open-auth-modal,
+#mobileBottomNav a {
   min-height: 44px;
   min-width: 44px;
 }
 
-/* Better contrast for muted text */
-.text-muted,
-.text-gray-500,
-.text-slate-400 {
-  color: #64748b !important;
-}
-
-/* High contrast mode support */
 @media (prefers-contrast: high) {
   .quiz-option {
     border-width: 3px;
@@ -2868,23 +3065,19 @@ a,
   }
 }
 
-/* Hide mobile nav during focused quiz mode */
 body.quiz-active .mobile-nav-shell {
   display: none !important;
 }
 
-/* --- Mobile Safety & Text Wrapping --- */
 .break-words {
-  word-break: break-all; /* More aggressive for mobile */
-  word-break: break-word; 
+  word-break: break-word;
   overflow-wrap: break-word;
 }
 
-/* Ensure paper cards respect container on mobile */
 #papersContainer a {
   max-width: 100%;
 }
-/* -- Feedback System (Toasts) ------------------------------------------------ */
+
 #feedback-container {
   pointer-events: none;
 }
@@ -2896,34 +3089,32 @@ body.quiz-active .mobile-nav-shell {
 }
 
 .feedback-success {
-  background: rgba(236, 253, 245, 0.9);
+  background: rgba(236, 253, 245, 0.92);
   border-left: 4px solid #10b981 !important;
 }
 
 .feedback-error {
-  background: rgba(254, 242, 242, 0.9);
+  background: rgba(254, 242, 242, 0.92);
   border-left: 4px solid #ef4444 !important;
 }
 
 .feedback-warning {
-  background: rgba(255, 251, 235, 0.9);
+  background: rgba(255, 251, 235, 0.92);
   border-left: 4px solid #f59e0b !important;
 }
 
 .feedback-info {
-  background: rgba(240, 249, 255, 0.9);
+  background: rgba(240, 249, 255, 0.92);
   border-left: 4px solid #3b82f6 !important;
 }
 
-/* Dark mode overrides for toasts */
 .dark .feedback-toast {
-  background: rgba(15, 23, 42, 0.9) !important;
+  background: rgba(15, 23, 42, 0.92) !important;
 }
 
 .dark .feedback-success { border-color: #10b981 !important; }
 .dark .feedback-error { border-color: #ef4444 !important; }
 .dark .feedback-warning { border-color: #f59e0b !important; }
-.dark .feedback-info { border-color: #3b82f6 !important; }
 
 .feedback-toast.translate-x-full {
   transform: translateX(100%);
@@ -2961,11 +3152,6 @@ body.quiz-active .mobile-nav-shell {
   opacity: 0;
   width: 0;
   height: 0;
-}
-
-.quiz-option:focus-within {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
 }
 
 .quiz-option.selected {
@@ -3044,13 +3230,10 @@ body.quiz-active .mobile-nav-shell {
   border-radius: 9999px;
 }
 
-
-.feedback-toast.translate-x-full {
-  transform: translateX(100%);
-  opacity: 0;
+.mobile-nav-shell {
+  transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
-/* --- Mobile Nav Patch B --- */
 .mobile-nav-link {
   min-height: 64px;
   border-radius: 20px;
@@ -3066,6 +3249,11 @@ body.quiz-active .mobile-nav-shell {
   transition: all 0.2s ease;
 }
 
+.mobile-nav-link:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: #0f172a;
+}
+
 .mobile-nav-link .material-symbols-outlined {
   font-size: 22px;
   line-height: 1;
@@ -3079,6 +3267,11 @@ body.quiz-active .mobile-nav-shell {
 
 html.dark .mobile-nav-link {
   color: #cbd5e1;
+}
+
+html.dark .mobile-nav-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
 }
 
 html.dark .mobile-nav-link.active {
@@ -3105,4 +3298,57 @@ html.dark .mobile-nav-link.active {
   font-weight: 900;
   line-height: 1;
   box-shadow: 0 12px 28px rgba(37, 99, 235, 0.28);
+}
+
+/* --- Mobile Nav Positioning Hotfix --- */
+#mobileBottomNav.mobile-nav-shell {
+  position: fixed;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(calc(100% - 24px), 420px);
+  z-index: 120;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#mobileBottomNav.mobile-nav-shell.nav-hidden {
+  transform: translate(-50%, calc(100% + 1rem));
+  opacity: 0;
+  pointer-events: none;
+}
+
+#mobileBottomNav .mobile-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  width: 100%;
+}
+
+#mobileBottomNav .mobile-nav-item {
+  min-height: 58px;
+  padding: 6px 4px;
+}
+
+#mobileBottomNav .mobile-nav-item .label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+body.quiz-active #mobileBottomNav.mobile-nav-shell {
+  display: none !important;
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  #mobileBottomNav.mobile-nav-shell {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  #mobileBottomNav.mobile-nav-shell {
+    display: none !important;
+  }
 }

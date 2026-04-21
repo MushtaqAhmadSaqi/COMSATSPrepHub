@@ -10,36 +10,18 @@
     <!-- External Styles -->
     <link rel="stylesheet" href="styles/tailwind-built.css">
     <link rel="stylesheet" href="style.css">
-    <style type="text/tailwindcss">
-      @layer utilities {
-        .glass { @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-white/10; }
-
-        .quiz-option {
-          @apply flex items-start gap-4 p-5 border-2 rounded-2xl cursor-pointer transition-all duration-200 font-mono text-[14px]
-          bg-white dark:bg-slate-900
-          border-slate-200 dark:border-white/10
-          text-slate-900 dark:text-slate-100
-          hover:border-brand-500 dark:hover:border-brand-400
-          hover:bg-brand-50 dark:hover:bg-slate-800;
+    
+    <style>
+        .glass {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
         }
-
-        .quiz-option.selected {
-          @apply border-sky-500 bg-sky-50 text-sky-900 dark:border-sky-400 dark:bg-sky-500/15 dark:text-sky-100;
-          box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+        .dark .glass {
+            background-color: rgba(15, 23, 42, 0.8);
+            border-color: rgba(255, 255, 255, 0.1);
         }
-
-        .quiz-option.correct {
-          @apply border-emerald-500 bg-emerald-50 text-emerald-800 dark:border-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-100;
-        }
-
-        .quiz-option.wrong {
-          @apply border-red-500 bg-red-50 text-red-800 dark:border-red-400 dark:bg-red-500/15 dark:text-red-100;
-        }
-
-        .radio-ui {
-          @apply w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-500 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all bg-white dark:bg-slate-800;
-        }
-      }
     </style>
     
     <script src="js/dark-mode.js" defer></script>
@@ -207,7 +189,7 @@
                                         class="text-4xl font-black text-slate-900 tracking-tighter">0%</span>
                                     <span id="scoreValue"
                                         class="text-[11px] font-bold text-slate-400 font-mono tracking-widest mt-1 uppercase">0
-                                        / 0 NODES</span>
+                                        / 0</span>
                                 </div>
                             </div>
                         </div>
@@ -245,9 +227,12 @@
       import { supabase, auth, escapeHtml } from './utils.js';
       import { nl2brSafe } from './js/render-safety.js';
       import { logger } from './js/logger.js';
+      import { saveQuizCompletion } from './js/progress-service.js';
 
       // State variables
       let quizzes = [];
+      let subjectCatalogMap = new Map();
+      let questionCountMap = new Map();
       let currentQuizId = null;
       let currentQuizTitle = '';
       let currentQuizName = '';
@@ -255,6 +240,33 @@
       let currentQuestionIndex = 0;
       let selectedAnswers = {};
       let resultsPersisted = false;
+
+      function buildSubjectCatalogMap(rows = []) {
+        const map = new Map();
+        rows.forEach(row => {
+          const code = String(row.subject_code || '').trim();
+          const name = String(row.subject_name || '').trim();
+          if (code && name && !map.has(code)) {
+            map.set(code, name);
+          }
+        });
+        return map;
+      }
+
+      function buildQuestionCountMap(rows = []) {
+        const map = new Map();
+        rows.forEach(row => {
+          const key = row.quiz_id;
+          map.set(key, (map.get(key) || 0) + 1);
+        });
+        return map;
+      }
+
+      function getSettledData(result) {
+        if (result.status !== 'fulfilled') return [];
+        if (result.value?.error) return [];
+        return result.value?.data || [];
+      }
 
       function getQuizElements() {
         return {
@@ -416,7 +428,14 @@
         const quizId = url.searchParams.get('quiz');
 
         if (quizId) {
-          // stay in quiz mode if URL has quiz param
+          // fetch quiz metadata quickly to resume
+          supabase.from('quizzes').select('title, subject_code').eq('id', quizId).single().then(({ data }) => {
+             if (data) {
+                startQuiz(quizId, data.title, data.subject_code, true);
+             } else {
+                showQuizCatalog(false);
+             }
+          });
           return;
         }
 
@@ -430,15 +449,29 @@
         }
       };
 
-      // Load quizzes when page opens
-      document.addEventListener('DOMContentLoaded', loadQuizzes);
+      // Load quizzes when page opens or jump straight to quiz
+      document.addEventListener('DOMContentLoaded', () => {
+          const url = new URL(window.location.href);
+          const quizId = url.searchParams.get('quiz');
+          if (quizId) {
+              // Try to load direct
+              supabase.from('quizzes').select('title, subject_code').eq('id', quizId).single().then(({ data }) => {
+                 if (data) {
+                    startQuiz(quizId, data.title, data.subject_code, false);
+                 } else {
+                    loadQuizzes();
+                 }
+              });
+          } else {
+              loadQuizzes();
+          }
+      });
 
       // ── Load Available Quizzes ───────────────────
       async function loadQuizzes() {
         const grid = document.getElementById('quizGrid');
 
         try {
-          // Add a timeout so it doesn't spin forever
           const timeoutPromise = new Promise((_, reject) =>
             setTimeout(() => reject(new Error('Loading timeout')), 8000)
           );
@@ -446,16 +479,14 @@
           const fetchPromise = supabase
             .from('quizzes')
             .select('id, title, subject_code')
-            .order('created_at', { ascending: false });
+            .order('title', { ascending: true });
 
-          // Wait for either data or timeout
-          const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
-
-          if (error) throw error;
+          const { data: quizRows, error: quizError } = await Promise.race([fetchPromise, timeoutPromise]);
+          if (quizError) throw quizError;
 
           grid.innerHTML = '';
 
-          if (!data || data.length === 0) {
+          if (!quizRows || quizRows.length === 0) {
             showQuizCatalogMessage({
               type: 'info',
               title: 'No Quizzes Available Yet',
@@ -464,44 +495,69 @@
             return;
           }
 
-          quizzes = data;
+          quizzes = quizRows;
 
-          // Create quiz cards
+          const quizIds = quizzes.map(item => item.id).filter(Boolean);
+
+          const [subjectRowsResult, questionRowsResult] = await Promise.allSettled([
+            supabase.from('past_papers').select('subject_code, subject_name'),
+            quizIds.length
+              ? supabase.from('quiz_questions').select('quiz_id').in('quiz_id', quizIds)
+              : Promise.resolve({ data: [], error: null })
+          ]);
+
+          subjectCatalogMap = buildSubjectCatalogMap(getSettledData(subjectRowsResult));
+          questionCountMap = buildQuestionCountMap(getSettledData(questionRowsResult));
+
           quizzes.forEach(q => {
+            const subjectLabel = subjectCatalogMap.get(q.subject_code) || q.subject_code || 'Subject';
+            const totalQuestions = questionCountMap.get(q.id) || 0;
+
             const card = document.createElement('button');
             card.type = 'button';
             card.setAttribute('data-aos', 'fade-up');
             card.className = 'card-hover group bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl p-6 hover:shadow-xl transition-all text-left w-full';
+
             card.innerHTML = `
               <div class="flex items-start justify-between mb-4">
                 <div class="w-12 h-12 rounded-xl bg-brand-50 dark:bg-brand-500/10 flex items-center justify-center text-brand-600 dark:text-brand-400 group-hover:scale-110 transition-transform">
                   <span class="material-symbols-outlined">quiz</span>
                 </div>
                 <div class="px-2 py-1 rounded-md bg-slate-100 dark:bg-white/5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                  ${Number.isFinite(q.questions_count) ? q.questions_count : 0} Questions
+                  ${totalQuestions} Question${totalQuestions === 1 ? '' : 's'}
                 </div>
               </div>
-              <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-brand-600 transition-colors">${escapeHtml(q.title || '')}</h3>
-              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">${escapeHtml(q.subject_code || '')}</p>
+
+              <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1 group-hover:text-brand-600 transition-colors">
+                ${escapeHtml(q.title || '')}
+              </h3>
+
+              <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">
+                ${escapeHtml(subjectLabel)}
+              </p>
+
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                ${escapeHtml(q.subject_code || '')}
+              </p>
+
               <div class="mt-6 flex items-center gap-2 text-brand-600 dark:text-brand-400 font-bold text-xs">
-                <span>Attempt Module</span>
+                <span>Start Quiz</span>
                 <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
               </div>
             `;
+
             card.addEventListener('click', () => startQuiz(q.id, q.title, q.subject_code));
             grid.appendChild(card);
           });
 
-          // Re-init 3D Tilt for dynamic cards
           if (window.reinitVanillaTilt) window.reinitVanillaTilt();
-
         } catch (err) {
           logger.error('Failed to load quizzes', err);
 
           showQuizCatalogMessage({
             type: 'error',
             title: 'Failed to load quizzes',
-            message: 'Something went wrong. Please try again.',
+            message: err?.message || 'Something went wrong. Please try again.',
             actionText: 'Try Again',
             action: () => loadQuizzes()
           });
@@ -509,7 +565,7 @@
       }
 
       // ── Start a Quiz ──────────────────────────────
-      async function startQuiz(quizId, title, subCode) {
+      async function startQuiz(quizId, title, subCode, isPopstate = false) {
         currentQuizId = quizId;
         currentQuizTitle = title || 'Untitled Quiz';
         currentQuizName = subCode || 'SUBJECT';
@@ -524,6 +580,12 @@
         }
 
         showQuizRunner(quizId);
+        
+        // Prevent doubling of history states on load
+        if (isPopstate) {
+            history.replaceState({ view: 'quiz', quizId }, '', `quiz.html?quiz=${quizId}`);
+        }
+        
         currentQuizName = subCode;
         clearQuestionErrorState();
 
@@ -584,7 +646,7 @@
         document.getElementById('bgQuestionNum').textContent = `Q${String(currentQuestionIndex + 1).padStart(2, '0')}`;
         document.getElementById('questionCountLabel').textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
 
-        const progressPct = ((currentQuestionIndex) / questions.length) * 100;
+        const progressPct = ((currentQuestionIndex + 1) / questions.length) * 100;
         document.getElementById('quizProgressBar').style.width = `${progressPct}%`;
 
         const qText = document.getElementById('questionText');
@@ -677,138 +739,7 @@
         }
       };
 
-      async function getSignedInUserId() {
-        const { data, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        return data?.session?.user?.id || null;
-      }
 
-      async function saveQuizAttempt({
-        userId,
-        quizId,
-        quizTitle,
-        subjectCode,
-        correctAnswers,
-        totalQuestions
-      }) {
-        const scorePercent = totalQuestions
-          ? Math.round((correctAnswers / totalQuestions) * 100)
-          : 0;
-
-        const payload = {
-          user_id: userId,
-          quiz_id: quizId,
-          quiz_title: quizTitle,
-          subject_code: subjectCode,
-          score_percent: scorePercent,
-          correct_answers: correctAnswers,
-          total_questions: totalQuestions
-        };
-
-        const { error } = await supabase
-          .from('user_quiz_attempts')
-          .insert([payload]);
-
-        if (error) throw error;
-      }
-
-      async function upsertSubjectProgress({
-        userId,
-        subjectCode,
-        subjectName,
-        masteryPercent,
-        topicName = null
-      }) {
-        const query = supabase
-          .from('user_subject_progress')
-          .select('id, sessions_count, mastery_percent')
-          .eq('user_id', userId)
-          .eq('subject_code', subjectCode);
-
-        const scopedQuery = topicName
-          ? query.eq('topic_name', topicName)
-          : query.is('topic_name', null);
-
-        const { data: existing, error: fetchError } = await scopedQuery.maybeSingle();
-        if (fetchError) throw fetchError;
-
-        if (existing?.id) {
-          const currentMastery = Number(existing.mastery_percent || 0);
-          const nextMastery = Math.round((currentMastery + masteryPercent) / 2);
-
-          const { error: updateError } = await supabase
-            .from('user_subject_progress')
-            .update({
-              subject_name: subjectName,
-              mastery_percent: nextMastery,
-              sessions_count: Number(existing.sessions_count || 0) + 1,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', existing.id);
-
-          if (updateError) throw updateError;
-          return;
-        }
-
-        const { error: insertError } = await supabase
-          .from('user_subject_progress')
-          .insert([{
-            user_id: userId,
-            subject_code: subjectCode,
-            subject_name: subjectName,
-            topic_name: topicName,
-            mastery_percent: masteryPercent,
-            sessions_count: 1
-          }]);
-
-        if (insertError) throw insertError;
-      }
-
-      async function persistQuizCompletion({
-        quizId,
-        quizTitle,
-        subjectCode,
-        correctAnswers,
-        totalQuestions
-      }) {
-        if (resultsPersisted) return;
-
-        try {
-          const userId = await getSignedInUserId();
-          if (!userId) return;
-
-          const percent = totalQuestions
-            ? Math.round((correctAnswers / totalQuestions) * 100)
-            : 0;
-
-          await saveQuizAttempt({
-            userId,
-            quizId,
-            quizTitle,
-            subjectCode,
-            correctAnswers,
-            totalQuestions
-          });
-
-          await upsertSubjectProgress({
-            userId,
-            subjectCode,
-            subjectName: subjectCode,
-            masteryPercent: percent
-          });
-
-          resultsPersisted = true;
-        } catch (error) {
-          console.error('Failed to persist quiz completion:', error);
-          if (window.showFeedbackStatus) {
-            window.showFeedbackStatus({
-              type: 'warning',
-              message: 'Quiz finished, but progress sync failed.',
-              duration: 5000
-            });
-          }
-        }
-      }
 
       async function showResults() {
         document.getElementById('step2-question').classList.add('hidden');
@@ -851,13 +782,25 @@
           desc.textContent = `Keep practicing ${currentQuizName}. Review the questions you got wrong.`;
         }
 
-        await persistQuizCompletion({
-          quizId: currentQuizId,
-          quizTitle: currentQuizTitle,
-          subjectCode: currentQuizName,
-          correctAnswers: correctCount,
-          totalQuestions: total
-        });
+        try {
+            await saveQuizCompletion({
+              quizId: currentQuizId,
+              quizTitle: currentQuizTitle,
+              subjectCode: currentQuizName,
+              subjectName: currentQuizName,
+              correctAnswers: correctCount,
+              totalQuestions: total
+            });
+        } catch (error) {
+            console.error('Progress sync failed:', error);
+            if (window.showFeedbackStatus) {
+                window.showFeedbackStatus({
+                    type: 'warning',
+                    message: 'Quiz finished, but progress sync failed.',
+                    duration: 5000
+                });
+            }
+        }
       }
     </script>
     

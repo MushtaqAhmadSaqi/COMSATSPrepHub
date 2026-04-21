@@ -56,15 +56,22 @@
     <!-- Progress Bar (non-sticky + auto-hide) -->
     <div id="progressWrap"
         class="bg-white border-b border-slate-200 transition-all"
-        style="display:none;">
+        style="display:none;"
+        role="region"
+        aria-label="Reading Progress">
         <div class="max-w-screen-xl mx-auto px-4 sm:px-6 py-2.5 flex items-center gap-4">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">PROGRESS</span>
-            <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap" aria-hidden="true">PROGRESS</span>
+            <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"
+                 role="progressbar"
+                 aria-valuemin="0"
+                 aria-valuemax="100"
+                 aria-valuenow="0"
+                 id="progressAccessibility">
                 <div id="progressFill"
                     class="h-full bg-gradient-to-r from-brand-500 to-teal-500 rounded-full transition-all duration-500 ease-out"
                     style="width:0%"></div>
             </div>
-            <span id="progressText" class="text-xs font-bold text-slate-500 whitespace-nowrap">0 / 0</span>
+            <span id="progressText" class="text-xs font-bold text-slate-500 whitespace-nowrap" aria-live="polite">0 / 0</span>
         </div>
     </div>
 
@@ -198,6 +205,7 @@
         import { supabase, auth, escapeHtml } from './utils.js';
         import { sanitizeHtml } from './js/render-safety.js';
         import { logger } from './js/logger.js';
+        import { ensureSubjectTracked, addSubjectMastery } from './js/progress-service.js';
 
         // ── Dependency Loader ──────────────────────
         const CORE_DEPENDENCIES = [
@@ -331,45 +339,10 @@
           if (!paper || studyOpenPersisted) return;
 
           try {
-            const userId = await getSignedInUserId();
-            if (!userId) return;
-
-            const { data: existing, error: fetchError } = await supabase
-              .from('user_subject_progress')
-              .select('id, sessions_count, mastery_percent')
-              .eq('user_id', userId)
-              .eq('subject_code', paper.subject_code)
-              .is('topic_name', null)
-              .maybeSingle();
-
-            if (fetchError) throw fetchError;
-
-            if (existing?.id) {
-              const { error: updateError } = await supabase
-                .from('user_subject_progress')
-                .update({
-                  subject_name: paper.subject_name,
-                  sessions_count: Number(existing.sessions_count || 0) + 1,
-                  updated_at: new Date().toISOString()
-                })
-                .eq('id', existing.id);
-
-              if (updateError) throw updateError;
-            } else {
-              const { error: insertError } = await supabase
-                .from('user_subject_progress')
-                .insert([{
-                  user_id: userId,
-                  subject_code: paper.subject_code,
-                  subject_name: paper.subject_name,
-                  topic_name: null,
-                  mastery_percent: 15,
-                  sessions_count: 1
-                }]);
-
-              if (insertError) throw insertError;
-            }
-
+            await ensureSubjectTracked({
+                subjectCode: paper.subject_code,
+                subjectName: paper.subject_name
+            });
             studyOpenPersisted = true;
           } catch (error) {
             console.error('Failed to save paper study progress:', error);
@@ -842,52 +815,45 @@
             const pct = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
             const fill = document.getElementById('progressFill');
             const text = document.getElementById('progressText');
+            const ariaBar = document.getElementById('progressAccessibility');
+            
             if (fill) fill.style.width = pct + '%';
             if (text) text.textContent = `${answeredCount} / ${totalQuestions}`;
+            if (ariaBar) ariaBar.setAttribute('aria-valuenow', pct);
         }
 
-        async function trackMastery() {
-            const session = await auth.getSession();
-            const userId = session?.user?.id;
-            if (!userId || !globalPaper) return;
+        let pendingMastery = 0;
+        let masterySyncTimer = null;
 
-            const code = globalPaper.subject_code;
-            const name = globalPaper.subject_name;
+        function trackMastery() {
+            pendingMastery += 2;
+            
+            if (masterySyncTimer) clearTimeout(masterySyncTimer);
+            masterySyncTimer = setTimeout(flushMastery, 2500);
+        }
 
+        async function flushMastery() {
+            if (pendingMastery === 0 || !globalPaper) return;
+            
+            const delta = pendingMastery;
+            pendingMastery = 0; // reset early to avoid double counting during await
+            
             try {
-                const { data: existing } = await supabase
-                    .from('user_subject_progress')
-                    .select('id, mastery_percent')
-                    .eq('user_id', userId)
-                    .eq('subject_code', code)
-                    .maybeSingle();
-
-                if (existing) {
-                    const current = existing.mastery_percent || 0;
-                    if (current < 100) {
-                        await supabase
-                            .from('user_subject_progress')
-                            .update({ 
-                                mastery_percent: Math.min(100, current + 2), // 2% per question reveal
-                                updated_at: new Date().toISOString()
-                            })
-                            .eq('id', existing.id);
-                    }
-                } else {
-                    await supabase
-                        .from('user_subject_progress')
-                        .insert({
-                            user_id: userId,
-                            subject_code: code,
-                            subject_name: name,
-                            sessions_count: 1,
-                            mastery_percent: 2
-                        });
-                }
+                await addSubjectMastery({
+                    subjectCode: globalPaper.subject_code,
+                    subjectName: globalPaper.subject_name,
+                    delta: delta
+                });
             } catch (err) {
-                console.warn('Mastery tracking failed:', err);
+                console.warn('Mastery tracking failed, requeuing:', err);
+                pendingMastery += delta; // re-queue failed attempts
             }
         }
+        
+        // Ensure any pending mastery is saved safely when leaving
+        window.addEventListener('beforeunload', () => {
+            if (pendingMastery > 0) flushMastery();
+        });
 
         const formatContentAsync = async (text) => {
             if (!text) return '';

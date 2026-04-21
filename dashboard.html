@@ -11,42 +11,44 @@
 
     <script src="js/dark-mode.js" defer></script>
 </head>
-<body class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300 antialiased min-h-screen">
+<body class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300 antialiased min-h-screen flex flex-col">
     <div id="app-header"></div>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 relative z-10">
       <!-- HERO -->
       <section class="mb-8">
         <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-sm">
-          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <p class="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400 mb-6 flex items-center gap-2">
-              <span class="material-symbols-outlined text-[16px]">calendar_today</span>
-              <span id="currentDate">Loading date...</span>
-            </p>
-
-            <div class="flex items-center gap-4">
-              <div class="hero-brand-logo" aria-hidden="true">C</div>
-              <div>
-                <p class="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400 mb-1">
-                  Student Dashboard
-                </p>
-                <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-                  Welcome back, <span id="userFirstName">Student</span>
-                </h1>
+          <div class="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_auto] lg:items-end">
+            <div class="space-y-5">
+              <p class="inline-flex w-fit items-center gap-2 rounded-full bg-brand-50 dark:bg-brand-500/10 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">
+                <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                <span id="currentDate">Loading date...</span>
+              </p>
+      
+              <div class="flex items-center gap-4">
+                <div class="hero-brand-logo" aria-hidden="true">C</div>
+                <div class="min-w-0">
+                  <p class="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400 mb-1">
+                    Student Dashboard
+                  </p>
+                  <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+                    Welcome back, <span id="userFirstName">Student</span>
+                  </h1>
+                </div>
               </div>
+      
+              <p id="welcomeSubtext" class="text-slate-600 dark:text-slate-400 max-w-2xl">
+                Track your study progress, quiz performance, and subject mastery in one clean dashboard.
+              </p>
             </div>
-
-            <p id="welcomeSubtext" class="mt-4 text-slate-600 dark:text-slate-400 max-w-2xl">
-              Track your study progress, quiz performance, and subject mastery in one clean dashboard.
-            </p>
-    
-            <div class="flex flex-wrap gap-3">
+      
+            <div class="flex flex-wrap gap-3 lg:justify-end">
               <a href="quiz.html"
                  class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-semibold shadow-sm transition-all">
                 <span class="material-symbols-outlined text-[18px] mr-2">play_arrow</span>
                 Resume Practice
               </a>
-    
+      
               <a href="subjects.html"
                  class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold transition-all">
                 <span class="material-symbols-outlined text-[18px] mr-2">menu_book</span>
@@ -90,8 +92,21 @@
               <p class="text-sm text-slate-500 dark:text-slate-400">Your recent quiz performance trend</p>
             </div>
     
-            <div class="h-[280px]">
-              <canvas id="learningChart"></canvas>
+            <div class="h-[280px] relative">
+              <canvas id="learningChart" aria-label="Recent quiz score trend" role="img"></canvas>
+            
+              <div id="learningChartEmpty"
+                   class="hidden absolute inset-0 rounded-2xl border border-dashed border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-slate-800/30 flex items-center justify-center text-center px-6">
+                <div>
+                  <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-300 flex items-center justify-center">
+                    <span class="material-symbols-outlined">insights</span>
+                  </div>
+                  <p class="font-semibold text-slate-900 dark:text-white">No score trend yet</p>
+                  <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    Complete a few quizzes and your recent performance will appear here.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
     

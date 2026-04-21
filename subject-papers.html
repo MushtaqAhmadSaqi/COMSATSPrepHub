@@ -135,232 +135,223 @@
     <div id="app-mobile-nav"></div>
 
     <script type="module">
-        import { supabase, auth, escapeHtml as escHtml } from './utils.js';
+  import { supabase, escapeHtml as escHtml } from './utils.js';
+  import { ensureSubjectTracked } from './js/progress-service.js';
 
-        const params = new URLSearchParams(window.location.search);
-        const subjectName = params.get('subject') || '';
-        const subjectCode = params.get('code') || '';
+  const params = new URLSearchParams(window.location.search);
+  const subjectName = params.get('subject') || '';
+  const subjectCode = params.get('code') || '';
 
-        // Set header info
-        document.getElementById('subjectTitle').textContent = subjectName || 'Unknown Subject';
-        document.getElementById('subjectCode').textContent = subjectCode ? `Code: ${subjectCode}` : '';
-        document.title = `${subjectName} — Papers | COMSATSPrepHub`;
+  const titleEl = document.getElementById('subjectTitle');
+  const codeEl = document.getElementById('subjectCode');
+  const iconEl = document.getElementById('subjectIcon');
 
-        // Set icon based on subject
-        const iconEl = document.getElementById('subjectIcon');
-        const subjectIcons = {
-            'Data Structures': '💻',
-            'Operating Systems': '🖥️',
-            'Calculus': '📐',
-            'Linear Algebra': '📊',
-            'Web Technologies': '🌐'
-        };
-        iconEl.textContent = subjectIcons[subjectName] || '📘';
+  if (titleEl) titleEl.textContent = subjectName || subjectCode || 'Unknown Subject';
+  if (codeEl) codeEl.textContent = subjectCode ? `Code: ${subjectCode}` : '';
+  document.title = `${subjectName || subjectCode || 'Subject'} — Papers | COMSATSPrepHub`;
 
-        async function loadPapers() {
-            const loadingEl = document.getElementById('loadingSkeleton');
-            const papersContainer = document.getElementById('papersContainer');
-            const emptyState = document.getElementById('emptyState');
-            const errorBanner = document.getElementById('errorBanner');
-            const errorMessage = document.getElementById('errorMessage');
+  const subjectIcons = {
+    'Data Structures': '💻',
+    'Operating Systems': '🖥️',
+    'Calculus': '📐',
+    'Linear Algebra': '📊',
+    'Web Technologies': '🌐'
+  };
 
-            console.log('%c[Subjects-Papers] 🚀 loadPapers started', 'color: #10b981; font-weight: bold');
-            console.log('Subject:', subjectName, ' | Code:', subjectCode);
+  if (iconEl) iconEl.textContent = subjectIcons[subjectName] || '📘';
 
-            try {
-                // Timeout protection (same as subjects.html)
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Request timed out after 10 seconds')), 10000)
-                );
+  function showInlineError(message) {
+    const loadingEl = document.getElementById('loadingSkeleton');
+    const errorBanner = document.getElementById('errorBanner');
+    const errorMessage = document.getElementById('errorMessage');
+    const papersContainer = document.getElementById('papersContainer');
 
-                // Use .select('*') so it never breaks again after model changes
-                let query = supabase
-                    .from('past_papers')
-                    .select('*')
-                    .order('year', { ascending: false });
+    loadingEl?.classList.add('hidden');
+    papersContainer?.classList.add('hidden');
 
-                if (subjectCode) {
-                    query = query.eq('subject_code', subjectCode);
-                } else if (subjectName) {
-                    query = query.eq('subject_name', subjectName);
-                }
+    if (window.handleApiError) {
+      window.handleApiError(new Error(message), 'Failed to load papers');
+    }
 
-                const fetchPromise = query;
-                const { data: papers, error } = await Promise.race([fetchPromise, timeoutPromise]);
+    if (errorBanner && errorMessage) {
+      errorBanner.classList.remove('hidden');
+      errorMessage.innerHTML = `
+        <strong>Failed to load papers</strong><br>
+        <span class="text-sm">${escHtml(message || 'Unknown error')}</span>
+      `;
+    }
+  }
 
-                console.log('✅ Query result:', { papersFound: papers?.length || 0, error });
+  function getExamBadgeClass(examType) {
+    return String(examType || '').toLowerCase().includes('mid')
+      ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400'
+      : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400';
+  }
 
-                if (error) throw error;
+  async function getQuestionCountsMap(paperIds = []) {
+    if (!paperIds.length) return { totalQuestions: 0, questionCountMap: new Map() };
 
-                // Hide loading
-                loadingEl.style.display = 'none';
+    const { data, error } = await supabase.from('paper_questions').select('paper_id').in('paper_id', paperIds);
+    if (error) throw error;
 
-                if (!papers || papers.length === 0) {
-                    emptyState.style.display = 'block';
-                    console.log('No papers found for this subject');
-                    return;
-                }
+    const questionCountMap = new Map();
 
-                console.log('📋 Sample paper object (check column names):', papers[0]);
+    (data || []).forEach(row => {
+      questionCountMap.set(row.paper_id, (questionCountMap.get(row.paper_id) || 0) + 1);
+    });
 
-                // === STATS ===
-                const years = [...new Set(papers.map(p => p.year).filter(Boolean))];
-                document.getElementById('statPapers').textContent = papers.length;
-                document.getElementById('statYears').textContent = years.length > 1 
-                    ? `${Math.min(...years)}–${Math.max(...years)}` 
-                    : (years[0] || '—');
-                document.getElementById('statsRow').classList.remove('opacity-60');
+    return {
+      totalQuestions: (data || []).length,
+      questionCountMap
+    };
+  }
 
-                // === GROUP BY YEAR + RENDER CARDS ===
-                const byYear = {};
-                papers.forEach(p => {
-                    const year = p.year || 'Unknown';
-                    if (!byYear[year]) byYear[year] = [];
-                    byYear[year].push(p);
-                });
+  function renderPaperGroups(papers, questionCountMap) {
+    const papersContainer = document.getElementById('papersContainer');
+    if (!papersContainer) return;
 
-                const sortedYears = Object.keys(byYear).sort((a, b) => b - a);
+    const grouped = new Map();
 
-                let html = '';
-                sortedYears.forEach(year => {
-                    const yearPapers = byYear[year];
+    papers.forEach(paper => {
+      const yearKey = String(paper.year || 'Unknown');
+      if (!grouped.has(yearKey)) grouped.set(yearKey, []);
+      grouped.get(yearKey).push(paper);
+    });
 
-                    const cardsHTML = yearPapers.map(p => {
-                        // Use fallbacks so it works even if column names changed
-                        const examType = p.exam_type || p.type || p.exam || 'Exam';
-                        const semester = p.semester || '';
-                        const instructor = p.instructor_name || p.instructor || p.teacher || 'Instructor not available';
-                        const totalMarks = p.total_marks || p.marks || p.total || '?';
-                        const qCount = 0; // we'll improve this later once we know the questions table structure
+    const sortedYears = [...grouped.keys()].sort((a, b) => Number(b) - Number(a));
 
-                        const isMid = String(examType).toLowerCase().includes('mid');
+    papersContainer.innerHTML = sortedYears
+      .map(year => {
+        const yearPapers = grouped.get(year) || [];
 
-                        return `
-                            <a href="paper-view.html?id=${p.id}" 
-                               class="group block w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 sm:p-6 transition-all duration-300 card-hover active:scale-[0.985]">
-                                
-                                <div class="flex items-start justify-between mb-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${isMid 
-                                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' 
-                                            : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400'}">
-                                            ${escHtml(examType)}
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="text-right flex-shrink-0">
-                                        <div class="text-sm font-black text-slate-900 dark:text-white tabular-nums">${year}</div>
-                                        <div class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">${escHtml(semester)}</div>
-                                    </div>
-                                </div>
+        const cardsHtml = yearPapers.map(paper => {
+          const examType = paper.exam_type || paper.type || 'Exam';
+          const semester = paper.semester || 'Term not listed';
+          const instructor = paper.instructor_name || paper.instructor || 'Instructor not listed';
+          const totalMarks = paper.total_marks || '—';
+          const questionCount = questionCountMap.get(paper.id) || 0;
 
-                                <div class="mb-5">
-                                    <h3 class="font-bold text-[17px] sm:text-xl text-slate-900 dark:text-white mb-2 leading-snug break-words">
-                                        ${escHtml(instructor)}
-                                    </h3>
-                                    <div class="flex items-center gap-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                                        <span>${qCount} Questions</span>
-                                        <span class="text-slate-200 dark:text-slate-800">•</span>
-                                        <span>${totalMarks} Marks</span>
-                                    </div>
-                                </div>
+          return `
+            <a href="paper-view.html?id=${paper.id}"
+               class="group block w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 sm:p-6 transition-all duration-300 card-hover active:scale-[0.985]">
+              <div class="flex items-start justify-between gap-4 mb-4">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${getExamBadgeClass(examType)}">
+                    ${escHtml(examType)}
+                  </span>
+                  <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300">
+                    ${escHtml(semester)}
+                  </span>
+                </div>
+                <div class="text-right flex-shrink-0">
+                  <div class="text-sm font-black text-slate-900 dark:text-white tabular-nums">${escHtml(year)}</div>
+                  <div class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none">
+                    ${questionCount} question${questionCount === 1 ? '' : 's'}
+                  </div>
+                </div>
+              </div>
 
-                                <div class="flex items-center justify-between pt-3 border-t border-slate-50 dark:border-white/5">
-                                    <div class="flex items-center gap-1.5 text-primary-hover group-hover:gap-2.5 transition-all duration-300">
-                                        <span class="text-[11px] font-black uppercase tracking-wider">Start Revision</span>
-                                        <span class="material-symbols-outlined text-base">arrow_forward</span>
-                                    </div>
-                                    <div class="text-slate-300 dark:text-slate-700 group-hover:text-primary transition-colors">
-                                        <span class="material-symbols-outlined text-lg">local_library</span>
-                                    </div>
-                                </div>
-                            </a>
-                        `;
-                    }).join('');
+              <div class="mb-5 min-w-0">
+                <h3 class="font-bold text-[17px] sm:text-xl text-slate-900 dark:text-white mb-2 leading-snug break-words">
+                  ${escHtml(instructor)}
+                </h3>
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  <span>${escHtml(subjectCode || subjectName || 'Subject')}</span>
+                  <span>•</span>
+                  <span>${escHtml(String(totalMarks))} marks</span>
+                </div>
+              </div>
 
-                    html += `
-                        <div class="animate-slide-up mb-10">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="px-3 py-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-xl flex items-center gap-2 shadow-sm">
-                                    <span class="material-symbols-outlined text-[18px] text-primary">calendar_today</span>
-                                    <span class="font-black text-base text-slate-900 dark:text-white tabular-nums">${year}</span>
-                                </div>
-                                <div class="flex-1 h-px bg-slate-200 dark:bg-white/10"></div>
-                                <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">${yearPapers.length} papers</span>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                ${cardsHTML}
-                            </div>
-                        </div>
-                    `;
-                });
+              <div class="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-white/5">
+                <div class="flex items-center gap-1.5 text-primary-hover group-hover:gap-2.5 transition-all duration-300">
+                  <span class="text-[11px] font-black uppercase tracking-wider">Open paper</span>
+                  <span class="material-symbols-outlined text-base">arrow_forward</span>
+                </div>
+                <span class="material-symbols-outlined text-lg text-slate-300 dark:text-slate-700 group-hover:text-primary transition-colors">description</span>
+              </div>
+            </a>
+          `;
+        }).join('');
 
-                papersContainer.innerHTML = html;
-                papersContainer.style.display = 'block';
-                papersContainer.classList.remove('hidden');
+        return `
+          <section class="animate-slide-up mb-10" aria-labelledby="year-${escHtml(year)}">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="px-3 py-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-xl flex items-center gap-2 shadow-sm">
+                <span class="material-symbols-outlined text-[18px] text-primary">calendar_today</span>
+                <span id="year-${escHtml(year)}" class="font-black text-base text-slate-900 dark:text-white tabular-nums">${escHtml(year)}</span>
+              </div>
+              <div class="flex-1 h-px bg-slate-200 dark:bg-white/10"></div>
+              <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">${yearPapers.length} papers</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              ${cardsHtml}
+            </div>
+          </section>
+        `;
+      })
+      .join('');
 
-                console.log('%c✅ Papers loaded successfully!', 'color: #10b981; font-weight: bold');
+    papersContainer.classList.remove('hidden');
+  }
 
-                // TRACK PROGRESS: Accessing a subject
-                saveSubjectAccess(subjectCode, subjectName);
+  async function loadPapers() {
+    const loadingEl = document.getElementById('loadingSkeleton');
+    const papersContainer = document.getElementById('papersContainer');
+    const emptyState = document.getElementById('emptyState');
 
-            } catch (err) {
-                console.error('❌ loadPapers failed:', err);
-                loadingEl.style.display = 'none';
+    if (!subjectName && !subjectCode) {
+      showInlineError('No subject was selected. Please go back and choose a subject first.');
+      return;
+    }
 
-                if (errorBanner && errorMessage) {
-                    errorBanner.style.display = 'flex';
-                    errorMessage.innerHTML = `
-                        <strong>Failed to load papers</strong><br>
-                        <span class="text-sm">${err.message || err}</span>
-                    `;
-                } else {
-                    alert('Error: ' + (err.message || err));
-                }
-            }
-        }
+    try {
+      const timeoutPromise = new Promise((_, reject) => {
+        window.setTimeout(() => reject(new Error('Request timed out after 10 seconds.')), 10000);
+      });
 
-        // Start loading
-        loadPapers();
+      let query = supabase.from('past_papers').select('*').order('year', { ascending: false });
 
-        async function saveSubjectAccess(code, name) {
-            const session = await auth.getSession();
-            const userId = session?.user?.id;
-            if (!userId || !code) return;
+      if (subjectCode) {
+        query = query.eq('subject_code', subjectCode);
+      } else {
+        query = query.eq('subject_name', subjectName);
+      }
 
-            try {
-                // Check if already exists
-                const { data: existing } = await supabase
-                    .from('user_subject_progress')
-                    .select('id, sessions_count')
-                    .eq('user_id', userId)
-                    .eq('subject_code', code)
-                    .maybeSingle();
+      const { data: papers, error } = await Promise.race([query, timeoutPromise]);
+      if (error) throw error;
 
-                if (existing) {
-                    await supabase
-                        .from('user_subject_progress')
-                        .update({ 
-                            sessions_count: (existing.sessions_count || 0) + 1,
-                            updated_at: new Date().toISOString()
-                        })
-                        .eq('id', existing.id);
-                } else {
-                    await supabase
-                        .from('user_subject_progress')
-                        .insert({
-                            user_id: userId,
-                            subject_code: code,
-                            subject_name: name,
-                            sessions_count: 1,
-                            mastery_percent: 5 // initial boost for starting
-                        });
-                }
-            } catch (err) {
-                console.warn('Silent progress tracking failed:', err);
-            }
-        }
-    </script>
+      loadingEl?.classList.add('hidden');
+
+      if (!papers || !papers.length) {
+        emptyState?.classList.remove('hidden');
+        return;
+      }
+
+      const paperIds = papers.map(paper => paper.id).filter(Boolean);
+      const { totalQuestions, questionCountMap } = await getQuestionCountsMap(paperIds);
+
+      const years = [...new Set(papers.map(p => Number(p.year)).filter(Number.isFinite))];
+      document.getElementById('statPapers').textContent = papers.length;
+      document.getElementById('statQuestions').textContent = totalQuestions;
+      document.getElementById('statYears').textContent = years.length > 1
+        ? `${Math.min(...years)}–${Math.max(...years)}`
+        : (years[0] || '—');
+      document.getElementById('statsRow')?.classList.remove('opacity-60');
+
+      renderPaperGroups(papers, questionCountMap);
+
+      await ensureSubjectTracked({
+        subjectCode,
+        subjectName: subjectName || subjectCode
+      });
+    } catch (error) {
+      showInlineError(error?.message || 'Something went wrong while loading papers.');
+      papersContainer?.classList.add('hidden');
+    }
+  }
+
+  loadPapers();
+</script>
 
     <script type="module" src="js/layout.js"></script>
 </body>

@@ -109,187 +109,207 @@
     <div id="app-mobile-nav"></div>
 
     <script type="module">
-        import { supabase, escapeHtml as escHtml } from './utils.js';
+  import { supabase, escapeHtml as escHtml } from './utils.js';
 
-        function debounce(fn, delay) {
-            let timeoutId;
-            return function (...args) {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => fn.apply(this, args), delay);
-            };
-        }
+  const palette = [
+    { bg: '#dbeafe', color: '#2563eb', icon: 'menu_book' },
+    { bg: '#dcfce7', color: '#15803d', icon: 'database' },
+    { bg: '#fef3c7', color: '#b45309', icon: 'function' },
+    { bg: '#f3e8ff', color: '#7e22ce', icon: 'scatter_plot' },
+    { bg: '#ccfbf1', color: '#0f766e', icon: 'terminal' },
+    { bg: '#e0f2fe', color: '#0369a1', icon: 'code' },
+    { bg: '#fce7f3', color: '#be185d', icon: 'psychology' },
+    { bg: '#fee2e2', color: '#b91c1c', icon: 'science' }
+  ];
 
-        function showSubjectsError(message) {
-            if (window.handleApiError) {
-                window.handleApiError(new Error(message), 'Failed to load catalog');
-                return;
-            }
+  const ui = {
+    loading: document.getElementById('loadingGrid'),
+    grid: document.getElementById('subjectsGrid'),
+    badge: document.getElementById('subjectCountBadge'),
+    badgeText: document.getElementById('subjectCountText'),
+    noResults: document.getElementById('noResults'),
+    emptyState: document.getElementById('emptyState'),
+    errorBanner: document.getElementById('errorBanner'),
+    errorMessage: document.getElementById('errorMessage'),
+    search: document.getElementById('subjectSearchInput'),
+    searchStatus: document.getElementById('subjectSearchStatus')
+  };
 
-            const errorBanner = document.getElementById('errorBanner');
-            const errorMessage = document.getElementById('errorMessage');
+  function debounce(fn, delay = 150) {
+    let timer = 0;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = window.setTimeout(() => fn(...args), delay);
+    };
+  }
 
-            if (!errorBanner || !errorMessage) return;
+  function resetUi() {
+    ui.errorBanner?.classList.add('hidden');
+    ui.noResults?.classList.add('hidden');
+    ui.emptyState?.classList.add('hidden');
+    if (ui.badge) ui.badge.style.display = 'none';
+  }
 
-            errorBanner.style.display = 'flex';
-            errorBanner.classList.remove('hidden');
+  function showError(message) {
+    ui.loading && (ui.loading.style.display = 'none');
+    ui.grid && (ui.grid.style.display = 'none');
 
-            errorMessage.innerHTML = '';
+    if (window.handleApiError) {
+      window.handleApiError(new Error(message), 'Failed to load subjects');
+    }
 
-            const title = document.createElement('strong');
-            title.textContent = 'Failed to load subjects';
+    if (ui.errorBanner && ui.errorMessage) {
+      ui.errorBanner.classList.remove('hidden');
+      ui.errorBanner.style.display = 'flex';
+      ui.errorMessage.innerHTML = `
+        <strong>Failed to load subjects</strong><br>
+        <span class="text-sm">${escHtml(message || 'Unknown error')}</span>
+      `;
+    }
+  }
 
-            const lineBreak = document.createElement('br');
+  function buildSubjects(rows = []) {
+    const subjectMap = new Map();
 
-            const detail = document.createElement('span');
-            detail.className = 'text-sm';
-            detail.textContent = String(message || 'Unknown error');
+    rows.forEach(row => {
+      const subjectName = String(row.subject_name || 'Untitled Subject').trim();
+      const subjectCode = String(row.subject_code || '').trim();
+      const key = subjectCode || subjectName;
+      const year = Number(row.year || 0);
 
-            errorMessage.appendChild(title);
-            errorMessage.appendChild(lineBreak);
-            errorMessage.appendChild(detail);
-        }
+      if (!subjectMap.has(key)) {
+        subjectMap.set(key, {
+          subject_name: subjectName,
+          subject_code: subjectCode,
+          count: 0,
+          latestYear: 0,
+          searchText: `${subjectName} ${subjectCode}`.toLowerCase()
+        });
+      }
 
-        const palette = [
-            { bg: '#dbeafe', color: '#2563eb', icon: 'menu_book' },
-            { bg: '#dcfce7', color: '#15803d', icon: 'database' },
-            { bg: '#fef3c7', color: '#b45309', icon: 'function' },
-            { bg: '#f3e8ff', color: '#7e22ce', icon: 'scatter_plot' },
-            { bg: '#ccfbf1', color: '#0f766e', icon: 'terminal' },
-            { bg: '#e0f2fe', color: '#0369a1', icon: 'code' },
-            { bg: '#fce7f3', color: '#be185d', icon: 'psychology' },
-            { bg: '#fee2e2', color: '#b91c1c', icon: 'science' },
-        ];
+      const subject = subjectMap.get(key);
+      subject.count += 1;
+      if (year > subject.latestYear) subject.latestYear = year;
+    });
 
-        async function loadSubjects() {
-            const loading = document.getElementById('loadingGrid');
-            const grid = document.getElementById('subjectsGrid');
-            const badge = document.getElementById('subjectCountBadge');
-            const badgeText = document.getElementById('subjectCountText');
+    return [...subjectMap.values()].sort((a, b) =>
+      a.subject_name.localeCompare(b.subject_name)
+    );
+  }
 
-            console.log('%c[Subjects] 🚀 loadSubjects started', 'color: #10b981; font-weight: bold');
+  function renderSubjects(subjects = []) {
+    if (!ui.grid) return;
 
-            try {
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Subjects request timed out after 8 seconds.')), 8000)
-                );
+    if (!subjects.length) {
+      ui.grid.innerHTML = '';
+      ui.grid.style.display = 'none';
+      ui.emptyState?.classList.remove('hidden');
+      return;
+    }
 
-                const fetchPromise = supabase
-                    .from('past_papers')
-                    .select('id, subject_code, subject_name')
-                    .order('subject_name', { ascending: true });
+    ui.grid.innerHTML = subjects.map((subject, index) => {
+      const p = palette[index % palette.length];
+      const url = `subject-papers.html?subject=${encodeURIComponent(subject.subject_name)}&code=${encodeURIComponent(subject.subject_code)}`;
 
-                const result = await Promise.race([fetchPromise, timeoutPromise]);
-                const { data: papers, error } = result;
+      return `
+        <a href="${url}"
+           class="group block bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 hover:shadow-xl transition-all duration-300 card-hover"
+           data-search="${escHtml(subject.searchText)}">
+          <div class="flex items-start justify-between gap-4 mb-5">
+            <div class="w-11 h-11 rounded-2xl flex items-center justify-center shadow-sm border border-black/5 dark:border-white/10"
+                 style="background:${p.bg}; color:${p.color};">
+              <span class="material-symbols-outlined text-[22px]">${p.icon}</span>
+            </div>
+            ${subject.latestYear ? `
+              <span class="inline-flex items-center rounded-full bg-slate-100 dark:bg-white/10 px-2.5 py-1 text-[11px] font-bold text-slate-500 dark:text-slate-300">
+                ${subject.latestYear}
+              </span>
+            ` : ''}
+          </div>
 
-                if (error) throw error;
+          <div class="mb-5 min-w-0">
+            <h3 class="text-xl font-black tracking-tight text-gray-900 dark:text-white mb-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-2">
+              ${escHtml(subject.subject_name)}
+            </h3>
+            <p class="font-mono text-sm text-gray-500 dark:text-gray-400 truncate">
+              ${escHtml(subject.subject_code || 'General subject')}
+            </p>
+          </div>
 
-                if (!papers || papers.length === 0) {
-                    document.getElementById('emptyState').classList.remove('hidden');
-                    return;
-                }
+          <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/10">
+            <div class="px-3 py-1 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs font-bold rounded-2xl">
+              ${subject.count} Paper${subject.count === 1 ? '' : 's'}
+            </div>
+            <div class="text-brand-600 dark:text-brand-400 group-hover:translate-x-1 transition-transform">
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </div>
+          </div>
+        </a>
+      `;
+    }).join('');
 
-                const subjectMap = {};
-                papers.forEach(p => {
-                    const safeName = p.subject_name || 'Untitled Subject';
-                    const safeCode = p.subject_code || 'NO-CODE';
+    ui.grid.classList.remove('hidden');
+    ui.grid.style.display = 'grid';
+  }
 
-                    if (!subjectMap[safeName]) {
-                        subjectMap[safeName] = {
-                            subject_name: safeName,
-                            subject_code: safeCode,
-                            count: 0
-                        };
-                    }
-                    subjectMap[safeName].count++;
-                });
+  function filterSubjects() {
+    if (!ui.grid || !ui.search) return;
 
-                const subjects = Object.values(subjectMap).sort((a, b) =>
-                    String(a.subject_name).localeCompare(String(b.subject_name))
-                );
+    const query = ui.search.value.toLowerCase().trim();
+    const cards = [...ui.grid.querySelectorAll('a[data-search]')];
+    let visible = 0;
 
-                badgeText.textContent = `${subjects.length} Subject${subjects.length !== 1 ? 's' : ''}`;
-                badge.style.display = 'inline-flex';
+    cards.forEach(card => {
+      const searchText = String(card.dataset.search || '').toLowerCase();
+      const shouldShow = !query || searchText.includes(query);
+      card.style.display = shouldShow ? '' : 'none';
+      if (shouldShow) visible += 1;
+    });
 
-                const fragment = document.createDocumentFragment();
+    ui.noResults?.classList.toggle('hidden', !(visible === 0 && cards.length > 0));
 
-                subjects.forEach((s, i) => {
-                    const p = palette[i % palette.length];
-                    const url = `subject-papers.html?subject=${encodeURIComponent(s.subject_name)}&code=${encodeURIComponent(s.subject_code)}`;
+    if (ui.searchStatus) {
+      ui.searchStatus.textContent = query
+        ? `${visible} subject${visible === 1 ? '' : 's'} found for ${query}.`
+        : `${visible} subjects available.`;
+    }
+  }
 
-                    const card = document.createElement('a');
-                    card.href = url;
-                    card.className = 'group block bg-white dark:bg-slate-800 border border-gray-200 dark:border-white/10 rounded-3xl p-5 hover:shadow-xl transition-all duration-300 card-hover';
-                    card.setAttribute('data-subject', s.subject_name);
+  async function loadSubjects() {
+    resetUi();
 
-                    card.innerHTML = `
-                        <div class="w-11 h-11 rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-black/5 dark:border-white/10"
-                             style="background: ${p.bg}; color: ${p.color};">
-                            <span class="material-symbols-outlined text-[22px]">${p.icon}</span>
-                        </div>
+    try {
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Subjects request timed out after 8 seconds.')), 8000)
+      );
 
-                        <div class="mb-5">
-                            <h3 class="text-xl font-black tracking-tight text-gray-900 dark:text-white mb-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-2">
-                                ${escHtml(s.subject_name)}
-                            </h3>
-                            <p class="font-mono text-sm text-gray-500 dark:text-gray-400">${escHtml(s.subject_code)}</p>
-                        </div>
+      const fetchPromise = supabase
+        .from('past_papers')
+        .select('id, subject_code, subject_name, year')
+        .order('subject_name', { ascending: true });
 
-                        <div class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/10">
-                            <div class="px-3 py-1 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs font-bold rounded-2xl">
-                                ${s.count} Paper${s.count !== 1 ? 's' : ''}
-                            </div>
-                            <div class="text-brand-600 dark:text-brand-400 group-hover:translate-x-1 transition-transform">
-                                <span class="material-symbols-outlined">arrow_forward</span>
-                            </div>
-                        </div>
-                    `;
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
+      if (error) throw error;
 
-                    fragment.appendChild(card);
-                });
+      ui.loading && (ui.loading.style.display = 'none');
 
-                grid.innerHTML = '';
-                grid.appendChild(fragment);
-                grid.style.display = 'grid';
+      const subjects = buildSubjects(data || []);
+      renderSubjects(subjects);
 
-                console.log('%c✅ Subjects loaded successfully!', 'color: #10b981; font-weight: bold');
+      if (ui.badge && ui.badgeText) {
+        ui.badgeText.textContent = `${subjects.length} Subject${subjects.length === 1 ? '' : 's'}`;
+        ui.badge.style.display = subjects.length ? 'inline-flex' : 'none';
+      }
 
-            } catch (err) {
-                console.error('❌ loadSubjects failed:', err);
-                showSubjectsError(err?.message || 'Something went wrong while loading subjects.');
-            } finally {
-                if (loading) loading.style.display = 'none';
-            }
-        }
+      filterSubjects();
+    } catch (error) {
+      showError(error?.message || 'Something went wrong while loading subjects.');
+    }
+  }
 
-        const filterGrid = function () {
-            const query = document.getElementById('subjectSearchInput').value.toLowerCase().trim();
-            const cards = document.querySelectorAll('#subjectsGrid a');
-            let visible = 0;
-
-            cards.forEach(card => {
-                const name = card.getAttribute('data-subject').toLowerCase();
-                const show = name.includes(query);
-                card.style.display = show ? '' : 'none';
-                if (show) visible++;
-            });
-
-            document.getElementById('noResults').style.display = (visible === 0 && cards.length > 0) ? 'block' : 'none';
-            
-            const status = document.getElementById('subjectSearchStatus');
-            if (status) {
-                status.textContent = query
-                    ? `${visible} subject${visible === 1 ? '' : 's'} found for ${query}.`
-                    : `${visible} subjects available.`;
-            }
-        };
-
-        // Apply debounce to search (now using local function)
-        const debouncedFilter = debounce(filterGrid, 150);
-        document.getElementById('subjectSearchInput').addEventListener('input', debouncedFilter);
-
-        // Load subjects
-        loadSubjects();
-    </script>
+  ui.search?.addEventListener('input', debounce(filterSubjects, 120));
+  loadSubjects();
+</script>
 
     <script type="module" src="js/layout.js"></script>
 </body>

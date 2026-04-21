@@ -44,6 +44,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function _hydrateLayout(currentPage, session, userName) {
+  _ensureMainTarget();
+  _injectSkipLink();
   _injectHeader(currentPage, session, userName);
   _injectGlobalFeedbackBox();
   _injectFooter();
@@ -86,12 +88,35 @@ function _initAOS() {
   });
 }
 
+function _ensureMainTarget() {
+  const main = document.querySelector('main');
+  if (main && !main.id) {
+    main.id = 'main-content';
+  }
+}
+
+function _injectSkipLink() {
+  if (document.getElementById('skip-to-content')) return;
+
+  const main = document.querySelector('main');
+  if (!main) return;
+  if (!main.id) main.id = 'main-content';
+
+  document.body.insertAdjacentHTML(
+    'afterbegin',
+    `<a id="skip-to-content" href="#${main.id}" class="skip-link">Skip to content</a>`
+  );
+}
+
 function _injectHeader(currentPage, session, userName) {
   const container = document.getElementById('app-header');
   if (!container && document.querySelector('header')) return;
 
   const isLoggedIn = !!session;
   const initial = userName ? userName.charAt(0).toUpperCase() : '?';
+  const isSubjectsActive = ['subjects.html', 'subject-papers.html', 'paper-view.html'].includes(currentPage);
+  const isQuizActive = currentPage === 'quiz.html';
+  const isDashboardActive = currentPage === 'dashboard.html';
 
   const html = `
     <header class="sticky top-0 z-50 transition-all duration-300 w-full">
@@ -105,9 +130,9 @@ function _injectHeader(currentPage, session, userName) {
 
           <nav class="hidden md:flex items-center bg-gray-100/50 dark:bg-black/20 rounded-full p-1 border border-gray-200/50 dark:border-white/5" aria-label="Primary">
             <a href="index.html" class="nav-link-premium px-5 py-2 text-sm font-semibold rounded-full transition-all ${currentPage === 'index.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Home</a>
-            <a href="subjects.html" class="nav-link-premium px-5 py-2 text-sm font-semibold rounded-full transition-all ${currentPage === 'subjects.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Subjects</a>
-            <a href="quiz.html" class="nav-link-premium px-5 py-2 text-sm font-semibold rounded-full transition-all ${currentPage === 'quiz.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Quiz</a>
-            <a href="about-us.html" class="nav-link-premium px-5 py-2 text-sm font-semibold rounded-full transition-all ${currentPage === 'about-us.html' ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Team</a>
+            <a href="subjects.html" class="nav-link-premium px-5 py-2 text-sm font-semibold rounded-full transition-all ${isSubjectsActive ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Subjects</a>
+            <a href="quiz.html" class="nav-link-premium px-5 py-2 text-sm font-semibold rounded-full transition-all ${isQuizActive ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Quiz</a>
+            <a href="dashboard.html" class="nav-link-premium px-5 py-2 text-sm font-semibold rounded-full transition-all ${isDashboardActive ? 'bg-white dark:bg-white/20 text-primary dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/5'}">Dashboard</a>
           </nav>
 
           <div class="flex items-center gap-2 sm:gap-3">
@@ -145,37 +170,34 @@ function _injectHeader(currentPage, session, userName) {
 
 function _injectMobileNav(currentPage) {
   if (window.innerWidth > 1024) return;
+
   const container = document.getElementById('app-mobile-nav');
   if (!container && document.getElementById('mobileBottomNav')) return;
 
+  const isSubjectsActive = ['subjects.html', 'subject-papers.html', 'paper-view.html'].includes(currentPage);
+  const isDashboardActive = currentPage === 'dashboard.html';
+
   const html = `
-    <nav
-      aria-label="Mobile navigation"
-      class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[120] w-[calc(100%-24px)] max-w-sm lg:hidden"
-    >
-      <div class="grid grid-cols-4 items-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-[28px] shadow-2xl px-2 py-2">
-        <a href="index.html"
-           class="mobile-nav-link ${currentPage === 'index.html' ? 'active' : ''}">
+    <nav id="mobileBottomNav" aria-label="Mobile navigation" class="mobile-nav-shell">
+      <div class="mobile-nav-grid">
+        <a href="index.html" class="mobile-nav-item ${currentPage === 'index.html' ? 'active' : ''}">
           <span class="material-symbols-outlined">home</span>
-          <span>Home</span>
+          <span class="label">Home</span>
         </a>
 
-        <a href="subjects.html"
-           class="mobile-nav-link ${currentPage === 'subjects.html' || currentPage === 'subject-papers.html' || currentPage === 'paper-view.html' ? 'active' : ''}">
+        <a href="subjects.html" class="mobile-nav-item ${isSubjectsActive ? 'active' : ''}">
           <span class="material-symbols-outlined">menu_book</span>
-          <span>Subjects</span>
+          <span class="label">Subjects</span>
         </a>
 
-        <a href="quiz.html"
-           class="mobile-nav-link ${currentPage === 'quiz.html' ? 'active' : ''}">
+        <a href="quiz.html" class="mobile-nav-item ${currentPage === 'quiz.html' ? 'active' : ''}">
           <span class="material-symbols-outlined">quiz</span>
-          <span>Quiz</span>
+          <span class="label">Quiz</span>
         </a>
 
-        <a href="about-us.html"
-           class="mobile-nav-link ${currentPage === 'about-us.html' ? 'active' : ''}">
-          <span class="material-symbols-outlined">groups</span>
-          <span>Team</span>
+        <a href="dashboard.html" class="mobile-nav-item ${isDashboardActive ? 'active' : ''}">
+          <span class="material-symbols-outlined">dashboard</span>
+          <span class="label">Dashboard</span>
         </a>
       </div>
     </nav>
@@ -309,8 +331,7 @@ function _wireNavButton(session) {
 }
 
 function _getSwipeRoutes() {
-  // Match the actual mobile navigation order
-  return ['index.html', 'subjects.html', 'quiz.html', 'about-us.html'];
+  return ['index.html', 'subjects.html', 'quiz.html', 'dashboard.html'];
 }
 
 function _isTouchDevice() {
@@ -449,16 +470,12 @@ function _initScrollHideNav() {
 
   const showChrome = () => {
     if (header) header.classList.remove('header-hidden');
-    if (bottomNav && bottomNav.style.display !== 'none') {
-      bottomNav.style.transform = 'translateY(0)';
-    }
+    if (bottomNav) bottomNav.classList.remove('nav-hidden');
   };
 
   const hideChrome = () => {
     if (header) header.classList.add('header-hidden');
-    if (bottomNav && bottomNav.style.display !== 'none') {
-      bottomNav.style.transform = 'translateY(calc(100% + 1rem))';
-    }
+    if (bottomNav) bottomNav.classList.add('nav-hidden');
   };
 
   showChrome();
@@ -472,24 +489,14 @@ function _initScrollHideNav() {
       const current = window.scrollY;
       const delta = current - lastScrollY;
 
-      // Always keep nav visible near the top
-      if (current < 24) {
+      if (current < 24 || _isModalOpen()) {
         showChrome();
         lastScrollY = current;
         ticking = false;
         return;
       }
 
-      // Never hide while modal is open
-      if (_isModalOpen()) {
-        showChrome();
-        lastScrollY = current;
-        ticking = false;
-        return;
-      }
-
-      // Ignore tiny scroll changes to reduce jitter
-      if (Math.abs(delta) < 12) {
+      if (Math.abs(delta) < 10) {
         ticking = false;
         return;
       }

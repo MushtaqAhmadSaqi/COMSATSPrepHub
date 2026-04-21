@@ -1,24 +1,42 @@
 import { supabase, auth, escapeHtml } from './core.js';
 
 let learningChart = null;
+let lastChartPayload = { labels: [], data: [] };
+
+const dashboardEls = {
+  currentDate: () => document.getElementById('currentDate'),
+  weakTopicsList: () => document.getElementById('weakTopicsList'),
+  recentActivityList: () => document.getElementById('recentActivityList'),
+  subjectMasteryList: () => document.getElementById('subjectMasteryList'),
+  learningChart: () => document.getElementById('learningChart'),
+  learningChartEmpty: () => document.getElementById('learningChartEmpty')
+};
 
 document.addEventListener('DOMContentLoaded', async () => {
   initDashboardDate();
+  bindThemeRefresh();
   await initDashboard();
 });
 
+function bindThemeRefresh() {
+  document.addEventListener('comsatsprephub:themechange', () => {
+    const { labels, data } = lastChartPayload;
+    renderLearningChart(labels, data).catch(error => {
+      console.error('Dashboard chart refresh failed:', error);
+    });
+  });
+}
+
 function initDashboardDate() {
-  const dateEl = document.getElementById('currentDate');
+  const dateEl = dashboardEls.currentDate();
   if (!dateEl) return;
 
-  const options = {
+  dateEl.textContent = new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric'
-  };
-
-  dateEl.textContent = new Date().toLocaleDateString('en-US', options);
+  }).format(new Date());
 }
 
 async function initDashboard() {
@@ -31,20 +49,13 @@ async function initDashboard() {
       return;
     }
 
-    const firstName =
-      user?.user_metadata?.full_name?.split(' ')[0] ||
-      user?.email?.split('@')[0] ||
-      'Student';
-
-    const fullName =
-      user?.user_metadata?.full_name ||
-      user?.email?.split('@')[0] ||
-      'Student';
+    const firstName = auth.getUserName(user);
+    const fullName = user?.user_metadata?.full_name || firstName;
 
     setText('userFirstName', firstName);
     setText(
       'welcomeSubtext',
-      `Great to have you back, ${fullName}. Keep building momentum with your quizzes and subject practice.`
+      `Great to have you back, ${fullName}. Your dashboard now reflects quiz results, studied subjects, and recent paper activity in one place.`
     );
 
     await loadDashboardData(user.id);
@@ -58,7 +69,7 @@ function setGuestFallback() {
   setText('userFirstName', 'Student');
   setText(
     'welcomeSubtext',
-    'Track your study progress, quiz performance, and subject mastery in one clean dashboard.'
+    'Track quiz scores, studied subjects, and mastery trends in one clean dashboard after you sign in.'
   );
 
   renderDashboardStats({
@@ -75,39 +86,32 @@ function setGuestFallback() {
 }
 
 async function loadDashboardData(userId) {
-  const [quizAttemptsResult, subjectProgressResult] = await Promise.allSettled([
+  const [quizAttemptsResult, subjectProgressResult, subjectsCatalogResult] = await Promise.allSettled([
     supabase
       .from('user_quiz_attempts')
-      .select('*')
+      .select('quiz_id, quiz_title, subject_code, score_percent, correct_answers, total_questions, completed_at')
       .eq('user_id', userId)
       .order('completed_at', { ascending: false }),
 
     supabase
       .from('user_subject_progress')
-      .select('*')
+      .select('subject_code, subject_name, topic_name, mastery_percent, sessions_count, updated_at')
       .eq('user_id', userId)
-      .order('updated_at', { ascending: false })
+      .order('updated_at', { ascending: false }),
+
+    supabase.from('past_papers').select('subject_code, subject_name')
   ]);
 
-  const quizAttempts =
-    quizAttemptsResult.status === 'fulfilled' && !quizAttemptsResult.value.error
-      ? quizAttemptsResult.value.data || []
-      : [];
+  const quizAttempts = getSettledRows(quizAttemptsResult);
+  const subjectProgress = getSettledRows(subjectProgressResult);
+  const subjectsCatalog = getSettledRows(subjectsCatalogResult);
 
-  const subjectProgress =
-    subjectProgressResult.status === 'fulfilled' && !subjectProgressResult.value.error
-      ? subjectProgressResult.value.data || []
-      : [];
+  logSettledError('Quiz attempts load error', quizAttemptsResult);
+  logSettledError('Subject progress load error', subjectProgressResult);
+  logSettledError('Subject catalog load error', subjectsCatalogResult);
 
-  if (quizAttemptsResult.status === 'fulfilled' && quizAttemptsResult.value.error) {
-    console.error('Quiz attempts load error:', quizAttemptsResult.value.error);
-  }
-
-  if (subjectProgressResult.status === 'fulfilled' && subjectProgressResult.value.error) {
-    console.error('Subject progress load error:', subjectProgressResult.value.error);
-  }
-
-  const stats = buildDashboardStats(quizAttempts, subjectProgress);
+  const subjectNameMap = buildSubjectNameMap(subjectsCatalog, subjectProgress);
+  const stats = buildDashboardStats({ quizAttempts, subjectProgress, subjectNameMap });
 
   renderDashboardStats(stats);
   renderWeakTopics(stats.weakTopics);
@@ -116,70 +120,134 @@ async function loadDashboardData(userId) {
   renderLearningChart(stats.chartLabels, stats.chartScores);
 }
 
-function buildDashboardStats(quizAttempts, subjectProgress) {
+function getSettledRows(result) {
+  return result.status === 'fulfilled' && !result.value.error ? result.value.data || [] : [];
+}
+
+function logSettledError(label, result) {
+  if (result.status === 'fulfilled' && result.value.error) {
+    console.error(`${label}:`, result.value.error);
+  }
+}
+
+function buildSubjectNameMap(subjectsCatalog, subjectProgress) {
+  const map = new Map();
+
+  [...subjectsCatalog, ...subjectProgress].forEach(item => {
+    const code = String(item?.subject_code || '').trim();
+    const name = String(item?.subject_name || '').trim();
+
+    if (code && name && !map.has(code)) {
+      map.set(code, name);
+    }
+  });
+
+  return map;
+}
+
+function resolveSubjectLabel(subjectCode, subjectNameMap, fallbackName = '') {
+  const code = String(subjectCode || '').trim();
+  const label = String(fallbackName || '').trim() || subjectNameMap.get(code) || code || 'Untitled Subject';
+  return { code, label };
+}
+
+function buildDashboardStats({ quizAttempts, subjectProgress, subjectNameMap }) {
   const quizCount = quizAttempts.length;
 
   const averageScore = quizCount
-    ? Math.round(
-        quizAttempts.reduce((sum, item) => sum + Number(item.score_percent || 0), 0) / quizCount
-      )
+    ? Math.round(quizAttempts.reduce((sum, item) => sum + Number(item.score_percent || 0), 0) / quizCount)
     : 0;
 
-  const subjectsStudied = new Set(
-    subjectProgress
-      .map(item => item.subject_code || item.subject_name)
-      .filter(Boolean)
-  ).size;
+  const normalizedSubjectProgress = subjectProgress.map(item => {
+    const subject = resolveSubjectLabel(item.subject_code, subjectNameMap, item.subject_name);
 
-  const studySessions = subjectProgress.reduce(
-    (sum, item) => sum + Number(item.sessions_count || 0),
-    0
-  );
-
-  const weakTopics = subjectProgress
-    .filter(item => Number(item.mastery_percent || 0) < 50)
-    .sort((a, b) => Number(a.mastery_percent || 0) - Number(b.mastery_percent || 0))
-    .slice(0, 5)
-    .map(item => ({
-      name: item.topic_name || item.subject_name || item.subject_code || 'Untitled Topic',
-      score: Number(item.mastery_percent || 0),
-      subject: item.subject_code || item.subject_name || 'Subject'
-    }));
-
-  const recentActivity = quizAttempts.slice(0, 5).map(item => ({
-    title: `Completed ${item.quiz_title || 'Quiz'}`,
-    meta: `${item.subject_code || 'Subject'} • ${Number(item.score_percent || 0)}% score`,
-    date: item.completed_at
-  }));
-
-  const masteryMap = {};
-
-  subjectProgress.forEach(item => {
-    const key = item.subject_code || item.subject_name || 'UNKNOWN';
-
-    if (!masteryMap[key]) {
-      masteryMap[key] = {
-        name: item.subject_name || item.subject_code || 'Untitled Subject',
-        code: item.subject_code || '',
-        total: 0,
-        count: 0
-      };
-    }
-
-    masteryMap[key].total += Number(item.mastery_percent || 0);
-    masteryMap[key].count += 1;
+    return {
+      ...item,
+      subject_code: subject.code,
+      subject_name: subject.label,
+      mastery_percent: Number(item.mastery_percent || 0),
+      sessions_count: Number(item.sessions_count || 0)
+    };
   });
 
-  const subjectMastery = Object.values(masteryMap)
+  const rootSubjectRows = normalizedSubjectProgress.filter(item => !item.topic_name);
+  const studyRowsForActivity = rootSubjectRows.filter(
+    item => item.sessions_count > 0 || item.mastery_percent > 0
+  );
+
+  const subjectsStudied = new Set(
+    normalizedSubjectProgress.map(item => item.subject_code || item.subject_name).filter(Boolean)
+  ).size;
+
+  const studySessions = rootSubjectRows.reduce((sum, item) => sum + item.sessions_count, 0);
+
+  const weakTopics = normalizedSubjectProgress
+    .filter(item => item.mastery_percent > 0 && item.mastery_percent < 65)
+    .sort((a, b) => a.mastery_percent - b.mastery_percent)
+    .slice(0, 5)
+    .map(item => ({
+      name: item.topic_name || item.subject_name,
+      score: item.mastery_percent,
+      subject: item.subject_code || item.subject_name
+    }));
+
+  const recentQuizActivity = quizAttempts.slice(0, 4).map(item => {
+    const subject = resolveSubjectLabel(item.subject_code, subjectNameMap);
+    const score = Number(item.score_percent || 0);
+
+    return {
+      type: 'quiz',
+      title: item.quiz_title || `${subject.label} quiz`,
+      meta: `${subject.code || subject.label} • ${score}% score`,
+      date: item.completed_at
+    };
+  });
+
+  const recentStudyActivity = studyRowsForActivity.slice(0, 4).map(item => ({
+    type: 'study',
+    title: `Studied ${item.subject_name}`,
+    meta: `${item.sessions_count} session${item.sessions_count === 1 ? '' : 's'} • ${item.mastery_percent}% mastery`,
+    date: item.updated_at
+  }));
+
+  const recentActivity = [...recentQuizActivity, ...recentStudyActivity]
+    .filter(item => item.date)
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 6);
+
+  const masteryMap = new Map();
+
+  normalizedSubjectProgress.forEach(item => {
+    const key = item.subject_code || item.subject_name;
+    if (!key) return;
+
+    if (!masteryMap.has(key)) {
+      masteryMap.set(key, {
+        name: item.subject_name,
+        code: item.subject_code,
+        total: 0,
+        count: 0,
+        sessions: 0
+      });
+    }
+
+    const existing = masteryMap.get(key);
+    existing.total += item.mastery_percent;
+    existing.count += 1;
+    existing.sessions = Math.max(existing.sessions, item.sessions_count);
+  });
+
+  const subjectMastery = [...masteryMap.values()]
     .map(item => ({
       name: item.name,
       code: item.code,
-      mastery: Math.round(item.total / item.count)
+      mastery: Math.round(item.total / item.count),
+      sessions: item.sessions
     }))
-    .sort((a, b) => b.mastery - a.mastery)
+    .sort((a, b) => (b.mastery !== a.mastery ? b.mastery - a.mastery : b.sessions - a.sessions))
     .slice(0, 6);
 
-  const chartItems = quizAttempts.slice(0, 6).reverse();
+  const chartItems = quizAttempts.slice(0, 8).reverse();
   const chartLabels = chartItems.map((item, index) => item.quiz_title || `Quiz ${index + 1}`);
   const chartScores = chartItems.map(item => Number(item.score_percent || 0));
 
@@ -204,14 +272,16 @@ function renderDashboardStats(stats) {
 }
 
 function renderWeakTopics(items) {
-  const el = document.getElementById('weakTopicsList');
+  const el = dashboardEls.weakTopicsList();
   if (!el) return;
 
   if (!items.length) {
     el.innerHTML = `
-      <p class="text-sm text-slate-500 dark:text-slate-400">
-        No weak topics yet. Complete more quizzes to detect low-performing areas.
-      </p>
+      <div class="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 px-4 py-5 bg-slate-50/70 dark:bg-slate-800/30">
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          No weak topics yet. Keep studying and completing quizzes to surface low-confidence areas.
+        </p>
+      </div>
     `;
     return;
   }
@@ -224,7 +294,7 @@ function renderWeakTopics(items) {
             <p class="font-semibold text-slate-900 dark:text-white truncate">${escapeHtml(item.name)}</p>
             <p class="text-sm text-slate-500 dark:text-slate-400 truncate">${escapeHtml(item.subject)}</p>
           </div>
-          <span class="ml-4 shrink-0 text-sm font-bold text-red-500">${item.score}%</span>
+          <span class="ml-4 shrink-0 inline-flex items-center rounded-full bg-red-50 dark:bg-red-500/10 px-2.5 py-1 text-sm font-bold text-red-600 dark:text-red-400">${item.score}%</span>
         </div>
       `
     )
@@ -232,14 +302,16 @@ function renderWeakTopics(items) {
 }
 
 function renderRecentActivity(items) {
-  const el = document.getElementById('recentActivityList');
+  const el = dashboardEls.recentActivityList();
   if (!el) return;
 
   if (!items.length) {
     el.innerHTML = `
-      <p class="text-sm text-slate-500 dark:text-slate-400">
-        No activity recorded yet. Your latest completed quizzes will appear here.
-      </p>
+      <div class="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 px-4 py-5 bg-slate-50/70 dark:bg-slate-800/30">
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          No activity recorded yet. Your latest study sessions and quiz attempts will appear here.
+        </p>
+      </div>
     `;
     return;
   }
@@ -248,9 +320,12 @@ function renderRecentActivity(items) {
     .map(
       item => `
         <div class="rounded-2xl border border-slate-200 dark:border-white/10 px-4 py-3 bg-slate-50/70 dark:bg-slate-800/40">
-          <p class="font-semibold text-slate-900 dark:text-white">${escapeHtml(item.title)}</p>
-          <p class="text-sm text-slate-500 dark:text-slate-400">${escapeHtml(item.meta)}</p>
-          <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">${formatRelativeDate(item.date)}</p>
+          <div class="flex items-center justify-between gap-3">
+            <p class="font-semibold text-slate-900 dark:text-white min-w-0 truncate">${escapeHtml(item.title)}</p>
+            <span class="shrink-0 rounded-full px-2 py-1 text-[11px] font-bold uppercase tracking-wide ${item.type === 'quiz' ? 'bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300'}">${item.type}</span>
+          </div>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">${escapeHtml(item.meta)}</p>
+          <p class="text-xs text-slate-400 dark:text-slate-500 mt-2">${formatRelativeDate(item.date)}</p>
         </div>
       `
     )
@@ -258,14 +333,16 @@ function renderRecentActivity(items) {
 }
 
 function renderSubjectMastery(items) {
-  const el = document.getElementById('subjectMasteryList');
+  const el = dashboardEls.subjectMasteryList();
   if (!el) return;
 
   if (!items.length) {
     el.innerHTML = `
-      <p class="text-sm text-slate-500 dark:text-slate-400">
-        No subject progress yet. Start studying papers or completing quizzes.
-      </p>
+      <div class="rounded-2xl border border-dashed border-slate-200 dark:border-white/10 px-4 py-5 bg-slate-50/70 dark:bg-slate-800/30">
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          No subject progress yet. Start with a paper or quiz and your mastery bars will show up here.
+        </p>
+      </div>
     `;
     return;
   }
@@ -281,7 +358,7 @@ function renderSubjectMastery(items) {
             </div>
             <span class="shrink-0 text-sm font-bold text-brand-600 dark:text-brand-400">${item.mastery}%</span>
           </div>
-          <div class="h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+          <div class="h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden" aria-hidden="true">
             <div class="h-full rounded-full bg-gradient-to-r from-sky-500 to-brand-500 transition-all duration-500" style="width:${item.mastery}%"></div>
           </div>
         </div>
@@ -291,8 +368,25 @@ function renderSubjectMastery(items) {
 }
 
 async function renderLearningChart(labels, data) {
-  const canvas = document.getElementById('learningChart');
+  lastChartPayload = { labels: [...labels], data: [...data] };
+
+  const canvas = dashboardEls.learningChart();
+  const empty = dashboardEls.learningChartEmpty();
   if (!canvas) return;
+
+  if (!labels.length || !data.length) {
+    if (learningChart) {
+      learningChart.destroy();
+      learningChart = null;
+    }
+
+    canvas.classList.add('hidden');
+    empty?.classList.remove('hidden');
+    return;
+  }
+
+  canvas.classList.remove('hidden');
+  empty?.classList.add('hidden');
 
   const { Chart } = await import('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm');
   const ctx = canvas.getContext('2d');
@@ -302,7 +396,6 @@ async function renderLearningChart(labels, data) {
   }
 
   const isDark = document.documentElement.classList.contains('dark');
-
   const borderColor = isDark ? '#38bdf8' : '#0ea5e9';
   const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.06)';
   const textColor = isDark ? '#cbd5e1' : '#64748b';
@@ -315,11 +408,11 @@ async function renderLearningChart(labels, data) {
   learningChart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: labels.length ? labels : ['No Data'],
+      labels,
       datasets: [
         {
           label: 'Score',
-          data: data.length ? data : [0],
+          data,
           borderColor,
           backgroundColor: gradient,
           fill: true,
@@ -336,13 +429,9 @@ async function renderLearningChart(labels, data) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: {
-        duration: 550
-      },
+      animation: { duration: 550 },
       plugins: {
-        legend: {
-          display: false
-        },
+        legend: { display: false },
         tooltip: {
           displayColors: false,
           backgroundColor: isDark ? 'rgba(15,23,42,0.96)' : 'rgba(255,255,255,0.98)',
@@ -350,35 +439,24 @@ async function renderLearningChart(labels, data) {
           bodyColor: isDark ? '#cbd5e1' : '#475569',
           borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.06)',
           borderWidth: 1,
-          padding: 12
+          padding: 12,
+          callbacks: {
+            label: context => `Score: ${context.parsed.y}%`
+          }
         }
       },
       scales: {
         x: {
-          grid: {
-            display: false
-          },
-          ticks: {
-            color: textColor
-          },
-          border: {
-            display: false
-          }
+          grid: { display: false },
+          ticks: { color: textColor },
+          border: { display: false }
         },
         y: {
           beginAtZero: true,
           max: 100,
-          ticks: {
-            color: textColor,
-            stepSize: 20
-          },
-          grid: {
-            color: gridColor,
-            drawTicks: false
-          },
-          border: {
-            display: false
-          }
+          ticks: { color: textColor, stepSize: 20 },
+          grid: { color: gridColor, drawTicks: false },
+          border: { display: false }
         }
       }
     }
