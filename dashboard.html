@@ -430,7 +430,17 @@
 
     <script>
         // 1. Initialize AOS Animation Library
-        AOS.init({ once: true, offset: 30, duration: 800, easing: 'ease-out-cubic' });
+        if (
+            typeof window.AOS !== 'undefined' &&
+            !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ) {
+            window.AOS.init({
+                once: true,
+                offset: 30,
+                duration: 800,
+                easing: 'ease-out-cubic'
+            });
+        }
 
         // 2. Set Current Date/Time
         const dateEl = document.getElementById('currentDate');
@@ -439,27 +449,115 @@
             dateEl.textContent = new Date().toLocaleDateString('en-US', options);
         }
 
-        // 3. Simple Profile Tooltip Toggle
+        // 3. Accessible Profile Tooltip Toggle
         const profileBadge = document.getElementById('profileBadge');
         const profileTooltip = document.getElementById('profileTooltip');
-        
-        let timeout;
-        const openTooltip = () => {
-            clearTimeout(timeout);
-            profileTooltip.classList.remove('hidden');
-            setTimeout(() => profileTooltip.classList.replace('opacity-0', 'opacity-100'), 10);
-        };
-        const closeTooltip = () => {
-            timeout = setTimeout(() => {
-                profileTooltip.classList.replace('opacity-100', 'opacity-0');
-                setTimeout(() => profileTooltip.classList.add('hidden'), 200);
-            }, 300);
-        };
 
-        profileBadge.addEventListener('mouseenter', openTooltip);
-        profileBadge.addEventListener('mouseleave', closeTooltip);
-        profileTooltip.addEventListener('mouseenter', openTooltip);
-        profileTooltip.addEventListener('mouseleave', closeTooltip);
+        if (profileBadge && profileTooltip) {
+            let closeTimer = null;
+
+            profileBadge.setAttribute('role', 'button');
+            profileBadge.setAttribute('tabindex', '0');
+            profileBadge.setAttribute('aria-haspopup', 'menu');
+            profileBadge.setAttribute('aria-expanded', 'false');
+
+            function openTooltip() {
+                window.clearTimeout(closeTimer);
+                profileTooltip.classList.remove('hidden');
+                profileBadge.setAttribute('aria-expanded', 'true');
+
+                requestAnimationFrame(() => {
+                    profileTooltip.classList.remove('opacity-0');
+                    profileTooltip.classList.add('opacity-100');
+                });
+            }
+
+            function closeTooltip({ immediate = false } = {}) {
+                window.clearTimeout(closeTimer);
+
+                const runClose = () => {
+                    profileTooltip.classList.remove('opacity-100');
+                    profileTooltip.classList.add('opacity-0');
+                    profileBadge.setAttribute('aria-expanded', 'false');
+
+                    window.setTimeout(() => {
+                        if (!profileTooltip.classList.contains('opacity-100')) {
+                            profileTooltip.classList.add('hidden');
+                        }
+                    }, 200);
+                };
+
+                if (immediate) {
+                    runClose();
+                } else {
+                    closeTimer = window.setTimeout(runClose, 180);
+                }
+            }
+
+            function toggleTooltip() {
+                const isHidden = profileTooltip.classList.contains('hidden');
+                if (isHidden) {
+                    openTooltip();
+                } else {
+                    closeTooltip({ immediate: true });
+                }
+            }
+
+            // Desktop pointer support
+            profileBadge.addEventListener('mouseenter', openTooltip);
+            profileBadge.addEventListener('mouseleave', () => closeTooltip());
+            profileTooltip.addEventListener('mouseenter', openTooltip);
+            profileTooltip.addEventListener('mouseleave', () => closeTooltip());
+
+            // Touch / click support
+            profileBadge.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleTooltip();
+            });
+
+            // Keyboard support
+            profileBadge.addEventListener('keydown', event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    toggleTooltip();
+                }
+
+                if (event.key === 'Escape') {
+                    closeTooltip({ immediate: true });
+                    profileBadge.focus();
+                }
+            });
+
+            profileTooltip.addEventListener('keydown', event => {
+                if (event.key === 'Escape') {
+                    closeTooltip({ immediate: true });
+                    profileBadge.focus();
+                }
+            });
+
+            // Outside click close
+            document.addEventListener('click', event => {
+                if (
+                    !profileTooltip.classList.contains('hidden') &&
+                    !profileTooltip.contains(event.target) &&
+                    !profileBadge.contains(event.target)
+                ) {
+                    closeTooltip({ immediate: true });
+                }
+            });
+
+            // Focus leaving both elements
+            document.addEventListener('focusin', event => {
+                if (
+                    !profileTooltip.classList.contains('hidden') &&
+                    !profileTooltip.contains(event.target) &&
+                    !profileBadge.contains(event.target)
+                ) {
+                    closeTooltip({ immediate: true });
+                }
+            });
+        }
 
         // 4. Setup Advanced Chart.js Graph
         const ctx = document.getElementById('learningChart');
