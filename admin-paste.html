@@ -158,8 +158,9 @@ CRITICAL INSTRUCTIONS FOR UI RENDERING:
 - NEWLINES: Use actual newline escape sequences (\n\n) to separate paragraphs or steps within a text field.
 - TABLES: Format tables as Markdown tables within the JSON string, ensuring newline sequences (\n) separate the rows.
 - INSTRUCTORS: If there are multiple instructors, set "instructor_name" to "Central Paper".
-- GRAPHS/CHARTS: If the question includes a graph or chart:
-   - Add a "graph" object to that question.
+- GRAPHS/CHARTS:
+   - If the graph is PART OF THE QUESTION (e.g. "Look at this graph and answer..."), put it under "graph".
+   - If the graph is PART OF THE SOLUTION (e.g. "Sketch y = -2(x+1)^2 - 3"), put it under "answer_graph" instead.
    - For MATHEMATICAL FUNCTIONS: Use type "scatter", compute AT LEAST 20 evenly-spaced {x, y} coordinate pairs covering the relevant domain, and include them in the datasets data array as objects: [{"x": -4, "y": 5}, {"x": -3, "y": -1}, ...]. Also include "xMin", "xMax", "yMin", "yMax" for proper axis scaling.
    - For BAR/PIE/LINE charts with categories: Use "labels" for categories and "data" as a plain number array.
    - For FLOWCHARTS or TREES: Use type "mermaid" with a "code" field containing Mermaid syntax.
@@ -179,11 +180,10 @@ JSON FORMAT:
       "question_number": 1,
       "clo": "CLO-1",
       "marks": 5,
-      "question_text": "Main question text goes here...",
-      "sub_parts": ["A. ...", "B. ..."],
-      "options": ["Opt 1", "Opt 2", "Opt 3", "Opt 4"],
+      "question_text": "Sketch y = -2(x+1)^2 - 3",
       "model_answer": "Step-by-step solution...",
-      "graph": { "type": "scatter", "title": "Chart Title", "datasets": [...] }
+      "graph": null,
+      "answer_graph": { "type": "scatter", "title": "y = -2(x+1)^2 - 3", "datasets": [...] }
     }
   ]
 }
@@ -262,28 +262,36 @@ JSON FORMAT:
         const DEPS = {
             mathjax: {
                 ready: false,
-                loaded: false,
+                readyPromise: null,
                 load: () => {
-                   window.MathJax = {
-                        tex: {
-                            inlineMath: [['$', '$'], ['\\(', '\\)']],
-                            displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                            processEscapes: true,
-                            processEnvironments: true,
-                            tags: 'ams'
-                        },
-                        options: {
-                            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
-                            ignoreHtmlClass: 'no-mathjax'
-                        },
-                        startup: {
-                            pageReady: () => {
-                                DEPS.mathjax.ready = true;
-                                return MathJax.startup.defaultPageReady();
+                    // expose a promise we can await
+                    DEPS.mathjax.readyPromise = new Promise((resolve) => {
+                        window.MathJax = {
+                            tex: {
+                                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                                processEscapes: true,
+                                processEnvironments: true,
+                                tags: 'ams'
+                            },
+                            options: {
+                                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+                                ignoreHtmlClass: 'no-mathjax'
+                            },
+                            startup: {
+                                pageReady: () => {
+                                    return MathJax.startup.defaultPageReady().then(() => {
+                                        DEPS.mathjax.ready = true;
+                                        resolve();
+                                    });
+                                }
                             }
-                        }
-                    };
-                    return importScript('https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js', 'MathJax-script');
+                        };
+                    });
+                    return importScript(
+                        'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js',
+                        'MathJax-script'
+                    ).then(() => DEPS.mathjax.readyPromise);
                 }
             },
             marked: {
@@ -323,10 +331,11 @@ JSON FORMAT:
             const hasMath = JSON.stringify(data).includes('$');
             if (hasMath) promises.push(DEPS.mathjax.load());
             
-            const hasGraphs = data.questions.some(q => q.graph);
-            if (hasGraphs) {
-                const hasMermaid = data.questions.some(q => q.graph?.type === 'mermaid');
-                const hasChart = data.questions.some(q => q.graph && q.graph.type !== 'mermaid');
+            // Check BOTH question-side and answer-side graphs
+            const allGraphs = data.questions.flatMap(q => [q.graph, q.answer_graph].filter(Boolean));
+            if (allGraphs.length) {
+                const hasMermaid = allGraphs.some(g => g.type === 'mermaid');
+                const hasChart = allGraphs.some(g => g.type !== 'mermaid');
                 if (hasMermaid) promises.push(DEPS.mermaid.load());
                 if (hasChart) promises.push(DEPS.chartjs.load());
             }
@@ -487,7 +496,8 @@ JSON FORMAT:
                     model_answer: q.model_answer ?? null,
                     sub_parts: q.sub_parts ?? null,
                     options: q.options ?? null,
-                    graph: q.graph ?? null
+                    graph: q.graph ?? null,
+                    answer_graph: q.answer_graph ?? null
                 }));
 
                 const { error: qErr } = await supabase.from('questions').insert(questionsPayload);
@@ -569,6 +579,7 @@ JSON FORMAT:
         function initializeCharts() {
             if (!window.Chart) return;
             document.querySelectorAll('canvas[data-chart]').forEach(canvas => {
+                if (canvas.dataset.chartInit === '1') return; // skip already drawn
                 try {
                     const config = JSON.parse(canvas.getAttribute('data-chart'));
                     if (config.type === 'scatter' || config._isFunction) {
@@ -577,6 +588,7 @@ JSON FORMAT:
                         delete config._xMin; delete config._xMax; delete config._yMin; delete config._yMax; delete config._isFunction;
                     }
                     new Chart(canvas, config);
+                    canvas.dataset.chartInit = '1';
                 } catch (e) { console.error('Chart init error:', e); }
             });
         }
@@ -595,12 +607,15 @@ JSON FORMAT:
                         <span class="text-slate-400 text-[10px] font-bold">${q.marks} Marks</span>
                     </div>
                     <div class="question-prose text-[15px] dark:text-gray-300">${formatMarkdown(q.question_text)}</div>
-                    ${q.graph ? renderGraph(q.graph, `chart_${i}_${cIdx++}`) : ''}
+                    ${q.graph ? renderGraph(q.graph, `qchart_${i}_${cIdx++}`) : ''}
                     ${q.sub_parts?.length ? `<div class="mt-4 pl-4 border-l-2 border-blue-500 space-y-3 font-medium">${q.sub_parts.map(sp => `<div>${formatMarkdown(sp)}</div>`).join('')}</div>` : ''}
-                    ${q.model_answer ? `
+                    ${(q.model_answer || q.answer_graph) ? `
                     <details class="mt-4">
                         <summary class="cursor-pointer text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-2 rounded-lg">View Solution</summary>
-                        <div class="mt-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg text-[14px] leading-relaxed">${formatMarkdown(q.model_answer)}</div>
+                        <div class="mt-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg text-[14px] leading-relaxed">
+                            ${q.model_answer ? formatMarkdown(q.model_answer) : ''}
+                            ${q.answer_graph ? renderGraph(q.answer_graph, `achart_${i}_${cIdx++}`) : ''}
+                        </div>
                     </details>` : ''}
                 </div>
             `).join('');
@@ -609,14 +624,45 @@ JSON FORMAT:
             uploadBtn.classList.remove('hidden');
             exportBtn.classList.remove('hidden');
 
-            requestAnimationFrame(() => {
+            requestAnimationFrame(async () => {
                 initializeCharts();
                 if (DEPS.mermaid.ready) mermaid.run();
-                if (window.MathJax) MathJax.typesetPromise([document.getElementById('qList')]);
+
+                // Wait until MathJax is actually ready before typesetting
+                if (DEPS.mathjax.readyPromise) {
+                    await DEPS.mathjax.readyPromise;
+                }
                 
-                document.querySelectorAll('details').forEach(d => {
-                    d.addEventListener('toggle', () => {
-                        if (d.open && window.MathJax) MathJax.typesetPromise([d]);
+                if (window.MathJax?.typesetPromise) {
+                    try {
+                        await MathJax.typesetPromise([document.getElementById('qList')]);
+                    } catch (e) {
+                        console.error('MathJax typeset error:', e);
+                    }
+                }
+                
+                document.querySelectorAll('details').forEach(det => {
+                    det.addEventListener('toggle', async () => {
+                        if (!det.open) return;
+
+                        // 1) Typeset math inside the opened panel
+                        if (window.MathJax?.typesetPromise) {
+                            // Clear any prior typeset in this subtree so it re-renders cleanly
+                            if (MathJax.typesetClear) MathJax.typesetClear([det]);
+                            try {
+                                await MathJax.typesetPromise([det]);
+                            } catch (e) {
+                                console.error('MathJax toggle typeset error:', e);
+                            }
+                        }
+
+                        // 2) Initialize any answer-graph canvases that haven't been drawn yet
+                        initializeCharts(); // call again; existing ones are skipped via attribute
+
+                        // 3) Render any mermaid inside the panel
+                        if (DEPS.mermaid.ready) {
+                            det.querySelectorAll('.mermaid:not([data-processed])').forEach(() => mermaid.run({ nodes: det.querySelectorAll('.mermaid') }));
+                        }
                     });
                 });
             });
@@ -641,30 +687,4 @@ JSON FORMAT:
         }
     </script>
 </body>
-</html>
--sm leading-relaxed border transition-all';
-            box.classList.remove('hidden');
-            box.classList.add(...toneClasses);
-            box.innerHTML = html;
-        }
-
-        function hideStatus() {
-            const box = document.getElementById('statusBox');
-            if (!box) return;
-
-            box.classList.add('hidden');
-            box.innerHTML = '';
-        }
-
-        function resetBtn(btn) {
-            if (!btn) return;
-
-            btn.disabled = false;
-            btn.innerHTML = '🚀 Upload to Database';
-            btn.classList.replace('from-emerald-600', 'from-blue-600');
-            btn.classList.replace('to-emerald-600', 'to-indigo-600');
-        }
-    </script>
-</body>
-
 </html>

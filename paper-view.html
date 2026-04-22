@@ -254,15 +254,42 @@
                 return new Promise((resolve, reject) => {
                     if (dep.isMathJax && !window.MathJax) {
                         window.MathJax = {
-                            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
-                            options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+                            tex: { 
+                                inlineMath: [['$', '$'], ['\\(', '\\)']], 
+                                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                                processEscapes: true,
+                                processEnvironments: true,
+                                tags: 'ams'
+                            },
+                            options: { 
+                                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+                                ignoreHtmlClass: 'no-mathjax'
+                            },
+                            startup: {
+                                pageReady: () => {
+                                    return MathJax.startup.defaultPageReady().then(() => {
+                                        window.MathJax.ready = true;
+                                        if (window.MathJax.resolveReady) window.MathJax.resolveReady();
+                                        resolve();
+                                    });
+                                }
+                            }
                         };
+                        window.MathJax.readyPromise = new Promise(res => {
+                            window.MathJax.resolveReady = res;
+                        });
                     }
                     const script = document.createElement('script');
                     script.id = dep.id;
                     script.src = dep.src;
                     script.async = true;
-                    script.onload = resolve;
+                    script.onload = () => {
+                        if (dep.isMathJax) {
+                            window.MathJax.readyPromise.then(resolve);
+                        } else {
+                            resolve();
+                        }
+                    };
                     script.onerror = reject;
                     document.head.appendChild(script);
                 });
@@ -616,11 +643,14 @@
         function initializeCharts() {
             const isDark = document.documentElement.classList.contains('dark');
             document.querySelectorAll('canvas[data-chart]').forEach(canvas => {
+                if (canvas.dataset.chartInit === '1') return; // skip already drawn
                 try {
                     const config = JSON.parse(canvas.getAttribute('data-chart'));
                     
                     // Theme-aware defaults
-                    Chart.defaults.color = isDark ? '#94a3b8' : '#64748b';
+                    if (window.Chart) {
+                        Chart.defaults.color = isDark ? '#94a3b8' : '#64748b';
+                    }
                     
                     if (config.type === 'scatter' || config._isFunction) {
                         config.data.datasets.forEach(ds => {
@@ -648,6 +678,7 @@
                     config.options.responsive = true;
                     config.options.plugins = config.options.plugins || { legend: { position: 'bottom' } };
                     new Chart(canvas, config);
+                    canvas.dataset.chartInit = '1';
                 } catch (e) {
                     logger.error('Chart init error', e);
                 }
@@ -683,8 +714,9 @@
                 `;
                 qNav.appendChild(navLink);
 
-                // ── Graph/Diagram ──
-                const graphHtml = q.graph ? renderGraph(q.graph, `chart_pv_${chartCounter++}`) : '';
+                // ── Graphs ──
+                const qGraphHtml = q.graph ? renderGraph(q.graph, `qchart_pv_${chartCounter++}`) : '';
+                const aGraphHtml = q.answer_graph ? renderGraph(q.answer_graph, `achart_pv_${chartCounter++}`) : '';
 
                 // ── Question card ──
                 const card = document.createElement('section');
@@ -725,7 +757,7 @@
                             ${q.sub_parts.map(sp => `<div class="prose dark:prose-invert max-w-none text-[15.5px] leading-relaxed text-slate-700 dark:text-gray-300">${formatMarkdown(sp)}</div>`).join('')}
                         </div>` : ''}
                         
-                        ${graphHtml}
+                        ${qGraphHtml}
                         
                         <!-- Model Answer -->
                         <div id="model-${q.id}" class="hidden mt-8 transition-all">
@@ -735,7 +767,9 @@
                                     <span class="font-black text-[11px] text-emerald-700 dark:text-emerald-300 uppercase tracking-widest">Model Answer</span>
                                 </div>
                                 <div class="prose dark:prose-invert max-w-none text-[15.5px] leading-relaxed text-slate-800 dark:text-gray-200">
-                                    ${q.model_answer ? formatMarkdown(q.model_answer) : '<em class="text-slate-400">No model answer available.</em>'}
+                                    ${q.model_answer ? formatMarkdown(q.model_answer) : ''}
+                                    ${aGraphHtml}
+                                    ${(!q.model_answer && !q.answer_graph) ? '<em class="text-slate-400">No model answer available.</em>' : ''}
                                 </div>
                             </div>
                         </div>
@@ -775,13 +809,14 @@
             requestAnimationFrame(async () => {
                 const deferredDeps = [];
                 
-                // Detect math in questions
+                // Detect math and graphs in questions/answers
+                const allGraphs = questions.flatMap(q => [q.graph, q.answer_graph].filter(Boolean));
+                const hasGraphs = allGraphs.length > 0;
+                const hasMermaid = allGraphs.some(g => g.type === 'mermaid');
+                const hasCharts = allGraphs.some(g => g.type !== 'mermaid');
+                
                 const fullText = questions.map(q => (q.question_text || '') + (q.model_answer || '') + (q.sub_parts?.join('') || '')).join(' ');
                 const hasMath = fullText.includes('$') || fullText.includes('\\(') || fullText.includes('\\[');
-                
-                if (hasMath) deferredDeps.push(MATH_DEPENDENCY);
-                if (hasCharts) deferredDeps.push({ id: 'chart-js', src: 'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js' });
-                if (hasMermaid) deferredDeps.push({ id: 'mermaid-js', src: 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js' });
                 
                 if (deferredDeps.length) {
                     await loadDependencies(deferredDeps);
@@ -790,7 +825,14 @@
                 if (hasCharts && window.Chart) initializeCharts();
                 if (hasMermaid && window.mermaid) initializeMermaidDiagrams();
                 if (hasMath && window.MathJax) {
-                    MathJax.typesetPromise([container]).catch(err => logger.error('MathJax render failed', err));
+                    if (window.MathJax.readyPromise) await window.MathJax.readyPromise;
+                    if (window.MathJax.typesetPromise) {
+                        try {
+                            await MathJax.typesetPromise([container]);
+                        } catch (err) {
+                            logger.error('MathJax render failed', err);
+                        }
+                    }
                 }
                 if (typeof autoHideProgressBar === 'function') autoHideProgressBar();
             });
@@ -821,7 +863,19 @@
                 btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">check_circle</span> Submitted`;
 
                 // Trigger MathJax on newly visible model answer
-                if (window.MathJax) MathJax.typesetPromise([model]).catch(err => logger.error('MathJax model render failed', err));
+                if (window.MathJax?.typesetPromise) {
+                    // Clear prior typeset in this subtree to ensure fresh render
+                    if (MathJax.typesetClear) MathJax.typesetClear([model]);
+                    MathJax.typesetPromise([model]).catch(err => logger.error('MathJax model render failed', err));
+                }
+
+                // Initialize any answer-graph canvases that haven't been drawn yet
+                if (window.Chart) initializeCharts();
+
+                // Render any mermaid inside the panel
+                if (window.mermaid) {
+                    model.querySelectorAll('.mermaid:not([data-processed])').forEach(() => mermaid.run({ nodes: model.querySelectorAll('.mermaid') }));
+                }
 
                 // Smooth scroll to model answer
                 model.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
