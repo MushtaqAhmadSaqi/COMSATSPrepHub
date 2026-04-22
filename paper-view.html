@@ -240,19 +240,13 @@
         import { logger } from './js/logger.js';
         import { ensureSubjectTracked, addSubjectMastery } from './js/progress-service.js';
 
-        // ── Dependency Loader ──────────────────────
-        const CORE_DEPENDENCIES = [
-            { id: 'marked-js', src: 'https://cdn.jsdelivr.net/npm/marked/marked.min.js' }
-        ];
-
-        const MATH_DEPENDENCY = { id: 'mathjax-js', src: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js', isMathJax: true };
-
-        async function loadDependencies(deps = CORE_DEPENDENCIES) {
-            const promises = deps.map(dep => {
-                if (document.getElementById(dep.id)) return Promise.resolve();
-                
-                return new Promise((resolve, reject) => {
-                    if (dep.isMathJax && !window.MathJax) {
+        const DEPS = {
+            mathjax: {
+                ready: false,
+                readyPromise: null,
+                load: () => {
+                    if (DEPS.mathjax.readyPromise) return DEPS.mathjax.readyPromise;
+                    DEPS.mathjax.readyPromise = new Promise((resolve) => {
                         window.MathJax = {
                             tex: { 
                                 inlineMath: [['$', '$'], ['\\(', '\\)']], 
@@ -268,37 +262,46 @@
                             startup: {
                                 pageReady: () => {
                                     return MathJax.startup.defaultPageReady().then(() => {
-                                        window.MathJax.ready = true;
-                                        if (window.MathJax.resolveReady) window.MathJax.resolveReady();
+                                        DEPS.mathjax.ready = true;
                                         resolve();
                                     });
                                 }
                             }
                         };
-                        window.MathJax.readyPromise = new Promise(res => {
-                            window.MathJax.resolveReady = res;
-                        });
+                    });
+                    return importScript('https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js', 'mathjax-js')
+                        .then(() => DEPS.mathjax.readyPromise);
+                }
+            },
+            marked: {
+                load: () => importScript('https://cdn.jsdelivr.net/npm/marked/marked.min.js', 'marked-js')
+            },
+            chartjs: {
+                load: () => importScript('https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js', 'chart-js')
+            },
+            mermaid: {
+                ready: false,
+                load: async () => {
+                    await importScript('https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js', 'mermaid-js');
+                    if (window.mermaid) {
+                        mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict' });
+                        DEPS.mermaid.ready = true;
                     }
-                    const script = document.createElement('script');
-                    script.id = dep.id;
-                    script.src = dep.src;
-                    script.async = true;
-                    script.onload = () => {
-                        if (dep.isMathJax) {
-                            window.MathJax.readyPromise.then(resolve);
-                        } else {
-                            resolve();
-                        }
-                    };
-                    script.onerror = reject;
-                    document.head.appendChild(script);
-                });
-            });
-            await Promise.all(promises);
-            // Initialize Mermaid after load
-            if (deps.some(dep => dep.id === 'mermaid-js') && window.mermaid) {
-                mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'strict' });
+                }
             }
+        };
+
+        function importScript(src, id) {
+            return new Promise((resolve, reject) => {
+                if (document.getElementById(id)) return resolve();
+                const script = document.createElement('script');
+                script.id = id;
+                script.src = src;
+                script.async = true;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
         }
 
         // Initialize Mermaid (deferred)
@@ -413,7 +416,6 @@
             console.log('[Paper-View] loadPaper started');
             try {
                 // Parallel: dependencies + paper query
-                const depPromise = loadDependencies();
                 hidePaperError();
 
                 const timeoutPromise = new Promise((_, reject) =>
@@ -504,7 +506,7 @@
                 
                 document.getElementById('progressWrap').style.display = '';
                 updateProgress();
-                renderQuestions(questions);
+                await renderQuestions(questions);
 
             } catch (err) {
                 console.error('[Paper-View] Load error:', err);
@@ -694,12 +696,27 @@
         }
 
         // ── Render Questions ──────────────────────────
-        function renderQuestions(questions) {
+        async function renderQuestions(questions) {
             const container = document.getElementById('questionsContainer');
             container.classList.remove('hidden');
             const qNav = document.getElementById('qNav');
 
             let chartCounter = 0;
+
+            const promises = [DEPS.marked.load()];
+            const allGraphs = questions.flatMap(q => [q.graph, q.answer_graph].filter(Boolean));
+            const hasGraphs = allGraphs.length > 0;
+            const hasMermaid = allGraphs.some(g => g.type === 'mermaid');
+            const hasCharts = allGraphs.some(g => g.type !== 'mermaid');
+            
+            const fullText = questions.map(q => (q.question_text || '') + (q.model_answer || '') + (q.sub_parts?.join('') || '')).join(' ');
+            const hasMath = fullText.includes('$') || fullText.includes('\\(') || fullText.includes('\\[');
+
+            if (hasMath) promises.push(DEPS.mathjax.load());
+            if (hasCharts) promises.push(DEPS.chartjs.load());
+            if (hasMermaid) promises.push(DEPS.mermaid.load());
+
+            await Promise.all(promises);
 
             questions.forEach((q) => {
                 // ── Sidebar question nav link ──
@@ -802,36 +819,16 @@
                 container.appendChild(card);
             });
 
-            const hasGraphs = questions.some(q => !!q.graph);
-            const hasMermaid = questions.some(q => q.graph?.type === 'mermaid');
-            const hasCharts = questions.some(q => q.graph && q.graph.type !== 'mermaid');
-
             requestAnimationFrame(async () => {
-                const deferredDeps = [];
-                
-                // Detect math and graphs in questions/answers
-                const allGraphs = questions.flatMap(q => [q.graph, q.answer_graph].filter(Boolean));
-                const hasGraphs = allGraphs.length > 0;
-                const hasMermaid = allGraphs.some(g => g.type === 'mermaid');
-                const hasCharts = allGraphs.some(g => g.type !== 'mermaid');
-                
-                const fullText = questions.map(q => (q.question_text || '') + (q.model_answer || '') + (q.sub_parts?.join('') || '')).join(' ');
-                const hasMath = fullText.includes('$') || fullText.includes('\\(') || fullText.includes('\\[');
-                
-                if (deferredDeps.length) {
-                    await loadDependencies(deferredDeps);
-                }
-
                 if (hasCharts && window.Chart) initializeCharts();
-                if (hasMermaid && window.mermaid) initializeMermaidDiagrams();
-                if (hasMath && window.MathJax) {
-                    if (window.MathJax.readyPromise) await window.MathJax.readyPromise;
-                    if (window.MathJax.typesetPromise) {
-                        try {
-                            await MathJax.typesetPromise([container]);
-                        } catch (err) {
-                            logger.error('MathJax render failed', err);
-                        }
+                if (hasMermaid && DEPS.mermaid.ready) await initializeMermaidDiagrams();
+                if (hasMath && window.MathJax?.typesetPromise) {
+                    try {
+                        // Ensure we are truly ready before typesetting
+                        if (DEPS.mathjax.readyPromise) await DEPS.mathjax.readyPromise;
+                        await MathJax.typesetPromise([container]);
+                    } catch (err) {
+                        logger.error('MathJax render failed', err);
                     }
                 }
                 if (typeof autoHideProgressBar === 'function') autoHideProgressBar();
@@ -1090,14 +1087,15 @@ body { font-family: Arial, sans-serif; padding: 28px; line-height: 1.55; color: 
 .q-box { margin: 0 0 24px 0; padding: 18px; border: 1px solid #e5e7eb; border-radius: 12px; page-break-inside: avoid; }
 .q-meta { margin: 0 0 10px 0; font-weight: bold; color: #0f172a; }
 .model-ans { margin-top: 16px; padding: 14px; border-radius: 10px; background: #f8fafc; border-left: 4px solid #0ea5e9; }
-</style>
-</head>
+<` + `/style>
+<` + `/head>
 <body>
 <div class="paper-head">
 <h1>${escapeHtml(globalPaper.subject_name)}</h1>
 <h3>${escapeHtml(globalPaper.exam_type)} ${globalPaper.year}</h3>
 <p><b>Instructor:</b> ${escapeHtml(globalPaper.instructor_name || '—')} &nbsp;|&nbsp; <b>Code:</b> ${escapeHtml(globalPaper.subject_code)} &nbsp;|&nbsp; <b>Total Marks:</b> ${globalPaper.total_marks}</p>
 </div>`;
+
 
                 for (const q of globalQuestions) {
                     const qText = await formatContentAsync(q.question_text);
@@ -1111,7 +1109,7 @@ body { font-family: Arial, sans-serif; padding: 28px; line-height: 1.55; color: 
                     </div>`;
                 }
 
-                html += '</body></html>';
+                html += '<' + '/body><' + '/html>';
 
                 const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
                 const url = URL.createObjectURL(blob);
