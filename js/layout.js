@@ -143,18 +143,39 @@ function _injectHeader(currentPage, session, userName) {
               <span class="dark-mode-icon block w-5 h-5 flex items-center justify-center" aria-hidden="true"></span>
             </button>
 
-            <button id="open-auth-modal"
-                    class="flex items-center gap-2 bg-blue-600 dark:bg-white hover:bg-blue-700 dark:hover:bg-gray-100 text-white dark:text-[#1e1e2e] px-3 sm:px-5 py-2.5 sm:py-3 rounded-full text-xs font-bold transition-all active:scale-95 shadow-md"
-                    type="button"
-                    aria-label="${isLoggedIn ? 'Open dashboard' : 'Open sign in dialog'}">
-              ${isLoggedIn ? `
-                <div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-[10px] text-white font-black" aria-hidden="true">${initial}</div>
-                <span class="hidden sm:inline">Dashboard</span>
-              ` : `
+            ${isLoggedIn ? `
+              <div class="relative">
+                <button id="open-auth-modal"
+                        class="flex items-center justify-center w-11 h-11 rounded-full bg-blue-600 dark:bg-white hover:bg-blue-700 dark:hover:bg-gray-100 text-white dark:text-[#1e1e2e] transition-all active:scale-95 shadow-md"
+                        type="button"
+                        aria-label="Dashboard menu"
+                        aria-haspopup="true"
+                        aria-expanded="false">
+                  <span class="text-sm font-black">${initial}</span>
+                </button>
+                <div id="dashboard-dropdown" 
+                     class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-gray-200 dark:border-white/10 py-2 z-50">
+                  <a href="dashboard.html"
+                     class="block px-4 py-3 text-sm font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">dashboard</span>
+                    Dashboard
+                  </a>
+                  <button id="logout-btn"
+                          class="w-full text-left px-4 py-3 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">logout</span>
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            ` : `
+              <button id="open-auth-modal"
+                      class="flex items-center gap-2 bg-blue-600 dark:bg-white hover:bg-blue-700 dark:hover:bg-gray-100 text-white dark:text-[#1e1e2e] px-3 sm:px-5 py-2.5 sm:py-3 rounded-full text-xs font-bold transition-all active:scale-95 shadow-md"
+                      type="button"
+                      aria-label="Open sign in dialog">
                 <span class="material-symbols-outlined text-[18px]" aria-hidden="true">person</span>
                 <span class="hidden sm:inline">Sign In</span>
-              `}
-            </button>
+              </button>
+            `}
           </div>
         </div>
       </div>
@@ -298,7 +319,7 @@ function _injectFooter() {
   if (!container && document.querySelector('footer')) return;
 
   const html = `
-    <footer class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-100 dark:border-white/5 py-4 px-4 sm:px-6 transition-colors duration-300 rounded-t-[1.5rem] mt-auto pb-24 lg:pb-4">
+    <footer class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-gray-100 dark:border-white/5 py-6 px-4 sm:px-6 transition-colors duration-300 rounded-t-[1.5rem]">
       <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
         <div class="space-y-0">
           <div class="font-black text-sm tracking-tight text-[#1a1a2e] dark:text-white">COMSATSPrepHub</div>
@@ -328,9 +349,39 @@ function _wireNavButton(session) {
   if (!button) return;
 
   if (session) {
-    button.addEventListener('click', () => {
-      window.location.href = 'dashboard.html';
+    // Toggle dropdown on click
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      const dropdown = document.getElementById('dashboard-dropdown');
+      if (dropdown) {
+        dropdown.classList.toggle('hidden');
+        button.setAttribute('aria-expanded', button.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+      }
     });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('dashboard-dropdown');
+      if (dropdown && !dropdown.contains(e.target) && e.target !== button && !button.contains(e.target)) {
+        dropdown.classList.add('hidden');
+        button.setAttribute('aria-expanded', 'false');
+      }
+    });
+    
+    // Handle logout
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+          await auth.signOut();
+          window.location.href = 'index.html';
+        } catch (error) {
+          console.error('Logout failed:', error);
+          window.location.href = 'index.html';
+        }
+      });
+    }
   } else {
     button.addEventListener('click', event => {
       event.preventDefault();

@@ -93,6 +93,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+main {
+  flex: 1;
+}
+
+footer {
+  margin-top: auto;
+}
+
 img {
   max-width: 100%;
 }
