@@ -15,11 +15,12 @@
     -webkit-backdrop-filter: blur(8px);
     z-index: 1000;
     display: none !important; /* Managed by JS */
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 16px;
+    padding: 24px 16px;
     opacity: 0;
     pointer-events: none;
+    overflow-y: auto;
     transition: opacity 0.35s ease;
 }
 
@@ -42,7 +43,7 @@
 .auth-modal {
     width: 100%;
     max-width: 900px;
-    max-height: 95vh;
+    max-height: calc(100vh - 48px);
     border-radius: 20px;
     overflow: hidden;
     position: relative;
@@ -86,7 +87,7 @@
 /* ── PANEL LAYOUT ── */
 .am-panel {
     display: flex;
-    min-height: 520px;
+    min-height: 0;
 }
 
 /* ── SIDE PANEL (LEFT BRANDED HALF) ── */
@@ -244,6 +245,7 @@
     align-items: center;
     justify-content: center;
     padding: 32px 24px;
+    min-height: 0;
     overflow-y: auto;
 }
 
@@ -530,6 +532,40 @@
 
 /* ── SCROLLBAR HIDE ── */
 .auth-modal::-webkit-scrollbar { width: 0; }
+
+@media (max-height: 780px) {
+    .auth-modal-overlay {
+        align-items: flex-start;
+    }
+
+    .auth-modal {
+        max-height: calc(100vh - 24px);
+    }
+
+    .am-form-panel {
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 767px) {
+    .auth-modal-overlay {
+        padding: 12px;
+    }
+
+    .auth-modal {
+        max-height: calc(100vh - 24px);
+        border-radius: 16px;
+    }
+
+    .am-form-panel {
+        padding: 24px 18px;
+        align-items: flex-start;
+    }
+
+    .am-wrap {
+        max-width: 100%;
+    }
+}
 
 /* ── SIGN IN NAV BUTTON ── */
 .btn-signin-nav {
