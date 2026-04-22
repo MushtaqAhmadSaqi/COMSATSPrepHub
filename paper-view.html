@@ -63,7 +63,55 @@
         max-width: 100%;
         height: auto;
       }
+
+      /* Spacing inside question + answer prose blocks */
+      .question-prose p,
+      .question-prose li {
+          margin: 0.55rem 0;           /* space between paragraphs / list items */
+          line-height: 1.75;            /* comfortable reading height */
+      }
+
+      .question-prose br {
+          display: block;
+          content: "";
+          margin-top: 0.5rem;           /* space when marked emits <br> */
+      }
+
+      .question-prose h1,
+      .question-prose h2,
+      .question-prose h3,
+      .question-prose strong {
+          display: inline-block;
+          margin-top: 0.4rem;
+      }
+
+      /* Display equations get their own breathing room */
+      .question-prose mjx-container[display="true"] {
+          margin: 1rem 0 !important;
+      }
+
+      /* The solution panel — make every direct child breathe */
+      .solution-prose > * + * {
+          margin-top: 0.75rem;          /* stacks vertical rhythm between blocks */
+      }
+
+      .solution-prose p {
+          margin: 0.6rem 0;
+          line-height: 1.8;
+      }
+
+      .solution-prose mjx-container[display="true"] {
+          margin: 1.1rem 0 !important;
+      }
+
+      .solution-prose hr {
+          border: 0;
+          border-top: 1px dashed #cbd5e1;
+          margin: 1.25rem 0;
+      }
+      .dark .solution-prose hr { border-top-color: #334155; }
     </style>
+
 </head>
 
 <body class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300 antialiased min-h-screen">
@@ -565,11 +613,14 @@
         // ══════════════════════════════════════════════
         function formatMarkdown(text) {
             if (!text || typeof text !== 'string') return '';
+            
+            // 🔸 Split step headers onto their own paragraph
+            let processed = text
+                .replace(/\n(?!\n)/g, '\n\n')                                // single \n → \n\n
+                .replace(/(Step\s*\d+[:.])/gi, '\n\n---\n\n**$1**\n\n')       // Add separator + bold Step
+                .replace(/(Left-hand derivative:|Right-hand derivative:|Conclusion:|Claim:|Counter-Example:)/gi, '\n\n**$1**\n\n');
 
-            // ←←← NEW: First normalize the smashed model answer
-            let processed = text.includes('Letu') || text.includes('Differentiatebothsides') 
-                            ? normalizeModelAnswer(text) 
-                            : text;
+            processed = processed.includes('Letu') || processed.includes('Differentiatebothsides') ? normalizeModelAnswer(processed) : processed;
 
             const mathBlocks = [];
             let counter = 0;
@@ -765,14 +816,16 @@
 
                     <!-- Question Body -->
                     <div class="p-6 sm:p-8">
-                        <div class="prose dark:prose-invert max-w-none text-[15.5px] leading-relaxed text-slate-800 dark:text-gray-200">
+                        <div class="question-prose prose dark:prose-invert max-w-none text-[15.5px] leading-relaxed text-slate-800 dark:text-gray-200">
                             ${formatMarkdown(q.question_text)}
                         </div>
 
+
                         ${q.sub_parts && q.sub_parts.length ? `
                         <div class="mt-6 space-y-6 pl-5 border-l-[3px] border-brand-200/50">
-                            ${q.sub_parts.map(sp => `<div class="prose dark:prose-invert max-w-none text-[15.5px] leading-relaxed text-slate-700 dark:text-gray-300">${formatMarkdown(sp)}</div>`).join('')}
+                            ${q.sub_parts.map(sp => `<div class="question-prose prose dark:prose-invert max-w-none text-[15.5px] leading-relaxed text-slate-700 dark:text-gray-300">${formatMarkdown(sp)}</div>`).join('')}
                         </div>` : ''}
+
                         
                         ${qGraphHtml}
                         
@@ -783,11 +836,12 @@
                                     <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">auto_awesome</span>
                                     <span class="font-black text-[11px] text-emerald-700 dark:text-emerald-300 uppercase tracking-widest">Model Answer</span>
                                 </div>
-                                <div class="prose dark:prose-invert max-w-none text-[15.5px] leading-relaxed text-slate-800 dark:text-gray-200">
+                                <div class="solution-prose question-prose prose dark:prose-invert max-w-none text-[15.5px] leading-loose space-y-3 text-slate-800 dark:text-gray-200">
                                     ${q.model_answer ? formatMarkdown(q.model_answer) : ''}
                                     ${aGraphHtml}
                                     ${(!q.model_answer && !q.answer_graph) ? '<em class="text-slate-400">No model answer available.</em>' : ''}
                                 </div>
+
                             </div>
                         </div>
                     </div>

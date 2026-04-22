@@ -129,7 +129,55 @@
             background: #334155 !important;
             color: #f472b6 !important;
         }
+
+        /* Spacing inside question + answer prose blocks */
+        .question-prose p,
+        .question-prose li {
+            margin: 0.55rem 0;           /* space between paragraphs / list items */
+            line-height: 1.75;            /* comfortable reading height */
+        }
+
+        .question-prose br {
+            display: block;
+            content: "";
+            margin-top: 0.5rem;           /* space when marked emits <br> */
+        }
+
+        .question-prose h1,
+        .question-prose h2,
+        .question-prose h3,
+        .question-prose strong {
+            display: inline-block;
+            margin-top: 0.4rem;
+        }
+
+        /* Display equations get their own breathing room */
+        .question-prose mjx-container[display="true"] {
+            margin: 1rem 0 !important;
+        }
+
+        /* The solution panel — make every direct child breathe */
+        .solution-prose > * + * {
+            margin-top: 0.75rem;          /* stacks vertical rhythm between blocks */
+        }
+
+        .solution-prose p {
+            margin: 0.6rem 0;
+            line-height: 1.8;
+        }
+
+        .solution-prose mjx-container[display="true"] {
+            margin: 1.1rem 0 !important;
+        }
+
+        .solution-prose hr {
+            border: 0;
+            border-top: 1px dashed #cbd5e1;
+            margin: 1.25rem 0;
+        }
+        .dark .solution-prose hr { border-top-color: #334155; }
     </style>
+
 </head>
 
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-gray-100 font-sans min-h-screen transition-colors duration-300">
@@ -552,18 +600,26 @@ JSON FORMAT:
 
         function formatMarkdown(text) {
             if (!text || typeof text !== 'string') return '';
-            let processed = text.includes('Letu') || text.includes('Differentiatebothsides') ? normalizeModelAnswer(text) : text;
+            
+            // 🔸 Split step headers onto their own paragraph
+            let processed = text
+                .replace(/\n(?!\n)/g, '\n\n')                                // single \n → \n\n
+                .replace(/(Step\s*\d+[:.])/gi, '\n\n---\n\n**$1**\n\n')       // Add separator + bold Step
+                .replace(/(Left-hand derivative:|Right-hand derivative:|Conclusion:|Claim:|Counter-Example:)/gi, '\n\n**$1**\n\n');
+
+            processed = processed.includes('Letu') || processed.includes('Differentiatebothsides') ? normalizeModelAnswer(processed) : processed;
             const mathBlocks = [];
             let counter = 0;
             processed = processed.replace(/\$\$([\s\S]*?)\$\$/g, m => { mathBlocks.push(m); return `%%MATH_BLOCK_${counter++}%%`; });
             processed = processed.replace(/\\\[([\s\S]*?)\\\]/g, m => { mathBlocks.push('$$' + m.slice(2, -2) + '$$'); return `%%MATH_BLOCK_${counter++}%%`; });
             processed = processed.replace(/\$(.+?)\$/g, m => { mathBlocks.push(m); return `%%MATH_BLOCK_${counter++}%%`; });
             processed = processed.replace(/\\\(([\s\S]*?)\\\)/g, m => { mathBlocks.push('$' + m.slice(2, -2) + '$'); return `%%MATH_BLOCK_${counter++}%%`; });
-            const html = marked.parse(processed, { breaks: true, gfm: true });
+            const html = marked.parse(processed, { breaks: false, gfm: true });
             let result = html;
             for (let i = 0; i < mathBlocks.length; i++) result = result.replace(`%%MATH_BLOCK_${i}%%`, mathBlocks[i]);
             return sanitizeHtml(result);
         }
+
 
         function renderGraph(graphData, containerId) {
             if (!graphData || !graphData.type) return '';
@@ -600,25 +656,32 @@ JSON FORMAT:
             ].map(([icon, k, v]) => `<div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 border border-slate-200 dark:border-slate-700"><div class="text-[10px] text-slate-500 uppercase font-bold">${icon} ${k}</div><strong class="block text-sm mt-1 dark:text-gray-200">${v}</strong></div>`).join('');
             
             let cIdx = 0;
-            document.getElementById('qList').innerHTML = d.questions.map((q, i) => `
+            document.getElementById('qList').innerHTML = d.questions.map((q, i) => {
+                const qGraphHtml = q.graph ? renderGraph(q.graph, `qchart_${i}_${cIdx++}`) : '';
+                const aGraphHtml = q.answer_graph ? renderGraph(q.answer_graph, `achart_${i}_${cIdx++}`) : '';
+                return `
                 <div class="question-card border border-slate-200 dark:border-slate-700 rounded-xl p-5 bg-white dark:bg-slate-800/20 shadow-sm mb-4">
                     <div class="flex justify-between mb-4">
                         <span class="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg">Q.${q.question_number}</span>
                         <span class="text-slate-400 text-[10px] font-bold">${q.marks} Marks</span>
                     </div>
-                    <div class="question-prose text-[15px] dark:text-gray-300">${formatMarkdown(q.question_text)}</div>
-                    ${q.graph ? renderGraph(q.graph, `qchart_${i}_${cIdx++}`) : ''}
-                    ${q.sub_parts?.length ? `<div class="mt-4 pl-4 border-l-2 border-blue-500 space-y-3 font-medium">${q.sub_parts.map(sp => `<div>${formatMarkdown(sp)}</div>`).join('')}</div>` : ''}
-                    ${(q.model_answer || q.answer_graph) ? `
-                    <details class="mt-4">
-                        <summary class="cursor-pointer text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-2 rounded-lg">View Solution</summary>
-                        <div class="mt-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg text-[14px] leading-relaxed">
-                            ${q.model_answer ? formatMarkdown(q.model_answer) : ''}
-                            ${q.answer_graph ? renderGraph(q.answer_graph, `achart_${i}_${cIdx++}`) : ''}
+                    <div class="mt-4 space-y-4">
+                        <div class="question-prose text-[15px] text-slate-800 dark:text-gray-200">
+                            ${formatMarkdown(q.question_text)}
                         </div>
-                    </details>` : ''}
-                </div>
-            `).join('');
+                        ${q.sub_parts?.length ? `<div class="mt-4 pl-4 border-l-2 border-blue-500 space-y-3 font-medium">${q.sub_parts.map(sp => `<div class="question-prose">${formatMarkdown(sp)}</div>`).join('')}</div>` : ''}
+                        ${qGraphHtml}
+                        ${(q.model_answer || q.answer_graph) ? `
+                        <details class="mt-4">
+                            <summary class="cursor-pointer text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-2 rounded-lg">View Solution</summary>
+                            <div class="solution-prose question-prose mt-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg text-[14px] leading-loose space-y-3">
+                                ${q.model_answer ? formatMarkdown(q.model_answer) : ''}
+                                ${aGraphHtml}
+                            </div>
+                        </details>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
 
             document.getElementById('preview').classList.remove('hidden');
             uploadBtn.classList.remove('hidden');
