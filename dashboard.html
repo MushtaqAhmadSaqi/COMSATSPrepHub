@@ -14,43 +14,43 @@
 <body class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300 antialiased min-h-screen flex flex-col">
     <div id="app-header"></div>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 relative z-10">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full flex-1 relative z-10">
       <!-- HERO -->
-      <section class="mb-8">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-sm">
-          <div class="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_auto] lg:items-end">
-            <div class="space-y-5">
-              <p class="inline-flex w-fit items-center gap-2 rounded-full bg-brand-50 dark:bg-brand-500/10 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">
+      <section class="mb-12">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl p-8 sm:p-10 shadow-sm">
+          <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+            <div class="space-y-6">
+              <p class="inline-flex w-fit items-center gap-2 rounded-full bg-brand-50 dark:bg-brand-500/10 px-4 py-2 text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">
                 <span class="material-symbols-outlined text-[16px]">calendar_today</span>
                 <span id="currentDate">Loading date...</span>
               </p>
       
-              <div class="flex items-center gap-4">
-                <div class="hero-brand-logo" aria-hidden="true">C</div>
-                <div class="min-w-0">
-                  <p class="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400 mb-1">
+              <div class="flex items-start gap-5">
+                <div class="hero-brand-logo flex-shrink-0" aria-hidden="true">C</div>
+                <div class="flex-1">
+                  <p class="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400 mb-3">
                     Student Dashboard
                   </p>
-                  <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-                    Welcome back, <span id="userFirstName">Student</span>
+              <h1 class="text-4xl sm:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight mb-4">
+                    Welcome back, <span id="userFirstName" class="bg-gradient-to-r from-brand-500 to-brand-600 bg-clip-text text-transparent">Student</span>
                   </h1>
                 </div>
               </div>
       
-              <p id="welcomeSubtext" class="text-slate-600 dark:text-slate-400 max-w-2xl">
+              <p id="welcomeSubtext" class="text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
                 Track your study progress, quiz performance, and subject mastery in one clean dashboard.
               </p>
             </div>
       
             <div class="flex flex-wrap gap-3 lg:justify-end">
               <a href="quiz.html"
-                 class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-semibold shadow-sm transition-all">
+                 class="inline-flex items-center justify-center px-6 py-3.5 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap">
                 <span class="material-symbols-outlined text-[18px] mr-2">play_arrow</span>
                 Resume Practice
               </a>
       
               <a href="subjects.html"
-                 class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold transition-all">
+                 class="inline-flex items-center justify-center px-6 py-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold transition-all duration-200 whitespace-nowrap">
                 <span class="material-symbols-outlined text-[18px] mr-2">menu_book</span>
                 Browse Subjects
               </a>
@@ -60,25 +60,25 @@
       </section>
     
       <!-- KPI ROW -->
-      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl p-5 shadow-sm">
-          <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Quizzes Completed</p>
-          <h3 id="statQuizCount" class="text-3xl font-black text-slate-900 dark:text-white">0</h3>
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-12">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl p-6 sm:p-7 shadow-sm hover:shadow-md transition-all">
+          <p class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mb-3 uppercase tracking-wider">Quizzes Completed</p>
+          <h3 id="statQuizCount" class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white">0</h3>
         </div>
     
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl p-5 shadow-sm">
-          <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Average Score</p>
-          <h3 id="statAverageScore" class="text-3xl font-black text-slate-900 dark:text-white">0%</h3>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl p-6 sm:p-7 shadow-sm hover:shadow-md transition-all">
+          <p class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mb-3 uppercase tracking-wider">Average Score</p>
+          <h3 id="statAverageScore" class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white">0%</h3>
         </div>
     
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl p-5 shadow-sm">
-          <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Subjects Studied</p>
-          <h3 id="statSubjectsStudied" class="text-3xl font-black text-slate-900 dark:text-white">0</h3>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl p-6 sm:p-7 shadow-sm hover:shadow-md transition-all">
+          <p class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mb-3 uppercase tracking-wider">Subjects Studied</p>
+          <h3 id="statSubjectsStudied" class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white">0</h3>
         </div>
     
-        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl p-5 shadow-sm">
-          <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">Study Sessions</p>
-          <h3 id="statStudySessions" class="text-3xl font-black text-slate-900 dark:text-white">0</h3>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl p-6 sm:p-7 shadow-sm hover:shadow-md transition-all">
+          <p class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mb-3 uppercase tracking-wider">Study Sessions</p>
+          <h3 id="statStudySessions" class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white">0</h3>
         </div>
       </section>
     
