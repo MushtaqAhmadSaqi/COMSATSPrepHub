@@ -196,11 +196,14 @@ body {
   align-items: center;
   justify-content: center;
   padding: 24px;
+  overflow-y: auto;
 }
 
 .wrap {
   width: 100%;
   max-width: 420px;
+  margin: auto 0;
+  padding: 24px 0;
 }
 
 .m-logo {
