@@ -123,7 +123,7 @@ function _injectHeader(currentPage, session, userName) {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
         <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl border border-gray-200/50 dark:border-white/10 rounded-[1.5rem] shadow-xl px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between transition-all duration-300 gap-2 sm:gap-3">
           <a href="index.html" class="flex items-center gap-3 group" aria-label="Go to home page">
-            <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#3b82f6] to-[#1e40af] flex items-center justify-center text-white font-black text-xl shadow-md group-hover:scale-105 transition-transform ring-1 ring-white/20">C</div>
+            <div class="w-9 h-9 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black text-xl shadow-md group-hover:scale-105 transition-transform ring-2 ring-blue-300/60 dark:ring-blue-500/30">C</div>
             <span class="font-black text-xl tracking-tighter text-[#1a1a2e] dark:text-white hidden sm:block">COMSATSPrepHub</span>
             <span class="font-black text-xl tracking-tighter text-[#1a1a2e] dark:text-white sm:hidden">COMSATS</span>
           </a>
@@ -144,7 +144,7 @@ function _injectHeader(currentPage, session, userName) {
             </button>
 
             <button id="open-auth-modal"
-                    class="flex items-center gap-2 bg-[#1e1e2e] dark:bg-white hover:bg-black dark:hover:bg-gray-100 text-white dark:text-[#1e1e2e] px-3 sm:px-5 py-2.5 sm:py-3 rounded-full text-xs font-bold transition-all active:scale-95 shadow-md"
+                    class="flex items-center gap-2 bg-blue-600 dark:bg-white hover:bg-blue-700 dark:hover:bg-gray-100 text-white dark:text-[#1e1e2e] px-3 sm:px-5 py-2.5 sm:py-3 rounded-full text-xs font-bold transition-all active:scale-95 shadow-md"
                     type="button"
                     aria-label="${isLoggedIn ? 'Open dashboard' : 'Open sign in dialog'}">
               ${isLoggedIn ? `
