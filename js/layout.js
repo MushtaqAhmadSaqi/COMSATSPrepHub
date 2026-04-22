@@ -216,9 +216,9 @@ function _injectMobileNav(currentPage) {
           <span class="label">Quiz</span>
         </a>
 
-        <a href="dashboard.html" class="mobile-nav-item ${isDashboardActive ? 'active' : ''}">
-          <span class="material-symbols-outlined">dashboard</span>
-          <span class="label">Dashboard</span>
+        <a href="about-us.html" class="mobile-nav-item ${currentPage === 'about-us.html' ? 'active' : ''}">
+          <span class="material-symbols-outlined">group</span>
+          <span class="label">Team</span>
         </a>
       </div>
     </nav>
