@@ -44,10 +44,12 @@ async function getExistingProgress({ userId, subjectCode, topicName = DEFAULT_TO
 
   query = topicName == null ? query.is('topic_name', null) : query.eq('topic_name', topicName);
 
-  const { data, error } = await query.maybeSingle();
+  // Avoid "JSON object requested, multiple (or no) rows returned" if the table
+  // accidentally contains duplicates for a user/subject/topic combination.
+  const { data, error } = await query.order('updated_at', { ascending: false }).limit(1);
   if (error) throw error;
 
-  const normalized = data || null;
+  const normalized = Array.isArray(data) && data.length ? data[0] : null;
   subjectProgressCache.set(cacheKey, normalized);
   return normalized;
 }

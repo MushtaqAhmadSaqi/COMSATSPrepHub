@@ -288,7 +288,11 @@
 
         if (mobileNav) {
           mobileNav.style.display = hidden ? 'none' : '';
-          mobileNav.style.transform = hidden ? 'translateY(calc(100% + 1rem))' : 'translateY(0)';
+          // Keep horizontal centering intact; mobile nav relies on translateX(-50%) from CSS.
+          mobileNav.style.transform = hidden ? 'translate(-50%, calc(100% + 1rem))' : '';
+          if (!hidden) {
+            mobileNav.classList.remove('nav-hidden');
+          }
         }
 
         document.body.classList.toggle('quiz-active', hidden);

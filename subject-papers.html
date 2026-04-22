@@ -343,10 +343,15 @@
 
       renderPaperGroups(papers, questionCountMap);
 
-      await ensureSubjectTracked({
-        subjectCode,
-        subjectName: subjectName || subjectCode
-      });
+      // Progress tracking should never block the papers list UI.
+      try {
+        await ensureSubjectTracked({
+          subjectCode,
+          subjectName: subjectName || subjectCode
+        });
+      } catch (error) {
+        console.warn('Subject tracking failed:', error);
+      }
     } catch (error) {
       showInlineError(error?.message || 'Something went wrong while loading papers.');
       papersContainer?.classList.add('hidden');

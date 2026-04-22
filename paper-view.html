@@ -30,6 +30,39 @@
       header.header-hidden {
         transform: translateY(-100%);
       }
+
+      /* Bug 4: prevent revealed model answers from breaking the mobile viewport */
+      [id^="model-"] {
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+
+      [id^="model-"] .prose {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+
+      [id^="model-"] pre,
+      [id^="model-"] code {
+        max-width: 100%;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+
+      [id^="model-"] table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+      }
+
+      [id^="model-"] img,
+      [id^="model-"] svg,
+      [id^="model-"] canvas {
+        max-width: 100%;
+        height: auto;
+      }
     </style>
 </head>
 
