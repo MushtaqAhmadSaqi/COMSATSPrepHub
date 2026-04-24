@@ -110,6 +110,8 @@
           margin: 1.25rem 0;
       }
       .dark .solution-prose hr { border-top-color: #334155; }
+
+
     </style>
 
 </head>
@@ -789,7 +791,7 @@
                 // ── Question card ──
                 const card = document.createElement('section');
                 card.id = `q-card-${q.id}`;
-                card.className = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 scroll-mt-24 card-hover';
+                card.className = 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 scroll-mt-24 card-hover w-full max-w-full min-w-0';
 
                 card.innerHTML = `
                     <!-- Question Header -->
@@ -820,30 +822,12 @@
                             ${formatMarkdown(q.question_text)}
                         </div>
 
-
                         ${q.sub_parts && q.sub_parts.length ? `
                         <div class="mt-6 space-y-6 pl-5 border-l-[3px] border-brand-200/50">
                             ${q.sub_parts.map(sp => `<div class="question-prose prose dark:prose-invert max-w-none text-[15.5px] leading-relaxed text-slate-700 dark:text-gray-300">${formatMarkdown(sp)}</div>`).join('')}
                         </div>` : ''}
 
-                        
                         ${qGraphHtml}
-                        
-                        <!-- Model Answer -->
-                        <div id="model-${q.id}" class="hidden mt-8 transition-all">
-                            <div class="relative bg-gradient-to-br from-emerald-50/50 to-white/50 dark:from-emerald-900/10 dark:to-slate-900/30 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-6 shadow-inner animate-slide-up">
-                                <div class="flex items-center gap-2 mb-4">
-                                    <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">auto_awesome</span>
-                                    <span class="font-black text-[11px] text-emerald-700 dark:text-emerald-300 uppercase tracking-widest">Model Answer</span>
-                                </div>
-                                <div class="solution-prose question-prose prose dark:prose-invert max-w-none text-[15.5px] leading-loose space-y-3 text-slate-800 dark:text-gray-200">
-                                    ${q.model_answer ? formatMarkdown(q.model_answer) : ''}
-                                    ${aGraphHtml}
-                                    ${(!q.model_answer && !q.answer_graph) ? '<em class="text-slate-400">No model answer available.</em>' : ''}
-                                </div>
-
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Answer Section -->
@@ -865,6 +849,21 @@
                             <div class="flex items-center gap-2 text-[11px] text-slate-400 font-bold uppercase tracking-wider italic">
                                 <span class="material-symbols-outlined text-[14px]">info</span>
                                 Self-study mode • Not saved
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Model Answer -->
+                    <div id="model-${q.id}" class="hidden px-6 sm:px-8 pb-6 sm:pb-8 transition-all scroll-mt-28">
+                        <div class="relative bg-gradient-to-br from-emerald-50/50 to-white/50 dark:from-emerald-900/10 dark:to-slate-900/30 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-5 sm:p-6 shadow-inner animate-slide-up">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">auto_awesome</span>
+                                <span class="font-black text-[11px] text-emerald-700 dark:text-emerald-300 uppercase tracking-widest">Model Answer</span>
+                            </div>
+                            <div class="solution-prose question-prose prose dark:prose-invert max-w-none text-[15.5px] leading-loose space-y-3 text-slate-800 dark:text-gray-200">
+                                ${q.model_answer ? formatMarkdown(q.model_answer) : ''}
+                                ${aGraphHtml}
+                                ${(!q.model_answer && !q.answer_graph) ? '<em class="text-slate-400">No model answer available.</em>' : ''}
                             </div>
                         </div>
                     </div>
@@ -928,8 +927,14 @@
                     model.querySelectorAll('.mermaid:not([data-processed])').forEach(() => mermaid.run({ nodes: model.querySelectorAll('.mermaid') }));
                 }
 
-                // Smooth scroll to model answer
-                model.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                // Smooth scroll to the revealed model answer
+                requestAnimationFrame(() => {
+                    model.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start',
+                        inline: 'nearest'
+                    });
+                });
             }, 350);
 
             // Progress

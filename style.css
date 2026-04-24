@@ -3361,3 +3361,154 @@ body.quiz-active #mobileBottomNav.mobile-nav-shell {
     display: none !important;
   }
 }
+
+/* =========================================================
+   FINAL MOBILE PAPER VIEW FIX
+   Prevent horizontal scrolling/cutting on first load + submit
+========================================================= */
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  position: relative;
+}
+
+/* Main paper layout must never become wider than the screen */
+main,
+#paperHeader,
+#questionsContainer,
+#questionsContainer > section,
+[id^="q-card-"],
+[id^="model-"] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Important: let content wrap inside the card */
+.question-prose,
+.solution-prose,
+.question-prose *,
+.solution-prose * {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Normal paragraphs/list text should wrap instead of forcing width */
+.question-prose p,
+.solution-prose p,
+.question-prose li,
+.solution-prose li,
+.question-prose div,
+.solution-prose div {
+  white-space: normal;
+}
+
+/* Your current inline-block strong tags can cause width issues */
+.question-prose strong,
+.solution-prose strong {
+  display: inline;
+  max-width: 100%;
+}
+
+/* Tables should scroll inside themselves only, not the full page */
+.question-prose table,
+.solution-prose table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Code blocks should wrap */
+.question-prose pre,
+.solution-prose pre,
+.question-prose code,
+.solution-prose code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* MathJax often causes mobile overflow */
+.question-prose mjx-container,
+.solution-prose mjx-container {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+
+/* Images, SVGs, charts, Mermaid diagrams */
+.question-prose img,
+.solution-prose img,
+.question-prose svg,
+.solution-prose svg,
+.question-prose canvas,
+.solution-prose canvas,
+.chart-container,
+.mermaid {
+  max-width: 100% !important;
+  height: auto;
+  overflow-x: auto;
+}
+
+/* Fix mobile card/header layout */
+@media (max-width: 640px) {
+  .max-w-screen-xl {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  #questionsContainer {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  #questionsContainer > section,
+  [id^="q-card-"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden;
+    border-radius: 18px !important;
+  }
+
+  /* Question top header should wrap on small phones */
+  [id^="q-card-"] > div:first-child {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  [id^="q-card-"] > div:first-child > div {
+    min-width: 0;
+  }
+
+  [id^="q-card-"] > div:first-child .text-lg {
+    font-size: 1rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .question-prose,
+  .solution-prose {
+    font-size: 0.94rem !important;
+    line-height: 1.7 !important;
+  }
+
+  textarea {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  button {
+    max-width: 100%;
+  }
+}
