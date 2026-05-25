@@ -43,39 +43,69 @@ import { supabase, auth } from '../../js/core.js';
   const gradeInsightMessage = document.getElementById('grade-insight-message');
   const gradeProgressFill = document.getElementById('grade-progress-fill');
 
-  const editModal = document.getElementById('edit-subject-modal');
-  const editNameInp = document.getElementById('edit-subject-name');
-  const editCreditsInp = document.getElementById('edit-credit-hours');
+  const submitBtnIcon = document.getElementById('submit-btn-icon');
+  const submitBtnText = document.getElementById('submit-btn-text');
+  const clearBtnIcon = document.getElementById('clear-btn-icon');
+  const clearBtnText = document.getElementById('clear-btn-text');
+  const editModeBadge = document.getElementById('edit-mode-badge');
+  const subjectNameInput = document.getElementById('subject-name');
   
-  const editQuizObt = document.getElementById('edit-quiz-obt');
-  const editQuizTot = document.getElementById('edit-quiz-tot');
-  const editAssignObt = document.getElementById('edit-assign-obt');
-  const editAssignTot = document.getElementById('edit-assign-tot');
-  const editMidObt = document.getElementById('edit-mid-obt');
-  const editMidTot = document.getElementById('edit-mid-tot');
-  const editFinalObt = document.getElementById('edit-final-obt');
-  const editFinalTot = document.getElementById('edit-final-tot');
-
-  // Lab Component inputs for editing
-  const editLabAssignObt = document.getElementById('edit-lab-assign-obt');
-  const editLabAssignTot = document.getElementById('edit-lab-assign-tot');
-  const editLabMidObt = document.getElementById('edit-lab-mid-obt');
-  const editLabMidTot = document.getElementById('edit-lab-mid-tot');
-  const editLabFinalObt = document.getElementById('edit-lab-final-obt');
-  const editLabFinalTot = document.getElementById('edit-lab-final-tot');
-  const editLabSection = document.getElementById('edit-lab-section');
-  
-  const closeModalBtn = document.getElementById('close-modal-btn');
-
-  const saveEditBtn = document.getElementById('save-changes-btn');
-  const cancelEditBtn = document.getElementById('cancel-changes-btn');
-
-  let subjectToEditId = null;
+  let editingSubjectId = null;
 
   const GPA_STORAGE_KEY = 'comsatsprephub:gpa-subjects:v1';
 
   function normalizeSubject(subject, fallbackIndex = 0) {
     const safeId = Number(subject?.id) || fallbackIndex + 1;
+
+    // Load quizzes array
+    let rawQuizzes = [];
+    if (Array.isArray(subject?.raw?.quizzes)) {
+      rawQuizzes = subject.raw.quizzes;
+    } else if (subject?.raw?.q) {
+      rawQuizzes = [{ obtained: Number(subject.raw.q.obt) || 0, total: Number(subject.raw.q.tot) || 10 }];
+    } else {
+      rawQuizzes = [{ obtained: 0, total: 10 }];
+    }
+
+    // Load assignments array
+    let rawAssignments = [];
+    if (Array.isArray(subject?.raw?.assignments)) {
+      rawAssignments = subject.raw.assignments;
+    } else if (subject?.raw?.a) {
+      rawAssignments = [{ obtained: Number(subject.raw.a.obt) || 0, total: Number(subject.raw.a.tot) || 10 }];
+    } else {
+      rawAssignments = [{ obtained: 0, total: 10 }];
+    }
+
+    // Load lab assignments array
+    let rawLabAssignments = [];
+    if (Array.isArray(subject?.raw?.labAssignments)) {
+      rawLabAssignments = subject.raw.labAssignments;
+    } else if (subject?.raw?.l?.a) {
+      rawLabAssignments = [{ obtained: Number(subject.raw.l.a.obt) || 0, total: Number(subject.raw.l.a.tot) || 10 }];
+    } else {
+      rawLabAssignments = [{ obtained: 0, total: 10 }];
+    }
+
+    // Theory Mid and Final
+    const rawMid = {
+      obtained: Number(subject?.raw?.mid?.obtained ?? subject?.raw?.m?.obtained ?? 0),
+      total: Number(subject?.raw?.mid?.total ?? subject?.raw?.m?.total ?? 25)
+    };
+    const rawFinal = {
+      obtained: Number(subject?.raw?.final?.obtained ?? subject?.raw?.f?.obtained ?? 0),
+      total: Number(subject?.raw?.final?.total ?? subject?.raw?.f?.total ?? 50)
+    };
+
+    // Lab Mid and Final
+    const rawLabMid = {
+      obtained: Number(subject?.raw?.labMid?.obtained ?? subject?.raw?.l?.m?.obtained ?? 0),
+      total: Number(subject?.raw?.labMid?.total ?? subject?.raw?.l?.m?.total ?? 25)
+    };
+    const rawLabFinal = {
+      obtained: Number(subject?.raw?.labFinal?.obtained ?? subject?.raw?.l?.f?.obtained ?? 0),
+      total: Number(subject?.raw?.labFinal?.total ?? subject?.raw?.l?.f?.total ?? 50)
+    };
 
     return {
       id: safeId,
@@ -87,38 +117,35 @@ import { supabase, auth } from '../../js/core.js';
       hasLab: Boolean(subject?.hasLab),
       theoryTotal: Number(subject?.theoryTotal) || 0,
       labTotal: Number(subject?.labTotal) || 0,
+      scheme: subject?.scheme || null,
       raw: {
+        quizzes: rawQuizzes,
+        assignments: rawAssignments,
+        mid: rawMid,
+        final: rawFinal,
+        labAssignments: rawLabAssignments,
+        labMid: rawLabMid,
+        labFinal: rawLabFinal,
+        // Keep deprecated format for compatibility
         q: {
-          obt: Number(subject?.raw?.q?.obt) || 0,
-          tot: Number(subject?.raw?.q?.tot) || 10,
+          obt: rawQuizzes.reduce((acc, c) => acc + c.obtained, 0),
+          tot: rawQuizzes.reduce((acc, c) => acc + c.total, 0),
         },
         a: {
-          obt: Number(subject?.raw?.a?.obt) || 0,
-          tot: Number(subject?.raw?.a?.tot) || 10,
+          obt: rawAssignments.reduce((acc, c) => acc + c.obtained, 0),
+          tot: rawAssignments.reduce((acc, c) => acc + c.total, 0),
         },
-        m: {
-          obtained: Number(subject?.raw?.m?.obtained) || 0,
-          total: Number(subject?.raw?.m?.total) || 25,
-        },
-        f: {
-          obtained: Number(subject?.raw?.f?.obtained) || 0,
-          total: Number(subject?.raw?.f?.total) || 50,
-        },
-        l: subject?.raw?.l ? {
+        m: rawMid,
+        f: rawFinal,
+        l: Boolean(subject?.hasLab) ? {
           a: {
-            obt: Number(subject?.raw?.l?.a?.obt ?? subject?.raw?.l?.a?.obtained) || 0,
-            tot: Number(subject?.raw?.l?.a?.tot ?? subject?.raw?.l?.a?.total) || 10,
+            obt: rawLabAssignments.reduce((acc, c) => acc + c.obtained, 0),
+            tot: rawLabAssignments.reduce((acc, c) => acc + c.total, 0),
           },
-          m: {
-            obtained: Number(subject?.raw?.l?.m?.obtained) || 0,
-            total: Number(subject?.raw?.l?.m?.total) || 25,
-          },
-          f: {
-            obtained: Number(subject?.raw?.l?.f?.obtained) || 0,
-            total: Number(subject?.raw?.l?.f?.total) || 50,
-          }
+          m: rawLabMid,
+          f: rawLabFinal
         } : null
-      },
+      }
     };
   }
 
@@ -615,7 +642,6 @@ import { supabase, auth } from '../../js/core.js';
   // --- Core Handlers ---
 
   function handleAddSubject() {
-    const subjectNameInput = document.getElementById('subject-name');
     const subjectName = subjectNameInput?.value.trim() || 'Unnamed Subject';
     const hasLab = hasLabCb.checked;
     const creditHours = Math.max(Logic.toNum(courseCreditHoursEl?.value, 3), 0.5);
@@ -628,9 +654,16 @@ import { supabase, auth } from '../../js/core.js';
     const finalPct = Logic.calcFinalPercentage(theoryTotal, labTotal, hasLab, creditHours, 1);
     const gradeInfo = Logic.getGradeInfo(finalPct);
 
-    // Sum up categories for "Deep Edit" storage
+    // Sum up categories for backward-compatibility storage
     const sum = (arr) => arr.reduce((acc, curr) => ({ obt: acc.obt + curr.obtained, tot: acc.tot + curr.total }), { obt: 0, tot: 0 });
     const tStats = {
+      quizzes: data.theory.quizzes,
+      assignments: data.theory.assignments,
+      mid: data.theory.mid,
+      final: data.theory.final,
+      labAssignments: hasLab ? data.lab.labAssignments : [],
+      labMid: hasLab ? data.lab.labMid : null,
+      labFinal: hasLab ? data.lab.labFinal : null,
       q: sum(data.theory.quizzes),
       a: sum(data.theory.assignments),
       m: data.theory.mid,
@@ -651,6 +684,51 @@ import { supabase, auth } from '../../js/core.js';
       } : null
     };
 
+    if (editingSubjectId) {
+      // Update existing subject
+      const subject = addedSubjects.find(s => s.id === editingSubjectId);
+      if (subject) {
+        subject.name = subjectName;
+        subject.creditHours = creditHours;
+        subject.percentage = finalPct;
+        subject.gpa = gradeInfo.point;
+        subject.letter = gradeInfo.letter;
+        subject.hasLab = hasLab;
+        subject.theoryTotal = theoryTotal;
+        subject.labTotal = labTotal;
+        subject.scheme = scheme;
+        subject.raw = tStats;
+
+        const card = document.getElementById(`subject-card-${subject.id}`);
+        if (card) {
+          card.querySelector('.subject-name-text').textContent = subject.name;
+          card.querySelector('.subject-info-text').innerHTML = `
+            <span>Credits: <strong class="text-slate-700 dark:text-slate-200">${subject.creditHours.toFixed(1)}</strong></span>
+            <span>Theory: <strong class="text-slate-700 dark:text-slate-200">${subject.theoryTotal.toFixed(1)}%</strong></span>
+            ${subject.hasLab ? `<span>Lab: <strong class="text-slate-700 dark:text-slate-200">${subject.labTotal.toFixed(1)}%</strong></span>` : ''}
+            <span class="flex items-center gap-1.5 border-l border-slate-200 dark:border-slate-700 pl-4 ml-1">
+              <span class="text-slate-400 uppercase font-black text-[9px] tracking-widest">Aggregate</span> 
+              <strong class="text-teal-600 dark:text-teal-400 font-bold">${subject.percentage.toFixed(2)}%</strong>
+            </span>
+          `;
+          const gradeBadge = card.querySelector('.grade-badge');
+          gradeBadge.textContent = subject.letter;
+          gradeBadge.className = `grade-badge inline-flex items-center justify-center w-9 h-9 rounded-xl text-xs font-black ${getGradeBadgeColor(subject.letter)}`;
+          card.querySelector('.gpa-text').textContent = subject.gpa.toFixed(2);
+          card.querySelector('.gpa-text').className = `gpa-text text-lg font-black ${getGpaTextColor(subject.gpa)}`;
+        }
+      }
+      exitEditMode();
+      void saveGpaData();
+      
+      if (!overallResult.classList.contains('hidden')) {
+        calcGpaBtn.click();
+      } else {
+        calcGpaBtn.classList.add('is-pulsing');
+      }
+      return;
+    }
+
     const newSubject = {
       id: nextSubjectId++,
       name: subjectName,
@@ -661,6 +739,7 @@ import { supabase, auth } from '../../js/core.js';
       hasLab,
       theoryTotal,
       labTotal,
+      scheme,
       raw: tStats // Store for editing
     };
 
@@ -678,166 +757,104 @@ import { supabase, auth } from '../../js/core.js';
     void saveGpaData();
   }
 
-  function openEditModal(subject) {
-    subjectToEditId = subject.id;
-    editNameInp.value = subject.name;
-    editCreditsInp.value = subject.creditHours;
+  function loadSubjectIntoForm(subject) {
+    editingSubjectId = subject.id;
     
-    // Populate raw theory marks
-    editQuizObt.value = subject.raw.q.obt;
-    editQuizTot.value = subject.raw.q.tot || 10;
-    editAssignObt.value = subject.raw.a.obt;
-    editAssignTot.value = subject.raw.a.tot || 10;
-    editMidObt.value = subject.raw.m.obtained;
-    editMidTot.value = subject.raw.m.total || 25;
-    editFinalObt.value = subject.raw.f.obtained;
-    editFinalTot.value = subject.raw.f.total || 50;
-
-    // Populate raw lab marks if applicable
-    if (subject.hasLab && editLabSection) {
-      editLabSection.classList.remove('hidden');
-      if (editLabAssignObt) editLabAssignObt.value = subject.raw.l?.a?.obt ?? 0;
-      if (editLabAssignTot) editLabAssignTot.value = subject.raw.l?.a?.tot ?? 10;
-      if (editLabMidObt) editLabMidObt.value = subject.raw.l?.m?.obtained ?? 0;
-      if (editLabMidTot) editLabMidTot.value = subject.raw.l?.m?.total ?? 25;
-      if (editLabFinalObt) editLabFinalObt.value = subject.raw.l?.f?.obtained ?? 0;
-      if (editLabFinalTot) editLabFinalTot.value = subject.raw.l?.f?.total ?? 50;
-    } else if (editLabSection) {
-      editLabSection.classList.add('hidden');
-    }
-
-    editModal.classList.remove('hidden');
-    editModal.classList.add('flex');
-    editNameInp.focus();
-  }
-
-  function closeEditModal() {
-    editModal.classList.add('hidden');
-    editModal.classList.remove('flex');
-    subjectToEditId = null;
-  }
-
-  saveEditBtn.addEventListener('click', () => {
-    if (!subjectToEditId) return;
-
-    const subject = addedSubjects.find(s => s.id === subjectToEditId);
-    if (!subject) return;
-
-    const newName = editNameInp.value.trim() || 'Unnamed Subject';
-    const newCredits = Math.max(parseFloat(editCreditsInp.value) || 3, 0.5);
-    
-    // Read edited theory marks
-    const r = {
-      q: { obtained: parseFloat(editQuizObt.value) || 0, total: parseFloat(editQuizTot.value) || 1 },
-      a: { obtained: parseFloat(editAssignObt.value) || 0, total: parseFloat(editAssignTot.value) || 1 },
-      m: { obtained: parseFloat(editMidObt.value) || 0, total: parseFloat(editMidTot.value) || 1 },
-      f: { obtained: parseFloat(editFinalObt.value) || 0, total: parseFloat(editFinalTot.value) || 1 }
-    };
-
-    const scheme = readMarkScheme();
-    const theoryData = {
-      quizzes: [{ obtained: r.q.obtained, total: r.q.total }],
-      assignments: [{ obtained: r.a.obtained, total: r.a.total }],
-      mid: r.m,
-      final: r.f
-    };
-
-    const theoryTotal = Logic.calcTheoryTotal(theoryData, scheme.theory);
-    
-    // Read and recalculate lab marks if applicable
-    let labTotal = subject.labTotal;
-    let labRawData = subject.raw.l;
-
-    if (subject.hasLab) {
-      const l = {
-        a: { obtained: parseFloat(editLabAssignObt?.value) || 0, total: parseFloat(editLabAssignTot?.value) || 1 },
-        m: { obtained: parseFloat(editLabMidObt?.value) || 0, total: parseFloat(editLabMidTot?.value) || 1 },
-        f: { obtained: parseFloat(editLabFinalObt?.value) || 0, total: parseFloat(editLabFinalTot?.value) || 1 }
-      };
-
-      const labData = {
-        labAssignments: [{ obtained: l.a.obtained, total: l.a.total }],
-        labMid: l.m,
-        labFinal: l.f
-      };
-
-      labTotal = Logic.calcLabTotal(labData, scheme.lab);
-      labRawData = {
-        a: { obt: l.a.obtained, tot: l.a.total },
-        m: l.m,
-        f: l.f
-      };
-    }
-
-    const finalPct = Logic.calcFinalPercentage(theoryTotal, labTotal, subject.hasLab, newCredits, 1);
-    const gradeInfo = Logic.getGradeInfo(finalPct);
-
-    // Update data object
-    subject.name = newName;
-    subject.creditHours = newCredits;
-    subject.percentage = finalPct;
-    subject.gpa = gradeInfo.point;
-    subject.letter = gradeInfo.letter;
-    subject.theoryTotal = theoryTotal;
-    subject.labTotal = labTotal;
-    subject.raw = {
-      q: { obt: r.q.obtained, tot: r.q.total },
-      a: { obt: r.a.obtained, tot: r.a.total },
-      m: r.m,
-      f: r.f,
-      l: labRawData
-    };
-
-    // Refresh UI
+    // UI state
+    document.querySelectorAll('.subject-card').forEach(c => c.classList.remove('is-editing'));
     const card = document.getElementById(`subject-card-${subject.id}`);
-    if (card) {
-      const nameEl = card.querySelector('.subject-name-text');
-      const infoEl = card.querySelector('.subject-info-text');
-      const gradeBadge = card.querySelector('.grade-badge');
-      const gpaText = card.querySelector('.gpa-text');
-
-      if (nameEl) nameEl.textContent = subject.name;
-      if (infoEl) {
-        infoEl.innerHTML = `
-          <span>Credits: <strong class="text-slate-700 dark:text-slate-200">${subject.creditHours.toFixed(1)}</strong></span>
-          <span>Theory: <strong class="text-slate-700 dark:text-slate-200">${subject.theoryTotal.toFixed(1)}%</strong></span>
-          ${subject.hasLab ? `<span>Lab: <strong class="text-slate-700 dark:text-slate-200">${subject.labTotal.toFixed(1)}%</strong></span>` : ''}
-          <span class="flex items-center gap-1.5 border-l border-slate-200 dark:border-slate-700 pl-4 ml-1">
-            <span class="text-slate-400 uppercase font-black text-[9px] tracking-widest">Aggregate</span> 
-            <strong class="text-teal-600 dark:text-teal-400 font-bold">${subject.percentage.toFixed(2)}%</strong>
-          </span>
-        `;
-      }
-      if (gradeBadge) {
-        gradeBadge.textContent = subject.letter;
-        gradeBadge.className = `grade-badge inline-flex items-center justify-center w-10 h-10 rounded-xl text-sm font-bold ${getGradeBadgeColor(subject.letter)}`;
-      }
-      if (gpaText) gpaText.textContent = `${subject.gpa.toFixed(2)} GPA`;
-      
-      const cardGpaVal = card.querySelector('.gpa-text');
-      if (cardGpaVal) {
-        cardGpaVal.className = `gpa-text text-lg font-black ${getGpaTextColor(subject.gpa)}`;
-      }
-    }
-
-    closeEditModal();
-    void saveGpaData();
+    if (card) card.classList.add('is-editing');
     
-    if (!overallResult.classList.contains('hidden')) {
-      calcGpaBtn.click();
-    } else {
-      calcGpaBtn.classList.add('is-pulsing');
+    form.closest('.glass-card').classList.add('edit-active');
+    editModeBadge.classList.remove('hidden');
+    editModeBadge.classList.add('flex');
+    submitBtnIcon.textContent = 'save';
+    submitBtnText.textContent = 'Save Subject Changes';
+    clearBtnIcon.textContent = 'close';
+    clearBtnText.textContent = 'Cancel Edit';
+    
+    // Populate simple inputs
+    subjectNameInput.value = subject.name;
+    courseCreditHoursEl.value = subject.creditHours;
+    hasLabCb.checked = subject.hasLab;
+    syncLabMode();
+    
+    // Populate scheme
+    if (subject.scheme) {
+      document.getElementById('quiz-weight').value = subject.scheme.theory.quizWeight;
+      document.getElementById('assignment-weight').value = subject.scheme.theory.assignmentWeight;
+      document.getElementById('theory-mid-weight').value = subject.scheme.theory.midWeight;
+      document.getElementById('theory-final-weight').value = subject.scheme.theory.finalWeight;
+      if (subject.hasLab) {
+        document.getElementById('lab-assignment-weight').value = subject.scheme.lab.assignmentWeight;
+        document.getElementById('lab-mid-weight').value = subject.scheme.lab.midWeight;
+        document.getElementById('lab-final-weight').value = subject.scheme.lab.finalWeight;
+      }
     }
-  });
-
-  cancelEditBtn.addEventListener('click', closeEditModal);
-  if (closeModalBtn) {
-    closeModalBtn.addEventListener('click', closeEditModal);
+    
+    // Populate arrays
+    const fillRows = (containerId, type, items) => {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+      if (!items || items.length === 0) {
+        addDynamicRow(containerId, type);
+      } else {
+        items.forEach((item) => {
+          addDynamicRow(containerId, type);
+          const rows = container.querySelectorAll('.dynamic-row');
+          const lastRow = rows[rows.length - 1];
+          if (lastRow) {
+            const inputs = lastRow.querySelectorAll('input');
+            if (inputs[0]) { inputs[0].value = item.obtained; validateInput(inputs[0]); }
+            if (inputs[1]) { inputs[1].value = item.total; validateInput(inputs[1]); }
+          }
+        });
+      }
+    };
+    
+    fillRows('theory-quizzes-list', 'quiz', subject.raw.quizzes);
+    fillRows('theory-assignments-list', 'assignment', subject.raw.assignments);
+    if (subject.hasLab) {
+      fillRows('lab-assignments-list', 'lab', subject.raw.labAssignments);
+    }
+    
+    // Populate Mid/Final
+    const setPair = (prefix, data) => {
+      const obt = document.getElementById(`${prefix}-obtained`);
+      const tot = document.getElementById(`${prefix}-total`);
+      if (obt && tot && data) {
+        obt.value = data.obtained;
+        tot.value = data.total;
+        validateInput(obt);
+        validateInput(tot);
+      }
+    };
+    
+    setPair('theory-mid', subject.raw.mid);
+    setPair('theory-final', subject.raw.final);
+    if (subject.hasLab) {
+      setPair('lab-mid', subject.raw.labMid);
+      setPair('lab-final', subject.raw.labFinal);
+    }
+    
+    updateLivePreview();
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    subjectNameInput.focus();
   }
 
-  editModal.addEventListener('click', (e) => {
-    if (e.target === editModal) closeEditModal();
-  });
+  function exitEditMode() {
+    editingSubjectId = null;
+    document.querySelectorAll('.subject-card').forEach(c => c.classList.remove('is-editing'));
+    form.closest('.glass-card').classList.remove('edit-active');
+    editModeBadge.classList.add('hidden');
+    editModeBadge.classList.remove('flex');
+    submitBtnIcon.textContent = 'add_circle';
+    submitBtnText.textContent = 'Calculate & Add Subject';
+    clearBtnIcon.textContent = 'clear_all';
+    clearBtnText.textContent = 'Clear';
+    resetFormCompletely();
+  }
 
 
 
@@ -898,10 +915,10 @@ import { supabase, auth } from '../../js/core.js';
 
     subjectsList.appendChild(card);
     
-    // Card click opens edit modal (unless delete was clicked)
+    // Card click loads the subject into the left-side entry form for editing
     card.addEventListener('click', (e) => {
       if (!e.target.closest('.delete-btn')) {
-        openEditModal(subject);
+        loadSubjectIntoForm(subject);
       }
     });
 
@@ -912,6 +929,9 @@ import { supabase, auth } from '../../js/core.js';
   }
 
   function handleDeleteSubject(id) {
+    if (editingSubjectId === id) {
+      exitEditMode();
+    }
     const index = addedSubjects.findIndex(s => s.id === id);
     if (index === -1) return;
     addedSubjects.splice(index, 1);
@@ -1104,7 +1124,13 @@ import { supabase, auth } from '../../js/core.js';
   }
 
   hasLabCb.addEventListener('change', syncLabMode);
-  clearFormBtn.addEventListener('click', resetFormCompletely);
+  clearFormBtn.addEventListener('click', () => {
+    if (editingSubjectId) {
+      exitEditMode();
+    } else {
+      resetFormCompletely();
+    }
+  });
   setupRowListeners();
 
   // ── AI Screenshot OCR Scanner Integration ──
@@ -1297,10 +1323,8 @@ import { supabase, auth } from '../../js/core.js';
   }
 
   document.addEventListener('keydown', event => {
-    if (editModal.classList.contains('hidden')) return;
-
-    if (event.key === 'Escape') {
-      closeEditModal();
+    if (editingSubjectId && event.key === 'Escape') {
+      exitEditMode();
     }
   });
 

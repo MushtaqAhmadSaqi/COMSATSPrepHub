@@ -723,28 +723,42 @@ body.gpa-page td {
 }
 
 /* ==========================================================================
-   Deep Edit Subject Modal Dialog
+   Inline Subject Editing States
    ========================================================================== */
-#edit-subject-modal {
-  display: none;
-  background-color: rgba(15, 23, 42, 0.6) !important;
-  backdrop-filter: blur(8px);
+.glass-card.edit-active {
+  border-color: #14b8a6 !important;
+  box-shadow: 0 0 0 1px rgba(20, 184, 166, 0.3), 0 20px 60px rgba(15, 118, 110, 0.12) !important;
+  transform: translateY(-2px);
 }
 
-#edit-subject-modal.flex {
-  display: flex;
+html.dark .glass-card.edit-active,
+.dark .glass-card.edit-active {
+  border-color: #2dd4bf !important;
+  box-shadow: 0 0 0 1px rgba(45, 212, 191, 0.2), 0 20px 60px rgba(15, 23, 42, 0.5) !important;
 }
 
-#edit-subject-modal .glass-card {
-  background: rgba(255, 255, 255, 0.98) !important;
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.7) !important;
-  box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.25) !important;
-  border-radius: 28px;
+.subject-card.is-editing {
+  border-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.04) !important;
+  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.1) !important;
+  transform: translateY(-2px) scale(1.01);
 }
 
-#edit-subject-modal .gpa-input {
-  background-color: #f8fafc !important;
+.subject-card.is-editing::before {
+  background: linear-gradient(180deg, #34d399, #10b981);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+html.dark .subject-card.is-editing,
+.dark .subject-card.is-editing {
+  background: rgba(16, 185, 129, 0.06) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* ==========================================================================
@@ -948,15 +962,7 @@ html.dark body.gpa-page [class*="no-subject"],
   color: #cbd5e1 !important;
 }
 
-/* Dark Mode Edit Modal */
-.dark #edit-subject-modal .glass-card {
-  background: rgba(15, 23, 42, 0.98) !important;
-  border-color: rgba(45, 212, 191, 0.18) !important;
-}
 
-.dark #edit-subject-modal .gpa-input {
-  background-color: #0f172a !important;
-}
 
 .dark .remove-row-btn:hover {
   background-color: #450a0a !important;
