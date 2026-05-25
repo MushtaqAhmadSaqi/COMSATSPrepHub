@@ -1195,3 +1195,52 @@ html.dark body.gpa-page [class*="no-subject"],
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ==========================================================================
+   AI Screenshot OCR Upload Zone Styles
+   ========================================================================== */
+#ocr-upload-zone {
+  border-color: rgba(20, 184, 166, 0.3) !important;
+  background: rgba(20, 184, 166, 0.02) !important;
+  transition: all var(--transition-speed) ease;
+}
+
+#ocr-upload-zone:hover {
+  border-color: var(--site-accent) !important;
+  background: rgba(20, 184, 166, 0.06) !important;
+  transform: translateY(-1.5px);
+  box-shadow: 0 10px 25px rgba(20, 184, 166, 0.05) !important;
+}
+
+#ocr-upload-zone.drag-active {
+  border-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.08) !important;
+  box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.18) !important;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  display: block;
+  width: 100%;
+  animation: shimmer 1.8s infinite linear;
+}
+
+/* Dark Mode Upload Zone Styles */
+.dark #ocr-upload-zone {
+  border-color: rgba(45, 212, 191, 0.18) !important;
+  background: rgba(15, 23, 42, 0.4) !important;
+}
+
+.dark #ocr-upload-zone:hover {
+  border-color: var(--site-accent) !important;
+  background: rgba(20, 184, 166, 0.04) !important;
+}
+
+.dark #ocr-upload-zone.drag-active {
+  border-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.06) !important;
+}

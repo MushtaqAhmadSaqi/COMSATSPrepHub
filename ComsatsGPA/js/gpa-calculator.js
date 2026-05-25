@@ -1015,6 +1015,195 @@ import { supabase, auth } from '../../js/core.js';
   clearFormBtn.addEventListener('click', resetFormCompletely);
   setupRowListeners();
 
+  // ── AI Screenshot OCR Scanner Integration ──
+  const ocrUploadZone = document.getElementById('ocr-upload-zone');
+  const ocrFileInput = document.getElementById('ocr-file-input');
+  const ocrScanningState = document.getElementById('ocr-scanning-state');
+  const ocrIdleState = ocrUploadZone?.querySelector('.ocr-idle');
+
+  if (ocrUploadZone && ocrFileInput) {
+    ocrUploadZone.addEventListener('click', () => {
+      ocrFileInput.click();
+    });
+
+    ocrUploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      ocrUploadZone.classList.add('drag-active');
+    });
+
+    ocrUploadZone.addEventListener('dragleave', () => {
+      ocrUploadZone.classList.remove('drag-active');
+    });
+
+    ocrUploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      ocrUploadZone.classList.remove('drag-active');
+      if (e.dataTransfer.files && e.dataTransfer.files.length) {
+        handleOcrFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    ocrFileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length) {
+        handleOcrFile(e.target.files[0]);
+      }
+    });
+  }
+
+  async function handleOcrFile(file) {
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload a valid image file (screenshot).');
+      return;
+    }
+
+    // Show Loading/Scanning state
+    if (ocrIdleState) ocrIdleState.classList.add('hidden');
+    if (ocrScanningState) ocrScanningState.classList.remove('hidden');
+
+    try {
+      const base64 = await fileToBase64(file);
+
+      // Secure Bearer Token Authentication check:
+      // The serverless API endpoint requires a bearer token to verify user and prevent abuse.
+      const session = await auth.getSession();
+      const token = session?.access_token;
+
+      if (!token) {
+        throw new Error('Please sign in to your ComsatsPrepHub account to use the AI Screenshot Scanner.');
+      }
+
+      const response = await fetch('/api/analyze-screenshot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ imageBase64: base64 })
+      });
+
+      const data = await response.json();
+      if (!response.ok || data.error) {
+        throw new Error(data.error || 'Failed to parse screenshot.');
+      }
+
+      // Autofill the form dynamically!
+      autofillGpaFormFromOcr(data);
+
+    } catch (error) {
+      console.warn('[AI Scanner] Parse failed:', error);
+      alert(error.message || 'AI screenshot scanning failed. Please ensure your image is clear and you are logged in.');
+    } finally {
+      if (ocrIdleState) ocrIdleState.classList.remove('hidden');
+      if (ocrScanningState) ocrScanningState.classList.add('hidden');
+      if (ocrFileInput) ocrFileInput.value = ''; // Reset file input
+    }
+  }
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  }
+
+  function autofillGpaFormFromOcr(data) {
+    if (!data) return;
+
+    // 1. Subject details
+    const nameInp = document.getElementById('subject-name');
+    if (nameInp && data.subjectName) {
+      nameInp.value = data.subjectName;
+    }
+
+    if (courseCreditHoursEl && data.creditHours) {
+      courseCreditHoursEl.value = Math.max(0.5, Math.min(data.creditHours, 6));
+    }
+
+    // 2. Clear dynamic Quiz list and repopulate
+    const quizzesContainer = document.getElementById('theory-quizzes-list');
+    if (quizzesContainer && data.theory && Array.isArray(data.theory.quizzes)) {
+      quizzesContainer.innerHTML = '';
+      
+      if (data.theory.quizzes.length === 0) {
+        // Fallback row if no quizzes parsed
+        addDynamicRow('theory-quizzes-list', 'quiz');
+      } else {
+        data.theory.quizzes.forEach((quiz, index) => {
+          // Add a new row
+          addDynamicRow('theory-quizzes-list', 'quiz');
+          const rows = quizzesContainer.querySelectorAll('.dynamic-row');
+          const lastRow = rows[rows.length - 1];
+          if (lastRow) {
+            const obt = lastRow.querySelector('.quiz-obtained');
+            const tot = lastRow.querySelector('.quiz-total');
+            if (obt && tot) {
+              obt.value = quiz.obtained ?? '';
+              tot.value = quiz.total ?? 10;
+              validateInput(obt);
+            }
+          }
+        });
+      }
+    }
+
+    // 3. Clear dynamic Assignment list and repopulate
+    const assignmentsContainer = document.getElementById('theory-assignments-list');
+    if (assignmentsContainer && data.theory && Array.isArray(data.theory.assignments)) {
+      assignmentsContainer.innerHTML = '';
+      
+      if (data.theory.assignments.length === 0) {
+        // Fallback row if no assignments parsed
+        addDynamicRow('theory-assignments-list', 'assignment');
+      } else {
+        data.theory.assignments.forEach((assignment, index) => {
+          // Add a new row
+          addDynamicRow('theory-assignments-list', 'assignment');
+          const rows = assignmentsContainer.querySelectorAll('.dynamic-row');
+          const lastRow = rows[rows.length - 1];
+          if (lastRow) {
+            const obt = lastRow.querySelector('.assignment-obtained');
+            const tot = lastRow.querySelector('.assignment-total');
+            if (obt && tot) {
+              obt.value = assignment.obtained ?? '';
+              tot.value = assignment.total ?? 10;
+              validateInput(obt);
+            }
+          }
+        });
+      }
+    }
+
+    // 4. Populates Midterm obtained/total
+    if (data.theory && data.theory.mid) {
+      const midObt = document.getElementById('theory-mid-obtained');
+      const midTot = document.getElementById('theory-mid-total');
+      if (midObt && midTot) {
+        midObt.value = data.theory.mid.obtained ?? '';
+        midTot.value = data.theory.mid.total ?? 25;
+        validateInput(midObt);
+      }
+    }
+
+    // 5. Populates Final exam obtained/total
+    if (data.theory && data.theory.final) {
+      const finalObt = document.getElementById('theory-final-obtained');
+      const finalTot = document.getElementById('theory-final-total');
+      if (finalObt && finalTot) {
+        finalObt.value = data.theory.final.obtained ?? '';
+        finalTot.value = data.theory.final.total ?? 50;
+        validateInput(finalObt);
+      }
+    }
+
+    // Clear main form validation alerts
+    if (formErrors) formErrors.classList.add('hidden');
+
+    // Trigger preview and analytics recalculation
+    updateLivePreview();
+  }
+
   document.addEventListener('keydown', event => {
     if (editModal.classList.contains('hidden')) return;
 
