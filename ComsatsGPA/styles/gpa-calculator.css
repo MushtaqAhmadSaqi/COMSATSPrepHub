@@ -1,5 +1,6 @@
 /* ==========================================================================
-   GPA Calculator Custom Styles — COMSATSPrepHub Theme
+   COMSATS GPA Calculator Custom Styles — Unified Responsive UI
+   COMSATSPrepHub Theme (Light & Dark Modes)
    ========================================================================== */
 
 :root {
@@ -10,27 +11,211 @@
   --site-secondary: #0ea5e9;
   --site-secondary-soft: rgba(14, 165, 233, 0.10);
   --site-bg: #f8fafc;
-  --site-card: rgba(255, 255, 255, 0.78);
-  --site-border: rgba(15, 118, 110, 0.14);
+  --site-card: rgba(255, 255, 255, 0.96);
+  --site-border: #dbeafe;
   --error-color: #ef4444;
   --success-color: #10b981;
-  --transition-speed: 0.15s;
+  --transition-speed: 180ms;
 }
 
+/* ==========================================================================
+   Page Base & Theme Fixes (Ensures high contrast)
+   ========================================================================== */
+body.gpa-page {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(14, 165, 233, 0.14), transparent 28rem),
+    radial-gradient(circle at 92% 0%, rgba(99, 102, 241, 0.10), transparent 26rem),
+    #f8fafc !important;
+  color: #0f172a !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+
+body.gpa-page main,
+body.gpa-page #calculator,
+body.gpa-page .calculator-shell,
+body.gpa-page .gpa-shell,
+body.gpa-page .gpa-container {
+  position: relative;
+  z-index: 1;
+  color: #0f172a !important;
+}
+
+body.gpa-page h1,
+body.gpa-page h2,
+body.gpa-page h3,
+body.gpa-page h4,
+body.gpa-page label,
+body.gpa-page strong {
+  color: #0f172a !important;
+}
+
+body.gpa-page p,
+body.gpa-page span,
+body.gpa-page small,
+body.gpa-page li {
+  color: inherit;
+}
+
+body.gpa-page .text-white {
+  color: #0f172a !important;
+}
+
+/* Keep white text only on real colored badges & primary buttons */
+body.gpa-page button.text-white,
+body.gpa-page .btn-primary,
+body.gpa-page .gpa-primary-btn,
+body.gpa-page .bg-blue-500,
+body.gpa-page .bg-blue-600,
+body.gpa-page .bg-sky-500,
+body.gpa-page .bg-sky-600,
+body.gpa-page .bg-teal-600,
+body.gpa-page .bg-teal-700,
+body.gpa-page .bg-cyan-500,
+body.gpa-page .bg-cyan-600,
+body.gpa-page .bg-gradient-to-r {
+  color: #ffffff !important;
+}
+
+/* Base Utility Overrides for Slate/Gray text in GPA Page */
+body.gpa-page .text-gray-400,
+body.gpa-page .text-gray-500,
+body.gpa-page .text-slate-400,
+body.gpa-page .text-slate-500 {
+  color: #64748b !important;
+}
+
+body.gpa-page .text-gray-600,
+body.gpa-page .text-gray-700,
+body.gpa-page .text-slate-600,
+body.gpa-page .text-slate-700 {
+  color: #475569 !important;
+}
+
+body.gpa-page .text-gray-800,
+body.gpa-page .text-gray-900,
+body.gpa-page .text-slate-800,
+body.gpa-page .text-slate-900 {
+  color: #0f172a !important;
+}
+
+/* ==========================================================================
+   Typography & Elements Styling
+   ========================================================================== */
+body.gpa-page h1 {
+  font-size: clamp(2.1rem, 6vw, 4.25rem) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.055em !important;
+  font-weight: 900 !important;
+  text-shadow: none !important;
+}
+
+body.gpa-page h1 + p,
+body.gpa-page .hero-subtitle,
+body.gpa-page .gpa-subtitle {
+  max-width: 760px;
+  color: #475569 !important;
+  font-size: clamp(0.98rem, 2vw, 1.12rem) !important;
+  line-height: 1.75 !important;
+}
+
+body.gpa-page h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: clamp(1.2rem, 3vw, 1.65rem) !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.035em !important;
+}
+
+body.gpa-page h2 .material-symbols-outlined,
+body.gpa-page h3 .material-symbols-outlined {
+  color: #14b8a6 !important;
+}
+
+/* Section Title (Forms Header) */
+.section-title {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--site-primary);
+  margin-bottom: 0.75rem;
+  border-bottom: 1.5px dashed rgba(20, 184, 166, 0.2);
+  padding-bottom: 0.35rem;
+}
+
+.gpa-scheme-note {
+  margin: 0.35rem 0 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 16px;
+  background: rgba(14, 165, 233, 0.06);
+  border: 1.5px solid rgba(14, 165, 233, 0.12);
+  color: #475569;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  grid-column: span 2;
+}
+
+/* ==========================================================================
+   Premium Cards (Glassmorphism & elevation)
+   ========================================================================== */
+.glass-card {
+  background: var(--site-card) !important;
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--site-border) !important;
+  box-shadow: 0 18px 55px rgba(15, 23, 42, 0.08) !important;
+  border-radius: 24px;
+  transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+body.gpa-page .card,
+body.gpa-page .gpa-card,
+body.gpa-page .subject-entry-card,
+body.gpa-page .subjects-card,
+body.gpa-page .grade-scale-card,
+body.gpa-page .overall-gpa-card,
+body.gpa-page section,
+body.gpa-page aside {
+  color: #0f172a;
+}
+
+body.gpa-page .card,
+body.gpa-page .gpa-card,
+body.gpa-page .subject-entry-card,
+body.gpa-page .subjects-card,
+body.gpa-page .grade-scale-card,
+body.gpa-page .overall-gpa-card,
+body.gpa-page .rounded-2xl,
+body.gpa-page .rounded-3xl {
+  border-color: #dbeafe !important;
+  background:
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 34%),
+    rgba(255, 255, 255, 0.96) !important;
+  box-shadow: 0 18px 55px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* ==========================================================================
+   Forms & Custom Validation
+   ========================================================================== */
 .gpa-input {
   width: 100%;
-  border-radius: 0.75rem;
-  border: 1px solid #cbd5e1;
-  background-color: #ffffff;
-  color: #1e293b;
-  padding: 0.6rem 0.8rem;
-  font-size: 1rem;
+  min-height: 46px;
+  border-radius: 15px !important;
+  border: 1.5px solid #dbeafe !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.95rem;
   line-height: 1.5rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
   transition:
     border-color var(--transition-speed) ease,
     background-color var(--transition-speed) ease,
-    box-shadow var(--transition-speed) ease,
-    transform var(--transition-speed) ease;
+    box-shadow var(--transition-speed) ease;
   background-image: linear-gradient(
     to right,
     var(--site-accent-soft) var(--progress, 0%),
@@ -54,219 +239,390 @@ select.gpa-input {
   background-repeat: no-repeat;
 }
 
-.dark .gpa-input {
-  border-color: #475569;
-  background-color: #1e293b;
-  color: #f8fafc;
-  background-image: linear-gradient(
-    to right,
-    rgba(45, 212, 191, 0.15) var(--progress, 0%),
-    transparent var(--progress, 0%)
-  );
-}
-
-.dark select.gpa-input {
-  background-image:
-    linear-gradient(45deg, transparent 50%, #94a3b8 50%),
-    linear-gradient(135deg, #94a3b8 50%, transparent 50%),
-    linear-gradient(to right, rgba(45, 212, 191, 0.15) var(--progress, 0%), transparent var(--progress, 0%));
-}
-
 .gpa-input::placeholder {
-  color: #94a3b8;
+  color: #94a3b8 !important;
 }
 
 .gpa-input:hover {
-  border-color: var(--site-accent);
+  border-color: var(--site-accent) !important;
 }
 
 .gpa-input:focus {
-  outline: 2px solid var(--site-accent);
-  outline-offset: 2px;
-  border-color: transparent;
-  box-shadow: 0 10px 20px rgba(20, 184, 166, 0.08);
-}
-
-.gpa-input.is-invalid {
-  border-color: var(--error-color);
-  animation: shake 0.4s ease-in-out;
-}
-
-.gpa-input.is-valid {
-  border-color: var(--success-color);
+  outline: none !important;
+  border-color: var(--site-accent) !important;
+  box-shadow: 0 0 0 5px rgba(20, 184, 166, 0.18) !important;
 }
 
 .gpa-label {
   display: block;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #475569;
+  color: #475569 !important;
   margin-bottom: 0.25rem;
-}
-
-.dark .gpa-label {
-  color: #94a3b8;
 }
 
 .gpa-helper {
   margin-top: 0.35rem;
   font-size: 0.72rem;
-  line-height: 1.1rem;
-  color: #64748b;
+  line-height: 1.15;
+  color: #64748b !important;
 }
 
-.dark .gpa-helper {
+/* Form validation states */
+.gpa-input.is-invalid {
+  border-color: #ef4444 !important;
+  background-color: #fff1f2 !important;
+  animation: shake 0.4s ease-in-out;
+}
+
+.gpa-input.is-valid {
+  border-color: #10b981 !important;
+}
+
+.field-error {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  line-height: 1.1rem;
+  color: #dc2626;
+  font-weight: 600;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Mid/Final Pairs */
+.marks-grid-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* ==========================================================================
+   Buttons Hierarchy (Premium States)
+   ========================================================================== */
+body.gpa-page button,
+body.gpa-page .button,
+body.gpa-page .btn {
+  min-height: 44px;
+  border-radius: 14px !important;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+  cursor: pointer;
+}
+
+body.gpa-page button:hover,
+body.gpa-page .button:hover,
+body.gpa-page .btn:hover {
+  transform: translateY(-2px);
+}
+
+body.gpa-page button:active,
+body.gpa-page .button:active,
+body.gpa-page .btn:active {
+  transform: translateY(0);
+}
+
+/* Primary actions: Submit, Calculate, Save */
+body.gpa-page button[type="submit"],
+body.gpa-page .calculate-btn,
+body.gpa-page .add-subject-btn,
+body.gpa-page .save-btn,
+#save-changes-btn,
+#calc-overall-btn {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 14px 34px rgba(37, 99, 235, 0.25) !important;
+}
+
+body.gpa-page button[type="submit"]:hover,
+#calc-overall-btn:hover {
+  background: linear-gradient(135deg, #0284c7, #1d4ed8) !important;
+  box-shadow: 0 14px 38px rgba(37, 99, 235, 0.35) !important;
+}
+
+/* Secondary Actions / Clear Form */
+body.gpa-page .reset-btn,
+body.gpa-page .clear-btn,
+body.gpa-page button[type="button"],
+#clear-form-btn,
+#cancel-changes-btn {
+  border: 1.5px solid #dbeafe !important;
+  background: #ffffff !important;
+  color: #475569 !important;
+}
+
+body.gpa-page button[type="button"]:hover,
+#clear-form-btn:hover,
+#cancel-changes-btn:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Ghost Button styling */
+.btn-ghost {
+  background: transparent !important;
+  color: #64748b !important;
+  border: 1px solid transparent !important;
+  min-height: auto !important;
+}
+
+.btn-ghost:hover {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+}
+
+/* ==========================================================================
+   Dynamic Row Optimizations (Clean, Inline, High Density)
+   ========================================================================== */
+.dynamic-rows-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+}
+
+.dynamic-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 44px;
+  gap: 0.75rem;
+  align-items: center;
+  animation: slideInRow 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Visually hide dynamic repeating row labels to save massive vertical space on mobile */
+.dynamic-row label {
+  display: none !important;
+}
+
+.dynamic-row .gpa-input {
+  margin-right: 0;
+}
+
+/* Remove Row Trash Button */
+.remove-row-btn {
+  background: transparent !important;
+  color: #94a3b8 !important;
+  border: none !important;
+  padding: 0 !important;
+  cursor: pointer;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  transition: all 0.2s ease !important;
+  margin: 0 !important;
+}
+
+.remove-row-btn:hover {
+  background-color: #fee2e2 !important;
+  color: #ef4444 !important;
+  transform: scale(1.05) !important;
+}
+
+/* Add Row Dashed Button */
+.add-row-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.4rem !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  color: var(--site-primary) !important;
+  background: var(--site-accent-soft) !important;
+  border: 1.5px dashed rgba(20, 184, 166, 0.4) !important;
+  padding: 0.45rem 1rem !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  min-height: auto !important;
+  width: auto !important;
+  transition: all 0.2s ease !important;
+  margin-top: 0.5rem;
+}
+
+.add-row-btn:hover {
+  background: var(--site-accent) !important;
+  color: white !important;
+  border-style: solid !important;
+  border-color: transparent !important;
+  transform: translateY(-1.5px) !important;
+}
+
+/* Add dynamic row headers "Obtained | Total" above container */
+.dynamic-header-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 44px;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+  padding-right: 0.15rem;
+}
+
+.dynamic-header-lbl {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: #94a3b8;
 }
 
-.section-title {
+/* ==========================================================================
+   Live Preview & Score Badges
+   ========================================================================== */
+#live-preview-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 1rem;
+  font-weight: 700;
   font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--site-primary);
-  margin-bottom: 0.75rem;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scale(0.9);
+  opacity: 0;
 }
 
-.dark .section-title {
-  color: #2dd4bf;
+#live-preview-badge.visible {
+  transform: scale(1);
+  opacity: 1;
 }
 
-.hero-gradient {
-  position: relative;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.16), transparent 26%),
-    radial-gradient(circle at 80% 0%, rgba(255,255,255,0.12), transparent 22%),
-    linear-gradient(135deg, var(--site-primary) 0%, var(--site-accent) 48%, var(--site-secondary) 100%);
+/* GPA score badges */
+body.gpa-page .gpa-score,
+body.gpa-page .score-badge,
+body.gpa-page [class*="score"],
+body.gpa-page [class*="gpa-badge"] {
+  border: 1.5px solid rgba(20, 184, 166, 0.18) !important;
+  background: linear-gradient(135deg, #eff6ff, #e0f2fe) !important;
+  color: #0369a1 !important;
 }
 
-.hero-gradient::after {
-  content: "";
-  position: absolute;
-  inset: auto -10% -45% -10%;
-  height: 90%;
-  background: rgba(255, 255, 255, 0.10);
-  filter: blur(50px);
-  transform: rotate(-3deg);
-  pointer-events: none;
-}
-
-.hero-gradient > * {
-  position: relative;
-  z-index: 1;
-}
-
-@media (max-width: 640px) {
-  header.hero-gradient {
-    padding: 2rem 0.75rem;
-  }
-}
-
-.glass-card {
-  background: var(--site-card);
-  backdrop-filter: blur(14px);
-  border: 1px solid var(--site-border);
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
-}
-
-.dark .glass-card {
-  background: rgba(15, 23, 42, 0.78);
-  border: 1px solid rgba(45, 212, 191, 0.10);
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+/* ==========================================================================
+   Added Subjects List & Cards (Beautiful Layout)
+   ========================================================================== */
+#subjects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
 .subject-card {
   position: relative;
   overflow: hidden;
   border-radius: 1.25rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(15, 118, 110, 0.08) !important;
+  background: #ffffff !important;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.03);
 }
 
 .subject-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: translateY(-3px);
+  border-color: rgba(20, 184, 166, 0.28) !important;
+  box-shadow: 0 18px 30px rgba(15, 23, 42, 0.07) !important;
 }
 
 .subject-card::before {
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
-  width: 6px;
+  width: 5px;
   background: linear-gradient(180deg, var(--site-accent), var(--site-secondary));
-  opacity: 1;
+  z-index: 2;
 }
 
 .grade-badge {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: transform 0.2s ease;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .subject-card:hover .grade-badge {
   transform: scale(1.1) rotate(2deg);
 }
 
+/* Responsive Trash Button for Subject Cards */
 .delete-btn {
   position: absolute !important;
-  top: 8px !important;
-  right: 8px !important;
-  width: 28px !important;
-  height: 28px !important;
-  min-width: 28px !important;
-  min-height: 28px !important;
+  top: 12px !important;
+  right: 12px !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   border-radius: 50% !important;
-  background: rgba(241, 245, 249, 0.8) !important;
+  background: rgba(241, 245, 249, 0.9) !important;
   backdrop-filter: blur(4px);
   transition: all 0.2s ease;
   z-index: 20 !important;
   padding: 0 !important;
   border: 1px solid rgba(226, 232, 240, 0.8) !important;
   color: #ef4444 !important;
-  opacity: 0;
+  opacity: 0; /* Hover state on desktop only */
 }
 
 .subject-card:hover .delete-btn,
-.delete-btn:focus {
+.delete-btn:focus-visible {
   opacity: 1;
 }
 
-.dark .delete-btn {
-  background: rgba(30, 41, 59, 0.8);
-}
-
 .delete-btn:hover {
-  background: #fee2e2;
+  background: #fee2e2 !important;
   color: #ef4444 !important;
-  transform: rotate(90deg);
+  transform: scale(1.08) rotate(90deg);
 }
 
-.dark .delete-btn:hover {
-  background: #450a0a;
+/* Empty States */
+body.gpa-page .empty-state,
+body.gpa-page [class*="empty"],
+body.gpa-page [class*="no-subject"] {
+  border: 1.5px dashed #bae6fd !important;
+  background: #f0f9ff !important;
+  color: #475569 !important;
+  border-radius: 24px !important;
 }
 
+body.gpa-page .empty-state h3,
+body.gpa-page [class*="empty"] h3 {
+  color: #0f172a !important;
+}
+
+body.gpa-page .empty-state p,
+body.gpa-page [class*="empty"] p {
+  color: #64748b !important;
+}
+
+/* ==========================================================================
+   Overall Cumulative Result Panel
+   ========================================================================== */
 .overall-panel {
   background:
-    radial-gradient(circle at 15% 20%, rgba(255,255,255,0.18), transparent 28%),
-    linear-gradient(135deg, var(--site-primary), var(--site-secondary));
+    radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.18), transparent 28%),
+    linear-gradient(135deg, var(--site-primary), var(--site-secondary)) !important;
+  box-shadow: 0 20px 45px rgba(15, 118, 110, 0.25) !important;
+  border-radius: 28px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
 }
 
-.scale-row {
-  font-weight: 500;
-}
-
-.scale-row:nth-child(odd) {
-  background: rgba(15,118,110,0.04);
-}
-
-.dark .scale-row:nth-child(odd) {
-  background: rgba(20,184,166,0.06);
-}
-
+/* ==========================================================================
+   Details summary & Official Scale Tables
+   ========================================================================== */
 details > summary {
   list-style: none;
+  cursor: pointer;
+  user-select: none;
 }
 
 details > summary::-webkit-details-marker {
@@ -281,384 +637,59 @@ details[open] .chevron-icon {
   transform: rotate(180deg);
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Grade Scale Reference styling */
+body.gpa-page .grade-scale,
+body.gpa-page [class*="grade"] {
+  color: #0f172a;
 }
 
-.animate-slide-in {
-  animation: slideIn 0.25s ease both;
+.scale-row {
+  font-weight: 500;
+  transition: background-color var(--transition-speed) ease;
 }
 
-.slide-delay-1 {
-  animation-delay: 0.05s;
+.scale-row:nth-child(odd) {
+  background: rgba(15, 118, 110, 0.04);
 }
 
-.slide-delay-2 {
-  animation-delay: 0.10s;
+body.gpa-page table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.6rem;
+  color: #0f172a !important;
 }
 
-.slide-delay-3 {
-  animation-delay: 0.15s;
+body.gpa-page th {
+  color: #475569 !important;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 2px solid rgba(226, 232, 240, 0.5);
+  padding-bottom: 0.5rem;
 }
 
-.slide-delay-4 {
-  animation-delay: 0.20s;
+body.gpa-page td {
+  color: #0f172a !important;
+  padding: 0.55rem 0.75rem;
 }
 
-.slide-delay-5 {
-  animation-delay: 0.25s;
-}
-
-@keyframes shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-
-  25% {
-    transform: translateX(-4px);
-  }
-
-  75% {
-    transform: translateX(4px);
-  }
-}
-
-@keyframes pulseRing {
-  0% {
-    box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.4);
-  }
-
-  70% {
-    box-shadow: 0 0 0 10px rgba(20, 184, 166, 0);
-  }
-
-  100% {
-    box-shadow: 0 0 0 0 rgba(20, 184, 166, 0);
-  }
-}
-
-.is-pulsing {
-  animation: pulseRing 2s infinite;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
-}
-
-.animate-slide-in {
-  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-#edit-subject-modal.flex {
-  display: flex;
-}
-
-#edit-subject-modal .glass-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-.dark #edit-subject-modal .glass-card {
-  background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(45, 212, 191, 0.2);
-}
-
-#edit-subject-modal .gpa-input {
-  background-color: #f8fafc;
-}
-
-.dark #edit-subject-modal .gpa-input {
-  background-color: #0f172a;
-}
-
-.field-error {
-  font-size: 0.7rem;
-  color: var(--error-color);
-  margin-top: 0.25rem;
-  animation: fadeIn 0.2s ease-in-out;
-}
-
-.dark .field-error {
-  color: #f87171;
-}
-
-.btn-ghost {
-  background: transparent;
-  color: #64748b;
-  border: 1px solid transparent;
-}
-
-.btn-ghost:hover {
-  background: #f1f5f9;
-  color: #334155;
-}
-
-.dark .btn-ghost {
-  color: #94a3b8;
-}
-
-.dark .btn-ghost:hover {
-  background: #1e293b;
-  color: #e2e8f0;
-}
-
-
-.gpa-helper {
-  margin-top: 0.35rem;
-  font-size: 0.72rem;
-  line-height: 1.1rem;
-  color: #64748b;
-}
-
-.dark .gpa-helper {
-  color: #94a3b8;
-}
-
-.marks-settings {
-  transition:
-    border-color 0.15s ease,
-    background-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.marks-settings:hover {
-  border-color: rgba(20, 184, 166, 0.35);
-  box-shadow: 0 10px 25px rgba(15, 118, 110, 0.06);
-}
-
-.marks-settings summary::-webkit-details-marker {
-  display: none;
-}
-
-.marks-settings[open] {
-  border-color: rgba(20, 184, 166, 0.45);
-}
-
-.marks-settings input[type="number"] {
-  font-size: 0.95rem;
-}
-
-
-/* Dynamic Row Styles */
-.dynamic-rows-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.dynamic-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 0.5rem;
-  align-items: end;
-  animation: slideInRow 0.3s ease-out;
-}
-
-.dynamic-row .gpa-input {
-  margin-right: 0;
-}
-
-.remove-row-btn {
-  background: transparent;
-  color: #94a3b8;
-  border: none;
-  padding: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.5rem;
-}
-
-.remove-row-btn:hover {
-  background-color: #fee2e2;
-  color: #ef4444;
-}
-
-.dark .remove-row-btn:hover {
-  background-color: #450a0a;
-  color: #f87171;
-}
-
-.add-row-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--site-primary);
-  background: var(--site-accent-soft);
-  border: 1px dashed var(--site-accent);
-  padding: 0.4rem 0.8rem;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-top: 0.5rem;
-}
-
-.add-row-btn:hover {
-  background: var(--site-accent);
-  color: white;
-  border-style: solid;
-  transform: translateY(-1px);
-}
-
-.dark .add-row-btn {
-  color: #2dd4bf;
-  background: rgba(45, 212, 191, 0.05);
-}
-
-.dark .add-row-btn:hover {
-  background: #14b8a6;
-  color: white;
-}
-
-/* Live Preview Badge */
-#live-preview-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: 1rem;
-  font-weight: 700;
-  font-size: 0.75rem;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  transform: scale(0.9);
-  opacity: 0;
-}
-
-#live-preview-badge.visible {
-  transform: scale(1);
-  opacity: 1;
-}
-
-@keyframes slideInRow {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Mid/Final Pairs */
-.marks-grid-pair {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-}
-
-/* Accessibility: skip link */
-.skip-link {
-  position: absolute;
-  left: -999px;
-  top: 1rem;
-  z-index: 9999;
-  background: #0f766e;
-  color: #ffffff;
-  padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
-  font-weight: 800;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.25);
-}
-
-.skip-link:focus {
-  left: 1rem;
-}
-
-/* Stronger focus visibility */
-button:focus-visible,
-summary:focus-visible,
-.gpa-input:focus-visible,
-[role="switch"]:focus-visible + div {
-  outline: 3px solid #14b8a6;
-  outline-offset: 3px;
-}
-
-/* Better mobile touch targets */
-.btn,
-.add-row-btn,
-.remove-row-btn,
-#empty-state-cta,
-summary {
-  min-height: 44px;
-}
-
-.remove-row-btn {
-  min-width: 44px;
-}
-
-/* Better inline validation */
-.gpa-input.is-invalid {
-  border-color: #dc2626;
-  background-color: #fff1f2;
-}
-
-.dark .gpa-input.is-invalid {
-  background-color: rgba(127, 29, 29, 0.25);
-}
-
-.field-error {
-  display: block;
-  margin-top: 0.35rem;
-  font-size: 0.72rem;
-  line-height: 1.1rem;
-  color: #dc2626;
-  font-weight: 600;
-}
-
-.dark .field-error {
-  color: #fca5a5;
-}
-
-/* Grade insight panel */
+/* Grade Insight widget */
 .grade-insight {
   margin-bottom: 1rem;
-  border: 1px solid rgba(20, 184, 166, 0.25);
-  background: rgba(240, 253, 250, 0.75);
-  border-radius: 1rem;
+  border: 1.5px solid rgba(20, 184, 166, 0.22);
+  background: rgba(240, 253, 250, 0.8);
+  border-radius: 18px;
   padding: 1rem;
-}
-
-.dark .grade-insight {
-  background: rgba(20, 184, 166, 0.08);
-  border-color: rgba(45, 212, 191, 0.22);
+  animation: fadeIn 0.3s ease-out;
 }
 
 .grade-progress {
   width: 100%;
-  height: 0.55rem;
+  height: 0.6rem;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(148, 163, 184, 0.25);
+  background: rgba(148, 163, 184, 0.2);
 }
 
 .grade-progress span {
@@ -666,32 +697,482 @@ summary {
   height: 100%;
   width: 0%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #0f766e, #0ea5e9);
-  transition: width 0.25s ease;
+  background: linear-gradient(90deg, var(--site-primary), var(--site-secondary));
+  transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Better small-screen layout */
-@media (max-width: 420px) {
-  .glass-card {
-    border-radius: 1.25rem;
+/* ==========================================================================
+   Deep Edit Subject Modal Dialog
+   ========================================================================== */
+#edit-subject-modal {
+  display: none;
+  background-color: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(8px);
+}
+
+#edit-subject-modal.flex {
+  display: flex;
+}
+
+#edit-subject-modal .glass-card {
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.25) !important;
+  border-radius: 28px;
+}
+
+#edit-subject-modal .gpa-input {
+  background-color: #f8fafc !important;
+}
+
+/* ==========================================================================
+   Dark Mode Styles
+   ========================================================================== */
+html.dark body.gpa-page,
+.dark body.gpa-page,
+body.gpa-page.dark {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(56, 189, 248, 0.16), transparent 28rem),
+    radial-gradient(circle at 92% 0%, rgba(129, 140, 248, 0.12), transparent 26rem),
+    #08111f !important;
+  color: #f8fafc !important;
+}
+
+html.dark body.gpa-page main,
+html.dark body.gpa-page #calculator,
+.dark body.gpa-page main,
+.dark body.gpa-page #calculator {
+  color: #f8fafc !important;
+}
+
+html.dark body.gpa-page h1,
+html.dark body.gpa-page h2,
+html.dark body.gpa-page h3,
+html.dark body.gpa-page h4,
+html.dark body.gpa-page label,
+html.dark body.gpa-page strong,
+.dark body.gpa-page h1,
+.dark body.gpa-page h2,
+.dark body.gpa-page h3,
+.dark body.gpa-page h4,
+.dark body.gpa-page label,
+.dark body.gpa-page strong {
+  color: #f8fafc !important;
+}
+
+html.dark body.gpa-page p,
+html.dark body.gpa-page small,
+html.dark body.gpa-page li,
+.dark body.gpa-page p,
+.dark body.gpa-page small,
+.dark body.gpa-page li {
+  color: #cbd5e1 !important;
+}
+
+/* Dark Mode Card Overrides */
+html.dark body.gpa-page .card,
+html.dark body.gpa-page .gpa-card,
+html.dark body.gpa-page .subject-entry-card,
+html.dark body.gpa-page .subjects-card,
+html.dark body.gpa-page .grade-scale-card,
+html.dark body.gpa-page .overall-gpa-card,
+html.dark body.gpa-page .rounded-2xl,
+html.dark body.gpa-page .rounded-3xl,
+html.dark .glass-card,
+.dark body.gpa-page .card,
+.dark body.gpa-page .gpa-card,
+.dark body.gpa-page .subject-entry-card,
+.dark body.gpa-page .subjects-card,
+.dark body.gpa-page .grade-scale-card,
+.dark body.gpa-page .overall-gpa-card,
+.dark body.gpa-page .rounded-2xl,
+.dark body.gpa-page .rounded-3xl,
+.dark .glass-card {
+  background:
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015)),
+    #0f172a !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.42) !important;
+  color: #f8fafc !important;
+}
+
+/* Dark Mode Inputs */
+html.dark body.gpa-page input,
+html.dark body.gpa-page select,
+html.dark body.gpa-page textarea,
+.dark body.gpa-page input,
+.dark body.gpa-page select,
+.dark body.gpa-page textarea {
+  background-color: #172033 !important;
+  color: #f8fafc !important;
+  border-color: rgba(148, 163, 184, 0.28) !important;
+  background-image: linear-gradient(
+    to right,
+    rgba(45, 212, 191, 0.15) var(--progress, 0%),
+    transparent var(--progress, 0%)
+  );
+}
+
+html.dark body.gpa-page input::placeholder,
+html.dark body.gpa-page textarea::placeholder,
+.dark body.gpa-page input::placeholder,
+.dark body.gpa-page textarea::placeholder {
+  color: #64748b !important;
+}
+
+html.dark body.gpa-page select option,
+.dark body.gpa-page select option {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+/* Dark Mode Utilities & Badge Colors */
+html.dark body.gpa-page .text-gray-400,
+html.dark body.gpa-page .text-gray-500,
+html.dark body.gpa-page .text-slate-400,
+html.dark body.gpa-page .text-slate-500,
+.dark body.gpa-page .text-gray-400,
+.dark body.gpa-page .text-gray-500,
+.dark body.gpa-page .text-slate-400,
+.dark body.gpa-page .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+html.dark body.gpa-page .text-gray-600,
+html.dark body.gpa-page .text-gray-700,
+html.dark body.gpa-page .text-slate-600,
+html.dark body.gpa-page .text-slate-700,
+.dark body.gpa-page .text-gray-600,
+.dark body.gpa-page .text-gray-700,
+.dark body.gpa-page .text-slate-600,
+.dark body.gpa-page .text-slate-700 {
+  color: #cbd5e1 !important;
+}
+
+html.dark body.gpa-page .section-title,
+.dark body.gpa-page .section-title {
+  color: #2dd4bf !important;
+}
+
+.dark .gpa-scheme-note {
+  background: rgba(56, 189, 248, 0.08) !important;
+  border-color: rgba(56, 189, 248, 0.18) !important;
+  color: #cbd5e1 !important;
+}
+
+/* Dark Mode Live Badge */
+html.dark body.gpa-page .gpa-score,
+html.dark body.gpa-page .score-badge,
+html.dark body.gpa-page [class*="score"],
+html.dark body.gpa-page [class*="gpa-badge"],
+.dark body.gpa-page .gpa-score,
+.dark body.gpa-page .score-badge,
+.dark body.gpa-page [class*="score"],
+.dark body.gpa-page [class*="gpa-badge"] {
+  background: rgba(56, 189, 248, 0.12) !important;
+  border-color: rgba(56, 189, 248, 0.24) !important;
+  color: #7dd3fc !important;
+}
+
+/* Dark Mode Added Subjects Cards */
+html.dark body.gpa-page .subject-card,
+.dark body.gpa-page .subject-card {
+  border-color: rgba(148, 163, 184, 0.12) !important;
+}
+
+html.dark body.gpa-page .subject-card:hover,
+.dark body.gpa-page .subject-card:hover {
+  border-color: rgba(45, 212, 191, 0.28) !important;
+  box-shadow: 0 18px 30px rgba(0, 0, 0, 0.35) !important;
+}
+
+html.dark body.gpa-page th,
+.dark body.gpa-page th {
+  color: #94a3b8 !important;
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+html.dark body.gpa-page td,
+.dark body.gpa-page td {
+  color: #e2e8f0 !important;
+}
+
+.dark .scale-row:nth-child(odd) {
+  background: rgba(20, 184, 166, 0.05);
+}
+
+/* Dark Mode Delete Card Button */
+html.dark .delete-btn,
+.dark .delete-btn {
+  background: rgba(15, 23, 42, 0.9) !important;
+  border-color: rgba(148, 163, 184, 0.18) !important;
+}
+
+html.dark .delete-btn:hover,
+.dark .delete-btn:hover {
+  background: #450a0a !important;
+}
+
+/* Dark Mode Empty State */
+html.dark body.gpa-page .empty-state,
+html.dark body.gpa-page [class*="empty"],
+html.dark body.gpa-page [class*="no-subject"],
+.dark body.gpa-page .empty-state,
+.dark body.gpa-page [class*="empty"],
+.dark body.gpa-page [class*="no-subject"] {
+  background: rgba(56, 189, 248, 0.05) !important;
+  border-color: rgba(56, 189, 248, 0.2) !important;
+  color: #cbd5e1 !important;
+}
+
+/* Dark Mode Edit Modal */
+.dark #edit-subject-modal .glass-card {
+  background: rgba(15, 23, 42, 0.98) !important;
+  border-color: rgba(45, 212, 191, 0.18) !important;
+}
+
+.dark #edit-subject-modal .gpa-input {
+  background-color: #0f172a !important;
+}
+
+.dark .remove-row-btn:hover {
+  background-color: #450a0a !important;
+  color: #f87171 !important;
+}
+
+.dark .add-row-btn {
+  color: #2dd4bf !important;
+  background: rgba(45, 212, 191, 0.05) !important;
+}
+
+.dark .add-row-btn:hover {
+  background: #14b8a6 !important;
+  color: white !important;
+}
+
+.dark .grade-insight {
+  background: rgba(20, 184, 166, 0.06);
+  border-color: rgba(45, 212, 191, 0.2);
+}
+
+/* ==========================================================================
+   Animations & Keyframes
+   ========================================================================== */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRow {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulseRing {
+  0% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(20, 184, 166, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(20, 184, 166, 0); }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.28s ease-out forwards;
+}
+
+.is-pulsing {
+  animation: pulseRing 2s infinite;
+}
+
+/* Delay sequences for staggered card lists */
+.slide-delay-1 { animation-delay: 0.04s; }
+.slide-delay-2 { animation-delay: 0.08s; }
+.slide-delay-3 { animation-delay: 0.12s; }
+.slide-delay-4 { animation-delay: 0.16s; }
+.slide-delay-5 { animation-delay: 0.20s; }
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (MEDIA QUERIES)
+   ========================================================================== */
+
+/* Medium desktops and small laptops (tablet stack prep) */
+@media (max-width: 1024px) {
+  body.gpa-page main {
+    grid-template-columns: 1fr !important;
+    gap: 2.2rem !important;
+  }
+}
+
+/* Tablet refinements */
+@media (max-width: 900px) {
+  body.gpa-page main,
+  body.gpa-page #calculator,
+  body.gpa-page .calculator-shell,
+  body.gpa-page .gpa-shell {
+    padding-inline: 16px !important;
+  }
+}
+
+/* Touch devices & screen viewports <= 768px (Crucial UX fix) */
+@media (max-width: 768px) {
+  /* Permanently show the delete button on subject cards since hover is unavailable on touch */
+  .delete-btn {
+    opacity: 1 !important;
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    background: #fee2e2 !important;
+    color: #ef4444 !important;
+    border-color: rgba(239, 68, 68, 0.2) !important;
   }
 
-  .dynamic-row {
-    grid-template-columns: 1fr;
+  .subject-card {
+    padding-right: 3rem !important; /* Keep text clear of absolute delete button */
+  }
+
+  .subject-card:hover .delete-btn {
+    transform: none;
+  }
+
+  .subject-card:active {
+    transform: scale(0.99);
+  }
+}
+
+/* Mobile Screens (E.g. <= 640px) */
+@media (max-width: 640px) {
+  body.gpa-page {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.12), transparent 22rem),
+      #f8fafc !important;
+  }
+
+  body.gpa-page h1 {
+    text-align: left !important;
+    font-size: 2.25rem !important;
+  }
+
+  body.gpa-page h1 + p,
+  body.gpa-page .hero-subtitle,
+  body.gpa-page .gpa-subtitle {
+    text-align: left !important;
+    font-size: 0.95rem !important;
+  }
+
+  /* Card padding reduction to optimize screen estate */
+  body.gpa-page .card,
+  body.gpa-page .gpa-card,
+  body.gpa-page .subject-entry-card,
+  body.gpa-page .subjects-card,
+  body.gpa-page .grade-scale-card,
+  body.gpa-page .overall-gpa-card,
+  body.gpa-page .rounded-2xl,
+  body.gpa-page .rounded-3xl,
+  .glass-card {
+    border-radius: 22px !important;
+    padding: 1.15rem !important;
+  }
+
+  body.gpa-page input,
+  body.gpa-page select,
+  body.gpa-page textarea {
+    min-height: 48px !important;
+    font-size: 16px !important; /* Prevents iOS auto-zoom on input focus */
+  }
+
+  /* CRITICAL FIX: Only primary, form-wide action buttons stretch on mobile! */
+  body.gpa-page button[type="submit"],
+  #clear-form-btn,
+  #calc-overall-btn,
+  #reset-all-btn,
+  #save-changes-btn,
+  #cancel-changes-btn {
+    width: 100% !important;
+    min-height: 48px !important;
+    justify-content: center !important;
+  }
+
+  /* Ensure rows buttons DO NOT stretch to 100% width on mobile! */
+  .add-row-btn {
+    width: auto !important;
+    display: inline-flex !important;
   }
 
   .remove-row-btn {
-    width: 100%;
-    border: 1px dashed rgba(239, 68, 68, 0.35);
+    width: 44px !important;
+    min-width: 44px !important;
+    display: flex !important;
   }
 
-  #live-preview-badge {
-    font-size: 0.7rem;
-    padding: 0.35rem 0.55rem;
+  body.gpa-page table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
   }
 }
 
-/* Respect users who dislike animations */
+/* Small Screens (E.g. <= 420px) */
+@media (max-width: 420px) {
+  body.gpa-page .card,
+  body.gpa-page .glass-card {
+    border-radius: 18px !important;
+  }
+
+  /* Keep input rows compact and inline (DO NOT wrap/stack them vertical! It's too long!) */
+  .dynamic-row {
+    grid-template-columns: 1fr 1fr 40px;
+    gap: 0.5rem;
+  }
+
+  .remove-row-btn {
+    min-width: 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+  }
+
+  /* Adjust subject card layout text padding */
+  .subject-card {
+    padding: 1rem !important;
+    padding-right: 2.8rem !important;
+  }
+
+  .subject-card .subject-name-text {
+    font-size: 0.95rem !important;
+  }
+
+  /* Stack information elements under subject names nicely */
+  .subject-info-text {
+    gap: x-3 y-1.5 !important;
+    font-size: 10px !important;
+  }
+
+  /* Overall cumulative result adjustments */
+  .overall-panel {
+    padding: 1.25rem !important;
+  }
+
+  #overall-gpa {
+    font-size: 2.75rem !important;
+  }
+}
+
+/* User Accessibility Prefs (Reduced Motion) */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
