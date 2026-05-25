@@ -56,6 +56,17 @@ import { supabase, auth } from '../../js/core.js';
   const editFinalObt = document.getElementById('edit-final-obt');
   const editFinalTot = document.getElementById('edit-final-tot');
 
+  // Lab Component inputs for editing
+  const editLabAssignObt = document.getElementById('edit-lab-assign-obt');
+  const editLabAssignTot = document.getElementById('edit-lab-assign-tot');
+  const editLabMidObt = document.getElementById('edit-lab-mid-obt');
+  const editLabMidTot = document.getElementById('edit-lab-mid-tot');
+  const editLabFinalObt = document.getElementById('edit-lab-final-obt');
+  const editLabFinalTot = document.getElementById('edit-lab-final-tot');
+  const editLabSection = document.getElementById('edit-lab-section');
+  
+  const closeModalBtn = document.getElementById('close-modal-btn');
+
   const saveEditBtn = document.getElementById('save-changes-btn');
   const cancelEditBtn = document.getElementById('cancel-changes-btn');
 
@@ -93,6 +104,20 @@ import { supabase, auth } from '../../js/core.js';
           obtained: Number(subject?.raw?.f?.obtained) || 0,
           total: Number(subject?.raw?.f?.total) || 50,
         },
+        l: subject?.raw?.l ? {
+          a: {
+            obt: Number(subject?.raw?.l?.a?.obt ?? subject?.raw?.l?.a?.obtained) || 0,
+            tot: Number(subject?.raw?.l?.a?.tot ?? subject?.raw?.l?.a?.total) || 10,
+          },
+          m: {
+            obtained: Number(subject?.raw?.l?.m?.obtained) || 0,
+            total: Number(subject?.raw?.l?.m?.total) || 25,
+          },
+          f: {
+            obtained: Number(subject?.raw?.l?.f?.obtained) || 0,
+            total: Number(subject?.raw?.l?.f?.total) || 50,
+          }
+        } : null
       },
     };
   }
@@ -609,7 +634,21 @@ import { supabase, auth } from '../../js/core.js';
       q: sum(data.theory.quizzes),
       a: sum(data.theory.assignments),
       m: data.theory.mid,
-      f: data.theory.final
+      f: data.theory.final,
+      l: hasLab ? {
+        a: {
+          obt: sum(data.lab.labAssignments).obt,
+          tot: sum(data.lab.labAssignments).tot || 10
+        },
+        m: {
+          obtained: data.lab.labMid.obtained,
+          total: data.lab.labMid.total || 25
+        },
+        f: {
+          obtained: data.lab.labFinal.obtained,
+          total: data.lab.labFinal.total || 50
+        }
+      } : null
     };
 
     const newSubject = {
@@ -644,7 +683,7 @@ import { supabase, auth } from '../../js/core.js';
     editNameInp.value = subject.name;
     editCreditsInp.value = subject.creditHours;
     
-    // Populate raw marks
+    // Populate raw theory marks
     editQuizObt.value = subject.raw.q.obt;
     editQuizTot.value = subject.raw.q.tot || 10;
     editAssignObt.value = subject.raw.a.obt;
@@ -653,6 +692,19 @@ import { supabase, auth } from '../../js/core.js';
     editMidTot.value = subject.raw.m.total || 25;
     editFinalObt.value = subject.raw.f.obtained;
     editFinalTot.value = subject.raw.f.total || 50;
+
+    // Populate raw lab marks if applicable
+    if (subject.hasLab && editLabSection) {
+      editLabSection.classList.remove('hidden');
+      if (editLabAssignObt) editLabAssignObt.value = subject.raw.l?.a?.obt ?? 0;
+      if (editLabAssignTot) editLabAssignTot.value = subject.raw.l?.a?.tot ?? 10;
+      if (editLabMidObt) editLabMidObt.value = subject.raw.l?.m?.obtained ?? 0;
+      if (editLabMidTot) editLabMidTot.value = subject.raw.l?.m?.total ?? 25;
+      if (editLabFinalObt) editLabFinalObt.value = subject.raw.l?.f?.obtained ?? 0;
+      if (editLabFinalTot) editLabFinalTot.value = subject.raw.l?.f?.total ?? 50;
+    } else if (editLabSection) {
+      editLabSection.classList.add('hidden');
+    }
 
     editModal.classList.remove('hidden');
     editModal.classList.add('flex');
@@ -674,7 +726,7 @@ import { supabase, auth } from '../../js/core.js';
     const newName = editNameInp.value.trim() || 'Unnamed Subject';
     const newCredits = Math.max(parseFloat(editCreditsInp.value) || 3, 0.5);
     
-    // Read edited marks
+    // Read edited theory marks
     const r = {
       q: { obtained: parseFloat(editQuizObt.value) || 0, total: parseFloat(editQuizTot.value) || 1 },
       a: { obtained: parseFloat(editAssignObt.value) || 0, total: parseFloat(editAssignTot.value) || 1 },
@@ -682,7 +734,6 @@ import { supabase, auth } from '../../js/core.js';
       f: { obtained: parseFloat(editFinalObt.value) || 0, total: parseFloat(editFinalTot.value) || 1 }
     };
 
-    // Recalculate using GpaLogic (with default scheme or scheme from settings)
     const scheme = readMarkScheme();
     const theoryData = {
       quizzes: [{ obtained: r.q.obtained, total: r.q.total }],
@@ -692,7 +743,33 @@ import { supabase, auth } from '../../js/core.js';
     };
 
     const theoryTotal = Logic.calcTheoryTotal(theoryData, scheme.theory);
-    const finalPct = Logic.calcFinalPercentage(theoryTotal, subject.labTotal, subject.hasLab, newCredits, 1);
+    
+    // Read and recalculate lab marks if applicable
+    let labTotal = subject.labTotal;
+    let labRawData = subject.raw.l;
+
+    if (subject.hasLab) {
+      const l = {
+        a: { obtained: parseFloat(editLabAssignObt?.value) || 0, total: parseFloat(editLabAssignTot?.value) || 1 },
+        m: { obtained: parseFloat(editLabMidObt?.value) || 0, total: parseFloat(editLabMidTot?.value) || 1 },
+        f: { obtained: parseFloat(editLabFinalObt?.value) || 0, total: parseFloat(editLabFinalTot?.value) || 1 }
+      };
+
+      const labData = {
+        labAssignments: [{ obtained: l.a.obtained, total: l.a.total }],
+        labMid: l.m,
+        labFinal: l.f
+      };
+
+      labTotal = Logic.calcLabTotal(labData, scheme.lab);
+      labRawData = {
+        a: { obt: l.a.obtained, tot: l.a.total },
+        m: l.m,
+        f: l.f
+      };
+    }
+
+    const finalPct = Logic.calcFinalPercentage(theoryTotal, labTotal, subject.hasLab, newCredits, 1);
     const gradeInfo = Logic.getGradeInfo(finalPct);
 
     // Update data object
@@ -702,11 +779,13 @@ import { supabase, auth } from '../../js/core.js';
     subject.gpa = gradeInfo.point;
     subject.letter = gradeInfo.letter;
     subject.theoryTotal = theoryTotal;
+    subject.labTotal = labTotal;
     subject.raw = {
       q: { obt: r.q.obtained, tot: r.q.total },
       a: { obt: r.a.obtained, tot: r.a.total },
       m: r.m,
-      f: r.f
+      f: r.f,
+      l: labRawData
     };
 
     // Refresh UI
@@ -723,7 +802,10 @@ import { supabase, auth } from '../../js/core.js';
           <span>Credits: <strong class="text-slate-700 dark:text-slate-200">${subject.creditHours.toFixed(1)}</strong></span>
           <span>Theory: <strong class="text-slate-700 dark:text-slate-200">${subject.theoryTotal.toFixed(1)}%</strong></span>
           ${subject.hasLab ? `<span>Lab: <strong class="text-slate-700 dark:text-slate-200">${subject.labTotal.toFixed(1)}%</strong></span>` : ''}
-          <span>Final: <strong class="text-slate-700 dark:text-slate-200">${subject.percentage.toFixed(2)}%</strong></span>
+          <span class="flex items-center gap-1.5 border-l border-slate-200 dark:border-slate-700 pl-4 ml-1">
+            <span class="text-slate-400 uppercase font-black text-[9px] tracking-widest">Aggregate</span> 
+            <strong class="text-teal-600 dark:text-teal-400 font-bold">${subject.percentage.toFixed(2)}%</strong>
+          </span>
         `;
       }
       if (gradeBadge) {
@@ -731,6 +813,11 @@ import { supabase, auth } from '../../js/core.js';
         gradeBadge.className = `grade-badge inline-flex items-center justify-center w-10 h-10 rounded-xl text-sm font-bold ${getGradeBadgeColor(subject.letter)}`;
       }
       if (gpaText) gpaText.textContent = `${subject.gpa.toFixed(2)} GPA`;
+      
+      const cardGpaVal = card.querySelector('.gpa-text');
+      if (cardGpaVal) {
+        cardGpaVal.className = `gpa-text text-lg font-black ${getGpaTextColor(subject.gpa)}`;
+      }
     }
 
     closeEditModal();
@@ -744,10 +831,15 @@ import { supabase, auth } from '../../js/core.js';
   });
 
   cancelEditBtn.addEventListener('click', closeEditModal);
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', closeEditModal);
+  }
 
   editModal.addEventListener('click', (e) => {
     if (e.target === editModal) closeEditModal();
   });
+
+
 
   function renderSubjectCard(subject, orderIndex) {
     emptyState.classList.add('hidden');
