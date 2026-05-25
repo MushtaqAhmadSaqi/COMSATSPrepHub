@@ -102,13 +102,13 @@
               </p>
 
               <div>
-                <label for="assignment-weight" class="gpa-label">Assignment Weight</label>
-                <input id="assignment-weight" type="number" min="0" max="100" step="0.1" value="10" class="gpa-input">
+                <label for="quiz-weight" class="gpa-label">Quiz Weight</label>
+                <input id="quiz-weight" type="number" min="0" max="100" step="0.1" value="15" class="gpa-input">
               </div>
 
               <div>
-                <label for="quiz-weight" class="gpa-label">Quiz Weight</label>
-                <input id="quiz-weight" type="number" min="0" max="100" step="0.1" value="15" class="gpa-input">
+                <label for="assignment-weight" class="gpa-label">Assignment Weight</label>
+                <input id="assignment-weight" type="number" min="0" max="100" step="0.1" value="10" class="gpa-input">
               </div>
 
               <div>
@@ -157,29 +157,6 @@
         <div class="mb-6">
           <p class="section-title">Theory Component</p>
 
-          <!-- Dynamic Assignments -->
-          <div class="mb-5">
-            <div class="flex items-center justify-between mb-2">
-              <label class="gpa-label !mb-0">Assignments</label>
-              <button type="button" class="add-row-btn" data-container="theory-assignments-list" data-type="assignment">
-                <span class="material-symbols-outlined !text-xs">add</span> Add Assignment
-              </button>
-            </div>
-            <div class="dynamic-header-row">
-              <span class="dynamic-header-lbl">Obtained</span>
-              <span class="dynamic-header-lbl">Total</span>
-              <span></span>
-            </div>
-            <div id="theory-assignments-list" class="dynamic-rows-container">
-              <!-- Initial row -->
-              <div class="dynamic-row">
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Obtained</label><input type="number" step="0.5" class="gpa-input assignment-obtained" placeholder="0"></div>
-                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Total</label><input type="number" step="0.5" class="gpa-input assignment-total" value="10"></div>
-                <button type="button" class="remove-row-btn" title="Remove"><span class="material-symbols-outlined text-lg">delete</span></button>
-              </div>
-            </div>
-          </div>
-
           <!-- Dynamic Quizzes -->
           <div class="mb-5">
             <div class="flex items-center justify-between mb-2">
@@ -198,6 +175,29 @@
               <div class="dynamic-row">
                 <div><label class="text-[10px] font-bold text-slate-400 uppercase">Obtained</label><input type="number" step="0.5" class="gpa-input quiz-obtained" placeholder="0"></div>
                 <div><label class="text-[10px] font-bold text-slate-400 uppercase">Total</label><input type="number" step="0.5" class="gpa-input quiz-total" value="10"></div>
+                <button type="button" class="remove-row-btn" title="Remove"><span class="material-symbols-outlined text-lg">delete</span></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Assignments -->
+          <div class="mb-5">
+            <div class="flex items-center justify-between mb-2">
+              <label class="gpa-label !mb-0">Assignments</label>
+              <button type="button" class="add-row-btn" data-container="theory-assignments-list" data-type="assignment">
+                <span class="material-symbols-outlined !text-xs">add</span> Add Assignment
+              </button>
+            </div>
+            <div class="dynamic-header-row">
+              <span class="dynamic-header-lbl">Obtained</span>
+              <span class="dynamic-header-lbl">Total</span>
+              <span></span>
+            </div>
+            <div id="theory-assignments-list" class="dynamic-rows-container">
+              <!-- Initial row -->
+              <div class="dynamic-row">
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Obtained</label><input type="number" step="0.5" class="gpa-input assignment-obtained" placeholder="0"></div>
+                <div><label class="text-[10px] font-bold text-slate-400 uppercase">Total</label><input type="number" step="0.5" class="gpa-input assignment-total" value="10"></div>
                 <button type="button" class="remove-row-btn" title="Remove"><span class="material-symbols-outlined text-lg">delete</span></button>
               </div>
             </div>
@@ -359,7 +359,7 @@
       <!-- Calculate Overall GPA button -->
       <div aria-live="polite" class="w-full">
         <button id="calc-overall-btn"
-          class="hidden w-full flex items-center justify-center gap-2 bg-gradient-to-r from-teal-600 to-sky-600 hover:from-teal-700 hover:to-sky-700 text-white font-bold rounded-2xl py-3.5 px-6 text-sm transition-all shadow-lg shadow-teal-500/30 active:scale-[0.98]">
+          class="hidden w-full flex items-center justify-center gap-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold rounded-2xl py-3.5 px-6 text-sm transition-all shadow-lg shadow-emerald-500/25 active:scale-[0.98]">
           <span class="material-symbols-outlined">functions</span>
           Calculate Overall GPA
         </button>
