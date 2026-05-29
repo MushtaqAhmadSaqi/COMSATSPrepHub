@@ -10,6 +10,10 @@ import { auth } from './core.js';
 import { initAuthModal, openModal } from './auth-ui.js';
 import './ui-enhancements.js';
 
+// ── Google Analytics Config ───────────────────────────────────────────────
+// Replace with your GA4 Measurement ID (e.g. G-7L96JY8ZTJ)
+const GA_MEASUREMENT_ID = 'G-BKQ5GLJLJY';
+
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
 const shouldSaveData = () => !!connection?.saveData;
@@ -98,6 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     _initVanillaTilt();
     _initSwipeNav(currentPage);
     _initScrollHideNav();
+    _initGoogleAnalytics();
   });
 });
 
@@ -967,5 +972,26 @@ function _bindThemeLogoSync() {
       const base = currentSrc.includes('../') ? '../' : '';
       img.src = isDark ? `${base}Dlogo.png` : `${base}logo.png`;
     });
+  });
+}
+
+function _initGoogleAnalytics() {
+  // Ignore analytics for local development
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
+  if (GA_MEASUREMENT_ID === 'G-XXXXXXXXXX') {
+    console.warn('Google Analytics: Please replace the placeholder GA_MEASUREMENT_ID with your actual GA4 ID.');
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+  document.head.appendChild(script);
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function() { window.dataLayer.push(arguments); };
+  window.gtag('js', new Date());
+  window.gtag('config', GA_MEASUREMENT_ID, {
+    page_path: window.location.pathname + window.location.search
   });
 }
