@@ -1,0 +1,21 @@
+# COMSATSPrepHub LLM Guide
+
+> Information about COMSATSPrepHub for Language Models and AI crawlers.
+
+## About
+COMSATSPrepHub is a platform dedicated to helping students of COMSATS University prepare for their exams smarter and faster. We provide access to verified past papers, practice quizzes, AI quiz generation tools (using Gemini), and a GPA calculator. 
+
+## Key Tools
+- **Past Papers:** A categorized repository of past papers across various subjects including Calculus, Data Structures, OOP, Networks, and AI.
+- **Practice Quizzes:** Instant topic-based practice tests.
+- **AI Quiz Generator:** Generates personalized COMSATS-style quizzes based on user selection.
+- **GPA Calculator:** Calculates semester GPA based on COMSATS grading schemes.
+
+## Target Audience
+COMSATS University Students
+
+## Access
+The platform is free to use. Some advanced features, like AI Quiz Generation and saving GPA calculations, require user authentication.
+
+## Official Link
+https://comsatsprephub.vercel.app
