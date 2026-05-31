@@ -332,7 +332,7 @@
 
 </head>
 
-<body class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300 antialiased min-h-screen" style="visibility:hidden;">
+<body class="bg-[#f0f2f5] dark:bg-[#0f172a] text-[#1a1a2e] dark:text-gray-100 transition-colors duration-300 antialiased min-h-screen">
     <div id="app-header"></div>
 
     <!-- ═══════════════════════════════════════════════
@@ -684,18 +684,16 @@
         async function loadPaper() {
             console.log('[Paper-View] loadPaper started');
             
+            document.body.style.visibility = 'visible';
+
             // Require authentication before viewing the paper
             const session = await getUserSession();
             if (!session) {
                 initAuthModal();
                 sessionStorage.setItem('postAuthRedirect', window.location.href);
                 openModal();
-                // Keep body hidden while modal is shown — no flash
                 return;
             }
-
-            // Auth confirmed — reveal the page
-            document.body.style.visibility = 'visible';
 
             try {
                 // Parallel: dependencies + paper query
