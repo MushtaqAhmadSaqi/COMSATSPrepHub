@@ -22,6 +22,42 @@ import {
 
 let lastFocusedElement = null;
 let removeFocusTrap = null;
+let authModalCssReady = null;
+
+function ensureAuthModalCss() {
+  const existing = document.querySelector('link[href*="auth-modal.css"]');
+
+  if (existing?.sheet) {
+    return Promise.resolve();
+  }
+
+  if (authModalCssReady) return authModalCssReady;
+
+  const link = existing || document.createElement('link');
+
+  authModalCssReady = new Promise(resolve => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+    };
+
+    link.addEventListener('load', finish, { once: true });
+    link.addEventListener('error', finish, { once: true });
+
+    // Do not block auth entirely if the stylesheet is slow on a weak network.
+    window.setTimeout(finish, 1200);
+  });
+
+  if (!existing) {
+    link.rel = 'stylesheet';
+    link.href = 'auth-modal.css';
+    document.head.appendChild(link);
+  }
+
+  return authModalCssReady;
+}
 
 /* ──────────────────────────────────────────────────────────────────────────
  * SweetAlert Loader
@@ -116,18 +152,14 @@ function focusActiveField(tab = 'login') {
 export function initAuthModal() {
   if (document.getElementById('auth-modal-overlay')) return;
 
-  if (!document.querySelector('link[href*="auth-modal.css"]')) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'auth-modal.css';
-    document.head.appendChild(link);
-  }
-
+  ensureAuthModalCss();
   injectModalHTML();
   attachListeners();
 }
 
-export function openModal(startTab = 'login') {
+export async function openModal(startTab = 'login') {
+  await ensureAuthModalCss();
+
   const overlay = document.getElementById('auth-modal-overlay');
   const authCard = document.getElementById('am-auth');
 

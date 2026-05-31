@@ -629,6 +629,22 @@
             if (errorMsg) errorMsg.textContent = String(message || 'Something went wrong while loading the paper.');
         }
 
+        function isAuthRequiredError(error) {
+            const message = String(error?.message || error || '').toLowerCase();
+            return message.includes('sign in')
+                || message.includes('not authenticated')
+                || message.includes('auth')
+                || message.includes('jwt')
+                || message.includes('permission denied');
+        }
+
+        async function showPaperAuthGate() {
+            hidePaperError();
+            initAuthModal();
+            sessionStorage.setItem('postAuthRedirect', window.location.href);
+            await openModal();
+        }
+
         async function handleDownload() {
             // Placeholder for original handleDownload logic
             // In a real scenario, we'd preserve the original function
@@ -689,11 +705,11 @@
             // Require authentication before viewing the paper
             const session = await getUserSession();
             if (!session) {
-                initAuthModal();
-                sessionStorage.setItem('postAuthRedirect', window.location.href);
-                openModal();
+                await showPaperAuthGate();
                 return;
             }
+
+            let paperLoaded = false;
 
             try {
                 // Parallel: dependencies + paper query
@@ -788,12 +804,17 @@
                 document.getElementById('progressWrap').style.display = '';
                 updateProgress();
                 await renderQuestions(questions);
+                paperLoaded = true;
 
             } catch (err) {
                 console.error('[Paper-View] Load error:', err);
+                if (isAuthRequiredError(err)) {
+                    await showPaperAuthGate();
+                    return;
+                }
                 showPaperError(err.message || 'Connection failed.');
             } finally {
-                hidePaperSkeleton();
+                hidePaperSkeleton(paperLoaded);
                 const qContainer = document.getElementById('questionsContainer');
                 if (qContainer) qContainer.setAttribute('aria-busy', 'false');
             }
@@ -1462,7 +1483,7 @@ body { font-family: Arial, sans-serif; padding: 28px; line-height: 1.55; color: 
     </script>
     <script>
         // Hide skeleton when paper finishes loading
-        function hidePaperSkeleton() {
+        function hidePaperSkeleton(revealContent = true) {
             const skeleton = document.getElementById('paperLoadingSkeleton');
             const content = document.getElementById('paperTitleBlock');
 
@@ -1472,6 +1493,8 @@ body { font-family: Arial, sans-serif; padding: 28px; line-height: 1.55; color: 
 
                 setTimeout(() => {
                     skeleton.style.display = 'none';
+                    if (!revealContent) return;
+
                     content.classList.remove('hidden');
                     content.style.opacity = '0';
                     content.style.transition = 'opacity 0.4s ease';
