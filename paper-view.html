@@ -642,7 +642,26 @@
             hidePaperError();
             initAuthModal();
             sessionStorage.setItem('postAuthRedirect', window.location.href);
-            await openModal();
+            await openModal('login', { onDismiss: returnToPreviousPage });
+        }
+
+        function returnToPreviousPage() {
+            const fallback = 'subjects.html';
+
+            try {
+                const referrer = document.referrer ? new URL(document.referrer) : null;
+                const cameFromThisSite = referrer?.origin === window.location.origin;
+                const cameFromAnotherPage = cameFromThisSite && referrer.href !== window.location.href;
+
+                if (cameFromAnotherPage && window.history.length > 1) {
+                    window.history.back();
+                    return;
+                }
+            } catch (error) {
+                console.warn('Could not read referrer for paper auth return.', error);
+            }
+
+            window.location.href = fallback;
         }
 
         async function handleDownload() {

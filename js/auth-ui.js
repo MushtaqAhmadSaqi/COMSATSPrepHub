@@ -23,6 +23,7 @@ import {
 let lastFocusedElement = null;
 let removeFocusTrap = null;
 let authModalCssReady = null;
+let modalDismissHandler = null;
 
 function ensureAuthModalCss() {
   const existing = document.querySelector('link[href*="auth-modal.css"]');
@@ -157,7 +158,7 @@ export function initAuthModal() {
   attachListeners();
 }
 
-export async function openModal(startTab = 'login') {
+export async function openModal(startTab = 'login', options = {}) {
   await ensureAuthModalCss();
 
   const overlay = document.getElementById('auth-modal-overlay');
@@ -165,6 +166,7 @@ export async function openModal(startTab = 'login') {
 
   if (!overlay || !authCard) return;
 
+  modalDismissHandler = typeof options.onDismiss === 'function' ? options.onDismiss : null;
   lastFocusedElement = document.activeElement;
   overlay.hidden = false;
   overlay.style.display = 'flex';
@@ -184,10 +186,12 @@ export async function openModal(startTab = 'login') {
   focusActiveField(startTab);
 }
 
-export function closeModal() {
+export function closeModal(reason = 'dismiss') {
   const overlay = document.getElementById('auth-modal-overlay');
   if (!overlay) return;
 
+  const onDismiss = reason === 'dismiss' ? modalDismissHandler : null;
+  modalDismissHandler = null;
   overlay.classList.remove('open');
   document.body.style.overflow = '';
 
@@ -206,6 +210,10 @@ export function closeModal() {
 
   if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
     lastFocusedElement.focus();
+  }
+
+  if (onDismiss) {
+    window.setTimeout(onDismiss, 0);
   }
 }
 
@@ -388,7 +396,7 @@ function attachListeners() {
   const loginForm = document.getElementById('am-l-form');
   const signUpForm = document.getElementById('am-s-form');
 
-  closeButton?.addEventListener('click', closeModal);
+  closeButton?.addEventListener('click', () => closeModal());
 
   overlay?.addEventListener('click', event => {
     if (event.target === overlay) {
@@ -477,7 +485,7 @@ async function handleSignUpSubmit(event) {
 
     form.reset();
     await notify('Success!', 'Account created successfully. Please check your email to confirm your account.', 'success');
-    closeModal();
+    closeModal('signup-success');
   } catch (error) {
     console.error('Sign up unexpected error:', error);
     await notify('Error', 'An unexpected error occurred during sign up.', 'error');
@@ -514,7 +522,7 @@ async function handleLoginSubmit(event) {
     }
 
     form.reset();
-    closeModal();
+    closeModal('auth-success');
     redirectToDashboard();
   } catch (error) {
     console.error('Login unexpected error:', error);
