@@ -690,7 +690,7 @@
                 initAuthModal();
                 sessionStorage.setItem('postAuthRedirect', window.location.href);
                 openModal();
-                showPaperError('Please sign in to access this paper.');
+                // Keep the loading skeleton visible — no error flash behind the modal
                 return;
             }
 
