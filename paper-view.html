@@ -506,6 +506,7 @@
         import { sanitizeHtml } from './js/render-safety.js';
         import { logger } from './js/logger.js';
         import { ensureSubjectTracked, addSubjectMastery } from './js/progress-service.js';
+        import { requireAuth } from './user-state.js';
 
         const DEPS = {
             mathjax: {
@@ -681,6 +682,11 @@
 
         async function loadPaper() {
             console.log('[Paper-View] loadPaper started');
+            
+            // Require authentication before viewing the paper
+            const session = await requireAuth();
+            if (!session) return;
+
             try {
                 // Parallel: dependencies + paper query
                 hidePaperError();

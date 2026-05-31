@@ -57,7 +57,8 @@ export async function signOutAndRedirect(redirectPath = 'index.html') {
 export async function requireAuth(loginPath = 'auth.html') {
     const session = await getUserSession();
     if (!session) {
-        window.location.href = loginPath;
+        const currentUrl = encodeURIComponent(window.location.href);
+        window.location.href = `${loginPath}?redirect=${currentUrl}`;
         return null;
     }
     return session;
