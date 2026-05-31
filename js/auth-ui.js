@@ -198,7 +198,7 @@ function injectModalHTML() {
             <div class="am-logo">COMSATS<span style="color: #0ea5e9;">PrepHub</span></div>
             <div class="am-hero">
               <span class="am-sub">Academic Excellence</span>
-              <h2 class="am-h1">WELCOME BACK!</h2>
+              <h2 class="am-h1">WELCOME<br>BACK!</h2>
               <p class="am-p">Access your curated prep materials and continue your journey toward academic mastery at COMSATS.</p>
               <div class="am-dots" aria-hidden="true">
                 <div class="am-dot active"></div>

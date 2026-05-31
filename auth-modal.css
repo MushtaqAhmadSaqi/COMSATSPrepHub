@@ -106,7 +106,7 @@
 }
 
 .am-l-side {
-    background: linear-gradient(135deg, var(--brand-ink) 0%, var(--bg) 100%);
+    background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
 }
 
 .am-s-side {
@@ -120,7 +120,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0.15;
+    opacity: 0.25;
     pointer-events: none;
 }
 
@@ -349,7 +349,12 @@
     transition: border-color 0.3s, background 0.3s;
 }
 
-.am-in:focus { border-bottom-color: #535252; }
+.am-in:focus {
+    border-bottom-color: transparent;
+    border-color: #38bdf8;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.25);
+}
 .am-in::placeholder { color: #adb3b4; }
 .am-in.no-icon { padding-left: 14px; }
 
@@ -435,7 +440,8 @@
 }
 
 .am-b-login {
-    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-ink) 100%);
+    background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);
 }
 
 .am-b-signup {

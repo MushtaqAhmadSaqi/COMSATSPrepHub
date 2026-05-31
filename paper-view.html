@@ -506,7 +506,8 @@
         import { sanitizeHtml } from './js/render-safety.js';
         import { logger } from './js/logger.js';
         import { ensureSubjectTracked, addSubjectMastery } from './js/progress-service.js';
-        import { requireAuth } from './user-state.js';
+        import { getUserSession } from './user-state.js';
+        import { initAuthModal, openModal } from './js/auth-ui.js';
 
         const DEPS = {
             mathjax: {
@@ -684,8 +685,14 @@
             console.log('[Paper-View] loadPaper started');
             
             // Require authentication before viewing the paper
-            const session = await requireAuth();
-            if (!session) return;
+            const session = await getUserSession();
+            if (!session) {
+                initAuthModal();
+                sessionStorage.setItem('postAuthRedirect', window.location.href);
+                openModal();
+                showPaperError('Please sign in to access this paper.');
+                return;
+            }
 
             try {
                 // Parallel: dependencies + paper query
