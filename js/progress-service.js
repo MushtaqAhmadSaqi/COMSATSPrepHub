@@ -12,8 +12,8 @@ function toNumber(value, fallback = 0) {
   return Number.isFinite(num) ? num : fallback;
 }
 
-function getCacheKey(userId, subjectCode, topicName = DEFAULT_TOPIC) {
-  return [userId || 'guest', subjectCode || 'unknown', topicName ?? '__root__'].join('::');
+function getCacheKey(email, subjectCode, topicName = DEFAULT_TOPIC) {
+  return [email || 'guest', subjectCode || 'unknown', topicName ?? '__root__'].join('::');
 }
 
 function normalizeSubjectPayload({ subjectCode, subjectName, topicName = DEFAULT_TOPIC } = {}) {
@@ -24,13 +24,18 @@ function normalizeSubjectPayload({ subjectCode, subjectName, topicName = DEFAULT
   };
 }
 
-async function getSignedInUserId() {
+async function getSignedInUserInfo() {
   const session = await auth.getSession();
-  return session?.user?.id || null;
+  if (!session?.user) return null;
+  return {
+    id: session.user.id,
+    email: session.user.email,
+    name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Student'
+  };
 }
 
-async function getExistingProgress({ userId, subjectCode, topicName = DEFAULT_TOPIC }) {
-  const cacheKey = getCacheKey(userId, subjectCode, topicName);
+async function getExistingProgress({ email, subjectCode, topicName = DEFAULT_TOPIC }) {
+  const cacheKey = getCacheKey(email, subjectCode, topicName);
 
   if (subjectProgressCache.has(cacheKey)) {
     return subjectProgressCache.get(cacheKey);
@@ -38,8 +43,8 @@ async function getExistingProgress({ userId, subjectCode, topicName = DEFAULT_TO
 
   let query = supabase
     .from('user_subject_progress')
-    .select('id, user_id, subject_code, subject_name, topic_name, mastery_percent, sessions_count, updated_at')
-    .eq('user_id', userId)
+    .select('id, email, name, subject_code, subject_name, topic_name, mastery_percent, sessions_count, updated_at')
+    .eq('email', email)
     .eq('subject_code', subjectCode);
 
   query = topicName == null ? query.is('topic_name', null) : query.eq('topic_name', topicName);
@@ -55,7 +60,8 @@ async function getExistingProgress({ userId, subjectCode, topicName = DEFAULT_TO
 }
 
 async function persistSubjectProgress({
-  userId,
+  email,
+  name,
   subjectCode,
   subjectName,
   topicName = DEFAULT_TOPIC,
@@ -64,9 +70,9 @@ async function persistSubjectProgress({
   masteryAbsolute,
   minimumMastery
 }) {
-  if (!userId || !subjectCode) return null;
+  if (!email || !subjectCode) return null;
 
-  const existing = await getExistingProgress({ userId, subjectCode, topicName });
+  const existing = await getExistingProgress({ email, subjectCode, topicName });
 
   if (existing?.id) {
     const currentMastery = toNumber(existing.mastery_percent, 0);
@@ -78,6 +84,7 @@ async function persistSubjectProgress({
 
     const payload = {
       subject_name: subjectName,
+      name: name,
       sessions_count: Math.max(0, toNumber(existing.sessions_count, 0) + toNumber(sessionDelta, 0)),
       mastery_percent: nextMastery,
       updated_at: new Date().toISOString()
@@ -87,17 +94,18 @@ async function persistSubjectProgress({
       .from('user_subject_progress')
       .update(payload)
       .eq('id', existing.id)
-      .select('id, user_id, subject_code, subject_name, topic_name, mastery_percent, sessions_count, updated_at')
+      .select('id, email, name, subject_code, subject_name, topic_name, mastery_percent, sessions_count, updated_at')
       .single();
 
     if (error) throw error;
 
-    subjectProgressCache.set(getCacheKey(userId, subjectCode, topicName), data);
+    subjectProgressCache.set(getCacheKey(email, subjectCode, topicName), data);
     return data;
   }
 
   const payload = {
-    user_id: userId,
+    email: email,
+    name: name,
     subject_code: subjectCode,
     subject_name: subjectName,
     topic_name: topicName,
@@ -114,24 +122,25 @@ async function persistSubjectProgress({
   const { data, error } = await supabase
     .from('user_subject_progress')
     .insert(payload)
-    .select('id, user_id, subject_code, subject_name, topic_name, mastery_percent, sessions_count, updated_at')
+    .select('id, email, name, subject_code, subject_name, topic_name, mastery_percent, sessions_count, updated_at')
     .single();
 
   if (error) throw error;
 
-  subjectProgressCache.set(getCacheKey(userId, subjectCode, topicName), data);
+  subjectProgressCache.set(getCacheKey(email, subjectCode, topicName), data);
   return data;
 }
 
 export async function ensureSubjectTracked(payload = {}) {
-  const userId = await getSignedInUserId();
-  if (!userId) return null;
+  const userInfo = await getSignedInUserInfo();
+  if (!userInfo) return null;
 
   const normalized = normalizeSubjectPayload(payload);
   if (!normalized.subjectCode) return null;
 
   return persistSubjectProgress({
-    userId,
+    email: userInfo.email,
+    name: userInfo.name,
     subjectCode: normalized.subjectCode,
     subjectName: normalized.subjectName,
     topicName: normalized.topicName,
@@ -142,14 +151,15 @@ export async function ensureSubjectTracked(payload = {}) {
 }
 
 export async function recordStudySession(payload = {}) {
-  const userId = await getSignedInUserId();
-  if (!userId) return null;
+  const userInfo = await getSignedInUserInfo();
+  if (!userInfo) return null;
 
   const normalized = normalizeSubjectPayload(payload);
   if (!normalized.subjectCode) return null;
 
   return persistSubjectProgress({
-    userId,
+    email: userInfo.email,
+    name: userInfo.name,
     subjectCode: normalized.subjectCode,
     subjectName: normalized.subjectName,
     topicName: normalized.topicName,
@@ -161,14 +171,15 @@ export async function recordStudySession(payload = {}) {
 }
 
 export async function addSubjectMastery(payload = {}) {
-  const userId = await getSignedInUserId();
-  if (!userId) return null;
+  const userInfo = await getSignedInUserInfo();
+  if (!userInfo) return null;
 
   const normalized = normalizeSubjectPayload(payload);
   if (!normalized.subjectCode) return null;
 
   return persistSubjectProgress({
-    userId,
+    email: userInfo.email,
+    name: userInfo.name,
     subjectCode: normalized.subjectCode,
     subjectName: normalized.subjectName,
     topicName: normalized.topicName,
@@ -187,8 +198,8 @@ export async function saveQuizCompletion({
   correctAnswers,
   totalQuestions
 } = {}) {
-  const userId = await getSignedInUserId();
-  if (!userId || !quizId || !subjectCode) return null;
+  const userInfo = await getSignedInUserInfo();
+  if (!userInfo || !quizId || !subjectCode) return null;
 
   const safeTotalQuestions = Math.max(0, toNumber(totalQuestions, 0));
   const safeCorrectAnswers = Math.max(0, toNumber(correctAnswers, 0));
@@ -197,7 +208,7 @@ export async function saveQuizCompletion({
     : 0;
 
   const { error } = await supabase.from('user_quiz_attempts').insert({
-    user_id: userId,
+    user_id: userInfo.id,
     quiz_id: quizId,
     quiz_title: String(quizTitle || 'Untitled Quiz').trim(),
     subject_code: subjectCode,
@@ -210,7 +221,8 @@ export async function saveQuizCompletion({
   if (error) throw error;
 
   await persistSubjectProgress({
-    userId,
+    email: userInfo.email,
+    name: userInfo.name,
     subjectCode,
     subjectName: String(subjectName || subjectCode || 'Untitled Subject').trim(),
     topicName: DEFAULT_TOPIC,

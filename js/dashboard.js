@@ -59,7 +59,7 @@ async function initDashboard() {
       `Great to have you back, ${fullName}. Your study progress, quiz scores, weak topics, and subject mastery are organized in one focused workspace.`
     );
 
-    await loadDashboardData(user.id);
+    await loadDashboardData(user);
   } catch (error) {
     console.error('Dashboard init failed:', error);
     setGuestFallback();
@@ -90,7 +90,7 @@ function setGuestFallback() {
   });
 }
 
-async function loadDashboardData(userId) {
+async function loadDashboardData(user) {
   const [quizAttemptsResult, subjectProgressResult, subjectsCatalogResult] =
     await Promise.allSettled([
       supabase
@@ -98,7 +98,7 @@ async function loadDashboardData(userId) {
         .select(
           'quiz_id, quiz_title, subject_code, score_percent, correct_answers, total_questions, completed_at'
         )
-        .eq('user_id', userId)
+        .eq('user_id', user.id)
         .order('completed_at', { ascending: false }),
 
       supabase
@@ -106,7 +106,7 @@ async function loadDashboardData(userId) {
         .select(
           'subject_code, subject_name, topic_name, mastery_percent, sessions_count, updated_at'
         )
-        .eq('user_id', userId)
+        .eq('email', user.email)
         .order('updated_at', { ascending: false }),
 
       supabase
