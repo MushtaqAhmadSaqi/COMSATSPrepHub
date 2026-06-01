@@ -8,6 +8,7 @@
 
 import { auth } from './core.js';
 import { initAuthModal, openModal } from './auth-ui.js';
+import { trackCurrentUserVisit } from './user-visits.js';
 import './ui-enhancements.js';
 
 // ── Google Analytics Config ───────────────────────────────────────────────
@@ -74,6 +75,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     session = await auth.getSession();
     userName = session ? auth.getUserName(session.user) : null;
+
+    if (session) {
+      trackCurrentUserVisit(session, userName).catch(error => {
+        console.warn('User visit tracking failed:', error);
+      });
+    }
   } catch (error) {
     console.warn('Auth failed, layout will still load:', error);
   }
