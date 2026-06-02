@@ -29,7 +29,8 @@ function getUserDisplayName(user, fallbackName = '') {
  * - email (string)
  * - name (string)
  * - total_count_of_days (number)
- * 
+ * - last_visit_date (date or yyyy-mm-dd string)
+ *
  * @param {string} userEmail - The email of the user to fetch.
  * @returns {Promise<Object|null>} The user's visit data or null if not found.
  */
@@ -56,67 +57,100 @@ export async function getUserVisitCount(userEmail) {
 /**
  * Updates or inserts a user's visit count.
  * Typically you would call this when the user logs in or visits the site for the first time on a given day.
- * 
+ *
  * @param {string} userEmail - The email of the user.
  * @param {string} userName - The name of the user.
- * @returns {Promise<boolean>} True when the visit record was saved.
+ * @returns {Promise<{ok: boolean, status: 'incremented' | 'already-counted' | 'failed'}>}
  */
 export async function incrementUserVisit(userEmail, userName) {
     const cleanEmail = String(userEmail || '').trim().toLowerCase();
     const cleanName = String(userName || '').trim() || cleanEmail.split('@')[0] || 'Student';
+    const todayKey = getLocalDateKey();
 
     if (!cleanEmail) {
         console.warn('Cannot update user visits without a user email.');
-        return false;
+        return { ok: false, status: 'failed' };
     }
 
     try {
         // First check if the user exists in the table
         const { data: existingUser, error: fetchError } = await supabase
             .from('user_visits')
-            .select('total_count_of_days')
+            .select('total_count_of_days, last_visit_date, name')
             .eq('email', cleanEmail)
             .maybeSingle();
 
         if (fetchError) {
             console.error('Error checking existing user:', fetchError.message);
-            return false;
+            return { ok: false, status: 'failed' };
         }
 
         if (existingUser) {
+            const lastVisitKey = normalizeVisitDate(existingUser.last_visit_date);
+
+            if (lastVisitKey === todayKey) {
+                if (cleanName && cleanName !== String(existingUser.name || '').trim()) {
+                    const { error: nameUpdateError } = await supabase
+                        .from('user_visits')
+                        .update({ name: cleanName })
+                        .eq('email', cleanEmail);
+
+                    if (nameUpdateError) {
+                        console.error('Error updating visit name:', nameUpdateError.message);
+                    }
+                }
+
+                return { ok: true, status: 'already-counted' };
+            }
+
             // User exists, increment their count
             const newCount = (existingUser.total_count_of_days || 0) + 1;
-            const { error: updateError } = await supabase
+            const { data: updatedRows, error: updateError } = await supabase
                 .from('user_visits')
-                .update({ total_count_of_days: newCount, name: cleanName }) // Update name too just in case
-                .eq('email', cleanEmail);
+                .update({
+                    total_count_of_days: newCount,
+                    name: cleanName,
+                    last_visit_date: todayKey
+                })
+                .eq('email', cleanEmail)
+                .or(`last_visit_date.is.null,last_visit_date.neq.${todayKey}`)
+                .select('email');
 
             if (updateError) {
                 console.error('Error updating visit count:', updateError.message);
-                return false;
-            } else {
-                console.log(`Successfully updated visit count for ${cleanEmail} to ${newCount}`);
-                return true;
+                return { ok: false, status: 'failed' };
             }
+
+            if (!updatedRows || updatedRows.length === 0) {
+                return { ok: true, status: 'already-counted' };
+            }
+
+            console.log(`Successfully updated visit count for ${cleanEmail} to ${newCount}`);
+            return { ok: true, status: 'incremented' };
         } else {
             // User doesn't exist, insert new record with count 1
             const { error: insertError } = await supabase
                 .from('user_visits')
                 .insert([
-                    { email: cleanEmail, name: cleanName, total_count_of_days: 1 }
+                    {
+                        email: cleanEmail,
+                        name: cleanName,
+                        total_count_of_days: 1,
+                        last_visit_date: todayKey
+                    }
                 ]);
 
             if (insertError) {
                 console.error('Error inserting new user visit record:', insertError.message);
-                return false;
-            } else {
-                console.log(`Successfully created visit record for ${cleanEmail}`);
-                return true;
+                return { ok: false, status: 'failed' };
             }
+
+            console.log(`Successfully created visit record for ${cleanEmail}`);
+            return { ok: true, status: 'incremented' };
         }
     } catch (err) {
         console.error('Unexpected error updating user visits:', err);
-        return false;
+        return { ok: false, status: 'failed' };
     }
 }
 
@@ -144,9 +178,9 @@ export async function trackCurrentUserVisit(session, fallbackName = '') {
         // If localStorage is unavailable, still try to write the visit.
     }
 
-    const saved = await incrementUserVisit(email, getUserDisplayName(user, fallbackName));
+    const result = await incrementUserVisit(email, getUserDisplayName(user, fallbackName));
 
-    if (saved) {
+    if (result.ok && result.status !== 'failed') {
         try {
             localStorage.setItem(storageKey, todayKey);
         } catch {
@@ -154,7 +188,7 @@ export async function trackCurrentUserVisit(session, fallbackName = '') {
         }
     }
 
-    return saved;
+    return result.status === 'incremented';
 }
 
 /**
@@ -193,4 +227,23 @@ function escapeHtml(unsafe) {
          .replace(/>/g, "&gt;")
          .replace(/"/g, "&quot;")
          .replace(/'/g, "&#039;");
+}
+
+function normalizeVisitDate(value) {
+    if (!value) return null;
+
+    if (value instanceof Date) {
+        return getLocalDateKey(value);
+    }
+
+    const raw = String(value);
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+        return raw;
+    }
+
+    const parsed = new Date(raw);
+    if (Number.isNaN(parsed.getTime())) return null;
+
+    return getLocalDateKey(parsed);
 }
