@@ -1,8 +1,6 @@
 import assert from 'node:assert/strict';
-import { createRequire } from 'node:module';
-
-const require = createRequire(import.meta.url);
-const GpaLogic = require('../js/gpa-logic.js');
+await import('../js/gpa-logic.js');
+const GpaLogic = globalThis.GpaLogic;
 
 const {
   getGradeInfo,

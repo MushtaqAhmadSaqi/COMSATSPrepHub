@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://comsatsprephub.vercel.app/sitemap.xml

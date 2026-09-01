@@ -21,7 +21,7 @@ export default function Navbar({
     <>
       <header className="header-sticky">
         <div className="nav-container">
-          <div className="nav-[#glass-pill]">
+          <div className="nav-glass-pill">
             {/* Brand Logo */}
             <button
               type="button"

@@ -277,6 +277,140 @@
     return 'Add courses to calculate GPA.';
   }
 
+  function hasMarksLikeData(course = {}) {
+    return [
+      course.theoryCr,
+      course.theoryMarks,
+      course.labCr,
+      course.labMarks,
+      course.name,
+    ].some(value => value !== '' && value != null);
+  }
+
+  function validateCourseInput(course = {}) {
+    const theoryCr = Math.max(0, toNum(course.theoryCr, 0));
+    const labCr = Math.max(0, toNum(course.labCr, 0));
+    const theoryMarks = clamp(toNum(course.theoryMarks, 0), 0, 100);
+    const labMarks = clamp(toNum(course.labMarks, 0), 0, 100);
+
+    const errors = [];
+    if (theoryCr + labCr < 1) {
+      errors.push('Course must have at least 1 total credit hour.');
+    }
+
+    if (toNum(course.theoryMarks, 0) !== theoryMarks) {
+      errors.push('Theory marks must be between 0 and 100.');
+    }
+
+    if (toNum(course.labMarks, 0) !== labMarks) {
+      errors.push('Lab marks must be between 0 and 100.');
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+    };
+  }
+
+  function calculateCoursePercentage(course = {}) {
+    const theoryCr = Math.max(0, toNum(course.theoryCr, 0));
+    const labCr = Math.max(0, toNum(course.labCr, 0));
+    const totalCredits = theoryCr + labCr;
+
+    if (totalCredits <= 0) return 0;
+
+    const theoryMarks = clamp(toNum(course.theoryMarks, 0), 0, 100);
+    const labMarks = clamp(toNum(course.labMarks, 0), 0, 100);
+
+    return round2(((theoryMarks * theoryCr) + (labMarks * labCr)) / totalCredits);
+  }
+
+  function calculateCourseQualityPoints(course = {}) {
+    const totalCredits = Math.max(
+      0,
+      toNum(course.theoryCr, 0) + toNum(course.labCr, 0)
+    );
+    const percentage = calculateCoursePercentage(course);
+    const gradeInfo = getGradeInfo(percentage);
+    const qualityPoints = round2(gradeInfo.point * totalCredits);
+
+    return {
+      name: course.name || '',
+      percentage,
+      letter: gradeInfo.letter,
+      gradePoint: gradeInfo.point,
+      credits: totalCredits,
+      qualityPoints,
+    };
+  }
+
+  function calculateSemesterGPA(courses = []) {
+    const result = {
+      totalCredits: 0,
+      totalQualityPoints: 0,
+      gpa: 0,
+      courseResults: [],
+      errors: [],
+    };
+
+    courses.forEach((course, index) => {
+      if (!hasMarksLikeData(course)) return;
+
+      const validation = validateCourseInput(course);
+      if (!validation.valid) {
+        result.errors.push(
+          `Course ${index + 1}: ${validation.errors.join(' ')}`
+        );
+        return;
+      }
+
+      const courseResult = calculateCourseQualityPoints(course);
+      result.courseResults.push(courseResult);
+      result.totalCredits += courseResult.credits;
+      result.totalQualityPoints += courseResult.qualityPoints;
+    });
+
+    result.totalCredits = round2(result.totalCredits);
+    result.totalQualityPoints = round2(result.totalQualityPoints);
+    result.gpa =
+      result.totalCredits > 0
+        ? round2(result.totalQualityPoints / result.totalCredits)
+        : 0;
+
+    return result;
+  }
+
+  function calculateCGPA(previousCgpa, previousCredits, semesterGpaOrSummary, semesterCredits) {
+    const oldCgpa = clamp(toNum(previousCgpa, 0), 0, 4);
+    const oldCredits = Math.max(0, toNum(previousCredits, 0));
+
+    let semesterGpa = 0;
+    let currentCredits = 0;
+
+    if (
+      semesterGpaOrSummary &&
+      typeof semesterGpaOrSummary === 'object' &&
+      !Array.isArray(semesterGpaOrSummary)
+    ) {
+      semesterGpa = clamp(toNum(semesterGpaOrSummary.gpa, 0), 0, 4);
+      currentCredits = Math.max(0, toNum(semesterGpaOrSummary.totalCredits, 0));
+    } else {
+      semesterGpa = clamp(toNum(semesterGpaOrSummary, 0), 0, 4);
+      currentCredits = Math.max(0, toNum(semesterCredits, 0));
+    }
+
+    const totalCredits = round2(oldCredits + currentCredits);
+    if (totalCredits <= 0) {
+      return { cgpa: 0, totalCredits: 0 };
+    }
+
+    const combinedQualityPoints = (oldCgpa * oldCredits) + (semesterGpa * currentCredits);
+    return {
+      cgpa: round2(combinedQualityPoints / totalCredits),
+      totalCredits,
+    };
+  }
+
   return {
     GRADING_SCALE,
     DEFAULT_SCHEME,
@@ -294,5 +428,10 @@
     calcHonorPoints,
     calcTotalCredits,
     getPerformanceLabel,
+    validateCourseInput,
+    calculateCoursePercentage,
+    calculateCourseQualityPoints,
+    calculateSemesterGPA,
+    calculateCGPA,
   };
 });

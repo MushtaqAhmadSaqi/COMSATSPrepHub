@@ -7,9 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node ComsatsGPA/tests/gpa-logic.test.mjs",
-    "build:css": "tailwindcss -c tailwind.config.cjs -i ./styles/tailwind-input.css -o ./styles/tailwind-built.css --minify",
-    "watch:css": "tailwindcss -c tailwind.config.cjs -i ./styles/tailwind-input.css -o ./styles/tailwind-built.css --watch"
+    "test": "node legacy/web/ComsatsGPA/tests/gpa-logic.test.mjs",
+    "build:css": "tailwindcss -c tailwind.config.cjs -i ./legacy/web/styles/tailwind-input.css -o ./legacy/web/styles/tailwind-built.css --minify",
+    "watch:css": "tailwindcss -c tailwind.config.cjs -i ./legacy/web/styles/tailwind-input.css -o ./legacy/web/styles/tailwind-built.css --watch"
   },
   "devDependencies": {
     "@tailwindcss/aspect-ratio": "^0.4.2",

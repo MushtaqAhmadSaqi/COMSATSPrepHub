@@ -2,9 +2,8 @@ module.exports = {
   darkMode: 'class',
   content: [
     './*.html',
-    './auth.html',
-    './ComsatsGPA/**/*.html',
-    './ComsatsGPA/**/*.js'
+    './legacy/web/**/*.html',
+    './legacy/web/**/*.js'
   ],
   theme: {
     extend: {
@@ -33,4 +32,3 @@ module.exports = {
     require('@tailwindcss/aspect-ratio'),
   ]
 };
-

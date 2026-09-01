@@ -152,7 +152,7 @@ export default function GpaCalculator() {
             marginTop: '0.5rem',
             cursor: 'pointer',
             display: 'inline-flex',
-            align-items: 'center',
+            alignItems: 'center',
             gap: '0.375rem'
           }}
         >
