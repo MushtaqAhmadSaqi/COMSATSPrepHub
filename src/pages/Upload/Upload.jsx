@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
+import { fireConfetti } from '../../utils/confetti';
 import './Upload.css';
 
 export default function Upload() {
   const [submitted, setSubmitted] = useState(false);
+  const [subjectCode, setSubjectCode] = useState('');
+  const [examType, setExamType] = useState('');
+  const [uploaderName, setUploaderName] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true);
+    fireConfetti({ count: 90, spread: 80 });
   };
 
   return (
@@ -24,11 +29,23 @@ export default function Upload() {
             <div className="upload-success-icon">
               <span className="material-symbols-outlined" style={{ fontSize: '2.5rem' }}>check_circle</span>
             </div>
-            <h3 className="upload-success-title">Upload Submitted!</h3>
+            <h3 className="upload-success-title">Thank You, {uploaderName || 'Contributor'}! 🎉</h3>
             <p className="upload-success-text">
-              Thank you for contributing! Your paper will be reviewed by our team
-              and made public within 24–48 hours.
+              Your upload for <strong>{subjectCode || 'Past Paper'}</strong> has been received.
+              Our student moderation team will review and publish it within 24 hours.
             </p>
+            <button
+              type="button"
+              className="btn-primary-pill"
+              style={{ margin: '1.5rem auto 0 auto' }}
+              onClick={() => {
+                setSubmitted(false);
+                setSubjectCode('');
+                setExamType('');
+              }}
+            >
+              Upload Another Paper
+            </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
@@ -36,7 +53,7 @@ export default function Upload() {
               <div className="upload-dropzone-icon">
                 <span className="material-symbols-outlined" style={{ fontSize: '2.25rem' }}>cloud_upload</span>
               </div>
-              <div className="upload-dropzone-title">Drag & drop your file here</div>
+              <div className="upload-dropzone-title">Drag & drop your paper file here</div>
               <div className="upload-dropzone-hint">Supports PDF, PNG, JPG — up to 15MB</div>
             </div>
 
@@ -46,6 +63,8 @@ export default function Upload() {
                 type="text"
                 className="ai-input"
                 placeholder="e.g. CSC211 — Data Structures & Algorithms"
+                value={subjectCode}
+                onChange={(e) => setSubjectCode(e.target.value)}
                 required
               />
             </div>
@@ -56,6 +75,8 @@ export default function Upload() {
                 type="text"
                 className="ai-input"
                 placeholder="e.g. Terminal Examination — Fall 2023"
+                value={examType}
+                onChange={(e) => setExamType(e.target.value)}
                 required
               />
             </div>
@@ -66,6 +87,8 @@ export default function Upload() {
                 type="text"
                 className="ai-input"
                 placeholder="Your name for contributor credit"
+                value={uploaderName}
+                onChange={(e) => setUploaderName(e.target.value)}
               />
             </div>
 

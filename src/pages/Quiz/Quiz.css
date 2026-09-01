@@ -1,4 +1,4 @@
-/* ─── Quiz Page ─────────────────────────────────────────────────── */
+/* ─── Quiz Page Styles ─────────────────────────────────────────── */
 .quiz-container {
   max-width: 48rem;
   margin: 0 auto;
@@ -32,6 +32,19 @@
 
 html.dark .quiz-counter {
   background: var(--brand-soft-2);
+}
+
+.quiz-streak-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 0.2rem 0.625rem;
+  border-radius: 9999px;
+  margin-top: 0.25rem;
+  animation: pulse-glow 2s infinite;
 }
 
 /* ─── Progress Bar ──────────────────────────────────────────────── */
@@ -117,7 +130,7 @@ html.dark .quiz-counter {
 .quiz-option-btn:hover {
   border-color: var(--brand);
   background: var(--brand-soft);
-  transform: translateX(4px);
+  transform: translateX(6px);
   box-shadow: var(--shadow-1);
 }
 
@@ -140,7 +153,20 @@ html.dark .quiz-counter {
   color: #ffffff;
 }
 
-/* ─── Footer Row ────────────────────────────────────────────────── */
+/* ─── Hint Box ──────────────────────────────────────────────────── */
+.quiz-hint-box {
+  margin-top: 0.625rem;
+  padding: 0.875rem 1.125rem;
+  border-radius: var(--radius-md);
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  animation: fadeIn 0.3s var(--ease) both;
+}
+
+/* ─── Footer ────────────────────────────────────────────────────── */
 .quiz-footer {
   display: flex;
   justify-content: flex-end;
@@ -162,11 +188,25 @@ html.dark .quiz-counter {
   transition: all 0.25s var(--ease-spring);
 }
 
-.btn-quiz-next:hover {
+.btn-quiz-next:hover:not(:disabled) {
   transform: translateY(-2px) scale(1.03);
   box-shadow: 0 8px 24px rgba(14, 165, 233, 0.5);
 }
 
-.btn-quiz-next:active {
+.btn-quiz-next:active:not(:disabled) {
   transform: translateY(0) scale(0.97);
+}
+
+/* ─── Finish Card ───────────────────────────────────────────────── */
+.quiz-finish-badge {
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  box-shadow: var(--shadow-2);
+  animation: scaleIn 0.4s var(--ease-spring) both;
 }
