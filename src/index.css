@@ -94,7 +94,10 @@ html.dark {
   padding: 0;
 }
 
-html {
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
 }
