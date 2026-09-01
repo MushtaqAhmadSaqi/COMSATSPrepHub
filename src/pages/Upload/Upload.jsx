@@ -12,36 +12,65 @@ export default function Upload() {
   return (
     <div className="upload-container">
       <div className="upload-card">
-        <h1 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '0.5rem' }}>Upload Past Paper</h1>
-        <p style={{ color: '#64748b', marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text)', letterSpacing: '-0.04em', marginBottom: '0.5rem' }}>
+          Upload Past Paper
+        </h1>
+        <p style={{ color: 'var(--text-subtle)', marginBottom: '2rem', fontSize: '0.9375rem' }}>
           Contribute to your campus community by submitting exam papers & solution keys.
         </p>
 
         {submitted ? (
-          <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '64px', color: '#10b981' }}>check_circle</span>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginTop: '1rem' }}>Upload Submitted!</h3>
-            <p style={{ color: '#64748b', marginTop: '0.5rem' }}>Thank you! Your paper will be verified and made public shortly.</p>
+          <div className="upload-success">
+            <div className="upload-success-icon">
+              <span className="material-symbols-outlined" style={{ fontSize: '2.5rem' }}>check_circle</span>
+            </div>
+            <h3 className="upload-success-title">Upload Submitted!</h3>
+            <p className="upload-success-text">
+              Thank you for contributing! Your paper will be reviewed by our team
+              and made public within 24–48 hours.
+            </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="upload-dropzone">
-              <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#0ea5e9' }}>cloud_upload</span>
-              <p style={{ fontWeight: 700, marginTop: '0.5rem' }}>Drag & drop your PDF or image here</p>
-              <span style={{ fontSize: '0.8125rem', color: '#64748b' }}>Supports PDF, PNG, JPG up to 15MB</span>
+              <div className="upload-dropzone-icon">
+                <span className="material-symbols-outlined" style={{ fontSize: '2.25rem' }}>cloud_upload</span>
+              </div>
+              <div className="upload-dropzone-title">Drag & drop your file here</div>
+              <div className="upload-dropzone-hint">Supports PDF, PNG, JPG — up to 15MB</div>
             </div>
 
             <div className="ai-field">
               <label className="ai-label">Subject Code / Name</label>
-              <input type="text" className="ai-input" placeholder="e.g. CSC211 - Data Structures" required />
+              <input
+                type="text"
+                className="ai-input"
+                placeholder="e.g. CSC211 — Data Structures & Algorithms"
+                required
+              />
             </div>
 
             <div className="ai-field">
               <label className="ai-label">Exam Type & Year</label>
-              <input type="text" className="ai-input" placeholder="e.g. Terminal Exam - Fall 2023" required />
+              <input
+                type="text"
+                className="ai-input"
+                placeholder="e.g. Terminal Examination — Fall 2023"
+                required
+              />
+            </div>
+
+            <div className="ai-field">
+              <label className="ai-label">Your Name (Optional)</label>
+              <input
+                type="text"
+                className="ai-input"
+                placeholder="Your name for contributor credit"
+              />
             </div>
 
             <button type="submit" className="btn-generate-ai">
+              <span className="material-symbols-outlined">upload</span>
               Submit Paper for Review
             </button>
           </form>

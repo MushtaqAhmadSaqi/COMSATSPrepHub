@@ -1,66 +1,73 @@
 import React, { useState } from 'react';
 import './GpaCalculator.css';
 
+const GRADE_OPTIONS = [
+  { label: 'A  (85–100%) — 4.00', value: 4.0 },
+  { label: 'A- (80–84%)  — 3.70', value: 3.7 },
+  { label: 'B+ (75–79%)  — 3.33', value: 3.33 },
+  { label: 'B  (70–74%)  — 3.00', value: 3.0 },
+  { label: 'B- (65–69%)  — 2.70', value: 2.7 },
+  { label: 'C+ (60–64%)  — 2.33', value: 2.33 },
+  { label: 'C  (55–59%)  — 2.00', value: 2.0 },
+  { label: 'C- (50–54%)  — 1.70', value: 1.7 },
+  { label: 'D  (45–49%)  — 1.30', value: 1.3 },
+  { label: 'F  (<45%)    — 0.00', value: 0.0 },
+];
+
 export default function GpaCalculator() {
   const [courses, setCourses] = useState([
     { id: 1, name: 'Data Structures & Algorithms', credits: 4, gradePoint: 4.0 },
     { id: 2, name: 'Calculus & Analytical Geometry', credits: 3, gradePoint: 3.7 },
     { id: 3, name: 'Linear Algebra', credits: 3, gradePoint: 3.33 },
-    { id: 4, name: 'Human Computer Interaction', credits: 3, gradePoint: 3.0 }
+    { id: 4, name: 'Human Computer Interaction', credits: 3, gradePoint: 3.0 },
   ]);
 
   const [prevCgpa, setPrevCgpa] = useState('');
   const [prevCredits, setPrevCredits] = useState('');
 
-  const gradeOptions = [
-    { label: 'A (85-100%) - 4.00', value: 4.0 },
-    { label: 'A- (80-84%) - 3.70', value: 3.7 },
-    { label: 'B+ (75-79%) - 3.33', value: 3.33 },
-    { label: 'B (70-74%) - 3.00', value: 3.0 },
-    { label: 'B- (65-69%) - 2.70', value: 2.7 },
-    { label: 'C+ (60-64%) - 2.33', value: 2.33 },
-    { label: 'C (55-59%) - 2.00', value: 2.0 },
-    { label: 'C- (50-54%) - 1.70', value: 1.7 },
-    { label: 'D (45-49%) - 1.30', value: 1.3 },
-    { label: 'F (<45%) - 0.00', value: 0.0 }
-  ];
-
   const totalCredits = courses.reduce((acc, c) => acc + Number(c.credits || 0), 0);
-  const totalPoints = courses.reduce((acc, c) => acc + Number(c.credits || 0) * Number(c.gradePoint || 0), 0);
+  const totalPoints  = courses.reduce((acc, c) => acc + Number(c.credits || 0) * Number(c.gradePoint || 0), 0);
   const sgpa = totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : '0.00';
 
-  let cgpa = sgpa;
+  let cgpa = null;
   if (prevCgpa && prevCredits && Number(prevCredits) > 0) {
-    const oldPoints = Number(prevCgpa) * Number(prevCredits);
-    const combinedPoints = oldPoints + totalPoints;
-    const combinedCredits = Number(prevCredits) + totalCredits;
-    cgpa = combinedCredits > 0 ? (combinedPoints / combinedCredits).toFixed(2) : '0.00';
+    const combined = Number(prevCgpa) * Number(prevCredits) + totalPoints;
+    cgpa = ((combined) / (Number(prevCredits) + totalCredits)).toFixed(2);
   }
 
-  const addCourse = () => {
-    setCourses([
-      ...courses,
-      { id: Date.now(), name: `Subject ${courses.length + 1}`, credits: 3, gradePoint: 4.0 }
-    ]);
+  const updateCourse = (idx, key, val) => {
+    const next = [...courses];
+    next[idx] = { ...next[idx], [key]: val };
+    setCourses(next);
   };
 
-  const removeCourse = (id) => {
-    setCourses(courses.filter((c) => c.id !== id));
+  const addCourse = () => {
+    setCourses([...courses, {
+      id: Date.now(),
+      name: `Subject ${courses.length + 1}`,
+      credits: 3,
+      gradePoint: 4.0
+    }]);
   };
+
+  const removeCourse = (id) => setCourses(courses.filter(c => c.id !== id));
 
   return (
     <div className="gpa-container">
       <div className="gpa-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        {/* Title Row */}
+        <div className="gpa-title-row">
           <div>
-            <h1 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '0.25rem' }}>COMSATS GPA Calculator</h1>
-            <p style={{ color: '#64748b' }}>Calculate your SGPA and predicted CGPA according to COMSATS policies.</p>
+            <h1 className="gpa-title">COMSATS GPA Calculator</h1>
+            <p className="gpa-subtitle">Calculate your SGPA and predicted CGPA per COMSATS policy.</p>
           </div>
-          <span className="material-symbols-outlined" style={{ fontSize: '48px', color: '#0ea5e9' }}>calculate</span>
+          <div className="gpa-icon-badge">
+            <span className="material-symbols-outlined" style={{ fontSize: '2rem' }}>calculate</span>
+          </div>
         </div>
 
-        {/* Previous CGPA Inputs */}
-        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '1rem', padding: '1.25rem', marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+        {/* Previous CGPA */}
+        <div className="gpa-prev-box">
           <div>
             <label className="ai-label">Previous CGPA (Optional)</label>
             <input
@@ -85,20 +92,17 @@ export default function GpaCalculator() {
           </div>
         </div>
 
-        <h3 style={{ fontSize: '1.125rem', fontWeight: 800, marginBottom: '1rem' }}>Current Semester Courses</h3>
+        {/* Courses */}
+        <h3 className="gpa-section-title">Current Semester Courses</h3>
 
         {courses.map((course, idx) => (
-          <div key={course.id} className="gpa-row">
+          <div key={course.id} className="gpa-row" style={{ animationDelay: `${idx * 0.05}s` }}>
             <input
               type="text"
               className="ai-input"
               placeholder="Subject Name"
               value={course.name}
-              onChange={(e) => {
-                const next = [...courses];
-                next[idx].name = e.target.value;
-                setCourses(next);
-              }}
+              onChange={(e) => updateCourse(idx, 'name', e.target.value)}
             />
             <input
               type="number"
@@ -107,79 +111,49 @@ export default function GpaCalculator() {
               className="ai-input"
               placeholder="Credits"
               value={course.credits}
-              onChange={(e) => {
-                const next = [...courses];
-                next[idx].credits = Number(e.target.value);
-                setCourses(next);
-              }}
+              onChange={(e) => updateCourse(idx, 'credits', Number(e.target.value))}
             />
             <select
               className="ai-select"
               value={course.gradePoint}
-              onChange={(e) => {
-                const next = [...courses];
-                next[idx].gradePoint = Number(e.target.value);
-                setCourses(next);
-              }}
+              onChange={(e) => updateCourse(idx, 'gradePoint', Number(e.target.value))}
             >
-              {gradeOptions.map((g, i) => (
-                <option key={i} value={g.value}>
-                  {g.label}
-                </option>
+              {GRADE_OPTIONS.map((g, i) => (
+                <option key={i} value={g.value}>{g.label}</option>
               ))}
             </select>
             <button
               type="button"
+              className="gpa-delete-btn"
               onClick={() => removeCourse(course.id)}
-              style={{ background: '#fef2f2', border: 'none', color: '#ef4444', padding: '0.5rem', borderRadius: '50%', cursor: 'pointer' }}
-              title="Delete Subject"
+              title="Remove subject"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>delete</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
             </button>
           </div>
         ))}
 
-        <button
-          type="button"
-          onClick={addCourse}
-          style={{
-            padding: '0.625rem 1.25rem',
-            borderRadius: '9999px',
-            background: '#e0f2fe',
-            border: 'none',
-            fontWeight: 800,
-            color: '#0284c7',
-            marginTop: '0.5rem',
-            cursor: 'pointer',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.375rem'
-          }}
-        >
+        <button type="button" className="gpa-add-btn" onClick={addCourse}>
           <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
           Add Subject
         </button>
 
-        {/* Results Banner */}
+        {/* Results */}
         <div className="gpa-result-box">
-          <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+          <div className="gpa-result-inner">
             <div>
-              <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 800, opacity: 0.9 }}>
-                Semester SGPA
-              </span>
+              <div className="gpa-result-label">Semester SGPA</div>
               <div className="gpa-val">{sgpa}</div>
             </div>
-            {prevCgpa && prevCredits && (
+            {cgpa && (
               <div>
-                <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 800, opacity: 0.9 }}>
-                  Cumulative CGPA
-                </span>
+                <div className="gpa-result-label">Cumulative CGPA</div>
                 <div className="gpa-val">{cgpa}</div>
               </div>
             )}
           </div>
-          <div style={{ fontSize: '0.875rem', opacity: 0.9, marginTop: '0.75rem' }}>
-            Total Credits: {totalCredits} credit hours
+          <div className="gpa-result-credits">
+            Total Credit Hours: <strong>{totalCredits}</strong>
           </div>
         </div>
       </div>

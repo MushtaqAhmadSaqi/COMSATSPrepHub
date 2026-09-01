@@ -1,33 +1,105 @@
+/* ─── Upload Page ───────────────────────────────────────────────── */
 .upload-container {
-  max-width: 48rem;
+  max-width: 56rem;
   margin: 0 auto;
   padding: 3rem 1.5rem;
+  animation: fadeInUp 0.45s var(--ease) both;
 }
 
 .upload-card {
-  background: #ffffff;
-  border-radius: 1.5rem;
-  padding: 2.5rem;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  padding: 2.75rem;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow-2);
+  position: relative;
+  overflow: hidden;
 }
 
-.dark .upload-card {
-  background: #1e293b;
-  border-color: #334155;
+.upload-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #0ea5e9, #2563eb, #0d9488);
 }
 
+/* ─── Dropzone ──────────────────────────────────────────────────── */
 .upload-dropzone {
-  border: 2px dashed #cbd5e1;
-  border-radius: 1rem;
-  padding: 3rem 1.5rem;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 3rem 2rem;
   text-align: center;
-  margin-bottom: 1.5rem;
-  background: #f8fafc;
+  margin-bottom: 2rem;
   cursor: pointer;
+  transition: all 0.25s var(--ease-spring);
+  background: var(--surface-2);
 }
 
-.dark .upload-dropzone {
-  background: #0f172a;
-  border-color: #334155;
+.upload-dropzone:hover {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.upload-dropzone-icon {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, var(--brand-soft), var(--brand-soft-2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand);
+  margin: 0 auto 1.25rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+html.dark .upload-dropzone-icon {
+  background: var(--brand-soft-2);
+}
+
+.upload-dropzone-title {
+  font-weight: 800;
+  font-size: 1.0625rem;
+  color: var(--text);
+  margin-bottom: 0.375rem;
+}
+
+.upload-dropzone-hint {
+  font-size: 0.8125rem;
+  color: var(--text-subtle);
+}
+
+/* ─── Success State ─────────────────────────────────────────────── */
+.upload-success {
+  text-align: center;
+  padding: 3rem 1rem;
+  animation: scaleIn 0.4s var(--ease-spring) both;
+}
+
+.upload-success-icon {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #059669);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+
+.upload-success-title {
+  font-size: 1.625rem;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+}
+
+.upload-success-text {
+  color: var(--text-subtle);
+  font-size: 0.9375rem;
+  line-height: 1.6;
 }

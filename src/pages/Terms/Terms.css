@@ -1,18 +1,63 @@
+/* ─── Terms Page ────────────────────────────────────────────────── */
 .terms-container {
   max-width: 56rem;
   margin: 0 auto;
   padding: 3rem 1.5rem;
+  animation: fadeInUp 0.45s var(--ease) both;
 }
 
 .terms-card {
-  background: #ffffff;
-  border-radius: 1.5rem;
-  padding: 2.5rem;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  padding: 2.75rem;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow-2);
+  position: relative;
+  overflow: hidden;
 }
 
-.dark .terms-card {
-  background: #1e293b;
-  border-color: #334155;
+.terms-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #0ea5e9, #2563eb);
+}
+
+.terms-title {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -0.04em;
+  margin-bottom: 0.875rem;
+}
+
+.terms-intro {
+  color: var(--text-subtle);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+  font-size: 0.9375rem;
+}
+
+.terms-section-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin-top: 1.75rem;
+  margin-bottom: 0.625rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.terms-section-title .material-symbols-outlined {
+  color: var(--brand);
+  font-size: 20px;
+}
+
+.terms-body {
+  color: var(--text-muted);
+  line-height: 1.75;
+  font-size: 0.9375rem;
 }

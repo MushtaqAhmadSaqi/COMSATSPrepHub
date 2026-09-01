@@ -1,7 +1,9 @@
+/* ─── Subjects Page ─────────────────────────────────────────────── */
 .subjects-container {
   max-width: 80rem;
   margin: 0 auto;
   padding: 3rem 1.5rem;
+  animation: fadeInUp 0.45s var(--ease) both;
 }
 
 .subjects-header {
@@ -11,83 +13,149 @@
 .subjects-title {
   font-size: 2.25rem;
   font-weight: 900;
-  color: #1a1a2e;
+  color: var(--text);
   margin-bottom: 0.5rem;
+  letter-spacing: -0.03em;
 }
 
-.dark .subjects-title {
-  color: #ffffff;
+.subjects-header p {
+  color: var(--text-subtle);
+  font-size: 1rem;
 }
 
+/* ─── Search Bar ────────────────────────────────────────────────── */
 .subjects-search-bar {
   width: 100%;
-  max-width: 32rem;
-  padding: 0.875rem 1.25rem;
+  max-width: 34rem;
+  padding: 0.9375rem 1.375rem 0.9375rem 1rem;
   border-radius: 9999px;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface);
   font-size: 0.9375rem;
+  font-family: var(--font-family);
+  color: var(--text);
   outline: none;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2.5rem;
+  box-shadow: var(--shadow-1);
+  transition: border-color 0.2s var(--ease),
+              box-shadow 0.2s var(--ease);
 }
 
-.dark .subjects-search-bar {
-  background: #1e293b;
-  border-color: #334155;
-  color: #ffffff;
+.subjects-search-bar:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--ring), var(--shadow-1);
 }
 
+.subjects-search-bar::placeholder {
+  color: var(--text-subtle);
+}
+
+/* ─── Grid ──────────────────────────────────────────────────────── */
 .subjects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
+/* ─── Subject Card ──────────────────────────────────────────────── */
 .subject-card {
-  background: #ffffff;
-  border-radius: 1.25rem;
-  padding: 1.5rem;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  transition: all 0.25s ease;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 1.625rem;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow-1);
+  transition: transform 0.3s var(--ease-spring),
+              box-shadow 0.3s var(--ease),
+              border-color 0.2s var(--ease);
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.4s var(--ease) both;
 }
 
-.dark .subject-card {
-  background: #1e293b;
-  border-color: #334155;
+/* Shimmer top accent */
+.subject-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #0ea5e9, #2563eb, #0d9488);
+  opacity: 0;
+  transition: opacity 0.25s var(--ease);
 }
 
 .subject-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
-  border-color: #0ea5e9;
+  transform: translateY(-6px) scale(1.015);
+  box-shadow: var(--shadow-3), 0 0 0 1px rgba(14, 165, 233, 0.2);
+  border-color: transparent;
 }
 
+.subject-card:hover::before {
+  opacity: 1;
+}
+
+.subject-card:active {
+  transform: translateY(-2px) scale(0.99);
+}
+
+/* ─── Card Parts ────────────────────────────────────────────────── */
 .subject-code {
-  font-size: 0.75rem;
+  display: inline-block;
+  font-size: 0.6875rem;
   font-weight: 800;
-  color: #0ea5e9;
+  color: var(--brand);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.625rem;
+  background: var(--brand-soft);
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+}
+
+html.dark .subject-code {
+  background: var(--brand-soft-2);
 }
 
 .subject-name {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 800;
-  color: #0f172a;
-  margin-bottom: 0.75rem;
-}
-
-.dark .subject-name {
-  color: #ffffff;
+  color: var(--text);
+  margin-bottom: 1rem;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
 }
 
 .subject-meta {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 0.8125rem;
-  color: #64748b;
+  color: var(--text-subtle);
+  border-top: 1px solid var(--border);
+  padding-top: 0.875rem;
+}
+
+.subject-papers-count {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+/* ─── Empty State ───────────────────────────────────────────────── */
+.subjects-empty {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--text-subtle);
+  animation: fadeIn 0.4s var(--ease) both;
+}
+
+.subjects-empty .material-symbols-outlined {
+  font-size: 3rem;
+  color: var(--border-strong);
+  margin-bottom: 1rem;
+  display: block;
 }

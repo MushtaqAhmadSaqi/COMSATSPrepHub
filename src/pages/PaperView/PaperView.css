@@ -1,35 +1,132 @@
+/* ─── Paper View Page ───────────────────────────────────────────── */
 .paperview-container {
   max-width: 64rem;
   margin: 0 auto;
   padding: 3rem 1.5rem;
+  animation: fadeInUp 0.45s var(--ease) both;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--brand);
+  background: var(--brand-soft);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  border-radius: 9999px;
+  padding: 0.5rem 1.125rem;
+  margin-bottom: 1.75rem;
+  transition: all 0.22s var(--ease-spring);
+  font-family: var(--font-family);
+}
+
+.btn-back:hover {
+  transform: translateX(-3px);
+  background: var(--brand-soft-2);
+  box-shadow: var(--shadow-1);
+}
+
+html.dark .btn-back {
+  background: var(--brand-soft-2);
 }
 
 .paperview-header {
-  background: #ffffff;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 1.625rem 2rem;
+  margin-bottom: 1.5rem;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow-1);
 }
 
-.dark .paperview-header {
-  background: #1e293b;
-  border-color: #334155;
+.paperview-header h2 {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -0.03em;
+  margin-bottom: 0.25rem;
 }
 
+.paperview-header p {
+  color: var(--text-subtle);
+  font-size: 0.875rem;
+}
+
+/* ─── PDF Viewer Box ────────────────────────────────────────────── */
 .paperview-box {
-  background: #ffffff;
-  border-radius: 1rem;
-  min-height: 500px;
-  padding: 2rem;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  min-height: 520px;
+  border: 1.5px solid var(--border);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 1rem;
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: var(--shadow-2);
 }
 
-.dark .paperview-box {
-  background: #1e293b;
-  border-color: #334155;
+.paperview-icon-wrap {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 1.5rem;
+  background: linear-gradient(135deg, var(--brand-soft), var(--brand-soft-2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand);
+  margin-bottom: 0.5rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+html.dark .paperview-icon-wrap {
+  background: var(--brand-soft-2);
+}
+
+.paperview-box h3 {
+  font-size: 1.375rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.paperview-box p {
+  color: var(--text-subtle);
+  font-size: 0.9375rem;
+  max-width: 28rem;
+  line-height: 1.6;
+}
+
+/* ─── Action Buttons ────────────────────────────────────────────── */
+.paperview-actions {
+  display: flex;
+  gap: 0.875rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-download {
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  font-family: var(--font-family);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-brand);
+  transition: all 0.25s var(--ease-spring);
+}
+
+.btn-download:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.5);
 }

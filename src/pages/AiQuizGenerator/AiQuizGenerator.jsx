@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import './AiQuizGenerator.css';
 
+const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
+const QUESTION_COUNTS = [5, 10, 15, 20];
+
 export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
   const [topic, setTopic] = useState('Data Structures');
   const [difficulty, setDifficulty] = useState('Medium');
@@ -9,58 +12,74 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
   return (
     <div className="ai-gen-container">
       <div className="ai-gen-card">
+        {/* Title */}
         <h1 className="ai-gen-title">
-          <span className="material-symbols-outlined" style={{ color: '#0ea5e9' }}>auto_awesome</span>
+          <div className="ai-gen-icon">
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>auto_awesome</span>
+          </div>
           AI Quiz Generator
         </h1>
-        <p style={{ color: '#64748b', marginBottom: '2rem' }}>
-          Generate custom COMSATS-style quizzes on any subject powered by Gemini AI.
+        <p className="ai-gen-subtitle">
+          Generate custom COMSATS-style practice quizzes on any subject, instantly powered by Gemini AI.
         </p>
 
+        {/* Topic */}
         <div className="ai-field">
-          <label className="ai-label">Select Subject or Topic</label>
+          <label className="ai-label">Subject / Topic</label>
           <input
             type="text"
             className="ai-input"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            placeholder="e.g. Binary Search Trees or Object Oriented Programming"
+            placeholder="e.g. Binary Search Trees, Object Oriented Programming..."
           />
         </div>
 
+        {/* Difficulty */}
         <div className="ai-field">
           <label className="ai-label">Difficulty Level</label>
-          <select
-            className="ai-select"
-            value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value)}
-          >
-            <option value="Easy">Easy (Sessional Level)</option>
-            <option value="Medium">Medium (Midterm Level)</option>
-            <option value="Hard">Hard (Terminal Exam Level)</option>
-          </select>
+          <div className="ai-difficulty-grid">
+            {DIFFICULTIES.map((d) => (
+              <button
+                key={d}
+                type="button"
+                className={`ai-chip ${difficulty === d ? 'selected' : ''}`}
+                onClick={() => setDifficulty(d)}
+              >
+                {d === 'Easy' && '🟢 '}
+                {d === 'Medium' && '🟡 '}
+                {d === 'Hard' && '🔴 '}
+                {d}
+              </button>
+            ))}
+          </div>
         </div>
 
+        {/* Number of Questions */}
         <div className="ai-field">
           <label className="ai-label">Number of Questions</label>
-          <select
-            className="ai-select"
-            value={numQuestions}
-            onChange={(e) => setNumQuestions(Number(e.target.value))}
-          >
-            <option value={5}>5 Questions</option>
-            <option value={10}>10 Questions</option>
-            <option value={15}>15 Questions</option>
-          </select>
+          <div className="ai-count-grid">
+            {QUESTION_COUNTS.map((n) => (
+              <button
+                key={n}
+                type="button"
+                className={`ai-count-chip ${numQuestions === n ? 'selected' : ''}`}
+                onClick={() => setNumQuestions(n)}
+              >
+                {n} Qs
+              </button>
+            ))}
+          </div>
         </div>
 
+        {/* Generate */}
         <button
           type="button"
           className="btn-generate-ai"
           onClick={() => onStartAiQuiz({ topic, difficulty, numQuestions })}
         >
           <span className="material-symbols-outlined">bolt</span>
-          Generate Practice Quiz Now
+          Generate Practice Quiz
         </button>
       </div>
     </div>
