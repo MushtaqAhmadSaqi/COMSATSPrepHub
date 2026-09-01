@@ -19,6 +19,7 @@ import AdminGenerateQuizzes from './pages/AdminGenerateQuizzes/AdminGenerateQuiz
 import AdminPaste from './pages/AdminPaste/AdminPaste';
 import GpaCalculator from './pages/GpaCalculator/GpaCalculator';
 
+import { supabase } from './services/supabase';
 import './App.css';
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
   const [selectedPaper, setSelectedPaper] = useState(null);
   const [aiQuizParams, setAiQuizParams] = useState(null);
 
+  // Initialize Dark Mode & Supabase User Session
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark');
@@ -37,6 +39,22 @@ export default function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDark]);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data?.session?.user) {
+        setUser(data.session.user);
+      }
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, []);
 
   const handleNavigate = (path) => {
     setActivePath(path);
