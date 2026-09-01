@@ -1,0 +1,132 @@
+.about-container {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.about-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.about-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #1a1a2e;
+  margin-bottom: 0.5rem;
+}
+
+.dark .about-title {
+  color: #ffffff;
+}
+
+.about-subtitle {
+  font-size: 1rem;
+  color: #64748b;
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+.founder-card {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 3rem;
+}
+
+.dark .founder-card {
+  background: #1e293b;
+}
+
+@media (min-width: 768px) {
+  .founder-card {
+    flex-direction: row;
+  }
+}
+
+.founder-avatar {
+  width: 10rem;
+  height: 10rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #0ea5e9;
+  flex-shrink: 0;
+}
+
+.founder-info h3 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+}
+
+.dark .founder-info h3 {
+  color: #ffffff;
+}
+
+.founder-role {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0ea5e9;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+
+.founder-bio {
+  font-size: 0.9375rem;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.dark .founder-bio {
+  color: #cbd5e1;
+}
+
+.contributors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.contributor-card {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.dark .contributor-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.contributor-avatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.contributor-name {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: #0f172a;
+}
+
+.dark .contributor-name {
+  color: #ffffff;
+}
+
+.contributor-role {
+  font-size: 0.75rem;
+  color: #0ea5e9;
+}

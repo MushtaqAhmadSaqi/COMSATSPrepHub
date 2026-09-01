@@ -1,0 +1,36 @@
+.admin-paste-container {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.admin-paste-card {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.dark .admin-paste-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.admin-textarea {
+  width: 100%;
+  min-height: 250px;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #cbd5e1;
+  font-family: monospace;
+  font-size: 0.875rem;
+  outline: none;
+  background: #f8fafc;
+  margin-bottom: 1.5rem;
+}
+
+.dark .admin-textarea {
+  background: #0f172a;
+  border-color: #334155;
+  color: #ffffff;
+}

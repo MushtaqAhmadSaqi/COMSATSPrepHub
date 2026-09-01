@@ -1,0 +1,17 @@
+.admin-gen-container {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.admin-card {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.dark .admin-card {
+  background: #1e293b;
+  border-color: #334155;
+}

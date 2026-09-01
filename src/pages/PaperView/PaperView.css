@@ -1,0 +1,35 @@
+.paperview-container {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.paperview-header {
+  background: #ffffff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #e2e8f0;
+}
+
+.dark .paperview-header {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.paperview-box {
+  background: #ffffff;
+  border-radius: 1rem;
+  min-height: 500px;
+  padding: 2rem;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark .paperview-box {
+  background: #1e293b;
+  border-color: #334155;
+}

@@ -1,0 +1,21 @@
+.take-ai-container {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.ai-quiz-header {
+  background: #ffffff;
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dark .ai-quiz-header {
+  background: #1e293b;
+  border-color: #334155;
+}

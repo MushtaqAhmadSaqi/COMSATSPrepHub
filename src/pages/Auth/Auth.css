@@ -1,0 +1,18 @@
+.auth-page-container {
+  max-width: 28rem;
+  margin: 4rem auto;
+  padding: 0 1.5rem;
+}
+
+.auth-page-card {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+}
+
+.dark .auth-page-card {
+  background: #1e293b;
+  border-color: #334155;
+}
