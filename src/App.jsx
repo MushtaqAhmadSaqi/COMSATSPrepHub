@@ -56,8 +56,31 @@ export default function App() {
     };
   }, []);
 
+  // Listen to Browser Back / Forward & Mouse Back buttons
+  useEffect(() => {
+    const handlePopState = (e) => {
+      const pathFromState = e.state?.path;
+      const pathFromHash = window.location.hash.replace('#', '');
+      const targetPath = pathFromState || pathFromHash || 'home';
+      setActivePath(targetPath);
+    };
+
+    // Read initial route on page load
+    const initialHash = window.location.hash.replace('#', '');
+    if (initialHash) {
+      setActivePath(initialHash);
+    } else {
+      window.history.replaceState({ path: 'home' }, '', '/');
+    }
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const handleNavigate = (path) => {
     setActivePath(path);
+    const newUrl = path === 'home' ? '/' : `#${path}`;
+    window.history.pushState({ path }, '', newUrl);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
