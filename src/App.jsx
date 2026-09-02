@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
 import AuthModal from './components/AuthModal/AuthModal';
+import ScrollTop from './components/ScrollTop/ScrollTop';
 
 import Home from './pages/Home/Home';
 import About from './pages/About/About';
@@ -175,6 +176,8 @@ export default function App() {
         onClose={() => setIsAuthOpen(false)}
         onLoginSuccess={(u) => setUser(u)}
       />
+
+      <ScrollTop />
     </div>
   );
 }

@@ -3,9 +3,26 @@
   background: linear-gradient(180deg, #0a1628 0%, #0f172a 100%);
   color: #94a3b8;
   padding: 4rem 1.5rem 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: none;  /* replaced by animated border line below */
   position: relative;
   overflow: hidden;
+}
+
+/* Animated expanding border line at top */
+.footer-border-line {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 1px;
+  width: 0;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.4), rgba(37, 99, 235, 0.4), transparent);
+  transition: width 1.2s var(--ease) 0.2s;
+}
+
+.app-footer:hover .footer-border-line,
+.footer-border-line.footer-border-visible {
+  width: 100%;
 }
 
 /* Decorative glow */
@@ -32,6 +49,11 @@
   grid-template-columns: 1fr;
   gap: 2.5rem;
   margin-bottom: 3rem;
+}
+
+/* Each column is a reveal-enabled div */
+.footer-col {
+  /* reveal starts invisible — from index.css .reveal class */
 }
 
 @media (min-width: 768px) {
@@ -151,4 +173,34 @@
   background: rgba(56, 189, 248, 0.1);
   color: #38bdf8;
   transform: translateY(-2px);
+}
+
+/* ─── Back to Top (─────────────────────────────────────────── */
+.footer-back-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 1.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  background: rgba(56, 189, 248, 0.06);
+  color: #475569;
+  font-size: 0.8rem;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s var(--ease-spring);
+  letter-spacing: 0.01em;
+}
+
+.footer-back-top:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  transform: translateY(-2px);
+}
+
+.footer-back-top:active {
+  transform: translateY(0) scale(0.96);
 }

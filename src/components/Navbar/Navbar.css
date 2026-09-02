@@ -5,6 +5,19 @@
   z-index: 50;
   width: 100%;
   animation: fadeInDown 0.5s var(--ease) both;
+  transition: filter 0.3s var(--ease);
+}
+
+/* Deepened shadow when user has scrolled */
+.header-scrolled .nav-glass-pill {
+  box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.14),
+              0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+}
+
+html.dark .header-scrolled .nav-glass-pill {
+  box-shadow: 0 12px 40px -4px rgba(0, 0, 0, 0.7) !important;
 }
 
 /* ─── Container ────────────────────────────────────────────────── */
@@ -151,6 +164,20 @@ html.dark .desktop-nav-links {
   font-weight: 800;
 }
 
+/* Active nav item: animated gradient underline dot */
+.nav-link-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  animation: scaleIn 0.25s var(--ease-spring) both;
+}
+
 html.dark .nav-link-btn.active {
   background: rgba(37, 99, 235, 0.25);
   color: #93c5fd;
@@ -294,4 +321,17 @@ html.dark .icon-circle-btn {
   font-weight: 700;
   letter-spacing: 0.01em;
   white-space: nowrap;
+}
+
+/* Mobile tap bounce feedback */
+.mobile-nav-item:active {
+  transform: scale(0.88);
+}
+
+.mobile-nav-item .material-symbols-outlined {
+  transition: transform 0.2s var(--ease-spring);
+}
+
+.mobile-nav-item.active .material-symbols-outlined {
+  transform: scale(1.2);
 }

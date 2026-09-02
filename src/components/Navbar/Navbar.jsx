@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './Navbar.css';
 
 export default function Navbar({
@@ -9,17 +9,29 @@ export default function Navbar({
   user = null,
   onOpenAuth = () => {}
 }) {
+  const [scrolled, setScrolled] = useState(false);
+
   const navItems = [
-    { id: 'home', label: 'Home', icon: 'home' },
+    { id: 'home',     label: 'Home',    icon: 'home' },
     { id: 'subjects', label: 'Subjects', icon: 'menu_book' },
-    { id: 'quiz', label: 'Quiz', icon: 'quiz' },
-    { id: 'gpa', label: 'GPA Calc', icon: 'calculate' },
-    { id: 'about', label: 'Team', icon: 'groups' }
+    { id: 'quiz',     label: 'Quiz',     icon: 'quiz' },
+    { id: 'gpa',      label: 'GPA Calc', icon: 'calculate' },
+    { id: 'about',    label: 'Team',     icon: 'groups' }
   ];
+
+  /* Scroll shadow effect */
+  const handleScroll = useCallback(() => {
+    setScrolled(window.scrollY > 12);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
 
   return (
     <>
-      <header className="header-sticky">
+      <header className={`header-sticky${scrolled ? ' header-scrolled' : ''}`}>
         <div className="nav-container">
           <div className="nav-glass-pill">
             {/* Brand Logo */}
@@ -43,7 +55,7 @@ export default function Navbar({
                   key={item.id}
                   type="button"
                   onClick={() => onNavigate(item.id)}
-                  className={`nav-link-btn ${activePath === item.id ? 'active' : ''}`}
+                  className={`nav-link-btn${activePath === item.id ? ' active' : ''}`}
                 >
                   {item.label}
                 </button>
@@ -69,7 +81,7 @@ export default function Navbar({
                 <button
                   type="button"
                   onClick={() => onNavigate('dashboard')}
-                  className="signin-gradient-btn"
+                  className="signin-gradient-btn btn-shimmer"
                 >
                   <span className="material-symbols-outlined">account_circle</span>
                   <span>Dashboard</span>
@@ -78,7 +90,7 @@ export default function Navbar({
                 <button
                   type="button"
                   onClick={onOpenAuth}
-                  className="signin-gradient-btn"
+                  className="signin-gradient-btn btn-shimmer"
                 >
                   <span className="material-symbols-outlined">person</span>
                   <span>Sign In</span>
@@ -97,7 +109,7 @@ export default function Navbar({
               key={item.id}
               type="button"
               onClick={() => onNavigate(item.id)}
-              className={`mobile-nav-item ${activePath === item.id ? 'active' : ''}`}
+              className={`mobile-nav-item${activePath === item.id ? ' active' : ''}`}
             >
               <span className="material-symbols-outlined">{item.icon}</span>
               <span className="text-label">{item.label}</span>
