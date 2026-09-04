@@ -102,21 +102,23 @@ export default function Navbar({
         </div>
       </header>
 
-      {/* Mobile Navigation Bar — shows all 5 items */}
+      {/* Mobile Navigation Bar — shows 4 items (excluding GPA Calc) */}
       <nav className="mobile-bottom-nav">
         <div className="mobile-grid">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onNavigate(item.id)}
-              className={`mobile-nav-item${activePath === item.id ? ' active' : ''}`}
-              aria-label={item.label}
-            >
-              <span className="material-symbols-outlined">{item.icon}</span>
-              <span className="text-label">{item.label}</span>
-            </button>
-          ))}
+          {navItems
+            .filter((item) => item.id !== 'gpa')
+            .map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onNavigate(item.id)}
+                className={`mobile-nav-item${activePath === item.id ? ' active' : ''}`}
+                aria-label={item.label}
+              >
+                <span className="material-symbols-outlined">{item.icon}</span>
+                <span className="text-label">{item.label}</span>
+              </button>
+            ))}
         </div>
       </nav>
     </>

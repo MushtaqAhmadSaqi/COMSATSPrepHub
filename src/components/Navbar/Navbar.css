@@ -266,10 +266,12 @@ html.dark .icon-circle-btn {
 .mobile-bottom-nav {
   position: fixed;
   bottom: 0.625rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100vw - 1.5rem);
-  max-width: 24rem;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: calc(100% - 1.5rem);
+  max-width: 22rem;
   z-index: 99;
   background: rgba(10, 18, 35, 0.95);
   backdrop-filter: blur(20px);
@@ -293,6 +295,8 @@ html.dark .icon-circle-btn {
   grid-template-columns: repeat(4, 1fr);
   gap: 0.125rem;
   width: 100%;
+  align-items: center;
+  justify-items: center;
 }
 
 .mobile-nav-item {
