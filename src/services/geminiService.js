@@ -1,15 +1,14 @@
 /**
- * Gemini AI service for generating COMSATS-style MCQ quizzes.
- * Uses Gemini 1.5 Flash via the REST API.
+ * Groq AI service for generating COMSATS-style MCQ quizzes.
+ * Uses Llama 3.3 70B via the Groq REST API (free tier).
  */
 
-// Public Gemini API key (safe for client-side; has usage limits per day)
-const GEMINI_API_KEY = 'AIzaSyBTH5B7FPgT6w7mPFv9yU_H1PG5t7h-gUE';
-const GEMINI_MODEL = 'gemini-1.5-flash';
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'groq/compound-mini';
 
 /**
- * Generate MCQ questions for a given subject using Gemini AI.
+ * Generate MCQ questions for a given subject using Groq AI.
  *
  * @param {object} opts
  * @param {string} opts.subject - Subject name (e.g., "Data Structures & Algorithms")
@@ -22,37 +21,46 @@ export async function generateQuizWithGemini({ subject, subjectCode, numQuestion
   const prompt = buildPrompt(subject, subjectCode, numQuestions, difficulty);
 
   try {
-    const response = await fetch(GEMINI_API_URL, {
+    const response = await fetch(GROQ_API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY}`,
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 4096,
-        },
+        model: GROQ_MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert university professor. You always respond with valid JSON only — no markdown, no explanation, just the raw JSON array.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 4096,
       }),
     });
 
     if (!response.ok) {
       const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.error?.message || `Gemini API error: ${response.status}`);
+      throw new Error(errData.error?.message || `Groq API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const text = data?.choices?.[0]?.message?.content || '';
 
     return parseQuizFromResponse(text, numQuestions);
   } catch (err) {
-    console.error('Gemini quiz generation error:', err);
+    console.error('Groq quiz generation error:', err);
     throw err;
   }
 }
 
 /**
- * Build the prompt for Gemini to generate a structured MCQ quiz.
+ * Build the prompt for Groq to generate a structured MCQ quiz.
  */
 function buildPrompt(subject, subjectCode, numQuestions, difficulty) {
   return `You are an expert computer science professor at COMSATS University Islamabad. Generate ${numQuestions} multiple-choice questions (MCQs) for the subject "${subject}" (${subjectCode || 'university-level course'}).
@@ -76,15 +84,14 @@ Format:
     "options": ["O(n)", "O(log n)", "O(n²)", "O(1)"],
     "correct": 1,
     "hint": "Binary search halves the search space at each step."
-  },
-  ...
+  }
 ]
 
 Generate exactly ${numQuestions} questions now:`;
 }
 
 /**
- * Parse the JSON array from Gemini's response.
+ * Parse the JSON array from Groq's response.
  * Handles markdown code blocks and extracts the first valid JSON array.
  */
 function parseQuizFromResponse(text, expectedCount) {
@@ -97,7 +104,7 @@ function parseQuizFromResponse(text, expectedCount) {
   // Try to find a JSON array in the response
   const arrayMatch = cleaned.match(/\[[\s\S]*\]/);
   if (!arrayMatch) {
-    throw new Error('No valid JSON array found in Gemini response');
+    throw new Error('No valid JSON array found in AI response');
   }
 
   try {
@@ -126,15 +133,14 @@ function parseQuizFromResponse(text, expectedCount) {
       };
     });
 
-    // If we got fewer questions than expected, pad with fallbacks
+    // Pad with fallbacks if fewer questions than expected
     while (questions.length < expectedCount) {
       questions.push(getFallbackQuestion(questions.length));
     }
 
     return questions;
   } catch (parseErr) {
-    console.error('Failed to parse Gemini response:', parseErr);
-    // Return fallback questions
+    console.error('Failed to parse AI response:', parseErr);
     return Array.from({ length: expectedCount }, (_, i) => getFallbackQuestion(i));
   }
 }
