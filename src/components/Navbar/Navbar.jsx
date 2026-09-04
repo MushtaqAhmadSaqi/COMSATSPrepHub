@@ -1,6 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './Navbar.css';
 
+// Defined at module scope so the array is created once, not on every render
+const navItems = [
+  { id: 'home',     label: 'Home',    icon: 'home' },
+  { id: 'subjects', label: 'Subjects', icon: 'menu_book' },
+  { id: 'quiz',     label: 'Quiz',     icon: 'quiz' },
+  { id: 'gpa',      label: 'GPA Calc', icon: 'calculate' },
+  { id: 'about',    label: 'Team',     icon: 'groups' }
+];
+
 export default function Navbar({
   activePath = 'home',
   onNavigate = () => {},
@@ -10,14 +19,6 @@ export default function Navbar({
   onOpenAuth = () => {}
 }) {
   const [scrolled, setScrolled] = useState(false);
-
-  const navItems = [
-    { id: 'home',     label: 'Home',    icon: 'home' },
-    { id: 'subjects', label: 'Subjects', icon: 'menu_book' },
-    { id: 'quiz',     label: 'Quiz',     icon: 'quiz' },
-    { id: 'gpa',      label: 'GPA Calc', icon: 'calculate' },
-    { id: 'about',    label: 'Team',     icon: 'groups' }
-  ];
 
   /* Scroll shadow effect */
   const handleScroll = useCallback(() => {
@@ -101,15 +102,16 @@ export default function Navbar({
         </div>
       </header>
 
-      {/* Mobile Navigation Bar */}
+      {/* Mobile Navigation Bar — shows all 5 items */}
       <nav className="mobile-bottom-nav">
         <div className="mobile-grid">
-          {navItems.slice(0, 4).map((item) => (
+          {navItems.map((item) => (
             <button
               key={item.id}
               type="button"
               onClick={() => onNavigate(item.id)}
               className={`mobile-nav-item${activePath === item.id ? ' active' : ''}`}
+              aria-label={item.label}
             >
               <span className="material-symbols-outlined">{item.icon}</span>
               <span className="text-label">{item.label}</span>

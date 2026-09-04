@@ -1,5 +1,5 @@
-/* ==========================================================================
-   COMSATS GPA Calculator — Refactored Modern React Responsive UI
+﻿/* ==========================================================================
+   COMSATS GPA Calculator â€” Refactored Modern React Responsive UI
    ========================================================================== */
 
 .gpa-page-container {
@@ -14,8 +14,7 @@
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-:root.dark .gpa-page-container,
-.dark .gpa-page-container {
+html.dark .gpa-page-container {
   background:
     radial-gradient(circle at 8% 0%, rgba(56, 189, 248, 0.14), transparent 28rem),
     radial-gradient(circle at 92% 0%, rgba(129, 140, 248, 0.10), transparent 26rem),
@@ -44,7 +43,7 @@
   margin-bottom: 0.75rem;
 }
 
-.dark .gpa-hero-badge {
+html.dark .gpa-hero-badge {
   background: rgba(45, 212, 191, 0.15);
   color: #2dd4bf;
   border-color: rgba(45, 212, 191, 0.3);
@@ -59,7 +58,7 @@
   margin-bottom: 0.6rem;
 }
 
-.dark .gpa-hero-title {
+html.dark .gpa-hero-title {
   color: #f8fafc;
 }
 
@@ -71,7 +70,7 @@
   line-height: 1.6;
 }
 
-.dark .gpa-hero-subtitle {
+html.dark .gpa-hero-subtitle {
   color: #94a3b8;
 }
 
@@ -97,7 +96,7 @@
   position: relative;
 }
 
-.dark .gpa-glass-card {
+html.dark .gpa-glass-card {
   background:
     radial-gradient(circle at top right, rgba(56, 189, 248, 0.1), transparent 40%),
     rgba(15, 23, 42, 0.92);
@@ -110,7 +109,7 @@
   box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.3), 0 20px 55px rgba(15, 118, 110, 0.15) !important;
 }
 
-.dark .gpa-glass-card.edit-active {
+html.dark .gpa-glass-card.edit-active {
   border-color: #2dd4bf !important;
   box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.25), 0 20px 55px rgba(0, 0, 0, 0.5) !important;
 }
@@ -134,7 +133,7 @@
   letter-spacing: -0.02em;
 }
 
-.dark .gpa-card-title {
+html.dark .gpa-card-title {
   color: #f8fafc;
 }
 
@@ -142,7 +141,7 @@
   color: #0f766e;
 }
 
-.dark .gpa-card-title .material-symbols-outlined {
+html.dark .gpa-card-title .material-symbols-outlined {
   color: #2dd4bf;
 }
 
@@ -177,7 +176,7 @@
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.dark .gpa-live-badge {
+html.dark .gpa-live-badge {
   background: rgba(20, 184, 166, 0.12);
   border-color: rgba(45, 212, 191, 0.25);
   color: #2dd4bf;
@@ -209,7 +208,7 @@
   overflow: hidden;
 }
 
-.dark .gpa-ocr-zone {
+html.dark .gpa-ocr-zone {
   border-color: rgba(45, 212, 191, 0.25);
   background: rgba(15, 23, 42, 0.4);
 }
@@ -233,7 +232,7 @@
   transition: transform 0.2s ease;
 }
 
-.dark .gpa-ocr-icon {
+html.dark .gpa-ocr-icon {
   color: #2dd4bf;
 }
 
@@ -247,7 +246,7 @@
   color: #0f172a;
 }
 
-.dark .gpa-ocr-text-main {
+html.dark .gpa-ocr-text-main {
   color: #f8fafc;
 }
 
@@ -256,7 +255,7 @@
   color: #64748b;
 }
 
-.dark .gpa-ocr-text-sub {
+html.dark .gpa-ocr-text-sub {
   color: #94a3b8;
 }
 
@@ -298,7 +297,7 @@
   margin-bottom: 0.35rem;
 }
 
-.dark .gpa-label {
+html.dark .gpa-label {
   color: #cbd5e1;
 }
 
@@ -315,7 +314,7 @@
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.02);
 }
 
-.dark .gpa-input {
+html.dark .gpa-input {
   background: #1e293b;
   color: #f8fafc;
   border-color: rgba(148, 163, 184, 0.25);
@@ -325,7 +324,7 @@
   color: #94a3b8;
 }
 
-.dark .gpa-input::placeholder {
+html.dark .gpa-input::placeholder {
   color: #64748b;
 }
 
@@ -333,7 +332,7 @@
   border-color: #0f766e;
 }
 
-.dark .gpa-input:hover {
+html.dark .gpa-input:hover {
   border-color: #2dd4bf;
 }
 
@@ -343,7 +342,7 @@
   box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.15);
 }
 
-.dark .gpa-input:focus {
+html.dark .gpa-input:focus {
   border-color: #2dd4bf;
   box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.2);
 }
@@ -354,7 +353,7 @@
   animation: shake 0.35s ease-in-out;
 }
 
-.dark .gpa-input.is-invalid {
+html.dark .gpa-input.is-invalid {
   background-color: rgba(239, 68, 68, 0.15) !important;
 }
 
@@ -373,7 +372,7 @@
   margin-top: 0.25rem;
 }
 
-.dark .gpa-helper {
+html.dark .gpa-helper {
   color: #94a3b8;
 }
 
@@ -386,7 +385,7 @@
   margin-bottom: 1.1rem;
 }
 
-.dark .gpa-scheme-details {
+html.dark .gpa-scheme-details {
   border-color: rgba(148, 163, 184, 0.18);
   background: rgba(15, 23, 42, 0.4);
 }
@@ -402,7 +401,7 @@
   color: #0f766e;
 }
 
-.dark .gpa-scheme-summary {
+html.dark .gpa-scheme-summary {
   color: #2dd4bf;
 }
 
@@ -417,7 +416,7 @@
   padding-bottom: 0.3rem;
 }
 
-.dark .gpa-section-title {
+html.dark .gpa-section-title {
   color: #2dd4bf;
   border-bottom-color: rgba(45, 212, 191, 0.2);
 }
@@ -435,7 +434,7 @@
   color: #334155;
 }
 
-.dark .gpa-switch-label {
+html.dark .gpa-switch-label {
   color: #cbd5e1;
 }
 
@@ -448,7 +447,7 @@
   transition: background-color 0.2s ease;
 }
 
-.dark .gpa-switch-track {
+html.dark .gpa-switch-track {
   background: #334155;
 }
 
@@ -456,7 +455,7 @@
   background: #0f766e;
 }
 
-.dark .gpa-switch-track.active {
+html.dark .gpa-switch-track.active {
   background: #2dd4bf;
 }
 
@@ -557,7 +556,7 @@
   transform: scale(1.05);
 }
 
-.dark .gpa-row-remove-btn:hover {
+html.dark .gpa-row-remove-btn:hover {
   background: rgba(239, 68, 68, 0.2);
   color: #f87171;
 }
@@ -579,7 +578,7 @@
   animation: fadeIn 0.25s ease-out;
 }
 
-.dark .gpa-insight-box {
+html.dark .gpa-insight-box {
   background: rgba(20, 184, 166, 0.08);
   border-color: rgba(45, 212, 191, 0.25);
 }
@@ -598,7 +597,7 @@
   color: #0f172a;
 }
 
-.dark .gpa-insight-title {
+html.dark .gpa-insight-title {
   color: #f8fafc;
 }
 
@@ -608,7 +607,7 @@
   margin-bottom: 0.5rem;
 }
 
-.dark .gpa-insight-msg {
+html.dark .gpa-insight-msg {
   color: #cbd5e1;
 }
 
@@ -678,7 +677,7 @@
   transition: all 0.18s ease;
 }
 
-.dark .gpa-btn-clear {
+html.dark .gpa-btn-clear {
   background: #1e293b;
   color: #cbd5e1;
   border-color: rgba(148, 163, 184, 0.25);
@@ -689,7 +688,7 @@
   color: #0f172a;
 }
 
-.dark .gpa-btn-clear:hover {
+html.dark .gpa-btn-clear:hover {
   background: #334155;
   color: #f8fafc;
 }
@@ -716,7 +715,7 @@
   overflow: hidden;
 }
 
-.dark .gpa-subject-card {
+html.dark .gpa-subject-card {
   background: #1e293b;
   border-color: rgba(148, 163, 184, 0.2);
 }
@@ -750,7 +749,7 @@
   margin-bottom: 0.25rem;
 }
 
-.dark .gpa-subject-title {
+html.dark .gpa-subject-title {
   color: #f8fafc;
 }
 
@@ -763,7 +762,7 @@
   color: #64748b;
 }
 
-.dark .gpa-subject-details {
+html.dark .gpa-subject-details {
   color: #94a3b8;
 }
 
@@ -825,7 +824,7 @@
   transition: all 0.18s ease;
 }
 
-.dark .gpa-card-action-btn {
+html.dark .gpa-card-action-btn {
   background: #0f172a;
   border-color: rgba(148, 163, 184, 0.2);
   color: #cbd5e1;
@@ -949,3 +948,4 @@
     min-width: 38px;
   }
 }
+

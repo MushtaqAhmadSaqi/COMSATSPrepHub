@@ -28,9 +28,26 @@ export default function App() {
   const [isDark, setIsDark] = useState(false);
   const [user, setUser] = useState(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [selectedSubject, setSelectedSubject] = useState(null);
-  const [selectedPaper, setSelectedPaper] = useState(null);
-  const [aiQuizParams, setAiQuizParams] = useState(null);
+  // Lazy initialisers — restore from sessionStorage so sub-page navigation
+  // survives a page refresh or browser-back within the same tab session.
+  const [selectedSubject, setSelectedSubject] = useState(() => {
+    try {
+      const raw = sessionStorage.getItem('pph_selectedSubject');
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
+  const [selectedPaper, setSelectedPaper] = useState(() => {
+    try {
+      const raw = sessionStorage.getItem('pph_selectedPaper');
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
+  const [aiQuizParams, setAiQuizParams] = useState(() => {
+    try {
+      const raw = sessionStorage.getItem('pph_aiQuizParams');
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
 
   // Initialize Dark Mode & Supabase User Session
   useEffect(() => {
@@ -40,6 +57,28 @@ export default function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDark]);
+
+  // Persist sub-page navigation state across refreshes within the same tab
+  useEffect(() => {
+    try {
+      if (selectedSubject) sessionStorage.setItem('pph_selectedSubject', JSON.stringify(selectedSubject));
+      else sessionStorage.removeItem('pph_selectedSubject');
+    } catch { /* quota exceeded or private-mode restriction — fail silently */ }
+  }, [selectedSubject]);
+
+  useEffect(() => {
+    try {
+      if (selectedPaper) sessionStorage.setItem('pph_selectedPaper', JSON.stringify(selectedPaper));
+      else sessionStorage.removeItem('pph_selectedPaper');
+    } catch { /* quota exceeded or private-mode restriction — fail silently */ }
+  }, [selectedPaper]);
+
+  useEffect(() => {
+    try {
+      if (aiQuizParams) sessionStorage.setItem('pph_aiQuizParams', JSON.stringify(aiQuizParams));
+      else sessionStorage.removeItem('pph_aiQuizParams');
+    } catch { /* quota exceeded or private-mode restriction — fail silently */ }
+  }, [aiQuizParams]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {

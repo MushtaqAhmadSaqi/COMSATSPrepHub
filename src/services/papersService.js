@@ -52,9 +52,9 @@ export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName
     const query = supabase.from('past_papers').select('*');
 
     if (subjectCode) {
-      query.ilike('subject_code', `%${subjectCode}%`);
+      query = query.ilike('subject_code', `%${subjectCode}%`);
     } else if (subjectName) {
-      query.ilike('subject_name', `%${subjectName}%`);
+      query = query.ilike('subject_name', `%${subjectName}%`);
     }
 
     const { data, error } = await query.order('year', { ascending: false });

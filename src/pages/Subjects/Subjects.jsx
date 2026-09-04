@@ -114,14 +114,13 @@ export default function Subjects({ onSelectSubject = () => {} }) {
       ) : (
         <div className="subjects-grid">
           {filtered.map((subj, idx) => (
-            <div
+            <button
+              type="button"
               key={subj.code}
               className="subject-card"
               style={{ animationDelay: `${idx * 0.04}s` }}
               onClick={() => onSelectSubject(subj)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && onSelectSubject(subj)}
+              aria-label={`Browse ${subj.name} papers`}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.625rem' }}>
                 <div className="subject-code">{subj.code}</div>
@@ -137,7 +136,7 @@ export default function Subjects({ onSelectSubject = () => {} }) {
                   {subj.papers} Papers
                 </span>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       )}

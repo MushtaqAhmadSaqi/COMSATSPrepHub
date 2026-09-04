@@ -41,7 +41,11 @@ export function useScrollReveal({ threshold = 0.15, once = true } = {}) {
 }
 
 /**
- * useScrollRevealList — applies staggered reveal to an array of refs.
+ * useScrollRevealList — applies staggered reveal to an array of child elements.
+ *
+ * Uses a SINGLE shared IntersectionObserver for all children rather than one
+ * per child, reducing the number of active observers from O(n) to O(1).
+ *
  * @param {number} count — number of items
  * @param {Object} options — passed to IntersectionObserver
  * @returns {{ containerRef, visibleSet }} — visibleSet is a Set of visible indices
@@ -54,27 +58,33 @@ export function useScrollRevealList(count, { threshold = 0.1, once = true } = {}
     const container = containerRef.current;
     if (!container) return;
 
+    // Respect reduced-motion — immediately reveal all items
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setVisibleSet(new Set(Array.from({ length: count }, (_, i) => i)));
       return;
     }
 
     const children = Array.from(container.children);
-    const observers = children.map((child, idx) => {
-      const obs = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setVisibleSet((prev) => new Set([...prev, idx]));
-            if (once) obs.disconnect();
-          }
-        },
-        { threshold }
-      );
-      obs.observe(child);
-      return obs;
-    });
 
-    return () => observers.forEach((obs) => obs.disconnect());
+    // Single shared observer — much cheaper than one observer per child
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = children.indexOf(entry.target);
+            if (idx !== -1) {
+              setVisibleSet((prev) => new Set([...prev, idx]));
+              if (once) observer.unobserve(entry.target);
+            }
+          }
+        });
+      },
+      { threshold }
+    );
+
+    children.forEach((child) => observer.observe(child));
+
+    return () => observer.disconnect();
   }, [count, threshold, once]);
 
   return { containerRef, visibleSet };

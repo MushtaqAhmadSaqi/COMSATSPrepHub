@@ -1,8 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(pip list *)",
-      "Bash(python *)"
-    ]
+    "allow": ["Bash(pip list *)", "Bash(python *)"]
   }
 }

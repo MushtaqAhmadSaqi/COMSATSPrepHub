@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { fireConfetti } from '../../utils/confetti';
 import './GpaCalculator.css';
 
@@ -39,11 +39,16 @@ export default function GpaCalculator() {
     cgpa = cgpaNum.toFixed(2);
   }
 
-  // Trigger celebration on 4.0 or high GPA!
+  // Fire confetti only when SGPA crosses INTO the ≥ 3.5 band (not on every re-render above it)
+  const prevSgpaRef = useRef(null);
   useEffect(() => {
-    if (sgpaNum >= 3.5 && totalCredits > 0) {
+    const prev = prevSgpaRef.current;
+    const isHighNow = sgpaNum >= 3.5 && totalCredits > 0;
+    const wasHighBefore = prev !== null && prev >= 3.5;
+    if (isHighNow && !wasHighBefore) {
       fireConfetti({ count: 50, spread: 60 });
     }
+    prevSgpaRef.current = totalCredits > 0 ? sgpaNum : null;
   }, [sgpaNum, totalCredits]);
 
   const getGpaStanding = (val) => {
