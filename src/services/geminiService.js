@@ -5,7 +5,7 @@
 
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'groq/compound-mini';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 /**
  * Generate MCQ questions for a given subject using Groq AI.
@@ -18,6 +18,11 @@ const GROQ_MODEL = 'groq/compound-mini';
  * @returns {Promise<Array<{question: string, options: string[], correct: number, hint: string}>>}
  */
 export async function generateQuizWithGemini({ subject, subjectCode, numQuestions = 10, difficulty = 'Medium' }) {
+  if (!GROQ_API_KEY) {
+    console.warn('VITE_GROQ_API_KEY is not defined in environment variables. Falling back to built-in quiz questions.');
+    return Array.from({ length: numQuestions }, (_, i) => getFallbackQuestion(i));
+  }
+
   const prompt = buildPrompt(subject, subjectCode, numQuestions, difficulty);
 
   try {
@@ -46,7 +51,8 @@ export async function generateQuizWithGemini({ subject, subjectCode, numQuestion
 
     if (!response.ok) {
       const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.error?.message || `Groq API error: ${response.status}`);
+      console.warn('Groq API response error:', response.status, errData);
+      return Array.from({ length: numQuestions }, (_, i) => getFallbackQuestion(i));
     }
 
     const data = await response.json();
@@ -55,7 +61,7 @@ export async function generateQuizWithGemini({ subject, subjectCode, numQuestion
     return parseQuizFromResponse(text, numQuestions);
   } catch (err) {
     console.error('Groq quiz generation error:', err);
-    throw err;
+    return Array.from({ length: numQuestions }, (_, i) => getFallbackQuestion(i));
   }
 }
 
