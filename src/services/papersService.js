@@ -49,7 +49,7 @@ export async function fetchSubjectsFromSupabase() {
  */
 export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName) {
   try {
-    const query = supabase.from('past_papers').select('*');
+    let query = supabase.from('past_papers').select('*');
 
     if (subjectCode) {
       query = query.ilike('subject_code', `%${subjectCode}%`);
