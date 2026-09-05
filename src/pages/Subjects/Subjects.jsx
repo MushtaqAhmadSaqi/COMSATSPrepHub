@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { fetchSubjectsFromSupabase } from '../../services/papersService';
 import './Subjects.css';
 
@@ -18,6 +19,103 @@ const DEFAULT_SUBJECTS = [
 ];
 
 const DEPARTMENTS = ['All', 'CS & IT', 'Math', 'Software Eng', 'Electrical'];
+
+/* ── Spotlight Card with Glow Effect ── */
+function SpotlightSubjectCard({ subject, idx, onSelect }) {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+  const cardRef = React.useRef(null);
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    setMousePosition({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
+
+  return (
+    <motion.button
+      ref={cardRef}
+      type="button"
+      className="subject-card spotlight-subject"
+      onClick={() => onSelect(subject)}
+      aria-label={`Browse ${subject.name} papers`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: idx * 0.04 }}
+      whileHover={{ y: -6, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        '--mouse-x': `${mousePosition.x}px`,
+        '--mouse-y': `${mousePosition.y}px`,
+      }}
+    >
+      {isHovered && (
+        <motion.div
+          className="spotlight-glow"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        />
+      )}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.625rem' }}>
+        <div className="subject-code">{subject.code}</div>
+        <motion.span
+          className="material-symbols-outlined"
+          style={{ color: 'var(--brand)', opacity: 0.8, fontSize: '20px' }}
+          animate={{ rotate: isHovered ? 360 : 0 }}
+          transition={{ duration: 0.6, ease: 'easeInOut' }}
+        >
+          {subject.icon || 'menu_book'}
+        </motion.span>
+      </div>
+      <h3 className="subject-name">{subject.name}</h3>
+      <div className="subject-meta">
+        <span>{subject.department}</span>
+        <span className="subject-papers-count">
+          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>description</span>
+          {subject.papers} Papers
+        </span>
+      </div>
+    </motion.button>
+  );
+}
+
+/* ── Animated Department Chip ── */
+function DepartmentChip({ dept, isSelected, onClick }) {
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      className={`department-chip ${isSelected ? 'selected' : ''}`}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+      whileHover={{ scale: 1.05, y: -2 }}
+      whileTap={{ scale: 0.95 }}
+      style={{
+        padding: '0.4rem 1rem',
+        borderRadius: '9999px',
+        border: '1.5px solid var(--border)',
+        background: isSelected ? 'var(--brand)' : 'var(--surface)',
+        color: isSelected ? '#ffffff' : 'var(--text-muted)',
+        fontWeight: 700,
+        fontSize: '0.8125rem',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        boxShadow: isSelected ? 'var(--shadow-brand)' : 'none'
+      }}
+    >
+      {dept}
+    </motion.button>
+  );
+}
 
 export default function Subjects({ onSelectSubject = () => {} }) {
   const [subjects, setSubjects] = useState(DEFAULT_SUBJECTS);
@@ -48,98 +146,134 @@ export default function Subjects({ onSelectSubject = () => {} }) {
   });
 
   return (
-    <div className="subjects-container">
+    <motion.div
+      className="subjects-container"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <div className="subjects-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-          <h1 className="subjects-title" style={{ marginBottom: 0 }}>Browse All Subjects</h1>
+          <motion.h1
+            className="subjects-title"
+            style={{ marginBottom: 0 }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            Browse All Subjects
+          </motion.h1>
           {isFromSupabase && (
-            <span style={{ fontSize: '0.6875rem', fontWeight: 800, color: '#10b981', background: 'rgba(16,185,129,0.12)', padding: '0.2rem 0.6rem', borderRadius: '9999px', border: '1px solid rgba(16,185,129,0.3)' }}>
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              style={{
+                fontSize: '0.6875rem',
+                fontWeight: 800,
+                color: '#10b981',
+                background: 'rgba(16,185,129,0.12)',
+                padding: '0.2rem 0.6rem',
+                borderRadius: '9999px',
+                border: '1px solid rgba(16,185,129,0.3)'
+              }}
+            >
               ⚡ Supabase Live
-            </span>
+            </motion.span>
           )}
         </div>
-        <p>Select a subject to view past examination papers, quizzes, and solutions.</p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          Select a subject to view past examination papers, quizzes, and solutions.
+        </motion.p>
       </div>
 
       {/* Filter Tabs & Search Row */}
       <div style={{ marginBottom: '2rem' }}>
-        <input
+        <motion.input
           type="text"
           className="subjects-search-bar"
           placeholder="🔍  Search by name, code (e.g. CSC211), or department..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           aria-label="Search subjects"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          whileFocus={{
+            borderColor: '#2563eb',
+            boxShadow: '0 0 0 3px rgba(14, 165, 233, 0.25)'
+          }}
         />
 
         {/* Category Chips */}
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '-1rem' }}>
-          {DEPARTMENTS.map((dept) => (
-            <button
+        <motion.div
+          style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '-1rem' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
+          {DEPARTMENTS.map((dept, idx) => (
+            <DepartmentChip
               key={dept}
-              type="button"
+              dept={dept}
+              isSelected={selectedDept === dept}
               onClick={() => setSelectedDept(dept)}
-              style={{
-                padding: '0.4rem 1rem',
-                borderRadius: '9999px',
-                border: '1.5px solid var(--border)',
-                background: selectedDept === dept ? 'var(--brand)' : 'var(--surface)',
-                color: selectedDept === dept ? '#ffffff' : 'var(--text-muted)',
-                fontWeight: 700,
-                fontSize: '0.8125rem',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: selectedDept === dept ? 'var(--shadow-brand)' : 'none'
-              }}
-            >
-              {dept}
-            </button>
+            />
           ))}
-        </div>
+        </motion.div>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-subtle)' }}>
-          <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', animation: 'spin 1s linear infinite' }}>
+        <motion.div
+          style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-subtle)' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+        >
+          <motion.span
+            className="material-symbols-outlined"
+            style={{ fontSize: '2.5rem' }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+          >
             progress_activity
-          </span>
+          </motion.span>
           <p style={{ marginTop: '0.75rem', fontWeight: 600 }}>Fetching subjects from Supabase...</p>
-        </div>
+        </motion.div>
       ) : filtered.length === 0 ? (
-        <div className="subjects-empty">
+        <motion.div
+          className="subjects-empty"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+        >
           <span className="material-symbols-outlined">search_off</span>
           <p style={{ fontWeight: 700, fontSize: '1.125rem', marginBottom: '0.25rem' }}>No subjects match your filter</p>
           <p style={{ fontSize: '0.875rem' }}>Try selecting "All" or typing a different keyword</p>
-        </div>
+        </motion.div>
       ) : (
-        <div className="subjects-grid">
-          {filtered.map((subj, idx) => (
-            <button
-              type="button"
-              key={subj.code}
-              className="subject-card"
-              style={{ animationDelay: `${idx * 0.04}s` }}
-              onClick={() => onSelectSubject(subj)}
-              aria-label={`Browse ${subj.name} papers`}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.625rem' }}>
-                <div className="subject-code">{subj.code}</div>
-                <span className="material-symbols-outlined" style={{ color: 'var(--brand)', opacity: 0.8, fontSize: '20px' }}>
-                  {subj.icon || 'menu_book'}
-                </span>
-              </div>
-              <h3 className="subject-name">{subj.name}</h3>
-              <div className="subject-meta">
-                <span>{subj.department}</span>
-                <span className="subject-papers-count">
-                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>description</span>
-                  {subj.papers} Papers
-                </span>
-              </div>
-            </button>
-          ))}
-        </div>
+        <motion.div
+          className="subjects-grid"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+        >
+          <AnimatePresence mode="wait">
+            {filtered.map((subj, idx) => (
+              <SpotlightSubjectCard
+                key={subj.code}
+                subject={subj}
+                idx={idx}
+                onSelect={onSelectSubject}
+              />
+            ))}
+          </AnimatePresence>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }

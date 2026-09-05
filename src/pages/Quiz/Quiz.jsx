@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { fetchSubjectsFromSupabase } from '../../services/papersService';
 import { generateQuizWithGemini } from '../../services/geminiService';
 import { fireConfetti } from '../../utils/confetti';
@@ -8,21 +9,58 @@ const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 const QUESTION_COUNTS = [5, 10, 15, 20];
 const LETTERS = ['A', 'B', 'C', 'D'];
 
-export default function Quiz() {
-  // Step state: 'select' | 'configure' | 'loading' | 'playing' | 'finished'
-  const [step, setStep] = useState('select');
+/* ── Animated Option Button ── */
+function AnimatedOption({ letter, opt, index, selectedOption, revealed, correct, isCorrect, onClick, disabled }) {
+  let optionClass = 'quiz-option-btn';
+  if (selectedOption === index) optionClass += ' selected';
+  if (revealed) {
+    if (index === correct) optionClass += ' correct';
+    else if (selectedOption === index) optionClass += ' incorrect';
+  }
 
-  // Subject selection
+  return (
+    <motion.button
+      key={index}
+      type="button"
+      className={optionClass}
+      onClick={() => !revealed && onClick(index)}
+      disabled={disabled}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      whileHover={!revealed ? { scale: 1.01, x: 2 } : {}}
+      whileTap={{ scale: 0.98 }}
+    >
+      <span className="quiz-option-letter">{letter}</span>
+      <span style={{ flex: 1 }}>{opt}</span>
+      {revealed && index === correct && (
+        <motion.span
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 300 }}
+          className="material-symbols-outlined"
+          style={{ fontSize: '20px', color: '#10b981' }}
+        >
+          check_circle
+        </motion.span>
+      )}
+      {revealed && selectedOption === index && index !== correct && (
+        <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#ef4444' }}>
+          cancel
+        </span>
+      )}
+    </motion.button>
+  );
+}
+
+export default function Quiz() {
+  const [step, setStep] = useState('select');
   const [subjects, setSubjects] = useState([]);
   const [subjectsLoading, setSubjectsLoading] = useState(true);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Quiz configuration
   const [difficulty, setDifficulty] = useState('Medium');
   const [numQuestions, setNumQuestions] = useState(10);
-
-  // Quiz state
   const [questions, setQuestions] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -32,18 +70,14 @@ export default function Quiz() {
   const [showHint, setShowHint] = useState(false);
   const [error, setError] = useState('');
 
-  // Ref for streak confetti
   const prevStreakRef = useRef(0);
 
-  // Fetch subjects on mount
   useEffect(() => {
     async function loadSubjects() {
       setSubjectsLoading(true);
       const data = await fetchSubjectsFromSupabase();
-      if (data && data.length > 0) {
-        setSubjects(data);
-      } else {
-        // Fallback subjects
+      if (data && data.length > 0) { setSubjects(data); }
+      else {
         setSubjects([
           { code: 'CSC211', name: 'Data Structures & Algorithms', papers: 19, department: 'CS & IT' },
           { code: 'CSC102', name: 'Programming Fundamentals', papers: 22, department: 'CS & IT' },
@@ -58,25 +92,20 @@ export default function Quiz() {
     loadSubjects();
   }, []);
 
-  // Filter subjects by search
   const filteredSubjects = subjects.filter(s =>
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.code.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Handle subject selection
   const handleSelectSubject = (subject) => {
     setSelectedSubject(subject);
     setStep('configure');
   };
 
-  // Handle quiz generation
   const handleGenerateQuiz = async () => {
     if (!selectedSubject) return;
-
     setStep('loading');
     setError('');
-
     try {
       const generatedQuestions = await generateQuizWithGemini({
         subject: selectedSubject.name,
@@ -84,7 +113,6 @@ export default function Quiz() {
         numQuestions,
         difficulty,
       });
-
       setQuestions(generatedQuestions);
       setCurrentIdx(0);
       setSelectedOption(null);
@@ -94,26 +122,20 @@ export default function Quiz() {
       setShowHint(false);
       setStep('playing');
     } catch (err) {
-      console.error('Failed to generate quiz:', err);
       setError(err.message || 'Failed to generate quiz. Please try again.');
       setStep('configure');
     }
   };
 
-  // Handle answer submission
   const handleSubmitAnswer = () => {
     if (selectedOption === null) return;
-
     setRevealed(true);
-
     const isCorrect = selectedOption === questions[currentIdx].correct;
     if (isCorrect) {
       const newScore = score + 1;
       const newStreak = streak + 1;
       setScore(newScore);
       setStreak(newStreak);
-
-      // Fire confetti on streak of 3+
       if (newStreak >= 3 && prevStreakRef.current < 3) {
         fireConfetti({ count: 40, spread: 50 });
       }
@@ -124,15 +146,11 @@ export default function Quiz() {
     }
   };
 
-  // Handle next question
   const handleNextQuestion = () => {
     if (currentIdx + 1 >= questions.length) {
-      // Quiz finished
       const finalScore = score;
       const pct = Math.round((finalScore / questions.length) * 100);
-      if (pct >= 50) {
-        fireConfetti({ count: 100, spread: 80, originY: 0.5 });
-      }
+      if (pct >= 50) { fireConfetti({ count: 100, spread: 80, originY: 0.5 }); }
       setStep('finished');
     } else {
       setCurrentIdx(currentIdx + 1);
@@ -142,7 +160,6 @@ export default function Quiz() {
     }
   };
 
-  // Handle restart
   const handleRestart = () => {
     setStep('select');
     setSelectedSubject(null);
@@ -156,10 +173,15 @@ export default function Quiz() {
     setError('');
   };
 
-  // === RENDER STEP: SELECT SUBJECT ===
+  // SELECT SUBJECT
   if (step === 'select') {
     return (
-      <div className="quiz-container">
+      <motion.div
+        className="quiz-container"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <div className="quiz-select-header">
           <h1>Practice Quiz</h1>
           <p>Choose a subject to generate an AI-powered practice quiz</p>
@@ -176,21 +198,26 @@ export default function Quiz() {
         </div>
 
         {subjectsLoading ? (
-          <div className="quiz-loading-state">
+          <motion.div className="quiz-loading-state" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }}>
             <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', animation: 'spin 1s linear infinite' }}>
               progress_activity
             </span>
             <p>Loading subjects...</p>
-          </div>
+          </motion.div>
         ) : (
           <div className="quiz-subjects-grid">
             {filteredSubjects.map((subj, idx) => (
-              <button
+              <motion.button
                 key={subj.code}
                 type="button"
                 className="quiz-subject-card"
                 style={{ animationDelay: `${idx * 0.04}s` }}
                 onClick={() => handleSelectSubject(subj)}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: idx * 0.05 }}
+                whileHover={{ y: -4, boxShadow: '0 8px 30px rgba(14,165,233,0.15)' }}
+                whileTap={{ scale: 0.98 }}
               >
                 <div className="quiz-subject-code">{subj.code}</div>
                 <div className="quiz-subject-name">{subj.name}</div>
@@ -201,33 +228,29 @@ export default function Quiz() {
                     {subj.papers} Papers
                   </span>
                 </div>
-              </button>
+              </motion.button>
             ))}
           </div>
         )}
-      </div>
+      </motion.div>
     );
   }
 
-  // === RENDER STEP: CONFIGURE QUIZ ===
+  // CONFIGURE QUIZ
   if (step === 'configure') {
     return (
-      <div className="quiz-container">
+      <motion.div
+        className="quiz-container"
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3 }}
+      >
         <div className="quiz-config-card">
-          {/* Back button */}
-          <button
-            type="button"
-            className="quiz-back-btn"
-            onClick={() => {
-              setSelectedSubject(null);
-              setStep('select');
-            }}
-          >
+          <button type="button" className="quiz-back-btn" onClick={() => { setSelectedSubject(null); setStep('select'); }}>
             <span className="material-symbols-outlined">arrow_back</span>
             Change Subject
           </button>
 
-          {/* Selected subject badge */}
           <div className="quiz-selected-subject">
             <div className="quiz-selected-badge">
               <span className="material-symbols-outlined">menu_book</span>
@@ -236,44 +259,45 @@ export default function Quiz() {
             <h2>{selectedSubject?.name}</h2>
           </div>
 
-          {/* Difficulty */}
           <div className="quiz-config-field">
             <label className="quiz-config-label">Difficulty Level</label>
             <div className="quiz-difficulty-grid">
               {DIFFICULTIES.map((d) => (
-                <button
+                <motion.button
                   key={d}
                   type="button"
                   className={`quiz-chip ${difficulty === d ? 'selected' : ''}`}
                   onClick={() => setDifficulty(d)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   {d === 'Easy' && '🟢 '}
                   {d === 'Medium' && '🟡 '}
                   {d === 'Hard' && '🔴 '}
                   {d}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
 
-          {/* Number of Questions */}
           <div className="quiz-config-field">
             <label className="quiz-config-label">Number of Questions</label>
             <div className="quiz-count-grid">
               {QUESTION_COUNTS.map((n) => (
-                <button
+                <motion.button
                   key={n}
                   type="button"
                   className={`quiz-count-chip ${numQuestions === n ? 'selected' : ''}`}
                   onClick={() => setNumQuestions(n)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   {n} Qs
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
 
-          {/* Error message */}
           {error && (
             <div className="quiz-error-alert">
               <span className="material-symbols-outlined">error</span>
@@ -281,130 +305,158 @@ export default function Quiz() {
             </div>
           )}
 
-          {/* Generate button */}
-          <button
+          <motion.button
             type="button"
             className="quiz-generate-btn"
             onClick={handleGenerateQuiz}
+            whileHover={{ scale: 1.02, boxShadow: '0 12px 40px rgba(14,165,233,0.35)' }}
+            whileTap={{ scale: 0.98 }}
           >
             <span className="material-symbols-outlined">auto_awesome</span>
             Generate AI Quiz
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
-  // === RENDER STEP: LOADING ===
+  // LOADING
   if (step === 'loading') {
     return (
       <div className="quiz-container">
-        <div className="quiz-loading-card">
-          <div className="quiz-loading-icon">
-            <span className="material-symbols-outlined" style={{ fontSize: '3rem', animation: 'spin 1s linear infinite' }}>
+        <motion.div
+          className="quiz-loading-card"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            className="quiz-loading-icon"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '3rem' }}>
               auto_awesome
             </span>
-          </div>
+          </motion.div>
           <h2>Generating Your Quiz...</h2>
           <p>AI is creating {numQuestions} {difficulty.toLowerCase()} questions for {selectedSubject?.name}</p>
           <div className="quiz-loading-bar">
-            <div className="quiz-loading-bar-fill" />
+            <motion.div
+              className="quiz-loading-bar-fill"
+              initial={{ width: '0%' }}
+              animate={{ width: '100%' }}
+              transition={{ duration: 2.5, ease: 'easeInOut' }}
+            />
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
-  // === RENDER STEP: PLAYING ===
+  // PLAYING
   if (step === 'playing' && questions.length > 0) {
     const q = questions[currentIdx];
     const progress = ((currentIdx) / questions.length) * 100;
     const isCorrect = selectedOption === q.correct;
 
     return (
-      <div className="quiz-container">
-        {/* Top Bar */}
+      <motion.div
+        className="quiz-container"
+        key={currentIdx}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3 }}
+      >
         <div className="quiz-header">
           <div>
             <h1>{selectedSubject?.name}</h1>
             {streak >= 2 && (
-              <span className="quiz-streak-badge">
+              <motion.span
+                className="quiz-streak-badge"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300 }}
+              >
                 🔥 {streak} Answer Streak!
-              </span>
+              </motion.span>
             )}
           </div>
-          <span className="quiz-counter">
-            Question {currentIdx + 1} of {questions.length}
-          </span>
+          <span className="quiz-counter">Question {currentIdx + 1} of {questions.length}</span>
         </div>
 
-        {/* Progress Bar */}
         <div className="quiz-progress-bar">
-          <div className="quiz-progress-fill" style={{ width: `${progress}%` }} />
+          <motion.div
+            className="quiz-progress-fill"
+            initial={{ width: `${((currentIdx) / questions.length) * 100}%` }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
+          />
         </div>
 
-        {/* Question Card */}
         <div className="quiz-card" key={currentIdx}>
-          <h3 className="quiz-question">{q.question}</h3>
+          <motion.h3
+            className="quiz-question"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {q.question}
+          </motion.h3>
 
-          {/* Options */}
           <div className="quiz-options">
-            {q.options.map((opt, i) => {
-              let optionClass = 'quiz-option-btn';
-              if (selectedOption === i) optionClass += ' selected';
-              if (revealed) {
-                if (i === q.correct) optionClass += ' correct';
-                else if (selectedOption === i) optionClass += ' incorrect';
-              }
-
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  className={optionClass}
-                  onClick={() => !revealed && setSelectedOption(i)}
-                  disabled={revealed}
-                >
-                  <span className="quiz-option-letter">{LETTERS[i]}</span>
-                  <span style={{ flex: 1 }}>{opt}</span>
-                  {revealed && i === q.correct && (
-                    <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#10b981' }}>
-                      check_circle
-                    </span>
-                  )}
-                  {revealed && selectedOption === i && i !== q.correct && (
-                    <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#ef4444' }}>
-                      cancel
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+            {q.options.map((opt, i) => (
+              <AnimatedOption
+                key={i}
+                letter={LETTERS[i]}
+                opt={opt}
+                index={i}
+                selectedOption={selectedOption}
+                revealed={revealed}
+                correct={q.correct}
+                isCorrect={isCorrect}
+                onClick={(idx) => !revealed && setSelectedOption(idx)}
+                disabled={revealed}
+              />
+            ))}
           </div>
 
-          {/* Hint toggle */}
           {q.hint && !revealed && (
             <div style={{ marginBottom: '1.5rem' }}>
-              <button
+              <motion.button
                 type="button"
                 onClick={() => setShowHint(!showHint)}
                 className="quiz-hint-toggle"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>lightbulb</span>
                 {showHint ? 'Hide Hint' : 'Need a Hint?'}
-              </button>
+              </motion.button>
 
-              {showHint && (
-                <div className="quiz-hint-box">
-                  💡 <strong>Hint:</strong> {q.hint}
-                </div>
-              )}
+              <AnimatePresence>
+                {showHint && (
+                  <motion.div
+                    className="quiz-hint-box"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    💡 <strong>Hint:</strong> {q.hint}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           )}
 
-          {/* Explanation after reveal */}
           {revealed && q.hint && (
-            <div className="quiz-explanation-box">
+            <motion.div
+              className="quiz-explanation-box"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
               <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>info</span>
               <div>
                 <strong>{isCorrect ? '✅ Correct!' : '❌ Incorrect'}</strong>
@@ -412,103 +464,133 @@ export default function Quiz() {
                   {q.hint}
                 </p>
               </div>
-            </div>
+            </motion.div>
           )}
 
-          {/* Footer */}
           <div className="quiz-footer">
             {!revealed ? (
-              <button
+              <motion.button
                 type="button"
                 className="btn-quiz-next"
                 onClick={handleSubmitAnswer}
                 disabled={selectedOption === null}
                 style={{ opacity: selectedOption === null ? 0.5 : 1 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
               >
                 Submit Answer
                 <span className="material-symbols-outlined">check</span>
-              </button>
+              </motion.button>
             ) : (
-              <button
+              <motion.button
                 type="button"
                 className="btn-quiz-next"
                 onClick={handleNextQuestion}
                 style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
               >
                 {currentIdx + 1 === questions.length ? 'View Results' : 'Next Question'}
                 <span className="material-symbols-outlined">arrow_forward</span>
-              </button>
+              </motion.button>
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
-  // === RENDER STEP: FINISHED ===
+  // FINISHED
   if (step === 'finished') {
     const pct = Math.round((score / questions.length) * 100);
-
     return (
-      <div className="quiz-container">
+      <motion.div
+        className="quiz-container"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, type: 'spring', stiffness: 200 }}
+      >
         <div className="quiz-card" style={{ textAlign: 'center', padding: '3.5rem 2rem' }}>
-          <div className="quiz-finish-badge">
+          <motion.div
+            className="quiz-finish-badge"
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
+          >
             <span className="material-symbols-outlined" style={{ fontSize: '3.5rem', color: pct >= 60 ? '#10b981' : '#f59e0b' }}>
               {pct >= 75 ? 'military_tech' : pct >= 50 ? 'emoji_events' : 'school'}
             </span>
-          </div>
+          </motion.div>
 
-          <h2 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.5rem', letterSpacing: '-0.03em' }}>
+          <motion.h2
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.5rem', letterSpacing: '-0.03em' }}
+          >
             {pct >= 75 ? 'Outstanding Performance! 🎉' : pct >= 50 ? 'Great Job! 👍' : 'Keep Practicing! 💪'}
-          </h2>
+          </motion.h2>
 
-          <p style={{ color: 'var(--text-subtle)', marginBottom: '0.5rem', fontSize: '1.0625rem' }}>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            style={{ color: 'var(--text-subtle)', marginBottom: '0.5rem', fontSize: '1.0625rem' }}
+          >
             {selectedSubject?.name}
-          </p>
+          </motion.p>
 
-          <p style={{ color: 'var(--text-subtle)', marginBottom: '2rem', fontSize: '1.0625rem' }}>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            style={{ color: 'var(--text-subtle)', marginBottom: '2rem', fontSize: '1.0625rem' }}
+          >
             You scored <strong style={{ color: 'var(--brand)', fontSize: '1.25rem' }}>{score}/{questions.length}</strong> ({pct}%)
-          </p>
+          </motion.p>
 
           <div className="quiz-stats-row">
-            <div className="quiz-stat-item">
+            <motion.div className="quiz-stat-item" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.6 }}>
               <span className="quiz-stat-value">{questions.length}</span>
               <span className="quiz-stat-label">Questions</span>
-            </div>
-            <div className="quiz-stat-item">
+            </motion.div>
+            <motion.div className="quiz-stat-item" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.7 }}>
               <span className="quiz-stat-value" style={{ color: '#10b981' }}>{score}</span>
               <span className="quiz-stat-label">Correct</span>
-            </div>
-            <div className="quiz-stat-item">
+            </motion.div>
+            <motion.div className="quiz-stat-item" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.8 }}>
               <span className="quiz-stat-value" style={{ color: '#ef4444' }}>{questions.length - score}</span>
               <span className="quiz-stat-label">Incorrect</span>
-            </div>
+            </motion.div>
           </div>
 
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '2rem' }}>
-            <button
+            <motion.button
               type="button"
               className="btn-quiz-next"
               onClick={handleGenerateQuiz}
               style={{ background: 'linear-gradient(135deg, #0ea5e9, #2563eb)' }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
             >
               <span className="material-symbols-outlined">refresh</span>
               New Quiz
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               type="button"
               className="btn-quiz-next"
               onClick={handleRestart}
               style={{ background: 'var(--surface-2)', color: 'var(--text)', border: '1.5px solid var(--border)' }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
             >
               <span className="material-symbols-outlined">menu_book</span>
               Change Subject
-            </button>
+            </motion.button>
           </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
-
   return null;
 }

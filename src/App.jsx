@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
 import AuthModal from './components/AuthModal/AuthModal';
@@ -193,6 +194,18 @@ export default function App() {
     }
   };
 
+  // Page transition animation settings
+  const pageVariants = {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -8 }
+  };
+
+  const pageTransition = {
+    duration: 0.35,
+    ease: [0.4, 0, 0.2, 1]
+  };
+
   return (
     <div className="app-container">
       <Navbar
@@ -205,7 +218,19 @@ export default function App() {
       />
 
       <main className="main-content">
-        {renderCurrentPage()}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activePath}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            variants={pageVariants}
+            transition={pageTransition}
+            style={{ width: '100%' }}
+          >
+            {renderCurrentPage()}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <Footer onNavigate={handleNavigate} />

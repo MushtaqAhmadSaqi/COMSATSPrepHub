@@ -1,19 +1,197 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { fireConfetti } from '../../utils/confetti';
 import './GpaCalculator.css';
 
 const GRADE_OPTIONS = [
-  { label: 'A  (85–100%) — 4.00', value: 4.0 },
-  { label: 'A- (80–84%)  — 3.70', value: 3.7 },
-  { label: 'B+ (75–79%)  — 3.33', value: 3.33 },
-  { label: 'B  (70–74%)  — 3.00', value: 3.0 },
-  { label: 'B- (65–69%)  — 2.70', value: 2.7 },
-  { label: 'C+ (60–64%)  — 2.33', value: 2.33 },
-  { label: 'C  (55–59%)  — 2.00', value: 2.0 },
-  { label: 'C- (50–54%)  — 1.70', value: 1.7 },
-  { label: 'D  (45–49%)  — 1.30', value: 1.3 },
-  { label: 'F  (<45%)    — 0.00', value: 0.0 },
+  { label: 'A', value: 4.0, color: 'emerald' },
+  { label: 'A-', value: 3.7, color: 'emerald' },
+  { label: 'B+', value: 3.33, color: 'sky' },
+  { label: 'B', value: 3.0, color: 'sky' },
+  { label: 'B-', value: 2.7, color: 'sky' },
+  { label: 'C+', value: 2.33, color: 'amber' },
+  { label: 'C', value: 2.0, color: 'amber' },
+  { label: 'C-', value: 1.7, color: 'orange' },
+  { label: 'D', value: 1.3, color: 'orange' },
+  { label: 'F', value: 0.0, color: 'red' },
 ];
+
+/* ── Animated Grade Badge ── */
+function AnimatedGradeBadge({ className, children }) {
+  return (
+    <motion.span
+      className={`grade-badge-animated ${className}`}
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      {children}
+    </motion.span>
+  );
+}
+
+/* ── Animated Input with Focus Ring ── */
+function AnimatedInput({ type, placeholder, value, onChange, className = '', min, max, step }) {
+  return (
+    <motion.input
+      type={type}
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      className={`gpa-input animated ${className}`}
+      min={min}
+      max={max}
+      step={step}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      whileHover={{ borderColor: '#0ea5e9' }}
+      whileFocus={{
+        borderColor: '#2563eb',
+        boxShadow: '0 0 0 3px rgba(14, 165, 233, 0.25)'
+      }}
+    />
+  );
+}
+
+/* ── Animated Select Dropdown ── */
+function AnimatedSelect({ value, onChange, children, className = '' }) {
+  return (
+    <motion.select
+      value={value}
+      onChange={onChange}
+      className={`gpa-input animated ${className}`}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      whileHover={{ borderColor: '#0ea5e9' }}
+      whileFocus={{
+        borderColor: '#2563eb',
+        boxShadow: '0 0 0 3px rgba(14, 165, 233, 0.25)'
+      }}
+    >
+      {children}
+    </motion.select>
+  );
+}
+
+/* ── Animated Number Display ── */
+function AnimatedNumber({ value, suffix = '', className = '' }) {
+  return (
+    <motion.div
+      className={`gpa-number ${className}`}
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, type: 'spring', stiffness: 200 }}
+    >
+      <span className="gpa-number-value">{value}</span>
+      {suffix && <span className="gpa-number-suffix">{suffix}</span>}
+    </motion.div>
+  );
+}
+
+/* ── Confetti Trigger Hook ── */
+function useConfettiTrigger() {
+  const prevValueRef = useRef(null);
+  const triggerConfetti = (currentValue, threshold = 3.5) => {
+    if (
+      prevValueRef.current !== null &&
+      prevValueRef.current < threshold &&
+      currentValue >= threshold
+    ) {
+      fireConfetti({ count: 50, spread: 60 });
+    }
+    prevValueRef.current = currentValue;
+  };
+  return triggerConfetti;
+}
+
+/* ── Animated Card Container ── */
+function AnimatedCard({ children, className = '', delay = 0 }) {
+  return (
+    <motion.div
+      className={`gpa-glass-card animated ${className}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* ── Subject Card with Hover Lift ── */
+function SubjectCard({ course, idx, updateCourse, removeCourse, gradeInfo }) {
+  return (
+    <motion.div
+      key={course.id}
+      className="gpa-subject-card"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: idx * 0.08 }}
+      whileHover={{ y: -4 }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <div style={{ flex: 1 }}>
+        <AnimatedInput
+          type="text"
+          placeholder="Subject Name"
+          value={course.name}
+          onChange={(e) => updateCourse(course.id, 'name', e.target.value)}
+          className="subject-name-input"
+          style={{ fontWeight: 700, marginBottom: '0.5rem' }}
+        />
+        <div className="gpa-subject-details">
+          <div className="subject-details-row">
+            <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>schedule</span>
+            <AnimatedInput
+              type="number"
+              min="1"
+              max="6"
+              placeholder="Credits"
+              value={course.credits}
+              onChange={(e) => updateCourse(course.id, 'credits', Number(e.target.value))}
+              className="credits-input"
+              style={{ width: '80px' }}
+            />
+            credit hrs
+          </div>
+          <AnimatedSelect
+            value={course.gradePoint}
+            onChange={(e) => updateCourse(course.id, 'gradePoint', Number(e.target.value))}
+            className="grade-select"
+          >
+            {GRADE_OPTIONS.map((g, i) => (
+              <option key={i} value={g.value}>
+                {g.label} ({g.value.toFixed(2)})
+              </option>
+            ))}
+          </AnimatedSelect>
+        </div>
+      </div>
+      <div className="gpa-subject-badge-col">
+        <AnimatedGradeBadge className={`gpa-grade-badge ${gradeInfo.color}`}>
+          {gradeInfo.label}
+        </AnimatedGradeBadge>
+        <motion.button
+          type="button"
+          className="gpa-card-action-btn delete"
+          onClick={() => removeCourse(course.id)}
+          title="Remove subject"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function GpaCalculator() {
   const [courses, setCourses] = useState([
@@ -27,7 +205,7 @@ export default function GpaCalculator() {
   const [prevCredits, setPrevCredits] = useState('');
 
   const totalCredits = courses.reduce((acc, c) => acc + Number(c.credits || 0), 0);
-  const totalPoints  = courses.reduce((acc, c) => acc + Number(c.credits || 0) * Number(c.gradePoint || 0), 0);
+  const totalPoints = courses.reduce((acc, c) => acc + Number(c.credits || 0) * Number(c.gradePoint || 0), 0);
   const sgpaNum = totalCredits > 0 ? totalPoints / totalCredits : 0;
   const sgpa = sgpaNum.toFixed(2);
 
@@ -39,27 +217,25 @@ export default function GpaCalculator() {
     cgpa = cgpaNum.toFixed(2);
   }
 
-  // Fire confetti only when SGPA crosses INTO the ≥ 3.5 band (not on every re-render above it)
-  const prevSgpaRef = useRef(null);
+  // Fire confetti only when SGPA crosses INTO the ≥ 3.5 band
+  const triggerConfetti = useConfettiTrigger();
   useEffect(() => {
-    const prev = prevSgpaRef.current;
-    const isHighNow = sgpaNum >= 3.5 && totalCredits > 0;
-    const wasHighBefore = prev !== null && prev >= 3.5;
-    if (isHighNow && !wasHighBefore) {
-      fireConfetti({ count: 50, spread: 60 });
-    }
-    prevSgpaRef.current = totalCredits > 0 ? sgpaNum : null;
-  }, [sgpaNum, totalCredits]);
+    triggerConfetti(sgpaNum, 3.5);
+  }, [sgpaNum]);
 
   const getGpaStanding = (val) => {
-    if (val >= 3.7) return { label: '🌟 Rector List (High Distinction)', color: '#10b981' };
-    if (val >= 3.5) return { label: '🏆 Dean List (Distinction)', color: '#0ea5e9' };
-    if (val >= 3.0) return { label: '✅ Good Standing', color: '#2563eb' };
-    if (val >= 2.0) return { label: '⚠️ Satisfactory', color: '#f59e0b' };
-    return { label: '🚨 Academic Warning Risk', color: '#ef4444' };
+    if (val >= 3.7) return { label: 'Rector List (High Distinction)', color: '#10b981' };
+    if (val >= 3.5) return { label: 'Dean List (Distinction)', color: '#0ea5e9' };
+    if (val >= 3.0) return { label: 'Good Standing', color: '#2563eb' };
+    if (val >= 2.0) return { label: 'Satisfactory', color: '#f59e0b' };
+    return { label: 'Academic Warning Risk', color: '#ef4444' };
   };
 
   const standing = getGpaStanding(cgpaNum);
+
+  const getGradeInfo = (gradePoint) => {
+    return GRADE_OPTIONS.find(g => g.value === Number(gradePoint)) || { label: 'N/A', color: 'gray' };
+  };
 
   const updateCourse = (idx, key, val) => {
     const next = [...courses];
@@ -79,116 +255,214 @@ export default function GpaCalculator() {
   const removeCourse = (id) => setCourses(courses.filter(c => c.id !== id));
 
   return (
-    <div className="gpa-container">
-      <div className="gpa-card">
-        {/* Title Row */}
-        <div className="gpa-title-row">
-          <div>
-            <h1 className="gpa-title">COMSATS GPA Calculator</h1>
-            <p className="gpa-subtitle">Instant SGPA and CGPA computation with COMSATS grading policy.</p>
+    <motion.div
+      className="gpa-page-container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Hero Section */}
+      <AnimatedCard delay={0.1}>
+        <div className="gpa-hero">
+          <div className="gpa-hero-badge">
+            <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>school</span>
+            COMSATS Grading Scale
           </div>
-          <div className="gpa-icon-badge">
-            <span className="material-symbols-outlined" style={{ fontSize: '2rem' }}>calculate</span>
-          </div>
+          <motion.h1
+            className="gpa-hero-title"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            GPA Calculator
+          </motion.h1>
+          <motion.p
+            className="gpa-hero-subtitle"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
+            Instantly compute your Semester GPA (SGPA) and Cumulative GPA (CGPA) using the official COMSATS grading policy.
+          </motion.p>
         </div>
+      </AnimatedCard>
 
-        {/* Previous CGPA */}
-        <div className="gpa-prev-box">
-          <div>
-            <label className="ai-label">Previous CGPA (Optional)</label>
-            <input
-              type="number"
-              step="0.01"
-              max="4.0"
-              className="ai-input"
-              placeholder="e.g. 3.45"
-              value={prevCgpa}
-              onChange={(e) => setPrevCgpa(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="ai-label">Previous Total Credits (Optional)</label>
-            <input
-              type="number"
-              className="ai-input"
-              placeholder="e.g. 60"
-              value={prevCredits}
-              onChange={(e) => setPrevCredits(e.target.value)}
-            />
-          </div>
-        </div>
-
-        {/* Courses */}
-        <h3 className="gpa-section-title">Current Semester Courses</h3>
-
-        {courses.map((course, idx) => (
-          <div key={course.id} className="gpa-row" style={{ animationDelay: `${idx * 0.05}s` }}>
-            <input
-              type="text"
-              className="ai-input"
-              placeholder="Subject Name"
-              value={course.name}
-              onChange={(e) => updateCourse(idx, 'name', e.target.value)}
-            />
-            <input
-              type="number"
-              min="1"
-              max="6"
-              className="ai-input"
-              placeholder="Credits"
-              value={course.credits}
-              onChange={(e) => updateCourse(idx, 'credits', Number(e.target.value))}
-            />
-            <select
-              className="ai-select"
-              value={course.gradePoint}
-              onChange={(e) => updateCourse(idx, 'gradePoint', Number(e.target.value))}
-            >
-              {GRADE_OPTIONS.map((g, i) => (
-                <option key={i} value={g.value}>{g.label}</option>
-              ))}
-            </select>
-            <button
-              type="button"
-              className="gpa-delete-btn"
-              onClick={() => removeCourse(course.id)}
-              title="Remove subject"
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
-            </button>
-          </div>
-        ))}
-
-        <button type="button" className="gpa-add-btn" onClick={addCourse}>
-          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
-          Add Subject
-        </button>
-
-        {/* Results Banner */}
-        <div className="gpa-result-box">
-          <div className="gpa-result-inner">
-            <div>
-              <div className="gpa-result-label">Semester SGPA</div>
-              <div className="gpa-val">{sgpa}</div>
+      {/* Two-Column Layout */}
+      <div className="gpa-layout-grid">
+        {/* Left Column — Course Input */}
+        <AnimatedCard delay={0.2}>
+          <div className="gpa-glass-card">
+            <div className="gpa-card-header">
+              <div className="gpa-card-title">
+                <span className="material-symbols-outlined">edit_note</span>
+                Current Semester
+              </div>
+              <div className="gpa-live-badge">
+                <AnimatedNumber value={sgpa} />
+              </div>
             </div>
+
+            {/* Previous CGPA Section */}
+            <div className="gpa-form-group">
+              <label className="gpa-label">Previous CGPA (Optional)</label>
+              <AnimatedInput
+                type="number"
+                step="0.01"
+                min="0"
+                max="4.0"
+                className="gpa-input"
+                placeholder="e.g. 3.45"
+                value={prevCgpa}
+                onChange={(e) => setPrevCgpa(e.target.value)}
+              />
+            </div>
+
+            <div className="gpa-form-group">
+              <label className="gpa-label">Previous Total Credits (Optional)</label>
+              <AnimatedInput
+                type="number"
+                min="0"
+                className="gpa-input"
+                placeholder="e.g. 60"
+                value={prevCredits}
+                onChange={(e) => setPrevCredits(e.target.value)}
+              />
+            </div>
+
+            <div className="gpa-section-title">Courses This Semester</div>
+
+            {/* Subject Cards List */}
+            <div className="gpa-subjects-list">
+              {courses.map((course, idx) => {
+                const gradeInfo = getGradeInfo(course.gradePoint);
+                return (
+                  <SubjectCard
+                    key={course.id}
+                    course={course}
+                    idx={idx}
+                    updateCourse={updateCourse}
+                    removeCourse={removeCourse}
+                    gradeInfo={gradeInfo}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Add Subject Button */}
+            <motion.button
+              type="button"
+              className="gpa-row-add-btn quiz"
+              onClick={addCourse}
+              style={{ marginTop: '1rem' }}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.96 }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
+              Add Subject
+            </motion.button>
+          </div>
+        </AnimatedCard>
+
+        {/* Right Column — Results Panel */}
+        <AnimatedCard delay={0.3}>
+          <div className="gpa-glass-card">
+            <div className="gpa-card-header">
+              <div className="gpa-card-title">
+                <span className="material-symbols-outlined">analytics</span>
+                GPA Summary
+              </div>
+            </div>
+
+            {/* SGPA Result */}
+            <div className="gpa-overall-panel">
+              <div className="gpa-overall-label">Semester GPA (SGPA)</div>
+              <AnimatedNumber value={sgpa} className="sgpa-number-large" />
+              <div style={{ fontSize: '0.875rem', opacity: 0.9, marginBottom: '0.75rem' }}>
+                {totalCredits} Credit Hours
+              </div>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.375rem',
+                background: 'rgba(255,255,255,0.2)',
+                padding: '0.35rem 0.85rem',
+                borderRadius: '9999px',
+                fontSize: '0.8rem',
+                fontWeight: 700
+              }}>
+                {standing.label}
+              </div>
+            </div>
+
+            {/* CGPA Result (if previous data provided) */}
             {cgpa && (
-              <div>
-                <div className="gpa-result-label">Cumulative CGPA</div>
-                <div className="gpa-val">{cgpa}</div>
+              <div className="gpa-overall-panel" style={{ marginTop: '1rem', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)' }}>
+                <div className="gpa-overall-label">Cumulative GPA (CGPA)</div>
+                <AnimatedNumber value={cgpa} className="cgpa-number-large" />
+                <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>
+                  {Number(prevCredits) + totalCredits} Total Credit Hours
+                </div>
               </div>
             )}
-          </div>
 
-          <div style={{ marginTop: '1rem', paddingTop: '0.875rem', borderTop: '1px solid rgba(255,255,255,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.875rem', opacity: 0.9 }}>
-              Total Credit Hours: <strong>{totalCredits}</strong>
-            </span>
-            <span style={{ fontSize: '0.8125rem', fontWeight: 800, background: 'rgba(255,255,255,0.2)', padding: '0.25rem 0.75rem', borderRadius: '9999px' }}>
-              {standing.label}
-            </span>
+            {/* Insight Box */}
+            <div className="gpa-insight-box">
+              <div className="gpa-insight-header">
+                <span className="gpa-insight-title">Performance Insight</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '1.1rem', color: '#0f766e' }}>lightbulb</span>
+              </div>
+              <motion.p
+                className="gpa-insight-msg"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                {sgpaNum >= 3.7
+                  ? "Outstanding! You're on the Rector's List with high distinction."
+                  : sgpaNum >= 3.5
+                  ? "Excellent work! Dean's List distinction achieved."
+                  : sgpaNum >= 3.0
+                  ? "Good standing. Keep up the solid performance!"
+                  : sgpaNum >= 2.0
+                  ? "Satisfactory progress. Consider seeking academic support."
+                  : "Academic support recommended. Meet with your advisor."}
+              </motion.p>
+              <div className="gpa-insight-progress">
+                <motion.div
+                  className="gpa-insight-fill"
+                  initial={{ width: '0%' }}
+                  animate={{ width: `${Math.min(100, (sgpaNum / 4) * 100)}%` }}
+                  transition={{ duration: 1.2, type: 'spring' }}
+                />
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="gpa-actions-row">
+              <motion.button
+                type="button"
+                className="gpa-btn-clear"
+                onClick={() => {
+                  setCourses([{ id: Date.now(), name: 'Subject 1', credits: 3, gradePoint: 4.0 }]);
+                  setPrevCgpa('');
+                  setPrevCredits('');
+                }}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.96 }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>restart_alt</span>
+                Reset
+              </motion.button>
+            </div>
           </div>
-        </div>
+        </AnimatedCard>
       </div>
-    </div>
+    </motion.div>
   );
 }
