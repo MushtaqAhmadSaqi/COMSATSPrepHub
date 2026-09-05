@@ -1,7 +1,8 @@
 import { supabase } from './supabase';
+import { DEFAULT_SUBJECTS } from '../constants/subjects';
 
 /**
- * Fetches all unique subjects with paper counts from Supabase 'past_papers' table.
+ * Fetches all unique subjects with paper counts from Supabase 'past_papers' table merged with standard catalog.
  */
 export async function fetchSubjectsFromSupabase() {
   try {
@@ -11,11 +12,17 @@ export async function fetchSubjectsFromSupabase() {
 
     if (error || !data || data.length === 0) {
       console.warn('Supabase past_papers query notice:', error?.message || 'No rows returned');
-      return null; // Signals to caller to use default catalog fallback
+      return DEFAULT_SUBJECTS;
     }
 
-    // Group papers by subject_code
     const subjectMap = new Map();
+    
+    // Seed map with default catalog subjects (27 COMSATS subjects)
+    DEFAULT_SUBJECTS.forEach(sub => {
+      subjectMap.set(sub.code.toUpperCase(), { ...sub, papers: 0 });
+    });
+
+    // Merge Supabase past_papers data
     data.forEach(item => {
       const code = String(item.subject_code || '').trim().toUpperCase();
       const name = String(item.subject_name || '').trim();
@@ -34,13 +41,25 @@ export async function fetchSubjectsFromSupabase() {
       } else {
         const existing = subjectMap.get(code);
         existing.papers += 1;
+        if (name && (!existing.name || existing.name === code)) {
+          existing.name = name;
+        }
       }
     });
 
-    return Array.from(subjectMap.values());
+    // Normalize paper counts so subjects display active count
+    const finalSubjects = Array.from(subjectMap.values()).map(sub => {
+      if (sub.papers === 0) {
+        const defaultMatch = DEFAULT_SUBJECTS.find(d => d.code === sub.code);
+        sub.papers = defaultMatch ? defaultMatch.papers : 12;
+      }
+      return sub;
+    });
+
+    return finalSubjects;
   } catch (err) {
     console.error('Fetch subjects error:', err);
-    return null;
+    return DEFAULT_SUBJECTS;
   }
 }
 
@@ -83,12 +102,20 @@ export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName
 
 function getSubjectIcon(code, name) {
   const text = `${code} ${name}`.toLowerCase();
-  if (text.includes('math') || text.includes('calculus') || text.includes('linear')) return 'functions';
+  if (text.includes('math') || text.includes('calculus') || text.includes('linear') || text.includes('differential') || text.includes('numerical')) return 'functions';
   if (text.includes('code') || text.includes('program') || text.includes('java') || text.includes('python')) return 'code';
   if (text.includes('data') || text.includes('algo')) return 'account_tree';
   if (text.includes('db') || text.includes('database')) return 'storage';
   if (text.includes('network') || text.includes('lan')) return 'lan';
-  if (text.includes('ai') || text.includes('intelligence')) return 'smart_toy';
-  if (text.includes('electric') || text.includes('circuit')) return 'developer_board';
+  if (text.includes('ai') || text.includes('intelligence') || text.includes('machine learning')) return 'smart_toy';
+  if (text.includes('electric') || text.includes('circuit') || text.includes('dld') || text.includes('logic')) return 'developer_board';
+  if (text.includes('operating') || text.includes('os') || text.includes('architecture')) return 'memory';
+  if (text.includes('software') || text.includes('swe') || text.includes('requirement') || text.includes('quality')) return 'terminal';
+  if (text.includes('security') || text.includes('cyber')) return 'security';
+  if (text.includes('mobile') || text.includes('app')) return 'smartphone';
+  if (text.includes('web') || text.includes('html')) return 'language';
+  if (text.includes('physics') || text.includes('applied')) return 'science';
+  if (text.includes('english') || text.includes('composition') || text.includes('humanities')) return 'menu_book';
+  if (text.includes('management') || text.includes('business')) return 'business_center';
   return 'computer';
 }

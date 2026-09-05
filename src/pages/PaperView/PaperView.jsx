@@ -1,62 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { generateExamPaperQuestions } from '../../services/geminiService';
 import './PaperView.css';
 
-const DEFAULT_QUESTIONS = [
-  {
-    id: 1,
-    number: 'Question 1',
-    section: 'Section A — Short Conceptual Questions',
-    marks: '5 Marks',
-    questionText: 'Differentiate between linear and non-linear data structures with two examples of each.',
-    answerText: `Linear Data Structures: Elements are arranged sequentially or linearly (e.g., Arrays, Linked Lists, Stacks, Queues). Each element has a unique predecessor and successor except the first and last.
-Non-Linear Data Structures: Elements are not arranged in a sequence; instead, they form a hierarchical structure (e.g., Trees, Graphs).`
-  },
-  {
-    id: 2,
-    number: 'Question 2',
-    section: 'Section A — Short Conceptual Questions',
-    marks: '5 Marks',
-    questionText: 'What is the time complexity of insertion at the beginning vs. insertion at the end of a Singly Linked List?',
-    answerText: `Insertion at Beginning: O(1) time complexity, because we only need to update the head pointer.
-Insertion at End: O(n) time complexity without a tail pointer (since we must traverse the entire list to find the last node). If a tail pointer is maintained, it is O(1).`
-  },
-  {
-    id: 3,
-    number: 'Question 3',
-    section: 'Section B — Problem Solving & Algorithm Analysis',
-    marks: '10 Marks',
-    questionText: 'Given an array of integers, write an algorithm or C++ function to detect if a cycle exists in a linked list using Floyd’s Cycle Detection (Tortoise and Hare approach).',
-    answerText: `C++ Implementation:
-bool hasCycle(ListNode* head) {
-    if (!head || !head->next) return false;
-    ListNode *slow = head, *fast = head;
-    while (fast && fast->next) {
-        slow = slow->next;
-        fast = fast->next->next;
-        if (slow == fast) return true; // Cycle detected
-    }
-    return false;
-}`
-  },
-  {
-    id: 4,
-    number: 'Question 4',
-    section: 'Section B — Problem Solving & Algorithm Analysis',
-    marks: '10 Marks',
-    questionText: 'Construct an AVL tree by inserting the following sequence of keys: 10, 20, 30, 40, 50, 25. Show the rotations performed at each step.',
-    answerText: `Step 1: Insert 10, 20, 30 -> Right-Right (RR) imbalance at node 10. Perform Left Rotation at 10. Root becomes 20.
-Step 2: Insert 40, 50 -> RR imbalance at node 30. Perform Left Rotation at 30.
-Step 3: Insert 25 -> RL (Right-Left) imbalance at node 20. Perform Right Rotation on node 40, then Left Rotation on node 20.
-Final Balanced AVL Tree Root: 30.`
-  }
-];
-
 export default function PaperView({
-  paper = { title: 'Terminal Examination — Fall 2023', term: 'Terminal', year: '2023', file_url: null },
+  paper = { title: 'Terminal Examination — Fall 2023', term: 'Terminal', year: '2023', file_url: null, subjectName: '', subjectCode: '' },
   onBack = () => {}
 }) {
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [expandedAnswers, setExpandedAnswers] = useState({});
   const [showAllAnswers, setShowAllAnswers] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadPaperQuestions() {
+      setLoading(true);
+      try {
+        const generated = await generateExamPaperQuestions({
+          subjectName: paper.subjectName || paper.title || 'Course Exam',
+          subjectCode: paper.subjectCode || '',
+          paperTitle: paper.title || '',
+          term: paper.term || 'Terminal',
+          year: paper.year || '2023'
+        });
+        if (isMounted) {
+          setQuestions(generated || []);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('Failed to load paper questions:', err);
+        if (isMounted) setLoading(false);
+      }
+    }
+    loadPaperQuestions();
+    return () => { isMounted = false; };
+  }, [paper.title, paper.subjectName, paper.subjectCode, paper.term, paper.year]);
 
   const toggleAnswer = (id) => {
     setExpandedAnswers((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -66,7 +44,7 @@ export default function PaperView({
     const nextState = !showAllAnswers;
     setShowAllAnswers(nextState);
     const newExpanded = {};
-    DEFAULT_QUESTIONS.forEach((q) => {
+    questions.forEach((q) => {
       newExpanded[q.id] = nextState;
     });
     setExpandedAnswers(newExpanded);
@@ -79,6 +57,8 @@ export default function PaperView({
       window.print();
     }
   };
+
+  const displaySubject = paper.subjectName || (paper.title ? paper.title.split('—')[0] : 'Subject Exam');
 
   return (
     <div className="paperview-container">
@@ -109,7 +89,7 @@ export default function PaperView({
           <div className="paperview-univ-title">COMSATS UNIVERSITY ISLAMABAD</div>
           <div className="paperview-exam-term">{paper.term || 'Terminal'} Examination — {paper.year || '2023'}</div>
           <div className="paperview-meta-grid">
-            <div><strong>Subject:</strong> {paper.title.split('—')[0] || 'Data Structures'}</div>
+            <div><strong>Subject:</strong> {displaySubject} {paper.subjectCode ? `(${paper.subjectCode})` : ''}</div>
             <div><strong>Total Marks:</strong> 50 Marks</div>
             <div><strong>Time Allowed:</strong> 3 Hours</div>
             <div><strong>Semester:</strong> {paper.year || '2023'}</div>
@@ -140,45 +120,58 @@ export default function PaperView({
             </span>
           </div>
 
-          {DEFAULT_QUESTIONS.map((q) => {
-            const isExpanded = showAllAnswers || expandedAnswers[q.id];
-            return (
-              <div key={q.id} className="paperview-question-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <span className="paperview-q-badge">{q.number}</span>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-subtle)' }}>{q.marks}</span>
-                </div>
-
-                <div className="paperview-q-section">{q.section}</div>
-                <div className="paperview-q-text">{q.questionText}</div>
-
-                {/* Solution Toggle */}
-                <button
-                  type="button"
-                  className="paperview-toggle-sol-btn"
-                  onClick={() => toggleAnswer(q.id)}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                    {isExpanded ? 'expand_less' : 'key'}
-                  </span>
-                  {isExpanded ? 'Hide Solution' : 'View Verified Solution Key'}
-                </button>
-
-                {/* Solution Content */}
-                {isExpanded && (
-                  <div className="paperview-answer-box">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: '#10b981', fontWeight: 800, fontSize: '0.8125rem', marginBottom: '0.5rem' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check_circle</span>
-                      Model Answer & Marking Scheme:
-                    </div>
-                    <pre style={{ fontFamily: 'inherit', whiteSpace: 'pre-wrap', margin: 0, fontSize: '0.9375rem', lineHeight: '1.65' }}>
-                      {q.answerText}
-                    </pre>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-subtle)' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', animation: 'spin 1s linear infinite' }}>
+                progress_activity
+              </span>
+              <p style={{ marginTop: '0.75rem', fontWeight: 600 }}>Generating questions & verified solutions for {displaySubject}...</p>
+            </div>
+          ) : questions.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-subtle)' }}>
+              <p>No questions generated for this paper.</p>
+            </div>
+          ) : (
+            questions.map((q) => {
+              const isExpanded = showAllAnswers || expandedAnswers[q.id];
+              return (
+                <div key={q.id} className="paperview-question-card">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <span className="paperview-q-badge">{q.number}</span>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-subtle)' }}>{q.marks}</span>
                   </div>
-                )}
-              </div>
-            );
-          })}
+
+                  <div className="paperview-q-section">{q.section}</div>
+                  <div className="paperview-q-text">{q.questionText}</div>
+
+                  {/* Solution Toggle */}
+                  <button
+                    type="button"
+                    className="paperview-toggle-sol-btn"
+                    onClick={() => toggleAnswer(q.id)}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                      {isExpanded ? 'expand_less' : 'key'}
+                    </span>
+                    {isExpanded ? 'Hide Solution' : 'View Verified Solution Key'}
+                  </button>
+
+                  {/* Solution Content */}
+                  {isExpanded && (
+                    <div className="paperview-answer-box">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: '#10b981', fontWeight: 800, fontSize: '0.8125rem', marginBottom: '0.5rem' }}>
+                        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check_circle</span>
+                        Model Answer & Marking Scheme:
+                      </div>
+                      <pre style={{ fontFamily: 'inherit', whiteSpace: 'pre-wrap', margin: 0, fontSize: '0.9375rem', lineHeight: '1.65' }}>
+                        {q.answerText}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
         </div>
 
         {/* Download Footer Section */}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchSubjectsFromSupabase } from '../../services/papersService';
 import { generateQuizWithGemini } from '../../services/geminiService';
+import { DEFAULT_SUBJECTS } from '../../constants/subjects';
 import { fireConfetti } from '../../utils/confetti';
 import './Quiz.css';
 
@@ -77,16 +78,7 @@ export default function Quiz() {
       setSubjectsLoading(true);
       const data = await fetchSubjectsFromSupabase();
       if (data && data.length > 0) { setSubjects(data); }
-      else {
-        setSubjects([
-          { code: 'CSC211', name: 'Data Structures & Algorithms', papers: 19, department: 'CS & IT' },
-          { code: 'CSC102', name: 'Programming Fundamentals', papers: 22, department: 'CS & IT' },
-          { code: 'CSC241', name: 'Object Oriented Programming', papers: 18, department: 'CS & IT' },
-          { code: 'CSC371', name: 'Database Systems', papers: 15, department: 'CS & IT' },
-          { code: 'CSC311', name: 'Computer Networks', papers: 13, department: 'CS & IT' },
-          { code: 'MTH104', name: 'Calculus & Analytical Geometry', papers: 16, department: 'Math' },
-        ]);
-      }
+      else { setSubjects(DEFAULT_SUBJECTS); }
       setSubjectsLoading(false);
     }
     loadSubjects();

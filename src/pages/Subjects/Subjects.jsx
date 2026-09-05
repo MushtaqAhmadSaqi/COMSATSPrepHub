@@ -1,24 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchSubjectsFromSupabase } from '../../services/papersService';
+import { DEFAULT_SUBJECTS, DEPARTMENTS } from '../../constants/subjects';
 import './Subjects.css';
-
-const DEFAULT_SUBJECTS = [
-  { code: 'CSC101', name: 'Introduction to ICT', papers: 14, department: 'CS & IT', icon: 'computer' },
-  { code: 'CSC102', name: 'Programming Fundamentals', papers: 22, department: 'CS & IT', icon: 'code' },
-  { code: 'CSC211', name: 'Data Structures & Algorithms', papers: 19, department: 'CS & IT', icon: 'account_tree' },
-  { code: 'MTH104', name: 'Calculus & Analytical Geometry', papers: 16, department: 'Math', icon: 'functions' },
-  { code: 'CSC322', name: 'Operating Systems', papers: 12, department: 'CS & IT', icon: 'memory' },
-  { code: 'CSC241', name: 'Object Oriented Programming', papers: 18, department: 'CS & IT', icon: 'hub' },
-  { code: 'CSC371', name: 'Database Systems', papers: 15, department: 'CS & IT', icon: 'storage' },
-  { code: 'MTH231', name: 'Linear Algebra', papers: 11, department: 'Math', icon: 'grid_on' },
-  { code: 'CSC311', name: 'Computer Networks', papers: 13, department: 'CS & IT', icon: 'lan' },
-  { code: 'CSC441', name: 'Artificial Intelligence', papers: 10, department: 'CS & IT', icon: 'smart_toy' },
-  { code: 'EEE241', name: 'Digital Logic Design', papers: 9, department: 'Electrical', icon: 'developer_board' },
-  { code: 'SWE301', name: 'Software Engineering Concepts', papers: 17, department: 'Software Eng', icon: 'terminal' }
-];
-
-const DEPARTMENTS = ['All', 'CS & IT', 'Math', 'Software Eng', 'Electrical'];
 
 /* ── Spotlight Card with Glow Effect ── */
 function SpotlightSubjectCard({ subject, idx, onSelect }) {
