@@ -357,7 +357,7 @@ export default function Quiz() {
   // PLAYING
   if (step === 'playing' && questions.length > 0) {
     const q = questions[currentIdx];
-    const progress = ((currentIdx) / questions.length) * 100;
+    const progress = ((currentIdx + 1) / questions.length) * 100;
     const isCorrect = selectedOption === q.correct;
 
     return (
@@ -388,7 +388,7 @@ export default function Quiz() {
         <div className="quiz-progress-bar">
           <motion.div
             className="quiz-progress-fill"
-            initial={{ width: `${((currentIdx) / questions.length) * 100}%` }}
+            initial={{ width: `${(currentIdx / questions.length) * 100}%` }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.4, ease: 'easeInOut' }}
           />

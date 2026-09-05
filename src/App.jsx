@@ -172,7 +172,7 @@ export default function App() {
         return (
           <TakeAiQuiz
             quizParams={aiQuizParams || undefined}
-            onFinish={() => handleNavigate('dashboard')}
+            onFinish={() => handleNavigate('ai-quiz-generator')}
           />
         );
       case 'dashboard':
