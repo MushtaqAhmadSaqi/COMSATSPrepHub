@@ -5,7 +5,8 @@
       "Bash(python *)",
       "WebFetch(domain:magicui.design)",
       "Bash(cd D:/PastPaperPrep/Full front end)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(npm run *)"
     ]
   },
   "enableAllProjectMcpServers": true,

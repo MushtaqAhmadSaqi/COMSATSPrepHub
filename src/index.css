@@ -6,7 +6,7 @@
 :root {
   --font-family: 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* Brand */
+  /* Brand Colors */
   --brand:        #0ea5e9;
   --brand-ink:    #0284c7;
   --brand-deep:   #0369a1;
@@ -18,7 +18,7 @@
   --accent:       #0d9488;
   --accent-soft:  #ccfbf1;
 
-  /* Surfaces (light) */
+  /* Surfaces (light mode) */
   --bg:            #f0f2f5;
   --surface:       #ffffff;
   --surface-2:     #f8fafc;
@@ -26,31 +26,56 @@
   --border:        #e2e8f0;
   --border-strong: #cbd5e1;
 
-  /* Text (light) */
+  /* Text (light mode) */
   --text:        #1a1a2e;
   --text-muted:  #475569;
   --text-subtle: #64748b;
 
-  /* Semantic */
+  /* Semantic Colors */
   --success: #10b981;
   --warning: #f59e0b;
   --danger:  #ef4444;
+  --info:    #3b82f6;
 
   /* Focus ring */
   --ring: rgba(14, 165, 233, 0.25);
 
-  /* Radii */
+  /* Spacing Scale */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Border Radii */
   --radius-sm:   8px;
   --radius-md:   14px;
   --radius-lg:   20px;
   --radius-xl:   24px;
+  --radius-2xl:  32px;
   --radius-pill: 9999px;
 
-  /* Elevation */
+  /* Elevation Shadows */
   --shadow-1: 0 2px 8px rgba(15, 23, 42, 0.05);
   --shadow-2: 0 6px 20px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
   --shadow-3: 0 14px 40px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.05);
   --shadow-brand: 0 6px 20px rgba(14, 165, 233, 0.35);
+
+  /* Typography Scale */
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+  --text-5xl:  3rem;
 
   /* Motion */
   --ease:        cubic-bezier(0.4, 0, 0.2, 1);
@@ -58,6 +83,10 @@
   --dur-fast:    150ms;
   --dur-base:    240ms;
   --dur-slow:    400ms;
+
+  /* Layout */
+  --nav-height: 3.5rem;
+  --container-max: 80rem;
 }
 
 /* Dark Mode Tokens */
@@ -130,6 +159,16 @@ button {
   outline-offset: 2px;
   box-shadow: 0 0 0 4px var(--ring);
 }
+
+/* Custom scrollbar (webkit) */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--brand); }
+
+/* Text selection highlight */
+::selection { background: rgba(14, 165, 233, 0.2); color: var(--text); }
+::-moz-selection { background: rgba(14, 165, 233, 0.2); color: var(--text); }
 
 /* ─────────────────────────────────────────────────────────────────
    KEYFRAME ANIMATIONS

@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-export const SUPABASE_URL = 'https://xylyiscatznexduatjmg.supabase.co';
-export const SUPABASE_KEY = 'sb_publishable_K0t4H7M3LU96jy8_z_TJHg_ok_u-7HC';
+// Use environment variables for security
+export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://xylyiscatznexduatjmg.supabase.co';
+export const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_K0t4H7M3LU96jy8_z_TJHg_ok_u-7HC';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
