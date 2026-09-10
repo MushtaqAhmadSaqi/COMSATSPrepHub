@@ -26,7 +26,9 @@ import './App.css';
 
 export default function App() {
   const [activePath, setActivePath] = useState('home');
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    try { return localStorage.getItem('pph_dark') === 'true'; } catch { return false; }
+  });
   const [user, setUser] = useState(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   // Lazy initialisers — restore from sessionStorage so sub-page navigation
@@ -57,7 +59,14 @@ export default function App() {
     } else {
       document.documentElement.classList.remove('dark');
     }
+    try { localStorage.setItem('pph_dark', isDark); } catch { /* quota exceeded */ }
   }, [isDark]);
+
+  // Body scroll lock when auth modal is open
+  useEffect(() => {
+    document.body.style.overflow = isAuthOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isAuthOpen]);
 
   // Persist sub-page navigation state across refreshes within the same tab
   useEffect(() => {
@@ -144,12 +153,14 @@ export default function App() {
         return (
           <SubjectPapers
             subject={selectedSubject || undefined}
+            onBack={() => handleNavigate('subjects')}
             onViewPaper={(paper) => {
               setSelectedPaper(paper);
               handleNavigate('paper-view');
             }}
           />
         );
+
       case 'paper-view':
         return (
           <PaperView
@@ -176,7 +187,7 @@ export default function App() {
           />
         );
       case 'dashboard':
-        return <Dashboard user={user || undefined} />;
+        return <Dashboard user={user || undefined} onNavigate={handleNavigate} />;
       case 'upload':
         return <Upload />;
       case 'auth':

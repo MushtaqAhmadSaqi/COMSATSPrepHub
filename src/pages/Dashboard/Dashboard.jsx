@@ -1,4 +1,5 @@
 import React from 'react';
+import { supabase } from '../../services/supabase';
 import './Dashboard.css';
 
 const STATS = [
@@ -34,19 +35,51 @@ const ACTIVITY = [
   { name: 'OOP Midterm Paper — Spring 2024', time: '3 days ago', icon: 'picture_as_pdf' },
 ];
 
-export default function Dashboard({ user = { name: 'Student', email: 'student@comsats.edu.pk' } }) {
-  const displayName = user?.user_metadata?.full_name || user?.name || user?.email?.split('@')[0] || 'Student';
+export default function Dashboard({ user = null, onNavigate = () => {} }) {
+  const displayName = user?.user_metadata?.full_name?.split(' ')[0]
+    || user?.email?.split('@')[0]
+    || 'Student';
+  const userEmail = user?.email || '';
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    onNavigate('home');
+  };
 
   return (
     <div className="dash-container">
       {/* Header */}
       <div className="dash-header">
-        <div className="dash-welcome-badge">
-          <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>waving_hand</span>
-          Welcome back
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <div className="dash-welcome-badge">
+              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>waving_hand</span>
+              Welcome back
+            </div>
+            <h1 className="dash-title">Hi, {displayName}!</h1>
+            <p className="dash-subtitle">
+              {userEmail && <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{userEmail} · </span>}
+              Student Performance Analytics & Study Overview
+            </p>
+          </div>
+          {user && (
+            <button
+              type="button"
+              className="dash-signout-btn"
+              onClick={handleSignOut}
+              aria-label="Sign out"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>logout</span>
+              Sign Out
+            </button>
+          )}
         </div>
-        <h1 className="dash-title">Hi, {displayName}!</h1>
-        <p className="dash-subtitle">Student Performance Analytics & Study Overview</p>
+      </div>
+
+      {/* Demo Notice */}
+      <div className="dash-demo-notice">
+        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>info</span>
+        Stats shown below are sample data — personalized analytics coming soon.
       </div>
 
       {/* Stats Grid */}
@@ -96,3 +129,4 @@ export default function Dashboard({ user = { name: 'Student', email: 'student@co
     </div>
   );
 }
+

@@ -36,8 +36,16 @@
   background: var(--surface-2);
 }
 
-.upload-dropzone:hover {
+.upload-dropzone:hover,
+.upload-dropzone.drag-over {
   border-color: var(--brand);
+  background: var(--brand-soft);
+  transform: scale(1.01);
+}
+
+.upload-dropzone.has-file {
+  border-color: var(--brand);
+  border-style: solid;
   background: var(--brand-soft);
 }
 

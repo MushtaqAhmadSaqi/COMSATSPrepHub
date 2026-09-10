@@ -7,9 +7,46 @@ export default function Upload() {
   const [subjectCode, setSubjectCode] = useState('');
   const [examType, setExamType] = useState('');
   const [uploaderName, setUploaderName] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [fileError, setFileError] = useState('');
+
+  const MAX_SIZE_MB = 15;
+
+  const validateAndSetFile = (file) => {
+    setFileError('');
+    if (!file) return;
+    const allowed = ['application/pdf', 'image/png', 'image/jpeg'];
+    if (!allowed.includes(file.type)) {
+      setFileError('Only PDF, PNG, or JPG files are accepted.');
+      return;
+    }
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      setFileError(`File must be under ${MAX_SIZE_MB}MB. Your file is ${(file.size / (1024*1024)).toFixed(1)}MB.`);
+      return;
+    }
+    setSelectedFile(file);
+  };
+
+  const handleFileInputChange = (e) => {
+    validateAndSetFile(e.target.files[0]);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    validateAndSetFile(e.dataTransfer.files[0]);
+  };
+
+  const handleDragOver = (e) => { e.preventDefault(); setDragOver(true); };
+  const handleDragLeave = () => setDragOver(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!selectedFile) {
+      setFileError('Please select a file to upload.');
+      return;
+    }
     setSubmitted(true);
     fireConfetti({ count: 90, spread: 80 });
   };
@@ -42,6 +79,8 @@ export default function Upload() {
                 setSubmitted(false);
                 setSubjectCode('');
                 setExamType('');
+                setSelectedFile(null);
+                setFileError('');
               }}
             >
               Upload Another Paper
@@ -49,13 +88,50 @@ export default function Upload() {
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
-            <div className="upload-dropzone">
+            <label
+              htmlFor="paper-file-input"
+              className={`upload-dropzone${dragOver ? ' drag-over' : ''}${selectedFile ? ' has-file' : ''}`}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              style={{ cursor: 'pointer', display: 'block' }}
+            >
+              <input
+                id="paper-file-input"
+                type="file"
+                accept=".pdf,.png,.jpg,.jpeg"
+                style={{ display: 'none' }}
+                onChange={handleFileInputChange}
+                aria-label="Choose past paper file"
+              />
               <div className="upload-dropzone-icon">
-                <span className="material-symbols-outlined" style={{ fontSize: '2.25rem' }}>cloud_upload</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '2.25rem' }}>
+                  {selectedFile ? 'description' : 'cloud_upload'}
+                </span>
               </div>
-              <div className="upload-dropzone-title">Drag & drop your paper file here</div>
-              <div className="upload-dropzone-hint">Supports PDF, PNG, JPG — up to 15MB</div>
-            </div>
+              {selectedFile ? (
+                <>
+                  <div className="upload-dropzone-title" style={{ color: 'var(--brand)' }}>
+                    {selectedFile.name}
+                  </div>
+                  <div className="upload-dropzone-hint">
+                    {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB · Click to change file
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="upload-dropzone-title">Drag & drop your paper file here</div>
+                  <div className="upload-dropzone-hint">Supports PDF, PNG, JPG — up to 15MB</div>
+                </>
+              )}
+            </label>
+
+            {fileError && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--danger)', fontSize: '0.875rem', marginBottom: '1rem', fontWeight: 600 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>error</span>
+                {fileError}
+              </div>
+            )}
 
             <div className="ai-field">
               <label className="ai-label">Subject Code / Name</label>

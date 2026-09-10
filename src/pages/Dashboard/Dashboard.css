@@ -102,6 +102,49 @@
   font-weight: 600;
 }
 
+/* ─── Sign Out Button ───────────────────────────────────────────── */
+.dash-signout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  font-family: inherit;
+}
+
+.dash-signout-btn:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+/* ─── Demo Notice ───────────────────────────────────────────────── */
+.dash-demo-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--brand-soft);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  color: var(--brand-deep);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+html.dark .dash-demo-notice {
+  background: rgba(14, 165, 233, 0.08);
+  color: #7dd3fc;
+}
+
 .dash-sub-positive { color: #10b981; }
 .dash-sub-neutral  { color: var(--text-subtle); }
 

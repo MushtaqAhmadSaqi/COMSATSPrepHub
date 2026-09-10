@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { fetchPapersForSubjectFromSupabase } from '../../services/papersService';
 import './SubjectPapers.css';
 
@@ -12,7 +13,8 @@ const DEFAULT_PAPERS = [
 
 export default function SubjectPapers({
   subject = { name: 'Data Structures & Algorithms', code: 'CSC211' },
-  onViewPaper = () => {}
+  onViewPaper = () => {},
+  onBack = null
 }) {
   const [papers, setPapers] = useState(DEFAULT_PAPERS);
   const [loading, setLoading] = useState(true);
@@ -32,14 +34,25 @@ export default function SubjectPapers({
   }, [subject.code, subject.name]);
 
   return (
-    <div className="papers-container">
+    <motion.div
+      className="papers-container"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <div className="papers-header">
         <div>
+          {onBack && (
+            <button type="button" className="btn-back" onClick={onBack} style={{ marginBottom: '1rem' }}>
+              <span className="material-symbols-outlined">arrow_back</span>
+              Back to Subjects
+            </button>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.375rem' }}>
             <span className="papers-subject-code" style={{ marginBottom: 0 }}>{subject.code}</span>
             {isFromSupabase && (
               <span style={{ fontSize: '0.6875rem', fontWeight: 800, color: '#10b981', background: 'rgba(16,185,129,0.12)', padding: '0.2rem 0.6rem', borderRadius: '9999px', border: '1px solid rgba(16,185,129,0.3)' }}>
-                ⚡ Supabase Live
+                ⚡ Live
               </span>
             )}
           </div>
@@ -49,10 +62,15 @@ export default function SubjectPapers({
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-subtle)' }}>
-          <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', animation: 'spin 1s linear infinite' }}>
+          <motion.span
+            className="material-symbols-outlined"
+            style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.75rem' }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+          >
             progress_activity
-          </span>
-          <p style={{ marginTop: '0.75rem', fontWeight: 600 }}>Loading past papers from Supabase...</p>
+          </motion.span>
+          <p style={{ fontWeight: 600 }}>Loading past papers...</p>
         </div>
       ) : papers.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-subtle)' }}>
@@ -65,10 +83,12 @@ export default function SubjectPapers({
       ) : (
         <div>
           {papers.map((p, idx) => (
-            <div
+            <motion.div
               key={p.id || idx}
               className="paper-item-card"
-              style={{ animationDelay: `${idx * 0.06}s` }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: idx * 0.05 }}
             >
               <div className="paper-item-left">
                 <div className="paper-item-icon">
@@ -83,14 +103,16 @@ export default function SubjectPapers({
                 type="button"
                 className="btn-view-paper"
                 onClick={() => onViewPaper(p)}
+                aria-label={`View ${p.title}`}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>open_in_new</span>
                 View Paper
               </button>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
+

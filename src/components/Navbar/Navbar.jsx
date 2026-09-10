@@ -19,6 +19,9 @@ export default function Navbar({
   onOpenAuth = () => {}
 }) {
   const [scrolled, setScrolled] = useState(false);
+  const firstName = user?.user_metadata?.full_name?.split(' ')[0]
+    || user?.email?.split('@')[0]
+    || null;
 
   /* Scroll shadow effect */
   const handleScroll = useCallback(() => {
@@ -50,13 +53,15 @@ export default function Navbar({
             </button>
 
             {/* Desktop Pill Navigation */}
-            <nav className="desktop-nav-links">
+            <nav className="desktop-nav-links" aria-label="Main navigation">
               {navItems.map((item) => (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => onNavigate(item.id)}
                   className={`nav-link-btn${activePath === item.id ? ' active' : ''}`}
+                  aria-label={item.label}
+                  aria-current={activePath === item.id ? 'page' : undefined}
                 >
                   {item.label}
                 </button>
@@ -83,15 +88,17 @@ export default function Navbar({
                   type="button"
                   onClick={() => onNavigate('dashboard')}
                   className="signin-gradient-btn btn-shimmer"
+                  aria-label="Go to dashboard"
                 >
                   <span className="material-symbols-outlined">account_circle</span>
-                  <span>Dashboard</span>
+                  <span>{firstName || 'Dashboard'}</span>
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={onOpenAuth}
                   className="signin-gradient-btn btn-shimmer"
+                  aria-label="Sign in to your account"
                 >
                   <span className="material-symbols-outlined">person</span>
                   <span>Sign In</span>

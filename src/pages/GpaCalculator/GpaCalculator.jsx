@@ -112,7 +112,7 @@ function useConfettiTrigger() {
 function AnimatedCard({ children, className = '', delay = 0 }) {
   return (
     <motion.div
-      className={`gpa-glass-card animated ${className}`}
+      className={className}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay }}
@@ -237,10 +237,8 @@ export default function GpaCalculator() {
     return GRADE_OPTIONS.find(g => g.value === Number(gradePoint)) || { label: 'N/A', color: 'gray' };
   };
 
-  const updateCourse = (idx, key, val) => {
-    const next = [...courses];
-    next[idx] = { ...next[idx], [key]: val };
-    setCourses(next);
+  const updateCourse = (id, key, val) => {
+    setCourses(prev => prev.map(c => c.id === id ? { ...c, [key]: val } : c));
   };
 
   const addCourse = () => {

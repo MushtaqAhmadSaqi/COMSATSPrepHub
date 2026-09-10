@@ -71,12 +71,13 @@ export default function TakeAiQuiz({
 
   const handleNextQuestion = () => {
     if (currentIdx + 1 >= questions.length) {
-      const pct = Math.round(((score + (selectedOption === questions[currentIdx]?.correct ? 0 : 0)) / questions.length) * 100);
+      const pct = Math.round((score / questions.length) * 100);
       if (pct >= 50) {
         fireConfetti({ count: 100, spread: 80, originY: 0.5 });
       }
       setIsFinished(true);
     } else {
+
       setCurrentIdx(currentIdx + 1);
       setSelectedOption(null);
       setRevealed(false);
