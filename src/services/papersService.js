@@ -8,7 +8,7 @@ export async function fetchSubjectsFromSupabase() {
   try {
     const { data, error } = await supabase
       .from('past_papers')
-      .select('subject_code, subject_name, department, term, year');
+      .select('subject_code, subject_name');
 
     if (error || !data || data.length === 0) {
       console.warn('Supabase past_papers query notice:', error?.message || 'No rows returned');

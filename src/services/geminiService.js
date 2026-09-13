@@ -236,6 +236,8 @@ export async function generateQuizWithGemini({ subject, subjectCode, numQuestion
         if (parsedQuestions && parsedQuestions.length > 0) {
           return parsedQuestions;
         }
+      } else {
+        console.info(`Groq AI API response status ${response.status}. Falling back to subject question bank.`);
       }
     } catch (err) {
       console.warn('Groq AI API fetch failed:', err.message);
@@ -292,6 +294,8 @@ JSON Structure:
         const text = data?.choices?.[0]?.message?.content || '';
         const parsed = parseExamQuestions(text);
         if (parsed && parsed.length > 0) return parsed;
+      } else {
+        console.info(`Groq AI API exam paper status ${response.status}. Falling back to offline exam paper questions.`);
       }
     } catch (err) {
       console.warn('AI Exam paper fetch failed:', err.message);

@@ -159,3 +159,36 @@ html.dark .subject-code {
   margin-bottom: 1rem;
   display: block;
 }
+
+/* ─── Mobile Responsiveness (Full Width Edge-to-Edge) ───────────── */
+@media (max-width: 640px) {
+  .subjects-container {
+    padding: 0.75rem 0.375rem 6.5rem 0.375rem;
+  }
+
+  .subjects-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .subjects-title {
+    font-size: 1.625rem;
+  }
+
+  .subjects-search-bar {
+    max-width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .subjects-grid {
+    grid-template-columns: 1fr;
+    gap: 0.875rem;
+  }
+
+  .subject-card {
+    padding: 1.25rem 1rem;
+    border-radius: 14px;
+  }
+}
+

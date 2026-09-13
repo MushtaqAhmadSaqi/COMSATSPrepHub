@@ -243,7 +243,7 @@ export default function Subjects({ onSelectSubject = () => {} }) {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.2 }}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="popLayout">
             {filtered.map((subj, idx) => (
               <SpotlightSubjectCard
                 key={subj.code}

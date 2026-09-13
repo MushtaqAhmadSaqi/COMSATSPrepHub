@@ -63,13 +63,13 @@ export default function PaperView({
   return (
     <div className="paperview-container">
       {/* Top Action Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <button type="button" className="btn-back" onClick={onBack} style={{ marginBottom: 0 }}>
+      <div className="paperview-top-actions">
+        <button type="button" className="btn-back" onClick={onBack}>
           <span className="material-symbols-outlined">arrow_back</span>
           Back to Papers
         </button>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div className="paperview-action-group">
           <button type="button" className="paperview-btn-secondary" onClick={toggleAll}>
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
               {showAllAnswers ? 'visibility_off' : 'visibility'}
@@ -111,11 +111,11 @@ export default function PaperView({
 
         {/* Questions & Answers Section */}
         <div className="paperview-questions-section">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '2px solid var(--border)', paddingBottom: '0.75rem' }}>
+          <div className="paperview-questions-header">
             <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text)' }}>
               Examination Questions & Solutions
             </h3>
-            <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--brand)', background: 'var(--brand-soft)', padding: '0.2rem 0.6rem', borderRadius: '9999px' }}>
+            <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--brand)', background: 'var(--brand-soft)', padding: '0.2rem 0.6rem', borderRadius: '9999px', whiteSpace: 'nowrap' }}>
               Verified Solution Key
             </span>
           </div>
