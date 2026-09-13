@@ -5,9 +5,38 @@
  */
 
 // Use environment variable for API key - never hardcode secrets
+// Use environment variable for API keys - never hardcode secrets
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'llama-3.1-70b-versatile', 'mixtral-8x7b-32768', 'gemma2-9b-it'];
+
+/**
+ * Call Google Gemini API (gemini-1.5-flash) using Google API Key
+ */
+async function callGoogleGemini(apiKey, prompt) {
+  if (!apiKey) return null;
+  const keyStr = apiKey.trim();
+  if (keyStr.startsWith('gsk_')) return null; // Belongs to Groq
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${keyStr}`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: 'application/json' }
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data?.candidates?.[0]?.content?.parts?.[0]?.text || null;
+    }
+  } catch (err) {
+    console.warn('Google Gemini API call failed:', err.message);
+  }
+  return null;
+}
 
 /**
  * Subject-specific question banks for COMSATS University courses.
@@ -200,11 +229,22 @@ const SUBJECT_QUESTION_BANKS = {
 };
 
 /**
- * Generate MCQ questions for a given subject using Groq AI with automatic fallbacks.
+ * Generate MCQ questions for a given subject using Google Gemini AI or Groq AI with automatic fallbacks.
  */
 export async function generateQuizWithGemini({ subject, subjectCode, numQuestions = 10, difficulty = 'Medium' }) {
+  const prompt = buildPrompt(subject, subjectCode, numQuestions, difficulty);
+
+  // 1. Try Google Gemini API if Gemini Key is available
+  if (GEMINI_API_KEY && !GEMINI_API_KEY.trim().startsWith('gsk_')) {
+    const geminiText = await callGoogleGemini(GEMINI_API_KEY, prompt);
+    if (geminiText) {
+      const parsed = parseQuizFromResponse(geminiText, numQuestions);
+      if (parsed && parsed.length > 0) return parsed;
+    }
+  }
+
+  // 2. Try Groq AI if Groq Key is available
   if (GROQ_API_KEY && GROQ_API_KEY.trim().startsWith('gsk_')) {
-    const prompt = buildPrompt(subject, subjectCode, numQuestions, difficulty);
     for (const model of GROQ_MODELS) {
       try {
         const response = await fetch(GROQ_API_URL, {
@@ -252,8 +292,7 @@ export async function generateQuizWithGemini({ subject, subjectCode, numQuestion
  * Matches paper subject (Calculus, Database, Networks, OOP, etc.)
  */
 export async function generateExamPaperQuestions({ subjectName = '', subjectCode = '', paperTitle = '', term = 'Terminal', year = '2023' }) {
-  if (GROQ_API_KEY && GROQ_API_KEY.trim().startsWith('gsk_')) {
-    const prompt = `You are a senior professor at COMSATS University Islamabad. Generate a realistic 4-question official examination paper with complete verified solution keys for "${subjectName || paperTitle}" (${subjectCode || 'COMSATS'}), Exam: ${term} ${year}.
+  const prompt = `You are a senior professor at COMSATS University Islamabad. Generate a realistic 4-question official examination paper with complete verified solution keys for "${subjectName || paperTitle}" (${subjectCode || 'COMSATS'}), Exam: ${term} ${year}.
 Requirements:
 1. Two short conceptual questions (5 Marks each) for Section A.
 2. Two detailed problem-solving/analytical questions (10 Marks each) for Section B.
@@ -271,6 +310,18 @@ JSON Structure:
     "answerText": "Step-by-step solution model answer here"
   }
 ]`;
+
+  // 1. Try Google Gemini API if Gemini Key is available
+  if (GEMINI_API_KEY && !GEMINI_API_KEY.trim().startsWith('gsk_')) {
+    const geminiText = await callGoogleGemini(GEMINI_API_KEY, prompt);
+    if (geminiText) {
+      const parsed = parseExamQuestions(geminiText);
+      if (parsed && parsed.length > 0) return parsed;
+    }
+  }
+
+  // 2. Try Groq AI if Groq Key is available
+  if (GROQ_API_KEY && GROQ_API_KEY.trim().startsWith('gsk_')) {
     for (const model of GROQ_MODELS) {
       try {
         const response = await fetch(GROQ_API_URL, {
