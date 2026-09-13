@@ -293,3 +293,25 @@ html.dark .auth-alert-success {
   color: var(--brand-ink);
   text-decoration: underline;
 }
+
+/* ─── Field-level Validation Errors ─────────────────────────────── */
+.auth-field-error {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.auth-input--error {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+/* ─── Submit Button Spinner ─────────────────────────────────────── */
+.auth-submit-spinner {
+  animation: spin 1s linear infinite;
+  margin-right: 0.25rem;
+}

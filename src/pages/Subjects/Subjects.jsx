@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchSubjectsFromSupabase } from '../../services/papersService';
 import { DEFAULT_SUBJECTS, DEPARTMENTS } from '../../constants/subjects';
+import { SkeletonCard } from '../../components/ui/Skeleton';
+import EmptyState from '../../components/ui/EmptyState';
+import ErrorState from '../../components/ui/ErrorState';
 import './Subjects.css';
 
 /* ── Spotlight Card with Glow Effect ── */
@@ -104,21 +107,29 @@ function DepartmentChip({ dept, isSelected, onClick }) {
 export default function Subjects({ onSelectSubject = () => {} }) {
   const [subjects, setSubjects] = useState(DEFAULT_SUBJECTS);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDept, setSelectedDept] = useState('All');
   const [isFromSupabase, setIsFromSupabase] = useState(false);
 
-  useEffect(() => {
-    async function loadSupabaseSubjects() {
-      setLoading(true);
+  const loadSubjects = async () => {
+    setLoading(true);
+    setError(null);
+    try {
       const dbSubjects = await fetchSubjectsFromSupabase();
       if (dbSubjects && dbSubjects.length > 0) {
         setSubjects(dbSubjects);
         setIsFromSupabase(true);
       }
+    } catch (err) {
+      setError(err.message || 'Failed to load subjects.');
+    } finally {
       setLoading(false);
     }
-    loadSupabaseSubjects();
+  };
+
+  useEffect(() => {
+    loadSubjects();
   }, []);
 
   const filtered = subjects.filter(s => {
@@ -212,33 +223,19 @@ export default function Subjects({ onSelectSubject = () => {} }) {
       </div>
 
       {loading ? (
-        <motion.div
-          style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-subtle)' }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.4 }}
-        >
-          <motion.span
-            className="material-symbols-outlined"
-            style={{ fontSize: '2.5rem' }}
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          >
-            progress_activity
-          </motion.span>
-          <p style={{ marginTop: '0.75rem', fontWeight: 600 }}>Fetching subjects from Supabase...</p>
-        </motion.div>
+        <div className="subjects-grid" aria-busy="true" aria-label="Loading subjects">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      ) : error ? (
+        <ErrorState message={error} onRetry={loadSubjects} />
       ) : filtered.length === 0 ? (
-        <motion.div
-          className="subjects-empty"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4 }}
-        >
-          <span className="material-symbols-outlined">search_off</span>
-          <p style={{ fontWeight: 700, fontSize: '1.125rem', marginBottom: '0.25rem' }}>No subjects match your filter</p>
-          <p style={{ fontSize: '0.875rem' }}>Try selecting "All" or typing a different keyword</p>
-        </motion.div>
+        <EmptyState
+          icon="search_off"
+          title="No subjects match your filter"
+          description='Try selecting "All" or typing a different keyword'
+        />
       ) : (
         <motion.div
           className="subjects-grid"

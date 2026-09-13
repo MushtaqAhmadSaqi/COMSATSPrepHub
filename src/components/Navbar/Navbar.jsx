@@ -45,7 +45,7 @@ export default function Navbar({
               className="brand-logo"
               style={{ background: 'none', border: 'none', padding: 0 }}
             >
-              <img src="/logo.png" alt="Logo" onError={(e) => { e.target.style.display = 'none'; }} />
+              <img src="/logo.png" alt="Logo" width="32" height="32" decoding="async" onError={(e) => { e.target.style.display = 'none'; }} />
               <div>
                 <span className="brand-title">COMSATS</span>
                 <span className="brand-highlight">PrepHub</span>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { fireConfetti } from '../../utils/confetti';
+import { useToast } from '../../utils/toast';
 import './Upload.css';
 
 export default function Upload() {
@@ -10,6 +11,10 @@ export default function Upload() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [dragOver, setDragOver] = useState(false);
   const [fileError, setFileError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const toast = useToast();
 
   const MAX_SIZE_MB = 15;
 
@@ -47,8 +52,25 @@ export default function Upload() {
       setFileError('Please select a file to upload.');
       return;
     }
-    setSubmitted(true);
-    fireConfetti({ count: 90, spread: 80 });
+    if (submitting) return;
+    setSubmitting(true);
+    // Simulate upload delay
+    setTimeout(() => {
+      setSubmitted(true);
+      setSubmitting(false);
+      toast.success('Paper submitted for review!');
+      fireConfetti({ count: 90, spread: 80 });
+    }, 600);
+  };
+
+  const validateFieldOnBlur = (field, value) => {
+    const errs = { ...fieldErrors };
+    if (!value.trim()) {
+      errs[field] = 'This field is required';
+    } else {
+      delete errs[field];
+    }
+    setFieldErrors(errs);
   };
 
   return (
@@ -137,24 +159,28 @@ export default function Upload() {
               <label className="ai-label">Subject Code / Name</label>
               <input
                 type="text"
-                className="ai-input"
+                className={`ai-input${fieldErrors.subjectCode ? ' auth-input--error' : ''}`}
                 placeholder="e.g. CSC211 — Data Structures & Algorithms"
                 value={subjectCode}
                 onChange={(e) => setSubjectCode(e.target.value)}
+                onBlur={(e) => validateFieldOnBlur('subjectCode', e.target.value)}
                 required
               />
+              {fieldErrors.subjectCode && <span className="auth-field-error">{fieldErrors.subjectCode}</span>}
             </div>
 
             <div className="ai-field">
               <label className="ai-label">Exam Type & Year</label>
               <input
                 type="text"
-                className="ai-input"
+                className={`ai-input${fieldErrors.examType ? ' auth-input--error' : ''}`}
                 placeholder="e.g. Terminal Examination — Fall 2023"
                 value={examType}
                 onChange={(e) => setExamType(e.target.value)}
+                onBlur={(e) => validateFieldOnBlur('examType', e.target.value)}
                 required
               />
+              {fieldErrors.examType && <span className="auth-field-error">{fieldErrors.examType}</span>}
             </div>
 
             <div className="ai-field">
@@ -168,9 +194,18 @@ export default function Upload() {
               />
             </div>
 
-            <button type="submit" className="btn-generate-ai">
-              <span className="material-symbols-outlined">upload</span>
-              Submit Paper for Review
+            <button type="submit" className="btn-generate-ai" disabled={submitting}>
+              {submitting ? (
+                <>
+                  <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite', fontSize: '18px' }}>progress_activity</span>
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined">upload</span>
+                  Submit Paper for Review
+                </>
+              )}
             </button>
           </form>
         )}

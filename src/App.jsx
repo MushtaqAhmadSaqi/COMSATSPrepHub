@@ -4,6 +4,9 @@ import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
 import AuthModal from './components/AuthModal/AuthModal';
 import ScrollTop from './components/ScrollTop/ScrollTop';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
+import InstallPrompt from './components/InstallPrompt/InstallPrompt';
+import { ToastProvider } from './utils/toast';
 
 import Home from './pages/Home/Home';
 import About from './pages/About/About';
@@ -218,41 +221,49 @@ export default function App() {
   };
 
   return (
-    <div className="app-container">
-      <Navbar
-        activePath={activePath}
-        onNavigate={handleNavigate}
-        isDark={isDark}
-        onToggleDarkMode={() => setIsDark(!isDark)}
-        user={user}
-        onOpenAuth={() => setIsAuthOpen(true)}
-      />
+    <ToastProvider>
+      <div className="app-container">
+        {/* Accessibility: skip-to-content link */}
+        <a href="#main-content" className="skip-link">Skip to content</a>
 
-      <main className="main-content">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activePath}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            variants={pageVariants}
-            transition={pageTransition}
-            style={{ width: '100%' }}
-          >
-            {renderCurrentPage()}
-          </motion.div>
-        </AnimatePresence>
-      </main>
+        <Navbar
+          activePath={activePath}
+          onNavigate={handleNavigate}
+          isDark={isDark}
+          onToggleDarkMode={() => setIsDark(!isDark)}
+          user={user}
+          onOpenAuth={() => setIsAuthOpen(true)}
+        />
 
-      <Footer onNavigate={handleNavigate} />
+        <main className="main-content" id="main-content">
+          <ErrorBoundary>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activePath}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                transition={pageTransition}
+                style={{ width: '100%' }}
+              >
+                {renderCurrentPage()}
+              </motion.div>
+            </AnimatePresence>
+          </ErrorBoundary>
+        </main>
 
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-        onLoginSuccess={(u) => setUser(u)}
-      />
+        <Footer onNavigate={handleNavigate} />
 
-      <ScrollTop />
-    </div>
+        <AuthModal
+          isOpen={isAuthOpen}
+          onClose={() => setIsAuthOpen(false)}
+          onLoginSuccess={(u) => setUser(u)}
+        />
+
+        <ScrollTop />
+        <InstallPrompt />
+      </div>
+    </ToastProvider>
   );
 }

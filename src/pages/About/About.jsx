@@ -8,6 +8,10 @@ const CONTRIBUTORS = [
   { name: 'Syed Saifullah', role: 'Active Contributor', image: '/Saif.jpeg' }
 ];
 
+/* Target aspect ratios for team photos — prevents CLS */
+const PHOTO_SIZE = { width: 56, height: 56 };
+const FOUNDER_SIZE = { width: 120, height: 120 };
+
 export default function About() {
   return (
     <div className="about-container">
@@ -30,6 +34,9 @@ export default function About() {
           src="/My-image.webp"
           alt="Mushtaq Ahmad Saqi"
           className="founder-avatar"
+          width={FOUNDER_SIZE.width}
+          height={FOUNDER_SIZE.height}
+          decoding="async"
           onError={(e) => {
             e.target.style.display = 'none';
           }}
@@ -62,6 +69,10 @@ export default function About() {
               src={c.image}
               alt={c.name}
               className="contributor-avatar"
+              width={PHOTO_SIZE.width}
+              height={PHOTO_SIZE.height}
+              loading="lazy"
+              decoding="async"
               onError={(e) => {
                 e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=0ea5e9&color=fff&size=56`;
               }}

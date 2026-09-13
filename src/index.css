@@ -100,7 +100,7 @@ html.dark {
 
   --text:        #f1f5f9;
   --text-muted:  #94a3b8;
-  --text-subtle: #64748b;
+  --text-subtle: #7c8da4;
 
   --brand:        #38bdf8;
   --brand-ink:    #0ea5e9;
@@ -162,6 +162,29 @@ button {
 
 /* Custom scrollbar (webkit) */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
+
+/* ── Skip-to-content link (a11y) ── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  padding: 0.625rem 1.25rem;
+  background: var(--brand);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  text-decoration: none;
+  transition: top var(--dur-fast) var(--ease);
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 9999px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--brand); }

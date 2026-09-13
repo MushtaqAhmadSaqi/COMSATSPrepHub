@@ -2,61 +2,55 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://comsatsprephub.vercel.app/</loc>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://comsatsprephub.vercel.app/index.html</loc>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://comsatsprephub.vercel.app/subjects.html</loc>
+    <loc>https://comsatsprephub.vercel.app/#subjects</loc>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://comsatsprephub.vercel.app/subject-papers.html</loc>
+    <loc>https://comsatsprephub.vercel.app/#quiz</loc>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://comsatsprephub.vercel.app/quiz.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://comsatsprephub.vercel.app/ai-quiz-generator.html</loc>
+    <loc>https://comsatsprephub.vercel.app/#ai-quiz-generator</loc>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://comsatsprephub.vercel.app/take-ai-quiz.html</loc>
+    <loc>https://comsatsprephub.vercel.app/#gpa</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://comsatsprephub.vercel.app/#upload</loc>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://comsatsprephub.vercel.app/ComsatsGPA/gpa-calculator.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://comsatsprephub.vercel.app/upload.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://comsatsprephub.vercel.app/paper-view.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://comsatsprephub.vercel.app/about-us.html</loc>
+    <loc>https://comsatsprephub.vercel.app/#about</loc>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://comsatsprephub.vercel.app/terms.html</loc>
+    <loc>https://comsatsprephub.vercel.app/#dashboard</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://comsatsprephub.vercel.app/#terms</loc>
+    <lastmod>2026-09-11</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

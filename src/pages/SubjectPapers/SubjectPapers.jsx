@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { fetchPapersForSubjectFromSupabase } from '../../services/papersService';
+import { SkeletonListItem } from '../../components/ui/Skeleton';
+import EmptyState from '../../components/ui/EmptyState';
+import ErrorState from '../../components/ui/ErrorState';
 import './SubjectPapers.css';
 
 const DEFAULT_PAPERS = [
@@ -18,18 +21,26 @@ export default function SubjectPapers({
 }) {
   const [papers, setPapers] = useState(DEFAULT_PAPERS);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isFromSupabase, setIsFromSupabase] = useState(false);
 
-  useEffect(() => {
-    async function loadPapers() {
-      setLoading(true);
+  const loadPapers = async () => {
+    setLoading(true);
+    setError(null);
+    try {
       const dbPapers = await fetchPapersForSubjectFromSupabase(subject.code, subject.name);
       if (dbPapers && dbPapers.length > 0) {
         setPapers(dbPapers);
         setIsFromSupabase(true);
       }
+    } catch (err) {
+      setError(err.message || 'Failed to load papers.');
+    } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadPapers();
   }, [subject.code, subject.name]);
 
@@ -61,25 +72,21 @@ export default function SubjectPapers({
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-subtle)' }}>
-          <motion.span
-            className="material-symbols-outlined"
-            style={{ fontSize: '2.5rem', display: 'block', marginBottom: '0.75rem' }}
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          >
-            progress_activity
-          </motion.span>
-          <p style={{ fontWeight: 600 }}>Loading past papers...</p>
+        <div className="skeleton-list" aria-busy="true" aria-label="Loading papers">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <SkeletonListItem key={i} />
+          ))}
         </div>
+      ) : error ? (
+        <ErrorState message={error} onRetry={loadPapers} />
       ) : papers.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '4rem 1rem', color: 'var(--text-subtle)' }}>
-          <span className="material-symbols-outlined" style={{ fontSize: '3rem', color: 'var(--border-strong)', marginBottom: '1rem', display: 'block' }}>
-            find_in_page
-          </span>
-          <p style={{ fontWeight: 700, fontSize: '1.125rem', marginBottom: '0.25rem' }}>No papers uploaded yet for {subject.code}</p>
-          <p style={{ fontSize: '0.875rem' }}>Be the first student to upload a paper for this subject!</p>
-        </div>
+        <EmptyState
+          icon="find_in_page"
+          title={`No papers uploaded yet for ${subject.code}`}
+          description="Be the first student to upload a paper for this subject!"
+          actionLabel="Upload Paper"
+          onAction={() => window.location.hash = 'upload'}
+        />
       ) : (
         <div>
           {papers.map((p, idx) => (

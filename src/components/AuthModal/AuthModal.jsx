@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { signInWithEmail, signUpWithEmail, signInWithGoogle } from '../../services/auth';
+import { useToast } from '../../utils/toast';
 import './AuthModal.css';
 
 /* Inline Google icon — avoids external svgrepo.com dependency */
@@ -27,6 +28,9 @@ export default function AuthModal({
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const toast = useToast();
 
   const cardRef = useRef(null);
   const firstInputRef = useRef(null);
@@ -74,8 +78,10 @@ export default function AuthModal({
       setLoading(false);
       if (!res.ok) {
         setErrorMsg(res.error);
+        toast.error(res.error);
       } else {
         setSuccessMsg('Account created! Signing you in...');
+        toast.success('Account created successfully!');
         if (res.user) { onLoginSuccess(res.user); setTimeout(onClose, 1000); }
       }
     } else {
@@ -83,8 +89,10 @@ export default function AuthModal({
       setLoading(false);
       if (!res.ok) {
         setErrorMsg(res.error);
+        toast.error(res.error);
       } else {
         setSuccessMsg('Signed in successfully!');
+        toast.success('Welcome back!');
         if (res.user) { onLoginSuccess(res.user); setTimeout(onClose, 800); }
       }
     }
@@ -93,13 +101,41 @@ export default function AuthModal({
   const handleGoogleSignIn = async () => {
     setErrorMsg('');
     const res = await signInWithGoogle();
-    if (!res.ok) setErrorMsg(res.error);
+    if (!res.ok) {
+      setErrorMsg(res.error);
+      toast.error(res.error);
+    }
   };
 
   const switchMode = () => {
     setIsSignUp(!isSignUp);
     setErrorMsg('');
     setSuccessMsg('');
+    setFieldErrors({});
+  };
+
+  /* Blur validation for individual fields */
+  const validateField = (field, value) => {
+    const errs = { ...fieldErrors };
+    switch (field) {
+      case 'email':
+        if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          errs.email = 'Please enter a valid email address';
+        } else { delete errs.email; }
+        break;
+      case 'password':
+        if (value && value.length < 8) {
+          errs.password = 'Must be at least 8 characters';
+        } else { delete errs.password; }
+        break;
+      case 'fullName':
+        if (isSignUp && value !== undefined && !value.trim()) {
+          errs.fullName = 'Name is required';
+        } else { delete errs.fullName; }
+        break;
+      default: break;
+    }
+    setFieldErrors(errs);
   };
 
   return (
@@ -155,12 +191,16 @@ export default function AuthModal({
               <input
                 ref={firstInputRef}
                 type="text"
-                className="auth-input"
+                className={`auth-input${fieldErrors.fullName ? ' auth-input--error' : ''}`}
                 placeholder="e.g. Moeed Ali"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
+                onBlur={(e) => validateField('fullName', e.target.value)}
+                autoComplete="name"
+                enterKeyHint="next"
                 required
               />
+              {fieldErrors.fullName && <span className="auth-field-error">{fieldErrors.fullName}</span>}
             </div>
           )}
 
@@ -169,12 +209,16 @@ export default function AuthModal({
             <input
               ref={isSignUp ? undefined : firstInputRef}
               type="email"
-              className="auth-input"
+              className={`auth-input${fieldErrors.email ? ' auth-input--error' : ''}`}
               placeholder="student@comsats.edu.pk"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onBlur={(e) => validateField('email', e.target.value)}
+              autoComplete="email"
+              enterKeyHint="next"
               required
             />
+            {fieldErrors.email && <span className="auth-field-error">{fieldErrors.email}</span>}
           </div>
 
           <div className="auth-form-group">
@@ -182,10 +226,13 @@ export default function AuthModal({
             <div className="auth-password-wrapper">
               <input
                 type={showPassword ? 'text' : 'password'}
-                className="auth-input"
+                className={`auth-input${fieldErrors.password ? ' auth-input--error' : ''}`}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onBlur={(e) => validateField('password', e.target.value)}
+                autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                enterKeyHint="done"
                 required
                 style={{ paddingRight: '3rem' }}
               />
@@ -200,9 +247,13 @@ export default function AuthModal({
                 </span>
               </button>
             </div>
+            {fieldErrors.password && <span className="auth-field-error">{fieldErrors.password}</span>}
           </div>
 
           <button type="submit" className="auth-submit-btn" disabled={loading}>
+            {loading && (
+              <span className="material-symbols-outlined auth-submit-spinner" style={{ fontSize: '18px' }}>progress_activity</span>
+            )}
             {loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Sign In')}
           </button>
         </form>
