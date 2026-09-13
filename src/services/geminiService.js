@@ -7,7 +7,7 @@
 // Use environment variable for API key - never hardcode secrets
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const GROQ_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'llama3-70b-8192', 'mixtral-8x7b-32768'];
 
 /**
  * Subject-specific question banks for COMSATS University courses.
@@ -204,43 +204,43 @@ const SUBJECT_QUESTION_BANKS = {
  */
 export async function generateQuizWithGemini({ subject, subjectCode, numQuestions = 10, difficulty = 'Medium' }) {
   if (GROQ_API_KEY && GROQ_API_KEY.trim().startsWith('gsk_')) {
-    try {
-      const prompt = buildPrompt(subject, subjectCode, numQuestions, difficulty);
-      const response = await fetch(GROQ_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GROQ_API_KEY.trim()}`,
-        },
-        body: JSON.stringify({
-          model: GROQ_MODEL,
-          messages: [
-            {
-              role: 'system',
-              content: 'You are an expert university professor. You always respond with valid JSON only — no markdown formatting, no explanations, just the raw JSON array.',
-            },
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
-          temperature: 0.7,
-          max_tokens: 4096,
-        }),
-      });
+    const prompt = buildPrompt(subject, subjectCode, numQuestions, difficulty);
+    for (const model of GROQ_MODELS) {
+      try {
+        const response = await fetch(GROQ_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${GROQ_API_KEY.trim()}`,
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              {
+                role: 'system',
+                content: 'You are an expert university professor. You always respond with valid JSON only — no markdown formatting, no explanations, just the raw JSON array.',
+              },
+              {
+                role: 'user',
+                content: prompt,
+              },
+            ],
+            temperature: 0.7,
+            max_tokens: 4096,
+          }),
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-        const text = data?.choices?.[0]?.message?.content || '';
-        const parsedQuestions = parseQuizFromResponse(text, numQuestions);
-        if (parsedQuestions && parsedQuestions.length > 0) {
-          return parsedQuestions;
+        if (response.ok) {
+          const data = await response.json();
+          const text = data?.choices?.[0]?.message?.content || '';
+          const parsedQuestions = parseQuizFromResponse(text, numQuestions);
+          if (parsedQuestions && parsedQuestions.length > 0) {
+            return parsedQuestions;
+          }
         }
-      } else {
-        console.info(`Groq AI API response status ${response.status}. Falling back to subject question bank.`);
+      } catch (err) {
+        console.warn(`Groq AI fetch failed for model ${model}:`, err.message);
       }
-    } catch (err) {
-      console.warn('Groq AI API fetch failed:', err.message);
     }
   }
 
@@ -253,8 +253,7 @@ export async function generateQuizWithGemini({ subject, subjectCode, numQuestion
  */
 export async function generateExamPaperQuestions({ subjectName = '', subjectCode = '', paperTitle = '', term = 'Terminal', year = '2023' }) {
   if (GROQ_API_KEY && GROQ_API_KEY.trim().startsWith('gsk_')) {
-    try {
-      const prompt = `You are a senior professor at COMSATS University Islamabad. Generate a realistic 4-question official examination paper with complete verified solution keys for "${subjectName || paperTitle}" (${subjectCode || 'COMSATS'}), Exam: ${term} ${year}.
+    const prompt = `You are a senior professor at COMSATS University Islamabad. Generate a realistic 4-question official examination paper with complete verified solution keys for "${subjectName || paperTitle}" (${subjectCode || 'COMSATS'}), Exam: ${term} ${year}.
 Requirements:
 1. Two short conceptual questions (5 Marks each) for Section A.
 2. Two detailed problem-solving/analytical questions (10 Marks each) for Section B.
@@ -272,33 +271,34 @@ JSON Structure:
     "answerText": "Step-by-step solution model answer here"
   }
 ]`;
-      const response = await fetch(GROQ_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${GROQ_API_KEY.trim()}`,
-        },
-        body: JSON.stringify({
-          model: GROQ_MODEL,
-          messages: [
-            { role: 'system', content: 'Respond with valid JSON array only — no markdown.' },
-            { role: 'user', content: prompt }
-          ],
-          temperature: 0.6,
-          max_tokens: 3500
-        })
-      });
+    for (const model of GROQ_MODELS) {
+      try {
+        const response = await fetch(GROQ_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${GROQ_API_KEY.trim()}`,
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: 'Respond with valid JSON array only — no markdown.' },
+              { role: 'user', content: prompt }
+            ],
+            temperature: 0.6,
+            max_tokens: 3500
+          })
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-        const text = data?.choices?.[0]?.message?.content || '';
-        const parsed = parseExamQuestions(text);
-        if (parsed && parsed.length > 0) return parsed;
-      } else {
-        console.info(`Groq AI API exam paper status ${response.status}. Falling back to offline exam paper questions.`);
+        if (response.ok) {
+          const data = await response.json();
+          const text = data?.choices?.[0]?.message?.content || '';
+          const parsed = parseExamQuestions(text);
+          if (parsed && parsed.length > 0) return parsed;
+        }
+      } catch (err) {
+        console.warn(`AI Exam paper fetch failed for model ${model}:`, err.message);
       }
-    } catch (err) {
-      console.warn('AI Exam paper fetch failed:', err.message);
     }
   }
 
