@@ -7,7 +7,7 @@
 // Use environment variable for API key - never hardcode secrets
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'llama3-70b-8192', 'mixtral-8x7b-32768'];
+const GROQ_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'llama-3.1-70b-versatile', 'mixtral-8x7b-32768', 'gemma2-9b-it'];
 
 /**
  * Subject-specific question banks for COMSATS University courses.
@@ -226,7 +226,7 @@ export async function generateQuizWithGemini({ subject, subjectCode, numQuestion
               },
             ],
             temperature: 0.7,
-            max_tokens: 4096,
+            max_tokens: 2048,
           }),
         });
 
@@ -286,7 +286,7 @@ JSON Structure:
               { role: 'user', content: prompt }
             ],
             temperature: 0.6,
-            max_tokens: 3500
+            max_tokens: 2048
           })
         });
 
