@@ -6,10 +6,43 @@
 
 // Use environment variable for API key - never hardcode secrets
 // Use environment variable for API keys - never hardcode secrets
+const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || import.meta.env.VITE_GROQ_API_KEY;
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'llama-3.1-70b-versatile', 'mixtral-8x7b-32768', 'gemma2-9b-it'];
+
+/**
+ * Call OpenRouter API (OpenRouter Free Tier Models)
+ */
+async function callOpenRouter(apiKey, prompt) {
+  if (!apiKey) return null;
+  const keyStr = apiKey.trim();
+  if (!keyStr.startsWith('sk-or-v1-')) return null;
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${keyStr}`
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-3.2-3b-instruct:free',
+        messages: [
+          { role: 'system', content: 'You are a university professor. Respond ONLY with valid raw JSON array.' },
+          { role: 'user', content: prompt }
+        ]
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data?.choices?.[0]?.message?.content || null;
+    }
+  } catch (err) {
+    console.warn('OpenRouter API call failed:', err.message);
+  }
+  return null;
+}
 
 /**
  * Call Google Gemini API (gemini-1.5-flash) using Google API Key
@@ -17,7 +50,7 @@ const GROQ_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'llama-3
 async function callGoogleGemini(apiKey, prompt) {
   if (!apiKey) return null;
   const keyStr = apiKey.trim();
-  if (keyStr.startsWith('gsk_')) return null; // Belongs to Groq
+  if (keyStr.startsWith('gsk_') || keyStr.startsWith('sk-or-v1-')) return null;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${keyStr}`;
   try {
     const res = await fetch(url, {
@@ -34,6 +67,32 @@ async function callGoogleGemini(apiKey, prompt) {
     }
   } catch (err) {
     console.warn('Google Gemini API call failed:', err.message);
+  }
+  return null;
+}
+
+/**
+ * Call Free Public Pollinations AI (Requires NO API Keys)
+ */
+async function callPollinationsAI(prompt) {
+  try {
+    const res = await fetch('https://text.pollinations.ai/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: 'You are a university professor. Respond ONLY with valid raw JSON array — no markdown.' },
+          { role: 'user', content: prompt }
+        ],
+        jsonMode: true
+      })
+    });
+    if (res.ok) {
+      const text = await res.text();
+      return text;
+    }
+  } catch (err) {
+    console.warn('Free Pollinations AI call failed:', err.message);
   }
   return null;
 }
@@ -234,8 +293,17 @@ const SUBJECT_QUESTION_BANKS = {
 export async function generateQuizWithGemini({ subject, subjectCode, numQuestions = 10, difficulty = 'Medium' }) {
   const prompt = buildPrompt(subject, subjectCode, numQuestions, difficulty);
 
+  // 0. Try OpenRouter API if OpenRouter key is provided (sk-or-v1-...)
+  if (OPENROUTER_API_KEY && OPENROUTER_API_KEY.trim().startsWith('sk-or-v1-')) {
+    const openRouterText = await callOpenRouter(OPENROUTER_API_KEY, prompt);
+    if (openRouterText) {
+      const parsed = parseQuizFromResponse(openRouterText, numQuestions);
+      if (parsed && parsed.length > 0) return parsed;
+    }
+  }
+
   // 1. Try Google Gemini API if Gemini Key is available
-  if (GEMINI_API_KEY && !GEMINI_API_KEY.trim().startsWith('gsk_')) {
+  if (GEMINI_API_KEY && !GEMINI_API_KEY.trim().startsWith('gsk_') && !GEMINI_API_KEY.trim().startsWith('sk-or-v1-')) {
     const geminiText = await callGoogleGemini(GEMINI_API_KEY, prompt);
     if (geminiText) {
       const parsed = parseQuizFromResponse(geminiText, numQuestions);
@@ -284,6 +352,13 @@ export async function generateQuizWithGemini({ subject, subjectCode, numQuestion
     }
   }
 
+  // 3. Try Free Public Pollinations AI (Requires NO API key)
+  const pollText = await callPollinationsAI(prompt);
+  if (pollText) {
+    const parsed = parseQuizFromResponse(pollText, numQuestions);
+    if (parsed && parsed.length > 0) return parsed;
+  }
+
   return getOfflineQuestions(subject, subjectCode, numQuestions, difficulty);
 }
 
@@ -311,8 +386,17 @@ JSON Structure:
   }
 ]`;
 
+  // 0. Try OpenRouter API if OpenRouter key is provided (sk-or-v1-...)
+  if (OPENROUTER_API_KEY && OPENROUTER_API_KEY.trim().startsWith('sk-or-v1-')) {
+    const openRouterText = await callOpenRouter(OPENROUTER_API_KEY, prompt);
+    if (openRouterText) {
+      const parsed = parseExamQuestions(openRouterText);
+      if (parsed && parsed.length > 0) return parsed;
+    }
+  }
+
   // 1. Try Google Gemini API if Gemini Key is available
-  if (GEMINI_API_KEY && !GEMINI_API_KEY.trim().startsWith('gsk_')) {
+  if (GEMINI_API_KEY && !GEMINI_API_KEY.trim().startsWith('gsk_') && !GEMINI_API_KEY.trim().startsWith('sk-or-v1-')) {
     const geminiText = await callGoogleGemini(GEMINI_API_KEY, prompt);
     if (geminiText) {
       const parsed = parseExamQuestions(geminiText);
@@ -351,6 +435,13 @@ JSON Structure:
         console.warn(`AI Exam paper fetch failed for model ${model}:`, err.message);
       }
     }
+  }
+
+  // 3. Try Free Public Pollinations AI (Requires NO API key)
+  const pollExamText = await callPollinationsAI(prompt);
+  if (pollExamText) {
+    const parsed = parseExamQuestions(pollExamText);
+    if (parsed && parsed.length > 0) return parsed;
   }
 
   return getOfflineExamQuestions(subjectName, subjectCode, paperTitle, term, year);
