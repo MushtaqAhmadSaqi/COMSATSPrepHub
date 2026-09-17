@@ -24,6 +24,7 @@ import AdminGenerateQuizzes from './pages/AdminGenerateQuizzes/AdminGenerateQuiz
 import AdminPaste from './pages/AdminPaste/AdminPaste';
 import GpaCalculator from './pages/GpaCalculator/GpaCalculator';
 
+import CommandPalette from './components/CommandPalette/CommandPalette';
 import { supabase } from './services/supabase';
 import './App.css';
 
@@ -34,6 +35,8 @@ export default function App() {
   });
   const [user, setUser] = useState(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isCmdPaletteOpen, setIsCmdPaletteOpen] = useState(false);
+
   // Lazy initialisers — restore from sessionStorage so sub-page navigation
   // survives a page refresh or browser-back within the same tab session.
   const [selectedSubject, setSelectedSubject] = useState(() => {
@@ -54,6 +57,18 @@ export default function App() {
       return raw ? JSON.parse(raw) : null;
     } catch { return null; }
   });
+
+  // Global Ctrl+K / Cmd+K listener
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        setIsCmdPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   // Initialize Dark Mode & Supabase User Session
   useEffect(() => {
@@ -208,15 +223,26 @@ export default function App() {
     }
   };
 
-  // Page transition animation settings
+  const handleExecuteCmdAction = async (actionId) => {
+    if (actionId === 'toggle_dark_mode') {
+      setIsDark(!isDark);
+    } else if (actionId === 'open_auth') {
+      setIsAuthOpen(true);
+    } else if (actionId === 'sign_out') {
+      await supabase.auth.signOut();
+      handleNavigate('home');
+    }
+  };
+
+  // Page transition animation settings — tuned specs
   const pageVariants = {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -8 }
+    exit: { opacity: 0, y: -4 }
   };
 
   const pageTransition = {
-    duration: 0.35,
+    duration: 0.24,
     ease: [0.4, 0, 0.2, 1]
   };
 
@@ -233,6 +259,7 @@ export default function App() {
           onToggleDarkMode={() => setIsDark(!isDark)}
           user={user}
           onOpenAuth={() => setIsAuthOpen(true)}
+          onOpenCommandPalette={() => setIsCmdPaletteOpen(true)}
         />
 
         <main className="main-content" id="main-content">
@@ -259,6 +286,14 @@ export default function App() {
           isOpen={isAuthOpen}
           onClose={() => setIsAuthOpen(false)}
           onLoginSuccess={(u) => setUser(u)}
+        />
+
+        <CommandPalette
+          isOpen={isCmdPaletteOpen}
+          onClose={() => setIsCmdPaletteOpen(false)}
+          onNavigate={handleNavigate}
+          onExecuteAction={handleExecuteCmdAction}
+          isLoggedIn={!!user}
         />
 
         <ScrollTop />

@@ -4,6 +4,7 @@ import { fetchSubjectsFromSupabase } from '../../services/papersService';
 import { generateQuizWithGemini } from '../../services/geminiService';
 import { DEFAULT_SUBJECTS } from '../../constants/subjects';
 import { fireConfetti } from '../../utils/confetti';
+import PageHeader from '../../components/PageHeader/PageHeader';
 import './Quiz.css';
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
@@ -128,9 +129,6 @@ export default function Quiz() {
       const newStreak = streak + 1;
       setScore(newScore);
       setStreak(newStreak);
-      if (newStreak >= 3 && prevStreakRef.current < 3) {
-        fireConfetti({ count: 40, spread: 50 });
-      }
       prevStreakRef.current = newStreak;
     } else {
       setStreak(0);
@@ -142,7 +140,7 @@ export default function Quiz() {
     if (currentIdx + 1 >= questions.length) {
       const finalScore = score;
       const pct = Math.round((finalScore / questions.length) * 100);
-      if (pct >= 50) { fireConfetti({ count: 100, spread: 80, originY: 0.5 }); }
+      if (pct >= 70) { fireConfetti({ count: 100, spread: 80, originY: 0.5 }); }
       setStep('finished');
     } else {
       setCurrentIdx(currentIdx + 1);
@@ -165,6 +163,37 @@ export default function Quiz() {
     setError('');
   };
 
+  // Keyboard navigation during active quiz (1-4 select, Enter submits/advances)
+  useEffect(() => {
+    if (step !== 'playing' || questions.length === 0) return;
+
+    const handleKeyDown = (e) => {
+      const activeTag = document.activeElement ? document.activeElement.tagName : '';
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag) || document.activeElement?.isContentEditable) return;
+
+      const key = e.key;
+      if (['1', '2', '3', '4'].includes(key)) {
+        const optionIdx = parseInt(key, 10) - 1;
+        const currentQ = questions[currentIdx];
+        if (currentQ && currentQ.options && currentQ.options[optionIdx] !== undefined && !revealed) {
+          setSelectedOption(optionIdx);
+        }
+      } else if (key === 'Enter') {
+        e.preventDefault();
+        if (!revealed) {
+          if (selectedOption !== null) {
+            handleSubmitAnswer();
+          }
+        } else {
+          handleNextQuestion();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [step, questions, currentIdx, selectedOption, revealed]);
+
   // SELECT SUBJECT
   if (step === 'select') {
     return (
@@ -174,18 +203,24 @@ export default function Quiz() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <div className="quiz-select-header">
-          <h1>Practice Quiz</h1>
-          <p>Choose a subject to generate an AI-powered practice quiz</p>
-        </div>
+        <PageHeader
+          badge="Practice"
+          title="Practice Quiz"
+          subtitle="Choose a subject to generate an AI-powered practice quiz"
+        />
 
         <div className="quiz-search-wrapper">
+          <label htmlFor="quiz-subject-search" className="quiz-search-label">
+            Search subjects
+          </label>
           <input
+            id="quiz-subject-search"
             type="text"
             className="quiz-search-input"
-            placeholder="🔍 Search subjects..."
+            placeholder="Search by name or code (e.g. CSC211)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search subjects"
           />
         </div>
 
@@ -315,7 +350,7 @@ export default function Quiz() {
   // LOADING
   if (step === 'loading') {
     return (
-      <div className="quiz-container">
+      <div className="quiz-container" aria-busy="true" aria-label="Generating quiz questions">
         <motion.div
           className="quiz-loading-card"
           initial={{ opacity: 0, scale: 0.95 }}
@@ -361,28 +396,25 @@ export default function Quiz() {
         transition={{ duration: 0.3 }}
       >
         <div className="quiz-header">
-          <div>
-            <h1>{selectedSubject?.name}</h1>
-            {streak >= 2 && (
-              <motion.span
-                className="quiz-streak-badge"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 300 }}
-              >
-                🔥 {streak} Answer Streak!
-              </motion.span>
-            )}
-          </div>
-          <span className="quiz-counter">Question {currentIdx + 1} of {questions.length}</span>
+          <h1>{selectedSubject?.name}</h1>
+        </div>
+
+        <div className="quiz-progress-meta">
+          <span className="quiz-counter-text">Question {currentIdx + 1} of {questions.length}</span>
+          {streak >= 3 && (
+            <span className="quiz-streak-indicator">
+              <span className="material-symbols-outlined" style={{ fontSize: '1rem', verticalAlign: 'middle' }}>
+                local_fire_department
+              </span>
+              {streak} streak
+            </span>
+          )}
         </div>
 
         <div className="quiz-progress-bar">
-          <motion.div
+          <div
             className="quiz-progress-fill"
-            initial={{ width: `${(currentIdx / questions.length) * 100}%` }}
-            animate={{ width: `${progress}%` }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            style={{ width: `${progress}%` }}
           />
         </div>
 
@@ -411,6 +443,10 @@ export default function Quiz() {
                 disabled={revealed}
               />
             ))}
+          </div>
+
+          <div className="quiz-keyboard-tip">
+            Tip: press 1–4 to answer, Enter to continue
           </div>
 
           {q.hint && !revealed && (

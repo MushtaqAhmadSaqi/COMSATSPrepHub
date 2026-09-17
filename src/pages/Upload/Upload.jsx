@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PageHeader from '../../components/PageHeader/PageHeader';
 import { fireConfetti } from '../../utils/confetti';
 import { useToast } from '../../utils/toast';
 import './Upload.css';
@@ -75,14 +76,13 @@ export default function Upload() {
 
   return (
     <div className="upload-container">
-      <div className="upload-card">
-        <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text)', letterSpacing: '-0.04em', marginBottom: '0.5rem' }}>
-          Upload Past Paper
-        </h1>
-        <p style={{ color: 'var(--text-subtle)', marginBottom: '2rem', fontSize: '0.9375rem' }}>
-          Contribute to your campus community by submitting exam papers & solution keys.
-        </p>
+      <PageHeader
+        badge="Contribute"
+        title="Upload Past Paper"
+        subtitle="Contribute to your campus community by submitting exam papers & solution keys."
+      />
 
+      <div className="upload-card">
         {submitted ? (
           <div className="upload-success">
             <div className="upload-success-icon">
@@ -156,8 +156,9 @@ export default function Upload() {
             )}
 
             <div className="ai-field">
-              <label className="ai-label">Subject Code / Name</label>
+              <label className="ai-label" htmlFor="upload-subject-code">Subject Code / Name</label>
               <input
+                id="upload-subject-code"
                 type="text"
                 className={`ai-input${fieldErrors.subjectCode ? ' auth-input--error' : ''}`}
                 placeholder="e.g. CSC211 — Data Structures & Algorithms"
@@ -170,8 +171,9 @@ export default function Upload() {
             </div>
 
             <div className="ai-field">
-              <label className="ai-label">Exam Type & Year</label>
+              <label className="ai-label" htmlFor="upload-exam-type">Exam Type & Year</label>
               <input
+                id="upload-exam-type"
                 type="text"
                 className={`ai-input${fieldErrors.examType ? ' auth-input--error' : ''}`}
                 placeholder="e.g. Terminal Examination — Fall 2023"
@@ -184,8 +186,9 @@ export default function Upload() {
             </div>
 
             <div className="ai-field">
-              <label className="ai-label">Your Name (Optional)</label>
+              <label className="ai-label" htmlFor="upload-uploader-name">Your Name (Optional)</label>
               <input
+                id="upload-uploader-name"
                 type="text"
                 className="ai-input"
                 placeholder="Your name for contributor credit"

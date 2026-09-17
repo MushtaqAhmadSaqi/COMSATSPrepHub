@@ -1,4 +1,5 @@
 import React from 'react';
+import PageHeader from '../../components/PageHeader/PageHeader';
 import './About.css';
 
 const CONTRIBUTORS = [
@@ -15,24 +16,17 @@ const FOUNDER_SIZE = { width: 120, height: 120 };
 export default function About() {
   return (
     <div className="about-container">
-      {/* Header */}
-      <div className="about-header">
-        <div className="about-badge">
-          <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>groups</span>
-          Our Team
-        </div>
-        <h1 className="about-title">Meet the Team</h1>
-        <p className="about-subtitle">
-          Built by students, for students. We're passionate about helping COMSATS
-          students excel academically through better tools.
-        </p>
-      </div>
+      <PageHeader
+        badge="Our Team"
+        title="Meet the Team"
+        subtitle="Built by students, for students. We're passionate about helping COMSATS students excel academically through better tools."
+      />
 
       {/* Founder Card */}
       <div className="founder-card">
         <img
           src="/My-image.webp"
-          alt="Mushtaq Ahmad Saqi"
+          alt="Mushtaq Ahmad Saqi — Founder & Lead Developer"
           className="founder-avatar"
           width={FOUNDER_SIZE.width}
           height={FOUNDER_SIZE.height}
@@ -67,7 +61,7 @@ export default function About() {
           >
             <img
               src={c.image}
-              alt={c.name}
+              alt={`${c.name} — ${c.role}`}
               className="contributor-avatar"
               width={PHOTO_SIZE.width}
               height={PHOTO_SIZE.height}

@@ -83,7 +83,7 @@
   font-size: 0.875rem;
   line-height: 1.7;
   max-width: 22rem;
-  color: #64748b;
+  color: #94a3b8;
 }
 
 /* ─── Column Headings ───────────────────────────────────────────── */
@@ -108,7 +108,7 @@
 .footer-links a {
   background: transparent;
   border: none;
-  color: #64748b;
+  color: #94a3b8;
   font-size: 0.875rem;
   font-family: inherit;
   text-align: left;
@@ -136,7 +136,7 @@
   align-items: center;
   justify-content: space-between;
   font-size: 0.8125rem;
-  color: #475569;
+  color: #94a3b8;
   text-align: center;
 }
 

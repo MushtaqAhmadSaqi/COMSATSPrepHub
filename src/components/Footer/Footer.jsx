@@ -38,7 +38,7 @@ export default function Footer({ onNavigate = () => {} }) {
   }, []);
 
   return (
-    <footer className="app-footer">
+    <footer className="app-footer" role="contentinfo">
       {/* Animated border line */}
       <div className="footer-border-line" ref={borderRef} />
 
@@ -60,7 +60,7 @@ export default function Footer({ onNavigate = () => {} }) {
               <a
                 href="mailto:mushtaqahmedsaqi1234@gmail.com"
                 className="footer-social-btn"
-                aria-label="Email support"
+                aria-label="Send email support request"
                 title="Email Support"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>mail</span>
@@ -70,7 +70,7 @@ export default function Footer({ onNavigate = () => {} }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="footer-social-btn"
-                aria-label="GitHub profile"
+                aria-label="Visit Mushtaq Ahmad Saqi GitHub profile"
                 title="GitHub"
               >
                 {/* Simple GitHub SVG icon */}
@@ -82,7 +82,7 @@ export default function Footer({ onNavigate = () => {} }) {
           </RevealCol>
 
           {/* Quick Links */}
-          <RevealCol delay={80}>
+          <RevealCol delay={60}>
             <h4 className="footer-heading">Quick Links</h4>
             <ul className="footer-links">
               <li><button type="button" onClick={() => onNavigate('home')}>Home</button></li>
@@ -93,7 +93,7 @@ export default function Footer({ onNavigate = () => {} }) {
           </RevealCol>
 
           {/* Tools */}
-          <RevealCol delay={160}>
+          <RevealCol delay={120}>
             <h4 className="footer-heading">Tools</h4>
             <ul className="footer-links">
               <li><button type="button" onClick={() => onNavigate('gpa')}>GPA Calculator</button></li>
@@ -104,7 +104,7 @@ export default function Footer({ onNavigate = () => {} }) {
           </RevealCol>
 
           {/* Legal */}
-          <RevealCol delay={240}>
+          <RevealCol delay={180}>
             <h4 className="footer-heading">Legal & Info</h4>
             <ul className="footer-links">
               <li><button type="button" onClick={() => onNavigate('terms')}>Terms of Service</button></li>
@@ -112,7 +112,7 @@ export default function Footer({ onNavigate = () => {} }) {
             </ul>
 
             {/* Back to top */}
-            <button type="button" className="footer-back-top" onClick={scrollToTop}>
+            <button type="button" className="footer-back-top" onClick={scrollToTop} aria-label="Scroll to top of page">
               <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_upward</span>
               Back to top
             </button>

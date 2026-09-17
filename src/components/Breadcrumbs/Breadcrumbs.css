@@ -1,0 +1,55 @@
+/* ─────────────────────────────────────────────────────────────────
+   BREADCRUMBS COMPONENT
+───────────────────────────────────────────────────────────────── */
+.breadcrumbs-container {
+  margin-bottom: var(--space-6);
+}
+
+.breadcrumbs-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-subtle);
+}
+
+.breadcrumbs-item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.breadcrumbs-separator {
+  font-size: 1rem;
+  color: var(--border-strong);
+  margin: 0 var(--space-1);
+  user-select: none;
+}
+
+.breadcrumbs-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-subtle);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.breadcrumbs-link:hover {
+  color: var(--text);
+  background: transparent;
+  transform: none;
+  text-decoration: none;
+}
+
+.breadcrumbs-current {
+  color: var(--text);
+  font-weight: 700;
+}

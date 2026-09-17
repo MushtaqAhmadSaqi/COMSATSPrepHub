@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fireConfetti } from '../../utils/confetti';
+import { useCounter } from '../../utils/useCounter';
+import PageHeader from '../../components/PageHeader/PageHeader';
 import './GpaCalculator.css';
 
 const GRADE_OPTIONS = [
@@ -111,6 +113,54 @@ function AnimatedCard({ children, className = '', delay = 0 }) {
     >
       {children}
     </motion.div>
+  );
+}
+
+/* ── SVG GPA Result Dial ── */
+function GpaDial({ scoreNum }) {
+  const CIRCUMFERENCE = 2 * Math.PI * 52; // ~326.726
+  const targetOffset = CIRCUMFERENCE * (1 - Math.min(4.0, Math.max(0, scoreNum)) / 4.0);
+  const { ref, display } = useCounter(scoreNum, { duration: 800, decimals: 2 });
+  const isReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  return (
+    <div className="gpa-dial-wrapper" ref={ref}>
+      <svg width="160" height="160" viewBox="0 0 120 120" className="gpa-dial-svg">
+        <defs>
+          <linearGradient id="gpaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#0ea5e9" />
+            <stop offset="100%" stopColor="#2563eb" />
+          </linearGradient>
+        </defs>
+        <circle
+          cx="60"
+          cy="60"
+          r="52"
+          stroke="var(--surface-3)"
+          strokeWidth="10"
+          fill="none"
+        />
+        <circle
+          cx="60"
+          cy="60"
+          r="52"
+          stroke="url(#gpaGrad)"
+          strokeWidth="10"
+          strokeLinecap="round"
+          fill="none"
+          strokeDasharray={CIRCUMFERENCE}
+          strokeDashoffset={targetOffset}
+          transform="rotate(-90 60 60)"
+          style={{
+            transition: isReducedMotion ? 'none' : 'stroke-dashoffset 800ms var(--ease-spring)'
+          }}
+        />
+      </svg>
+      <div className="gpa-dial-center">
+        <div className="gpa-dial-number text-gradient">{display}</div>
+        <div className="gpa-dial-denom">of 4.00</div>
+      </div>
+    </div>
   );
 }
 
@@ -251,31 +301,11 @@ export default function GpaCalculator() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Hero Section */}
-      <AnimatedCard delay={0.1}>
-        <div className="gpa-hero">
-          <div className="gpa-hero-badge">
-            <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>school</span>
-            COMSATS Grading Scale
-          </div>
-          <motion.h1
-            className="gpa-hero-title"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-          >
-            GPA Calculator
-          </motion.h1>
-          <motion.p
-            className="gpa-hero-subtitle"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-          >
-            Instantly compute your Semester GPA (SGPA) and Cumulative GPA (CGPA) using the official COMSATS grading policy.
-          </motion.p>
-        </div>
-      </AnimatedCard>
+      <PageHeader
+        badge="Tools"
+        title="GPA Calculator"
+        subtitle="Instantly compute your Semester GPA (SGPA) and Cumulative GPA (CGPA) using the official COMSATS grading policy."
+      />
 
       {/* Two-Column Layout */}
       <div className="gpa-layout-grid">
@@ -294,8 +324,9 @@ export default function GpaCalculator() {
 
             {/* Previous CGPA Section */}
             <div className="gpa-form-group">
-              <label className="gpa-label">Previous CGPA (Optional)</label>
+              <label className="gpa-label" htmlFor="gpa-prev-cgpa">Previous CGPA (Optional)</label>
               <AnimatedInput
+                id="gpa-prev-cgpa"
                 type="number"
                 step="0.01"
                 min="0"
@@ -308,8 +339,9 @@ export default function GpaCalculator() {
             </div>
 
             <div className="gpa-form-group">
-              <label className="gpa-label">Previous Total Credits (Optional)</label>
+              <label className="gpa-label" htmlFor="gpa-prev-credits">Previous Total Credits (Optional)</label>
               <AnimatedInput
+                id="gpa-prev-credits"
                 type="number"
                 min="0"
                 className="gpa-input"
@@ -368,8 +400,8 @@ export default function GpaCalculator() {
 
             {/* SGPA Result */}
             <div className="gpa-overall-panel">
-              <div className="gpa-overall-label">Semester GPA (SGPA)</div>
-              <AnimatedNumber value={sgpa} className="sgpa-number-large" />
+              <div className="gpa-overall-label" style={{ marginBottom: '1rem' }}>Semester GPA (SGPA)</div>
+              <GpaDial scoreNum={sgpaNum} />
               <div style={{ fontSize: '0.875rem', opacity: 0.9, marginBottom: '0.75rem' }}>
                 {totalCredits} Credit Hours
               </div>

@@ -22,7 +22,7 @@ export default function ScrollTop() {
       type="button"
       className={`scroll-top-btn${visible ? ' scroll-top-btn--visible' : ''}`}
       onClick={scrollToTop}
-      aria-label="Scroll to top"
+      aria-label="Scroll to top of page"
     >
       <span className="material-symbols-outlined">arrow_upward</span>
     </button>

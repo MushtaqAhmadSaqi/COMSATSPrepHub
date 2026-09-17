@@ -3,7 +3,13 @@
  * Zero external dependencies, 60fps smooth physics particles.
  */
 export function fireConfetti(options = {}) {
-  const count = options.count || 80;
+  // Respect prefers-reduced-motion
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return;
+  }
+
+  const requestedCount = options.count || 80;
+  const count = Math.min(requestedCount, 120);
   const spread = options.spread || 70;
   const originY = options.originY || 0.6;
 
@@ -22,7 +28,8 @@ export function fireConfetti(options = {}) {
   canvas.width = window.innerWidth * dpr;
   canvas.height = window.innerHeight * dpr;
 
-  const colors = ['#0ea5e9', '#2563eb', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#38bdf8'];
+  // Restricted palette adhering to design tokens
+  const colors = ['#0ea5e9', '#2563eb', '#0d9488', '#ffffff'];
 
   const particles = Array.from({ length: count }, () => {
     const angle = (Math.random() * spread - spread / 2 - 90) * (Math.PI / 180);
@@ -43,7 +50,7 @@ export function fireConfetti(options = {}) {
   });
 
   let startTime = null;
-  const duration = 2500; // ms
+  const duration = 1800; // 1.8s max duration
 
   function animate(timestamp) {
     if (!startTime) startTime = timestamp;
@@ -82,3 +89,4 @@ export function fireConfetti(options = {}) {
 
   requestAnimationFrame(animate);
 }
+
