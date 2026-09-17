@@ -1,43 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { useScrollRevealList } from '../../utils/useScrollReveal';
 import { useCounter } from '../../utils/useCounter';
-import { usePrefersReducedMotion } from '../../utils/usePrefersReducedMotion';
 import './Home.css';
-
-/* ── Typewriter for the gradient highlight ── */
-function TypewriterText({ text, delay = 600 }) {
-  const prefersReduced = usePrefersReducedMotion();
-  const [displayed, setDisplayed] = useState('');
-  const [done, setDone] = useState(false);
-  const idxRef = useRef(0);
-
-  useEffect(() => {
-    if (prefersReduced) {
-      setDisplayed(text);
-      setDone(true);
-      return;
-    }
-    const timeout = setTimeout(() => {
-      const interval = setInterval(() => {
-        idxRef.current += 1;
-        setDisplayed(text.slice(0, idxRef.current));
-        if (idxRef.current >= text.length) {
-          clearInterval(interval);
-          setDone(true);
-        }
-      }, 42);
-      return () => clearInterval(interval);
-    }, delay);
-    return () => clearTimeout(timeout);
-  }, [text, delay, prefersReduced]);
-
-  return (
-    <span className={`home-title-highlight${!done ? ' typing-cursor' : ''}`}>
-      {displayed}
-    </span>
-  );
-}
 
 /* ── Animated Stat Item ── */
 function StatItem({ num, label, suffix }) {
@@ -154,11 +119,6 @@ export default function Home({ onNavigate = () => {} }) {
   /* Scroll-reveal for feature cards */
   const { containerRef: featuresRef, visibleSet } = useScrollRevealList(features.length, { threshold: 0.12 });
 
-  // Parallax effect for hero section
-  const { scrollY } = useScroll();
-  const yParallax = useTransform(scrollY, [0, 500], [0, -100]);
-  const opacityParallax = useTransform(scrollY, [0, 300], [1, 0]);
-
   return (
     <div className="home-page-wrapper">
       <section className="home-hero-section">
@@ -169,15 +129,13 @@ export default function Home({ onNavigate = () => {} }) {
           ))}
         </div>
 
-        {/* Parallax Background Blobs */}
-        <motion.div
+        {/* Background Blobs */}
+        <div
           className="hero-blob hero-blob-1"
-          style={{ y: yParallax, opacity: opacityParallax }}
           aria-hidden="true"
         />
-        <motion.div
+        <div
           className="hero-blob hero-blob-2"
-          style={{ y: yParallax }}
           aria-hidden="true"
         />
 
@@ -194,7 +152,7 @@ export default function Home({ onNavigate = () => {} }) {
           </div>
         </motion.div>
 
-        {/* Headline — typewriter on highlight */}
+        {/* Headline */}
         <motion.h1
           className="home-title"
           initial={{ opacity: 0, y: 20 }}
@@ -202,7 +160,7 @@ export default function Home({ onNavigate = () => {} }) {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           Ace Your Exams at <br />
-          <TypewriterText text="COMSATS University" delay={500} />
+          <span className="home-title-highlight">COMSATS University</span>
         </motion.h1>
 
         {/* Subtitle */}

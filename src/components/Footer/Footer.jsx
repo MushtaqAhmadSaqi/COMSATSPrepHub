@@ -1,46 +1,26 @@
-import React, { useRef, useEffect } from 'react';
-import { useScrollReveal } from '../../utils/useScrollReveal';
+import React from 'react';
 import './Footer.css';
 
-/* Scroll-reveal wrapper for each footer column */
-function RevealCol({ children, delay = 0 }) {
-  const { ref, isVisible } = useScrollReveal({ threshold: 0.1 });
+/* Footer column wrapper */
+function RevealCol({ children }) {
   return (
-    <div
-      ref={ref}
-      className={`footer-col reveal${isVisible ? ' reveal-visible' : ''}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
+    <div className="footer-col">
       {children}
     </div>
   );
 }
 
 export default function Footer({ onNavigate = () => {} }) {
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-  const borderRef = useRef(null);
-
-  /* Expand the gradient border line when footer enters viewport */
-  useEffect(() => {
-    const el = borderRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.classList.add('footer-border-visible');
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.05 }
-    );
-    observer.observe(el.closest('footer'));
-    return () => observer.disconnect();
-  }, []);
+  const scrollToTop = () => {
+    const prefersReducedMotion = typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'instant' : 'smooth' });
+  };
 
   return (
     <footer className="app-footer" role="contentinfo">
-      {/* Animated border line */}
-      <div className="footer-border-line" ref={borderRef} />
+      {/* Border line */}
+      <div className="footer-border-line" />
 
       <div className="footer-container">
         <div className="footer-grid">

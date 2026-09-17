@@ -90,8 +90,9 @@ export default function Navbar({
                 onClick={onToggleDarkMode}
                 className="icon-circle-btn"
                 aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                aria-pressed={isDark}
               >
-                <span className="material-symbols-outlined">
+                <span className="material-symbols-outlined" aria-hidden="true">
                   {isDark ? 'light_mode' : 'dark_mode'}
                 </span>
               </button>
@@ -124,7 +125,7 @@ export default function Navbar({
       </header>
 
       {/* Mobile Navigation Bar — shows 4 items (excluding GPA Calc) */}
-      <nav className="mobile-bottom-nav" aria-label="Mobile">
+      <nav className="mobile-bottom-nav" aria-label="Main navigation">
         <div className="mobile-grid">
           {navItems
             .filter((item) => item.id !== 'gpa')

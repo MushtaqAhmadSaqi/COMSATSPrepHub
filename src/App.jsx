@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
 import AuthModal from './components/AuthModal/AuthModal';
@@ -234,15 +234,26 @@ export default function App() {
     }
   };
 
-  // Page transition animation settings — tuned specs
+  // Page transition animation settings — tuned specs with explicit reduced-motion handling
+  const reduceMotion = useReducedMotion();
+
+  const [routeDuration] = useState(() => {
+    if (typeof window === 'undefined') return 0.24;
+    const value = getComputedStyle(document.documentElement)
+      .getPropertyValue('--dur-base')
+      .trim();
+    if (!value) return 0.24;
+    return parseFloat(value) / (value.endsWith('ms') ? 1000 : 1);
+  });
+
   const pageVariants = {
-    initial: { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -4 }
+    initial: { opacity: reduceMotion ? 1 : 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: reduceMotion ? 1 : 0 }
   };
 
   const pageTransition = {
-    duration: 0.24,
+    duration: reduceMotion ? 0 : routeDuration,
     ease: [0.4, 0, 0.2, 1]
   };
 

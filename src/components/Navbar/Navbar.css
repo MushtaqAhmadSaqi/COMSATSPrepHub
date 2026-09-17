@@ -208,7 +208,7 @@ html.dark .nav-link-btn.active {
   background: var(--surface-3);
   color: var(--text-muted);
   border: 1px solid var(--border);
-  transition: all 0.2s var(--ease-spring);
+  transition: color var(--dur-fast) var(--ease);
 }
 
 @media (min-width: 640px) {
@@ -219,10 +219,11 @@ html.dark .nav-link-btn.active {
 }
 
 .icon-circle-btn:hover {
-  background: var(--brand-soft-2);
+  color: var(--text);
+}
+
+.icon-circle-btn:active {
   color: var(--brand);
-  border-color: rgba(14, 165, 233, 0.3);
-  transform: rotate(15deg) scale(1.08);
 }
 
 html.dark .icon-circle-btn {

@@ -66,6 +66,12 @@
 .particle-3 { width: 8px;  height: 8px;  top: 70%;  left: 15%; animation-duration: 9s;  animation-delay: -4s; }
 .particle-4 { width: 5px;  height: 5px;  top: 55%;  left: 75%; animation-duration: 13s; animation-delay: -1s; }
 
+.home-badge-pill,
+.home-title-highlight,
+.home-particles .particle {
+  animation: none;
+}
+
 /* ─── Badge Pill ────────────────────────────────────────────────── */
 .home-badge-wrapper {
   display: inline-block;

@@ -8,21 +8,15 @@
   overflow: hidden;
 }
 
-/* Animated expanding border line at top */
+/* Border line at top */
 .footer-border-line {
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
   height: 1px;
-  width: 0;
-  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.4), rgba(37, 99, 235, 0.4), transparent);
-  transition: width 1.2s var(--ease) 0.2s;
-}
-
-.app-footer:hover .footer-border-line,
-.footer-border-line.footer-border-visible {
   width: 100%;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.4), rgba(37, 99, 235, 0.4), transparent);
+  transition: none;
 }
 
 /* Decorative glow */
@@ -51,9 +45,10 @@
   margin-bottom: 3rem;
 }
 
-/* Each column is a reveal-enabled div */
+/* Each column is a div */
 .footer-col {
-  /* reveal starts invisible — from index.css .reveal class */
+  display: flex;
+  flex-direction: column;
 }
 
 @media (min-width: 768px) {
@@ -160,7 +155,7 @@
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.04);
-  color: #64748b;
+  color: #94a3b8;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -175,7 +170,7 @@
   transform: translateY(-2px);
 }
 
-/* ─── Back to Top (─────────────────────────────────────────── */
+/* ─── Back to Top ─────────────────────────────────────────── */
 .footer-back-top {
   display: inline-flex;
   align-items: center;
@@ -185,7 +180,7 @@
   border-radius: 9999px;
   border: 1px solid rgba(56, 189, 248, 0.2);
   background: rgba(56, 189, 248, 0.06);
-  color: #475569;
+  color: #94a3b8;
   font-size: 0.8rem;
   font-family: inherit;
   font-weight: 600;

@@ -10,7 +10,6 @@ export default function PaperView({
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedAnswers, setExpandedAnswers] = useState({});
-  const [showAllAnswers, setShowAllAnswers] = useState(false);
   const [readProgress, setReadProgress] = useState(0);
 
   useEffect(() => {
@@ -59,9 +58,11 @@ export default function PaperView({
     setExpandedAnswers((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const allExpanded =
+    questions.length > 0 && questions.every((q) => Boolean(expandedAnswers[q.id]));
+
   const toggleAll = () => {
-    const nextState = !showAllAnswers;
-    setShowAllAnswers(nextState);
+    const nextState = !allExpanded;
     const newExpanded = {};
     questions.forEach((q) => {
       newExpanded[q.id] = nextState;
@@ -97,11 +98,16 @@ export default function PaperView({
         <Breadcrumbs items={breadcrumbItems} />
 
         <div className="paperview-action-group">
-          <button type="button" className="paperview-btn-secondary" onClick={toggleAll}>
+          <button
+            type="button"
+            className="paperview-btn-secondary"
+            onClick={toggleAll}
+            disabled={loading || questions.length === 0}
+          >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-              {showAllAnswers ? 'visibility_off' : 'visibility'}
+              {allExpanded ? 'visibility_off' : 'visibility'}
             </span>
-            {showAllAnswers ? 'Hide All Solutions' : 'Show All Solutions'}
+            {allExpanded ? 'Hide All Solutions' : 'Show All Solutions'}
           </button>
           <button type="button" className="btn-download" onClick={handleDownload}>
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>download</span>
@@ -140,10 +146,10 @@ export default function PaperView({
         <div className="paperview-questions-section">
           <div className="paperview-questions-header">
             <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text)' }}>
-              Examination Questions & Solutions
+              AI practice questions & solutions
             </h3>
-            <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--brand)', background: 'var(--brand-soft)', padding: '0.2rem 0.6rem', borderRadius: '9999px', whiteSpace: 'nowrap' }}>
-              Verified Solution Key
+            <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--brand)', background: 'var(--brand-soft)', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-pill)', whiteSpace: 'nowrap' }}>
+              AI-generated solutions
             </span>
           </div>
 
@@ -152,7 +158,7 @@ export default function PaperView({
               <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', animation: 'spin 1s linear infinite' }}>
                 progress_activity
               </span>
-              <p style={{ marginTop: '0.75rem', fontWeight: 600 }}>Generating questions & verified solutions for {displaySubject}...</p>
+              <p style={{ marginTop: '0.75rem', fontWeight: 600 }}>Generating practice questions and suggested solutions…</p>
             </div>
           ) : questions.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-subtle)' }}>
@@ -160,7 +166,7 @@ export default function PaperView({
             </div>
           ) : (
             questions.map((q) => {
-              const isExpanded = showAllAnswers || expandedAnswers[q.id];
+              const isExpanded = Boolean(expandedAnswers[q.id]);
               return (
                 <div key={q.id} className="paperview-question-card">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
@@ -176,11 +182,12 @@ export default function PaperView({
                     type="button"
                     className="paperview-toggle-sol-btn"
                     onClick={() => toggleAnswer(q.id)}
+                    aria-expanded={isExpanded}
                   >
                     <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
                       {isExpanded ? 'expand_less' : 'key'}
                     </span>
-                    {isExpanded ? 'Hide Solution' : 'View Verified Solution Key'}
+                    {isExpanded ? 'Hide suggested solution' : 'View suggested solution'}
                   </button>
 
                   {/* Solution Content */}
@@ -188,7 +195,7 @@ export default function PaperView({
                     <div className="paperview-answer-box">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: '#10b981', fontWeight: 800, fontSize: '0.8125rem', marginBottom: '0.5rem' }}>
                         <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check_circle</span>
-                        Model Answer & Marking Scheme:
+                        Suggested answer:
                       </div>
                       <pre style={{ fontFamily: 'inherit', whiteSpace: 'pre-wrap', margin: 0, fontSize: '0.9375rem', lineHeight: '1.65' }}>
                         {q.answerText}

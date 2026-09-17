@@ -710,8 +710,8 @@ html.dark .gpa-btn-clear:hover {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-  transition: all 0.22s ease;
+  box-shadow: var(--shadow-1);
+  transition: border-color var(--dur-fast) var(--ease);
   overflow: hidden;
 }
 
@@ -728,12 +728,6 @@ html.dark .gpa-subject-card {
   left: 0;
   width: 5px;
   background: linear-gradient(180deg, #0f766e, #10b981);
-}
-
-.gpa-subject-card:hover {
-  transform: translateY(-2px);
-  border-color: #14b8a6;
-  box-shadow: 0 12px 25px rgba(15, 118, 110, 0.1);
 }
 
 .gpa-subject-card.is-editing {

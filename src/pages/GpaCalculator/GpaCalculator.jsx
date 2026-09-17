@@ -35,9 +35,12 @@ function AnimatedGradeBadge({ className, children }) {
 }
 
 /* ── Animated Input with Focus Ring ── */
-function AnimatedInput({ type, placeholder, value, onChange, className = '', min, max, step }) {
+function AnimatedInput({ id, 'aria-label': ariaLabel, 'aria-describedby': ariaDescribedBy, type, placeholder, value, onChange, className = '', min, max, step, style }) {
   return (
     <motion.input
+      id={id}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
       type={type}
       placeholder={placeholder}
       value={value}
@@ -46,25 +49,27 @@ function AnimatedInput({ type, placeholder, value, onChange, className = '', min
       min={min}
       max={max}
       step={step}
+      style={style}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      whileHover={{ scale: 1.01 }}
     />
   );
 }
 
 /* ── Animated Select Dropdown ── */
-function AnimatedSelect({ value, onChange, children, className = '' }) {
+function AnimatedSelect({ id, 'aria-label': ariaLabel, 'aria-describedby': ariaDescribedBy, value, onChange, children, className = '' }) {
   return (
     <motion.select
+      id={id}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
       value={value}
       onChange={onChange}
       className={`gpa-input animated ${className}`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      whileHover={{ scale: 1.01 }}
     >
       {children}
     </motion.select>
@@ -164,8 +169,9 @@ function GpaDial({ scoreNum }) {
   );
 }
 
-/* ── Subject Card with Hover Lift ── */
+/* ── Subject Card ── */
 function SubjectCard({ course, idx, updateCourse, removeCourse, gradeInfo }) {
+  const courseNum = idx + 1;
   return (
     <motion.div
       key={course.id}
@@ -173,13 +179,12 @@ function SubjectCard({ course, idx, updateCourse, removeCourse, gradeInfo }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: idx * 0.08 }}
-      whileHover={{ y: -4 }}
-      whileTap={{ scale: 0.98 }}
     >
       <div style={{ flex: 1 }}>
         <AnimatedInput
           type="text"
           placeholder="Subject Name"
+          aria-label={`Course ${courseNum} name`}
           value={course.name}
           onChange={(e) => updateCourse(course.id, 'name', e.target.value)}
           className="subject-name-input"
@@ -193,6 +198,7 @@ function SubjectCard({ course, idx, updateCourse, removeCourse, gradeInfo }) {
               min="1"
               max="6"
               placeholder="Credits"
+              aria-label={`Course ${courseNum} credits`}
               value={course.credits}
               onChange={(e) => updateCourse(course.id, 'credits', Number(e.target.value))}
               className="credits-input"
@@ -201,6 +207,7 @@ function SubjectCard({ course, idx, updateCourse, removeCourse, gradeInfo }) {
             credit hrs
           </div>
           <AnimatedSelect
+            aria-label={`Course ${courseNum} grade`}
             value={course.gradePoint}
             onChange={(e) => updateCourse(course.id, 'gradePoint', Number(e.target.value))}
             className="grade-select"
@@ -217,19 +224,15 @@ function SubjectCard({ course, idx, updateCourse, removeCourse, gradeInfo }) {
         <AnimatedGradeBadge className={`gpa-grade-badge ${gradeInfo.color}`}>
           {gradeInfo.label}
         </AnimatedGradeBadge>
-        <motion.button
+        <button
           type="button"
           className="gpa-card-action-btn delete"
           onClick={() => removeCourse(course.id)}
-          title="Remove subject"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          aria-label={`Remove course ${courseNum}`}
+          title={`Remove course ${courseNum}`}
         >
           <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
-        </motion.button>
+        </button>
       </div>
     </motion.div>
   );

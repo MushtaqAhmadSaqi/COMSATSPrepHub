@@ -30,8 +30,6 @@ function AnimatedOption({ letter, opt, index, selectedOption, revealed, correct,
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
-      whileHover={!revealed ? { scale: 1.01, x: 2 } : {}}
-      whileTap={{ scale: 0.98 }}
     >
       <span className="quiz-option-letter">{letter}</span>
       <span style={{ flex: 1 }}>{opt}</span>
@@ -59,6 +57,7 @@ export default function Quiz() {
   const [step, setStep] = useState('select');
   const [subjects, setSubjects] = useState([]);
   const [subjectsLoading, setSubjectsLoading] = useState(true);
+  const [subjectsError, setSubjectsError] = useState(null);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [difficulty, setDifficulty] = useState('Medium');
@@ -74,14 +73,24 @@ export default function Quiz() {
 
   const prevStreakRef = useRef(0);
 
-  useEffect(() => {
-    async function loadSubjects() {
-      setSubjectsLoading(true);
+  const loadSubjects = async () => {
+    setSubjectsLoading(true);
+    setSubjectsError(null);
+    try {
       const data = await fetchSubjectsFromSupabase();
-      if (data && data.length > 0) { setSubjects(data); }
-      else { setSubjects(DEFAULT_SUBJECTS); }
+      if (data && data.length > 0) {
+        setSubjects(data);
+      } else {
+        setSubjects(DEFAULT_SUBJECTS);
+      }
+    } catch (err) {
+      setSubjectsError('Couldn’t load subjects. Try again.');
+    } finally {
       setSubjectsLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadSubjects();
   }, []);
 
@@ -231,6 +240,23 @@ export default function Quiz() {
             </span>
             <p>Loading subjects...</p>
           </motion.div>
+        ) : subjectsError ? (
+          <div className="quiz-loading-state" role="alert">
+            <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>{subjectsError}</p>
+            <button
+              type="button"
+              className="quiz-back-btn"
+              onClick={loadSubjects}
+              style={{ marginBottom: 0 }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>refresh</span>
+              Try again
+            </button>
+          </div>
+        ) : filteredSubjects.length === 0 ? (
+          <div className="quiz-loading-state">
+            <p style={{ color: 'var(--text-muted)' }}>No subjects match your search.</p>
+          </div>
         ) : (
           <div className="quiz-subjects-grid">
             {filteredSubjects.map((subj, idx) => (
@@ -243,8 +269,6 @@ export default function Quiz() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: idx * 0.05 }}
-                whileHover={{ y: -4, boxShadow: '0 8px 30px rgba(14,165,233,0.15)' }}
-                whileTap={{ scale: 0.98 }}
               >
                 <div className="quiz-subject-code">{subj.code}</div>
                 <div className="quiz-subject-name">{subj.name}</div>

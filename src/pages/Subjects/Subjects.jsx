@@ -23,50 +23,18 @@ function highlightMatch(text, query) {
   );
 }
 
-/* ── Spotlight Card with Glow Effect ── */
-function SpotlightSubjectCard({ subject, idx, searchQuery = '', onSelect }) {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
-  const cardRef = React.useRef(null);
-
-  const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    setMousePosition({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
-  };
-
+/* ── Subject Card ── */
+function SubjectCard({ subject, idx, searchQuery = '', onSelect }) {
   return (
     <motion.button
-      ref={cardRef}
       type="button"
-      className="subject-card spotlight-subject"
+      className="subject-card"
       onClick={() => onSelect(subject)}
       aria-label={`Browse ${subject.name} papers`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: idx * 0.04 }}
-      whileHover={{ y: -3 }}
-      whileTap={{ scale: 0.98 }}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        '--mouse-x': `${mousePosition.x}px`,
-        '--mouse-y': `${mousePosition.y}px`,
-      }}
     >
-      {isHovered && (
-        <motion.div
-          className="spotlight-glow"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-        />
-      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.625rem' }}>
         <div className="subject-code">{subject.code}</div>
         <span
@@ -99,8 +67,6 @@ function DepartmentChip({ dept, isSelected, onClick }) {
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
-      whileHover={{ scale: 1.05, y: -2 }}
-      whileTap={{ scale: 0.95 }}
       style={{
         padding: '0.4rem 1rem',
         borderRadius: '9999px',
@@ -164,7 +130,7 @@ export default function Subjects({ onSelectSubject = () => {} }) {
       transition={{ duration: 0.4 }}
     >
       <PageHeader
-        badge="Library"
+        badge="Live catalog"
         title="Browse All Subjects"
         subtitle="Select a subject to view past examination papers, quizzes, and solutions."
       />
@@ -179,14 +145,13 @@ export default function Subjects({ onSelectSubject = () => {} }) {
             id="subject-search"
             type="text"
             className="subjects-search-bar"
-            placeholder="Search by name, code (e.g. CSC211), or department..."
+            placeholder="Search subjects by name or code"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search subjects"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            whileFocus={{ scale: 1.01 }}
           />
           {hasSearch && (
             <button
@@ -265,7 +230,7 @@ export default function Subjects({ onSelectSubject = () => {} }) {
         >
           <AnimatePresence>
             {filtered.map((subj, idx) => (
-              <SpotlightSubjectCard
+              <SubjectCard
                 key={subj.code}
                 subject={subj}
                 idx={idx}
