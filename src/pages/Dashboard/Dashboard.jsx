@@ -9,7 +9,7 @@ const STATS = [
     sub: '+3 this week',
     subClass: 'dash-sub-positive',
     icon: 'quiz',
-    colors: ['#0ea5e9', '#2563eb']
+    colors: ['var(--brand)', 'var(--accent)']
   },
   {
     label: 'Average Accuracy',
@@ -17,7 +17,7 @@ const STATS = [
     sub: 'Top 15% of cohort',
     subClass: 'dash-sub-positive',
     icon: 'track_changes',
-    colors: ['#10b981', '#0d9488']
+    colors: ['var(--success)', 'var(--accent)']
   },
   {
     label: 'Saved Papers',

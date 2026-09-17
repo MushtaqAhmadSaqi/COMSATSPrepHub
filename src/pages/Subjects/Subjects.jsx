@@ -198,10 +198,7 @@ export default function Subjects({ onSelectSubject = () => {} }) {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          whileFocus={{
-            borderColor: '#2563eb',
-            boxShadow: '0 0 0 3px rgba(14, 165, 233, 0.25)'
-          }}
+          whileFocus={{ scale: 1.01 }}
         />
 
         {/* Category Chips */}

@@ -21,7 +21,7 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #0ea5e9, #2563eb, #0d9488);
+  background: linear-gradient(90deg, var(--brand), var(--accent));
 }
 
 /* ─── Title ─────────────────────────────────────────────────────── */
@@ -40,7 +40,7 @@
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 0.875rem;
-  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  background: var(--brand);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -102,15 +102,14 @@ html.dark .ai-chip.selected {
   width: 100%;
   padding: 1.125rem;
   border-radius: 9999px;
-  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 60%, #0d9488 100%);
-  background-size: 200% auto;
+  background: var(--brand);
   color: #ffffff;
   font-weight: 800;
   font-size: 1rem;
   font-family: var(--font-family);
   border: none;
   cursor: pointer;
-  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
+  box-shadow: var(--shadow-brand);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -33,7 +33,7 @@ export default function AdminGenerateQuizzes() {
         </button>
 
         {status && (
-          <p style={{ marginTop: '1.5rem', fontWeight: 700, color: '#0ea5e9', textAlign: 'center' }}>
+          <p style={{ marginTop: '1.5rem', fontWeight: 700, color: 'var(--brand)', textAlign: 'center' }}>
             {status}
           </p>
         )}

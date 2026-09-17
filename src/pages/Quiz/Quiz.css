@@ -60,9 +60,9 @@ html.dark .quiz-counter {
 .quiz-progress-fill {
   height: 100%;
   border-radius: 9999px;
-  background: linear-gradient(90deg, #0ea5e9, #2563eb);
+  background: var(--brand);
   transition: width 0.5s var(--ease);
-  box-shadow: 0 0 8px rgba(14, 165, 233, 0.5);
+  box-shadow: var(--shadow-brand);
 }
 
 /* ─── Card ──────────────────────────────────────────────────────── */
@@ -175,7 +175,7 @@ html.dark .quiz-counter {
 .btn-quiz-next {
   padding: 0.875rem 1.75rem;
   border-radius: 9999px;
-  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  background: var(--brand);
   color: #ffffff;
   font-weight: 800;
   font-size: 0.9375rem;
@@ -469,26 +469,24 @@ html.dark .quiz-chip.selected {
   width: 100%;
   padding: 1rem;
   border-radius: 9999px;
-  background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 60%, #0d9488 100%);
-  background-size: 200% auto;
+  background: var(--brand);
   color: #ffffff;
   font-weight: 800;
   font-size: 1rem;
   font-family: var(--font-family);
   border: none;
   cursor: pointer;
-  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
+  box-shadow: var(--shadow-brand);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   transition: all 0.3s var(--ease-spring);
-  animation: gradientShift 3s ease infinite;
 }
 
 .quiz-generate-btn:hover {
   transform: translateY(-2px) scale(1.01);
-  box-shadow: 0 10px 28px rgba(14, 165, 233, 0.55);
+  box-shadow: var(--shadow-3);
 }
 
 .quiz-generate-btn:active {
@@ -512,7 +510,7 @@ html.dark .quiz-chip.selected {
   width: 5rem;
   height: 5rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  background: var(--brand);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -543,7 +541,7 @@ html.dark .quiz-chip.selected {
 
 .quiz-loading-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #0ea5e9, #2563eb, #0d9488);
+  background: linear-gradient(90deg, var(--brand), var(--accent));
   border-radius: 9999px;
   animation: loadingPulse 1.5s ease-in-out infinite;
 }

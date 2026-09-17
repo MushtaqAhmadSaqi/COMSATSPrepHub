@@ -4,22 +4,28 @@
    DESIGN TOKENS
 ───────────────────────────────────────────────────────────────── */
 :root {
-  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-body:    'Inter', system-ui, -apple-system, sans-serif;
+  --font-family:  var(--font-body);
 
-  /* Brand Colors */
-  --brand:        #0ea5e9;
-  --brand-ink:    #0284c7;
-  --brand-deep:   #0369a1;
-  --brand-soft:   #f0f9ff;
-  --brand-soft-2: #e0f2fe;
-  --brand-2:      #2563eb;
+  /* Academic Navy & Amber Tokens */
+  --brand:        #1e3a8a;
+  --brand-light:  #3b82f6;
+  --brand-dark:   #1e1b4b;
+  --brand-hover:  #1d4ed8;
+  --brand-ink:    #1e3a8a;
+  --brand-deep:   #172554;
+  --brand-soft:   rgba(30, 58, 138, 0.08);
+  --brand-soft-2: rgba(30, 58, 138, 0.14);
 
-  /* Accent teal */
-  --accent:       #0d9488;
-  --accent-soft:  #ccfbf1;
+  /* Amber Accent */
+  --accent:        #d97706;
+  --accent-hover:  #b45309;
+  --accent-bright: #fbbf24;
+  --accent-soft:   rgba(217, 119, 6, 0.12);
 
   /* Surfaces (light mode) */
-  --bg:            #f0f2f5;
+  --bg:            #f7f6f2;
   --surface:       #ffffff;
   --surface-2:     #f8fafc;
   --surface-3:     #f1f5f9;
@@ -27,18 +33,18 @@
   --border-strong: #cbd5e1;
 
   /* Text (light mode) */
-  --text:        #1a1a2e;
-  --text-muted:  #475569;
-  --text-subtle: #64748b;
+  --text:        #1c1917;
+  --text-muted:  #4b5563;
+  --text-subtle: #6b7280;
 
   /* Semantic Colors */
   --success: #10b981;
-  --warning: #f59e0b;
+  --warning: #d97706;
   --danger:  #ef4444;
-  --info:    #3b82f6;
+  --info:    #2563eb;
 
   /* Focus ring */
-  --ring: rgba(14, 165, 233, 0.25);
+  --ring: rgba(30, 58, 138, 0.25);
 
   /* Spacing Scale */
   --space-1:  0.25rem;
@@ -61,10 +67,10 @@
   --radius-pill: 9999px;
 
   /* Elevation Shadows */
-  --shadow-1: 0 2px 8px rgba(15, 23, 42, 0.05);
-  --shadow-2: 0 6px 20px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
-  --shadow-3: 0 14px 40px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.05);
-  --shadow-brand: 0 6px 20px rgba(14, 165, 233, 0.35);
+  --shadow-1: 0 2px 8px rgba(30, 58, 138, 0.04);
+  --shadow-2: 0 6px 20px rgba(30, 58, 138, 0.07), 0 2px 6px rgba(30, 58, 138, 0.04);
+  --shadow-3: 0 14px 40px rgba(30, 58, 138, 0.12), 0 4px 12px rgba(30, 58, 138, 0.05);
+  --shadow-brand: 0 6px 20px rgba(30, 58, 138, 0.25);
 
   /* Typography Scale */
   --text-xs:   0.75rem;
@@ -91,26 +97,37 @@
 
 /* Dark Mode Tokens */
 html.dark {
-  --bg:            #0f172a;
-  --surface:       #1e293b;
-  --surface-2:     #1e293b;
-  --surface-3:     #263245;
-  --border:        rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.15);
+  --bg:            #0a0f1e;
+  --surface:       #111827;
+  --surface-2:     #1f2937;
+  --surface-3:     #374151;
+  --border:        #1f2937;
+  --border-strong: #374151;
 
-  --text:        #f1f5f9;
-  --text-muted:  #94a3b8;
-  --text-subtle: #7c8da4;
+  --text:        #f3f4f6;
+  --text-muted:  #9ca3af;
+  --text-subtle: #9ca3af;
 
-  --brand:        #38bdf8;
-  --brand-ink:    #0ea5e9;
-  --brand-deep:   #7dd3fc;
-  --brand-soft:   rgba(14, 165, 233, 0.10);
-  --brand-soft-2: rgba(14, 165, 233, 0.18);
+  --brand:        #6d8dff;
+  --brand-light:  #93c5fd;
+  --brand-dark:   #1e3a8a;
+  --brand-hover:  #60a5fa;
+  --brand-ink:    #6d8dff;
+  --brand-deep:   #93c5fd;
+  --brand-soft:   rgba(109, 141, 255, 0.12);
+  --brand-soft-2: rgba(109, 141, 255, 0.22);
+
+  --accent:        #fbbf24;
+  --accent-hover:  #f59e0b;
+  --accent-bright: #fcd34d;
+  --accent-soft:   rgba(251, 191, 36, 0.15);
+
+  --ring: rgba(109, 141, 255, 0.3);
 
   --shadow-1: 0 2px 10px rgba(0, 0, 0, 0.35);
   --shadow-2: 0 6px 24px rgba(0, 0, 0, 0.40), 0 2px 6px rgba(0, 0, 0, 0.25);
   --shadow-3: 0 14px 40px rgba(0, 0, 0, 0.55), 0 4px 14px rgba(0, 0, 0, 0.30);
+  --shadow-brand: 0 6px 20px rgba(109, 141, 255, 0.3);
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -352,7 +369,7 @@ button {
    SHIMMER GRADIENT TEXT UTILITY
 ───────────────────────────────────────────────────────────────── */
 .text-gradient {
-  background: linear-gradient(135deg, #0ea5e9, #2563eb, #0d9488);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-bright) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
