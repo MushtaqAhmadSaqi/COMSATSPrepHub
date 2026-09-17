@@ -110,7 +110,7 @@ export default function TakeAiQuiz({
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '3rem', color: '#0ea5e9' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '3rem', color: 'var(--brand)' }}>
               auto_awesome
             </span>
           </motion.div>
@@ -185,7 +185,7 @@ export default function TakeAiQuiz({
               type="button"
               className="btn-quiz-next"
               onClick={handleRestartQuiz}
-              style={{ background: 'linear-gradient(135deg, #0ea5e9, #0d9488)' }}
+              style={{ background: 'var(--brand)' }}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
@@ -247,7 +247,7 @@ export default function TakeAiQuiz({
       <div className="quiz-progress-bar">
         <motion.div
           className="quiz-progress-fill"
-          style={{ background: 'linear-gradient(90deg, #0ea5e9, #0d9488)' }}
+          style={{ background: 'var(--brand)' }}
           initial={{ width: `${(currentIdx / questions.length) * 100}%` }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.4 }}
@@ -346,7 +346,7 @@ export default function TakeAiQuiz({
               onClick={handleSubmitAnswer}
               disabled={selectedOption === null}
               style={{
-                background: 'linear-gradient(135deg, #0ea5e9, #0d9488)',
+                background: 'var(--brand)',
                 opacity: selectedOption === null ? 0.5 : 1
               }}
             >

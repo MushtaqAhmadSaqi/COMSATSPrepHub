@@ -47,11 +47,7 @@ function AnimatedInput({ type, placeholder, value, onChange, className = '', min
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      whileHover={{ borderColor: '#0ea5e9' }}
-      whileFocus={{
-        borderColor: '#2563eb',
-        boxShadow: '0 0 0 3px rgba(14, 165, 233, 0.25)'
-      }}
+      whileHover={{ scale: 1.01 }}
     />
   );
 }
@@ -66,11 +62,7 @@ function AnimatedSelect({ value, onChange, children, className = '' }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      whileHover={{ borderColor: '#0ea5e9' }}
-      whileFocus={{
-        borderColor: '#2563eb',
-        boxShadow: '0 0 0 3px rgba(14, 165, 233, 0.25)'
-      }}
+      whileHover={{ scale: 1.01 }}
     >
       {children}
     </motion.select>
@@ -224,11 +216,11 @@ export default function GpaCalculator() {
   }, [sgpaNum]);
 
   const getGpaStanding = (val) => {
-    if (val >= 3.7) return { label: 'Rector List (High Distinction)', color: '#10b981' };
-    if (val >= 3.5) return { label: 'Dean List (Distinction)', color: '#0ea5e9' };
-    if (val >= 3.0) return { label: 'Good Standing', color: '#2563eb' };
-    if (val >= 2.0) return { label: 'Satisfactory', color: '#f59e0b' };
-    return { label: 'Academic Warning Risk', color: '#ef4444' };
+    if (val >= 3.7) return { label: 'Rector List (High Distinction)', color: 'var(--success)' };
+    if (val >= 3.5) return { label: 'Dean List (Distinction)', color: 'var(--brand)' };
+    if (val >= 3.0) return { label: 'Good Standing', color: 'var(--accent)' };
+    if (val >= 2.0) return { label: 'Satisfactory', color: 'var(--warning)' };
+    return { label: 'Academic Warning Risk', color: 'var(--danger)' };
   };
 
   const standing = getGpaStanding(cgpaNum);
@@ -397,7 +389,7 @@ export default function GpaCalculator() {
 
             {/* CGPA Result (if previous data provided) */}
             {cgpa && (
-              <div className="gpa-overall-panel" style={{ marginTop: '1rem', background: 'linear-gradient(135deg, #2563eb, #1d4ed8)' }}>
+              <div className="gpa-overall-panel" style={{ marginTop: '1rem', background: 'var(--brand)' }}>
                 <div className="gpa-overall-label">Cumulative GPA (CGPA)</div>
                 <AnimatedNumber value={cgpa} className="cgpa-number-large" />
                 <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>

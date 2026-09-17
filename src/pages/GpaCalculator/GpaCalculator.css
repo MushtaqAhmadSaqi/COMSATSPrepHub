@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    COMSATS GPA Calculator â€” Refactored Modern React Responsive UI
    ========================================================================== */
 
@@ -379,8 +379,8 @@ html.dark .gpa-helper {
 /* Custom Mark Scheme Accordion */
 .gpa-scheme-details {
   border-radius: 16px;
-  border: 1px solid #e0f2fe;
-  background: rgba(224, 242, 254, 0.3);
+  border: 1px solid var(--border);
+  background: var(--brand-soft);
   padding: 0.85rem 1rem;
   margin-bottom: 1.1rem;
 }
@@ -515,23 +515,23 @@ html.dark .gpa-switch-track.active {
 }
 
 .gpa-row-add-btn.quiz {
-  background: linear-gradient(135deg, #0f766e, #0d9488);
-  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
+  background: var(--brand);
+  box-shadow: var(--shadow-brand);
 }
 
 .gpa-row-add-btn.quiz:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.3);
+  box-shadow: var(--shadow-2);
 }
 
 .gpa-row-add-btn.assignment {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  background: var(--brand);
+  box-shadow: var(--shadow-brand);
 }
 
 .gpa-row-add-btn.assignment:hover {
   transform: translateY(-1.5px);
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+  box-shadow: var(--shadow-2);
 }
 
 .gpa-row-remove-btn {
@@ -790,8 +790,8 @@ html.dark .gpa-subject-details {
 }
 
 .gpa-grade-badge.sky {
-  background: #e0f2fe;
-  color: #0369a1;
+  background: var(--brand-soft);
+  color: var(--brand);
 }
 
 .gpa-grade-badge.amber {

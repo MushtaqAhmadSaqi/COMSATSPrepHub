@@ -139,14 +139,14 @@ html.dark .paper-badge {
 .btn-view-paper {
   padding: 0.5625rem 1.25rem;
   border-radius: 9999px;
-  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  background: var(--brand);
   color: #ffffff;
   font-weight: 700;
   font-size: 0.8125rem;
   font-family: var(--font-family);
   border: none;
   white-space: nowrap;
-  box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+  box-shadow: var(--shadow-brand);
   transition: all 0.25s var(--ease-spring);
   display: flex;
   align-items: center;

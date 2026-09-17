@@ -40,7 +40,7 @@ export default function Auth({ onLoginSuccess = () => {} }) {
           <button
             type="button"
             onClick={() => setIsSignUp(!isSignUp)}
-            style={{ background: 'none', border: 'none', color: '#0ea5e9', fontWeight: 700, marginLeft: '0.375rem', cursor: 'pointer' }}
+            style={{ background: 'none', border: 'none', color: 'var(--brand)', fontWeight: 700, marginLeft: '0.375rem', cursor: 'pointer' }}
           >
             {isSignUp ? 'Sign In' : 'Sign Up'}
           </button>

@@ -561,7 +561,7 @@ export default function Quiz() {
               type="button"
               className="btn-quiz-next"
               onClick={handleGenerateQuiz}
-              style={{ background: 'linear-gradient(135deg, #0ea5e9, #2563eb)' }}
+              style={{ background: 'var(--brand)' }}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
