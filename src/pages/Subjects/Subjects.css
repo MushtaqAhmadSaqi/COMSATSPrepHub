@@ -24,10 +24,15 @@
 }
 
 /* ─── Search Bar ────────────────────────────────────────────────── */
+.subjects-search-wrapper {
+  position: relative;
+  max-width: 34rem;
+  width: 100%;
+}
+
 .subjects-search-bar {
   width: 100%;
-  max-width: 34rem;
-  padding: 0.9375rem 1.375rem 0.9375rem 1rem;
+  padding: 0.9375rem 2.5rem 0.9375rem 1rem;
   border-radius: 9999px;
   border: 1.5px solid var(--border-strong);
   background: var(--surface);
@@ -35,10 +40,141 @@
   font-family: var(--font-family);
   color: var(--text);
   outline: none;
-  margin-bottom: 2.5rem;
+  margin-bottom: 0;
   box-shadow: var(--shadow-1);
   transition: border-color 0.2s var(--ease),
               box-shadow 0.2s var(--ease);
+}
+
+.subjects-search-clear-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--text-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.subjects-search-clear-btn:hover {
+  color: var(--text);
+  background: transparent;
+}
+
+.subject-match-mark {
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+  padding: 0 0.125em;
+  border-radius: 2px;
+  font-weight: inherit;
+}
+
+html.dark .subject-match-mark {
+  background: var(--brand-soft-2);
+  color: var(--brand-deep);
+}
+
+.subjects-filter-panel {
+  margin-bottom: 2rem;
+}
+
+.subjects-search-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.subjects-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.subjects-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.department-chip {
+  min-height: 2.75rem;
+}
+
+.clear-filters-btn,
+.clear-search-btn {
+  min-height: 2.75rem;
+  border: 0;
+  background: transparent;
+  color: var(--brand);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  white-space: nowrap;
+}
+
+.clear-filters-btn:hover,
+.clear-search-btn:hover {
+  color: var(--brand-hover);
+}
+
+.active-filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.active-filter-label {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.active-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.25rem;
+  max-width: 100%;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--brand-soft-2);
+  border-radius: var(--radius-pill);
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.active-filter-chip:hover {
+  border-color: var(--brand);
+}
+
+.active-filter-chip .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.subjects-result-count {
+  margin-top: 1rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .subjects-search-bar:focus {
@@ -64,9 +200,8 @@
   padding: 1.625rem;
   border: 1.5px solid var(--border);
   box-shadow: var(--shadow-1);
-  transition: transform 0.3s var(--ease-spring),
-              box-shadow 0.3s var(--ease),
-              border-color 0.2s var(--ease);
+  transition: box-shadow var(--dur-fast) var(--ease),
+              border-color var(--dur-fast) var(--ease);
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -87,9 +222,9 @@
 }
 
 .subject-card:hover {
-  transform: translateY(-6px) scale(1.015);
-  box-shadow: var(--shadow-3);
-  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+  border-color: var(--brand-light);
 }
 
 .subject-card:hover::before {
@@ -119,12 +254,13 @@ html.dark .subject-code {
 }
 
 .subject-name {
-  font-size: 1.125rem;
-  font-weight: 800;
+  font-size: 1.0625rem;
+  font-weight: 700;
   color: var(--text);
   margin-bottom: 1rem;
   line-height: 1.35;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
+  text-align: left;
 }
 
 .subject-meta {
@@ -178,7 +314,16 @@ html.dark .subject-code {
     max-width: 100%;
     padding: 0.75rem 1rem;
     font-size: 0.875rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0;
+  }
+
+  .subjects-filter-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .clear-filters-btn {
+    align-self: flex-start;
   }
 
   .subjects-grid {
@@ -191,4 +336,3 @@ html.dark .subject-code {
     border-radius: 14px;
   }
 }
-

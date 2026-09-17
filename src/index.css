@@ -34,13 +34,13 @@
 
   /* Text (light mode) */
   --text:        #1c1917;
-  --text-muted:  #4b5563;
-  --text-subtle: #6b7280;
+  --text-muted:  #374151;
+  --text-subtle: #475569;
 
   /* Semantic Colors */
-  --success: #10b981;
+  --success: #059669;
   --warning: #d97706;
-  --danger:  #ef4444;
+  --danger:  #dc2626;
   --info:    #2563eb;
 
   /* Focus ring */
@@ -104,8 +104,8 @@ html.dark {
   --border:        #1f2937;
   --border-strong: #374151;
 
-  --text:        #f3f4f6;
-  --text-muted:  #9ca3af;
+  --text:        #f9fafb;
+  --text-muted:  #d1d5db;
   --text-subtle: #9ca3af;
 
   --brand:        #6d8dff;
@@ -131,6 +131,32 @@ html.dark {
 }
 
 /* ─────────────────────────────────────────────────────────────────
+   UTILITIES & ACCESSIBILITY
+───────────────────────────────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.btn-reset {
+  font: inherit;
+  text-align: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  width: 100%;
+  cursor: pointer;
+  color: inherit;
+}
+
+/* ─────────────────────────────────────────────────────────────────
    RESET & BASE
 ───────────────────────────────────────────────────────────────── */
 *, *::before, *::after {
@@ -141,8 +167,6 @@ html.dark {
 
 html, body {
   width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
 }
@@ -315,15 +339,15 @@ button {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-1);
-  transition: transform var(--dur-base) var(--ease-spring),
-              box-shadow var(--dur-base) var(--ease),
+  transition: transform var(--dur-fast) var(--ease),
+              box-shadow var(--dur-fast) var(--ease),
               border-color var(--dur-fast) var(--ease);
 }
 
 .card:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: var(--shadow-3);
-  border-color: rgba(14, 165, 233, 0.3);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+  border-color: rgba(14, 165, 233, 0.25);
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -378,14 +402,16 @@ button {
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   STAGGERED ANIMATION DELAYS (for grids/lists)
+   STAGGERED ANIMATION DELAYS (60ms steps, capped at 0.36s)
 ───────────────────────────────────────────────────────────────── */
-.stagger-1 { animation-delay: 0.05s; }
-.stagger-2 { animation-delay: 0.10s; }
-.stagger-3 { animation-delay: 0.15s; }
-.stagger-4 { animation-delay: 0.20s; }
-.stagger-5 { animation-delay: 0.25s; }
-.stagger-6 { animation-delay: 0.30s; }
+.stagger-1 { animation-delay: 0.06s; }
+.stagger-2 { animation-delay: 0.12s; }
+.stagger-3 { animation-delay: 0.18s; }
+.stagger-4 { animation-delay: 0.24s; }
+.stagger-5 { animation-delay: 0.30s; }
+.stagger-6 { animation-delay: 0.36s; }
+.stagger-7 { animation-delay: 0.36s; }
+.stagger-8 { animation-delay: 0.36s; }
 
 /* ─────────────────────────────────────────────────────────────────
    BUTTON PRESS

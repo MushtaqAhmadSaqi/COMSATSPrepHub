@@ -56,14 +56,20 @@ export function SkeletonListItem() {
 }
 
 /**
- * SkeletonStatCard — matches dashboard stat card layout.
+ * SubjectCardSkeleton — exact mirror for real .subject-card layout.
  */
-export function SkeletonStatCard() {
+export function SubjectCardSkeleton() {
   return (
-    <div className="skeleton-stat-card" aria-hidden="true">
-      <Skeleton variant="text" width="60%" height="0.75rem" />
-      <Skeleton variant="text" width="40%" height="2rem" />
-      <Skeleton variant="text" width="50%" height="0.625rem" />
+    <div className="subject-card-skeleton" aria-hidden="true">
+      <span style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0,0,0,0)', border: 0 }}>
+        Loading subjects…
+      </span>
+      <div className="subject-card-skeleton__pill" />
+      <div className="subject-card-skeleton__title" />
+      <div className="subject-card-skeleton__meta">
+        <div className="subject-card-skeleton__meta-left" />
+        <div className="subject-card-skeleton__meta-right" />
+      </div>
     </div>
   );
 }

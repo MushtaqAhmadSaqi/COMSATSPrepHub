@@ -2,17 +2,18 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useScrollRevealList } from '../../utils/useScrollReveal';
 import { useCounter } from '../../utils/useCounter';
+import { usePrefersReducedMotion } from '../../utils/usePrefersReducedMotion';
 import './Home.css';
 
 /* ── Typewriter for the gradient highlight ── */
 function TypewriterText({ text, delay = 600 }) {
+  const prefersReduced = usePrefersReducedMotion();
   const [displayed, setDisplayed] = useState('');
   const [done, setDone] = useState(false);
   const idxRef = useRef(0);
 
   useEffect(() => {
-    // Respect reduced-motion
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (prefersReduced) {
       setDisplayed(text);
       setDone(true);
       return;
@@ -29,7 +30,7 @@ function TypewriterText({ text, delay = 600 }) {
       return () => clearInterval(interval);
     }, delay);
     return () => clearTimeout(timeout);
-  }, [text, delay]);
+  }, [text, delay, prefersReduced]);
 
   return (
     <span className={`home-title-highlight${!done ? ' typing-cursor' : ''}`}>
@@ -63,19 +64,35 @@ function addRipple(e) {
   circle.addEventListener('animationend', () => circle.remove());
 }
 
-/* ── Spotlight Card Effect ── */
+/* ── Spotlight Card Effect with Magnetic Hover ── */
 function SpotlightCard({ children, className = '', delay = 0 }) {
   const cardRef = useRef(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [magneticOffset, setMagneticOffset] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseMove = (e) => {
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
-    setMousePosition({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    setMousePosition({ x: mouseX, y: mouseY });
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setMagneticOffset({ x: 0, y: 0 });
+      return;
+    }
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const dx = Math.max(-6, Math.min(6, ((mouseX - centerX) / centerX) * 6));
+    const dy = Math.max(-6, Math.min(6, ((mouseY - centerY) / centerY) * 6));
+    setMagneticOffset({ x: dx, y: dy });
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setMagneticOffset({ x: 0, y: 0 });
   };
 
   return (
@@ -88,10 +105,14 @@ function SpotlightCard({ children, className = '', delay = 0 }) {
       transition={{ duration: 0.5, delay, ease: 'easeOut' }}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={handleMouseLeave}
       style={{
         '--mouse-x': `${mousePosition.x}px`,
         '--mouse-y': `${mousePosition.y}px`,
+        transform: `translate3d(${magneticOffset.x}px, ${magneticOffset.y}px, 0)`,
+        transition: isHovered
+          ? 'transform 150ms var(--ease), box-shadow 0.3s var(--ease-spring)'
+          : 'transform 300ms var(--ease), box-shadow 0.3s var(--ease-spring)'
       }}
     >
       {children}
@@ -141,9 +162,9 @@ export default function Home({ onNavigate = () => {} }) {
   return (
     <div className="home-page-wrapper">
       <section className="home-hero-section">
-        {/* Floating particles */}
+        {/* Floating particles — reduced to 4 for less visual noise */}
         <div className="home-particles" aria-hidden="true">
-          {Array.from({ length: 8 }).map((_, i) => (
+          {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className={`particle particle-${i + 1}`} />
           ))}
         </div>

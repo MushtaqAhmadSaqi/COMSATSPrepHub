@@ -2,13 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchSubjectsFromSupabase } from '../../services/papersService';
 import { DEFAULT_SUBJECTS, DEPARTMENTS } from '../../constants/subjects';
-import { SkeletonCard } from '../../components/ui/Skeleton';
+import { SkeletonCard, SubjectCardSkeleton } from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
+import PageHeader from '../../components/PageHeader/PageHeader';
 import './Subjects.css';
 
+/* ── Highlight Matched Substring ── */
+function highlightMatch(text, query) {
+  if (!query || !query.trim()) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escaped})`, 'gi');
+  const parts = text.split(regex);
+  return parts.map((part, i) =>
+    regex.test(part) ? (
+      <mark key={i} className="subject-match-mark">{part}</mark>
+    ) : (
+      part
+    )
+  );
+}
+
 /* ── Spotlight Card with Glow Effect ── */
-function SpotlightSubjectCard({ subject, idx, onSelect }) {
+function SpotlightSubjectCard({ subject, idx, searchQuery = '', onSelect }) {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
   const cardRef = React.useRef(null);
@@ -32,7 +48,7 @@ function SpotlightSubjectCard({ subject, idx, onSelect }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: idx * 0.04 }}
-      whileHover={{ y: -6, scale: 1.02 }}
+      whileHover={{ y: -3 }}
       whileTap={{ scale: 0.98 }}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
@@ -53,16 +69,15 @@ function SpotlightSubjectCard({ subject, idx, onSelect }) {
       )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.625rem' }}>
         <div className="subject-code">{subject.code}</div>
-        <motion.span
+        <span
           className="material-symbols-outlined"
-          style={{ color: 'var(--brand)', opacity: 0.8, fontSize: '20px' }}
-          animate={{ rotate: isHovered ? 360 : 0 }}
-          transition={{ duration: 0.6, ease: 'easeInOut' }}
+          style={{ color: 'var(--brand)', opacity: 0.7, fontSize: '20px' }}
+          aria-hidden="true"
         >
           {subject.icon || 'menu_book'}
-        </motion.span>
+        </span>
       </div>
-      <h3 className="subject-name">{subject.name}</h3>
+      <div className="subject-name">{highlightMatch(subject.name, searchQuery)}</div>
       <div className="subject-meta">
         <span>{subject.department}</span>
         <span className="subject-papers-count">
@@ -110,7 +125,6 @@ export default function Subjects({ onSelectSubject = () => {} }) {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDept, setSelectedDept] = useState('All');
-  const [isFromSupabase, setIsFromSupabase] = useState(false);
 
   const loadSubjects = async () => {
     setLoading(true);
@@ -119,7 +133,6 @@ export default function Subjects({ onSelectSubject = () => {} }) {
       const dbSubjects = await fetchSubjectsFromSupabase();
       if (dbSubjects && dbSubjects.length > 0) {
         setSubjects(dbSubjects);
-        setIsFromSupabase(true);
       }
     } catch (err) {
       setError(err.message || 'Failed to load subjects.');
@@ -140,6 +153,9 @@ export default function Subjects({ onSelectSubject = () => {} }) {
     return matchesDept && matchesQuery;
   });
 
+  const hasActiveFilters = selectedDept !== 'All';
+  const hasSearch = searchQuery.trim().length > 0;
+
   return (
     <motion.div
       className="subjects-container"
@@ -147,82 +163,89 @@ export default function Subjects({ onSelectSubject = () => {} }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="subjects-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-          <motion.h1
-            className="subjects-title"
-            style={{ marginBottom: 0 }}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            Browse All Subjects
-          </motion.h1>
-          {isFromSupabase && (
-            <motion.span
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              style={{
-                fontSize: '0.6875rem',
-                fontWeight: 800,
-                color: '#10b981',
-                background: 'rgba(16,185,129,0.12)',
-                padding: '0.2rem 0.6rem',
-                borderRadius: '9999px',
-                border: '1px solid rgba(16,185,129,0.3)'
-              }}
+      <PageHeader
+        badge="Library"
+        title="Browse All Subjects"
+        subtitle="Select a subject to view past examination papers, quizzes, and solutions."
+      />
+
+      {/* Filter tabs and search */}
+      <div className="subjects-filter-panel">
+        <label className="subjects-search-label" htmlFor="subject-search">
+          Find a subject
+        </label>
+        <div className="subjects-search-wrapper">
+          <motion.input
+            id="subject-search"
+            type="text"
+            className="subjects-search-bar"
+            placeholder="Search by name, code (e.g. CSC211), or department..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search subjects"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            whileFocus={{ scale: 1.01 }}
+          />
+          {hasSearch && (
+            <button
+              type="button"
+              className="subjects-search-clear-btn"
+              onClick={() => setSearchQuery('')}
+              aria-label="Clear search"
             >
-              ⚡ Supabase Live
-            </motion.span>
+              <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>close</span>
+            </button>
           )}
         </div>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          Select a subject to view past examination papers, quizzes, and solutions.
-        </motion.p>
-      </div>
 
-      {/* Filter Tabs & Search Row */}
-      <div style={{ marginBottom: '2rem' }}>
-        <motion.input
-          type="text"
-          className="subjects-search-bar"
-          placeholder="🔍  Search by name, code (e.g. CSC211), or department..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          aria-label="Search subjects"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          whileFocus={{ scale: 1.01 }}
-        />
+        <div className="subjects-filter-row">
+          <div className="subjects-filter-chips" aria-label="Filter by department">
+            {DEPARTMENTS.map((dept) => (
+              <DepartmentChip
+                key={dept}
+                dept={dept}
+                isSelected={selectedDept === dept}
+                onClick={() => setSelectedDept(dept)}
+              />
+            ))}
+          </div>
+          {hasActiveFilters && (
+            <button type="button" className="clear-filters-btn" onClick={() => setSelectedDept('All')}>
+              Clear filters
+            </button>
+          )}
+        </div>
 
-        {/* Category Chips */}
-        <motion.div
-          style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '-1rem' }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-        >
-          {DEPARTMENTS.map((dept, idx) => (
-            <DepartmentChip
-              key={dept}
-              dept={dept}
-              isSelected={selectedDept === dept}
-              onClick={() => setSelectedDept(dept)}
-            />
-          ))}
-        </motion.div>
+        {(hasActiveFilters || hasSearch) && (
+          <div className="active-filter-row" aria-label="Active filters">
+            <span className="active-filter-label">Active:</span>
+            {hasActiveFilters && (
+              <button type="button" className="active-filter-chip" onClick={() => setSelectedDept('All')}>
+                Department: {selectedDept}
+                <span className="material-symbols-outlined" aria-hidden="true">close</span>
+              </button>
+            )}
+            {hasSearch && (
+              <button type="button" className="active-filter-chip" onClick={() => setSearchQuery('')}>
+                Search: "{searchQuery}"
+                <span className="material-symbols-outlined" aria-hidden="true">close</span>
+              </button>
+            )}
+          </div>
+        )}
+
+        <p className="subjects-result-count" aria-live="polite">
+          {loading ? 'Loading subjects...' : filtered.length === 0 && hasSearch ? `No subjects match "${searchQuery}"` : `${filtered.length} ${filtered.length === 1 ? 'subject' : 'subjects'}`}
+        </p>
+
       </div>
 
       {loading ? (
         <div className="subjects-grid" aria-busy="true" aria-label="Loading subjects">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <SkeletonCard key={i} />
+          {Array.from({ length: typeof window !== 'undefined' && window.innerWidth < 768 ? 6 : 8 }).map((_, i) => (
+            <SubjectCardSkeleton key={i} />
           ))}
         </div>
       ) : error ? (
@@ -240,12 +263,13 @@ export default function Subjects({ onSelectSubject = () => {} }) {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.2 }}
         >
-          <AnimatePresence mode="popLayout">
+          <AnimatePresence>
             {filtered.map((subj, idx) => (
               <SpotlightSubjectCard
                 key={subj.code}
                 subject={subj}
                 idx={idx}
+                searchQuery={searchQuery}
                 onSelect={onSelectSubject}
               />
             ))}

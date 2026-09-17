@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
  * @param {string} suffix — text after number, e.g. "+" or "K+". Default ""
  * @returns {{ ref, display }} — attach ref to element, display is the formatted string
  */
-export function useCounter(target, { duration = 1500, suffix = '' } = {}) {
+export function useCounter(target, { duration = 1500, suffix = '', decimals = 0 } = {}) {
   const ref = useRef(null);
   const [count, setCount] = useState(0);
   const hasStarted = useRef(false);
@@ -34,7 +34,7 @@ export function useCounter(target, { duration = 1500, suffix = '' } = {}) {
           const tick = (now) => {
             const elapsed = now - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            const current = Math.round(easeOut(progress) * target);
+            const current = easeOut(progress) * target;
             setCount(current);
             if (progress < 1) requestAnimationFrame(tick);
           };
@@ -42,12 +42,13 @@ export function useCounter(target, { duration = 1500, suffix = '' } = {}) {
           requestAnimationFrame(tick);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.2 }
     );
 
     observer.observe(el);
     return () => observer.disconnect();
   }, [target, duration]);
 
-  return { ref, display: `${count}${suffix}` };
+  const formatted = decimals > 0 ? count.toFixed(decimals) : Math.round(count).toString();
+  return { ref, display: `${formatted}${suffix}` };
 }

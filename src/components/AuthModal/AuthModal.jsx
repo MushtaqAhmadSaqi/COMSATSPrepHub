@@ -34,26 +34,47 @@ export default function AuthModal({
 
   const cardRef = useRef(null);
   const firstInputRef = useRef(null);
+  const triggerRef = useRef(null);
 
-  /* Close on Escape key */
+  /* Store trigger element on open and restore on close */
+  useEffect(() => {
+    if (isOpen) {
+      triggerRef.current = document.activeElement;
+      requestAnimationFrame(() => {
+        firstInputRef.current?.focus();
+      });
+    } else if (triggerRef.current) {
+      triggerRef.current.focus?.();
+    }
+  }, [isOpen, isSignUp]);
+
+  /* Focus trap & Escape key listener */
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key === 'Tab' && cardRef.current) {
+        const focusables = cardRef.current.querySelectorAll(
+          'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
-
-  /* Move focus into the modal when it opens */
-  useEffect(() => {
-    if (isOpen) {
-      // Use rAF to allow the DOM to render before focusing
-      requestAnimationFrame(() => {
-        firstInputRef.current?.focus();
-      });
-    }
-  }, [isOpen, isSignUp]);
 
   if (!isOpen) return null;
 
@@ -147,10 +168,10 @@ export default function AuthModal({
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label={isSignUp ? 'Create account' : 'Sign in'}
+        aria-labelledby="auth-modal-title"
       >
         {/* Close */}
-        <button type="button" className="auth-close-btn" onClick={onClose} aria-label="Close">
+        <button type="button" className="auth-close-btn" onClick={onClose} aria-label="Close modal">
           <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
         </button>
 
@@ -161,7 +182,7 @@ export default function AuthModal({
               {isSignUp ? 'person_add' : 'login'}
             </span>
           </div>
-          <h3 className="auth-title">{isSignUp ? 'Create Account' : 'Welcome Back'}</h3>
+          <h3 className="auth-title" id="auth-modal-title">{isSignUp ? 'Create Account' : 'Welcome Back'}</h3>
           <p className="auth-subtitle">
             {isSignUp
               ? 'Join COMSATSPrepHub to track your progress & save papers'
@@ -171,13 +192,13 @@ export default function AuthModal({
 
         {/* Alerts */}
         {errorMsg && (
-          <div className="auth-alert auth-alert-error">
+          <div className="auth-alert auth-alert-error" role="alert">
             <span className="material-symbols-outlined" style={{ fontSize: '18px', flexShrink: 0 }}>error</span>
             {errorMsg}
           </div>
         )}
         {successMsg && (
-          <div className="auth-alert auth-alert-success">
+          <div className="auth-alert auth-alert-success" role="status">
             <span className="material-symbols-outlined" style={{ fontSize: '18px', flexShrink: 0 }}>check_circle</span>
             {successMsg}
           </div>
@@ -187,9 +208,10 @@ export default function AuthModal({
         <form onSubmit={handleSubmit}>
           {isSignUp && (
             <div className="auth-form-group">
-              <label className="auth-label">Full Name</label>
+              <label className="auth-label" htmlFor="auth-fullname">Full Name</label>
               <input
                 ref={firstInputRef}
+                id="auth-fullname"
                 type="text"
                 className={`auth-input${fieldErrors.fullName ? ' auth-input--error' : ''}`}
                 placeholder="e.g. Moeed Ali"
@@ -205,9 +227,10 @@ export default function AuthModal({
           )}
 
           <div className="auth-form-group">
-            <label className="auth-label">Email Address</label>
+            <label className="auth-label" htmlFor="auth-email">Email Address</label>
             <input
               ref={isSignUp ? undefined : firstInputRef}
+              id="auth-email"
               type="email"
               className={`auth-input${fieldErrors.email ? ' auth-input--error' : ''}`}
               placeholder="student@comsats.edu.pk"
@@ -222,9 +245,10 @@ export default function AuthModal({
           </div>
 
           <div className="auth-form-group">
-            <label className="auth-label">Password</label>
+            <label className="auth-label" htmlFor="auth-password">Password</label>
             <div className="auth-password-wrapper">
               <input
+                id="auth-password"
                 type={showPassword ? 'text' : 'password'}
                 className={`auth-input${fieldErrors.password ? ' auth-input--error' : ''}`}
                 placeholder="••••••••"

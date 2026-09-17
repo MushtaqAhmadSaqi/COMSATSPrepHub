@@ -75,12 +75,13 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={toast}>
       {children}
-      <div className="toast-container" aria-live="polite" aria-relevant="additions">
+      <div className="toast-container" aria-live="polite" role="status">
         <AnimatePresence mode="popLayout">
           {toasts.map((t) => (
             <motion.div
               key={t.id}
               className={`toast toast--${t.type}`}
+              role={t.type === 'error' ? 'alert' : 'status'}
               layout
               initial={variants.initial}
               animate={variants.animate}

@@ -91,12 +91,12 @@
   color: var(--info);
 }
 
-/* Mobile: center at bottom */
-@media (max-width: 480px) {
+/* Mobile: center at bottom above nav */
+@media (max-width: 767px) {
   .toast-container {
     right: 0.75rem;
     left: 0.75rem;
-    bottom: 5rem; /* above mobile bottom nav */
+    bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
     max-width: none;
     align-items: stretch;
   }

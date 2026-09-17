@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PageHeader from '../../components/PageHeader/PageHeader';
 import './AiQuizGenerator.css';
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
@@ -11,22 +12,19 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
 
   return (
     <div className="ai-gen-container">
+      <PageHeader
+        badge="AI Tools"
+        title="AI Quiz Generator"
+        subtitle="Generate custom COMSATS-style practice quizzes on any subject, instantly powered by Gemini AI."
+      />
+
       <div className="ai-gen-card">
-        {/* Title */}
-        <h1 className="ai-gen-title">
-          <div className="ai-gen-icon">
-            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>auto_awesome</span>
-          </div>
-          AI Quiz Generator
-        </h1>
-        <p className="ai-gen-subtitle">
-          Generate custom COMSATS-style practice quizzes on any subject, instantly powered by Gemini AI.
-        </p>
 
         {/* Topic */}
         <div className="ai-field">
-          <label className="ai-label">Subject / Topic</label>
+          <label className="ai-label" htmlFor="ai-topic-input">Subject / Topic</label>
           <input
+            id="ai-topic-input"
             type="text"
             className="ai-input"
             value={topic}

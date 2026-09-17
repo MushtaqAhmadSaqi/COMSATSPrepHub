@@ -101,6 +101,6 @@
 /* Push above mobile bottom nav */
 @media (max-width: 768px) {
   .install-prompt {
-    bottom: 5.5rem;
+    bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
   }
 }

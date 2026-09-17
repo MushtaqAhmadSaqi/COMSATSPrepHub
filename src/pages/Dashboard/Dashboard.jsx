@@ -1,5 +1,6 @@
 import React from 'react';
 import { supabase } from '../../services/supabase';
+import PageHeader from '../../components/PageHeader/PageHeader';
 import './Dashboard.css';
 
 const STATS = [
@@ -48,33 +49,23 @@ export default function Dashboard({ user = null, onNavigate = () => {} }) {
 
   return (
     <div className="dash-container">
-      {/* Header */}
-      <div className="dash-header">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <div className="dash-welcome-badge">
-              <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>waving_hand</span>
-              Welcome back
-            </div>
-            <h1 className="dash-title">Hi, {displayName}!</h1>
-            <p className="dash-subtitle">
-              {userEmail && <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>{userEmail} · </span>}
-              Student Performance Analytics & Study Overview
-            </p>
-          </div>
-          {user && (
-            <button
-              type="button"
-              className="dash-signout-btn"
-              onClick={handleSignOut}
-              aria-label="Sign out"
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>logout</span>
-              Sign Out
-            </button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        badge="Overview"
+        title={`Hi, ${displayName}!`}
+        subtitle={`${userEmail ? userEmail + ' · ' : ''}Student Performance Analytics & Study Overview`}
+      >
+        {user && (
+          <button
+            type="button"
+            className="dash-signout-btn"
+            onClick={handleSignOut}
+            aria-label="Sign out"
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>logout</span>
+            Sign Out
+          </button>
+        )}
+      </PageHeader>
 
       {/* Demo Notice */}
       <div className="dash-demo-notice">

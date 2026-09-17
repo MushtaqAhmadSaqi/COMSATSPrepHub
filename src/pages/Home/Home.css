@@ -65,10 +65,6 @@
 .particle-2 { width: 4px;  height: 4px;  top: 35%;  left: 85%; animation-duration: 11s; animation-delay: -2s; }
 .particle-3 { width: 8px;  height: 8px;  top: 70%;  left: 15%; animation-duration: 9s;  animation-delay: -4s; }
 .particle-4 { width: 5px;  height: 5px;  top: 55%;  left: 75%; animation-duration: 13s; animation-delay: -1s; }
-.particle-5 { width: 4px;  height: 4px;  top: 80%;  left: 40%; animation-duration: 10s; animation-delay: -6s; }
-.particle-6 { width: 7px;  height: 7px;  top: 15%;  left: 60%; animation-duration: 12s; animation-delay: -3s; }
-.particle-7 { width: 3px;  height: 3px;  top: 45%;  left: 30%; animation-duration: 7s;  animation-delay: -5s; }
-.particle-8 { width: 5px;  height: 5px;  top: 25%;  left: 50%; animation-duration: 14s; animation-delay: -7s; }
 
 /* ─── Badge Pill ────────────────────────────────────────────────── */
 .home-badge-wrapper {
@@ -83,15 +79,13 @@
   gap: 0.375rem;
   padding: 0.4375rem 0.875rem;
   border-radius: 9999px;
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.12), rgba(37, 99, 235, 0.08));
-  border: 1px solid rgba(14, 165, 233, 0.25);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.10), rgba(37, 99, 235, 0.07));
+  border: 1px solid rgba(14, 165, 233, 0.22);
   backdrop-filter: blur(8px);
-  font-size: 0.6875rem;
-  font-weight: 800;
+  font-size: 0.75rem;
+  font-weight: 600;
   color: var(--brand-deep);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  animation: pulse-glow 3s ease-in-out infinite;
+  letter-spacing: 0.01em;
 }
 
 @media (min-width: 640px) {
@@ -140,11 +134,9 @@ html.dark .home-badge-pill {
 .home-title-highlight {
   display: inline-block;
   background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 50%, #0d9488 100%);
-  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: gradientShift 4s ease infinite;
 }
 
 /* Typewriter blinking cursor — removed once typing is done */

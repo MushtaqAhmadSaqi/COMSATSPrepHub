@@ -59,9 +59,6 @@ export default function TakeAiQuiz({
       const newStreak = streak + 1;
       setScore(newScore);
       setStreak(newStreak);
-      if (newStreak >= 3 && prevStreakRef.current < 3) {
-        fireConfetti({ count: 40, spread: 50 });
-      }
       prevStreakRef.current = newStreak;
     } else {
       setStreak(0);
@@ -72,7 +69,7 @@ export default function TakeAiQuiz({
   const handleNextQuestion = () => {
     if (currentIdx + 1 >= questions.length) {
       const pct = Math.round((score / questions.length) * 100);
-      if (pct >= 50) {
+      if (pct >= 70) {
         fireConfetti({ count: 100, spread: 80, originY: 0.5 });
       }
       setIsFinished(true);

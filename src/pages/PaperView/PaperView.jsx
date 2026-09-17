@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { generateExamPaperQuestions } from '../../services/geminiService';
+import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 import './PaperView.css';
 
 export default function PaperView({
@@ -10,6 +11,24 @@ export default function PaperView({
   const [loading, setLoading] = useState(true);
   const [expandedAnswers, setExpandedAnswers] = useState({});
   const [showAllAnswers, setShowAllAnswers] = useState(false);
+  const [readProgress, setReadProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalHeight <= 0) {
+        setReadProgress(0);
+        return;
+      }
+      const currentScroll = window.scrollY;
+      const progress = Math.min(1, Math.max(0, currentScroll / totalHeight));
+      setReadProgress(progress);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -58,16 +77,24 @@ export default function PaperView({
     }
   };
 
-  const displaySubject = paper.subjectName || (paper.title ? paper.title.split('—')[0] : 'Subject Exam');
+  const displaySubject = paper.subjectName || (paper.title ? paper.title.split('—')[0].trim() : 'Subject Exam');
+
+  const breadcrumbItems = [
+    { label: 'Subjects', onClick: () => { window.location.hash = 'subjects'; } },
+    { label: displaySubject, onClick: onBack },
+    { label: paper.title || 'Paper View' }
+  ];
 
   return (
     <div className="paperview-container">
+      <div
+        className="paperview-progress-bar"
+        style={{ transform: `scaleX(${readProgress})` }}
+        aria-hidden="true"
+      />
       {/* Top Action Bar */}
       <div className="paperview-top-actions">
-        <button type="button" className="btn-back" onClick={onBack}>
-          <span className="material-symbols-outlined">arrow_back</span>
-          Back to Papers
-        </button>
+        <Breadcrumbs items={breadcrumbItems} />
 
         <div className="paperview-action-group">
           <button type="button" className="paperview-btn-secondary" onClick={toggleAll}>
