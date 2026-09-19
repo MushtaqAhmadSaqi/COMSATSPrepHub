@@ -16,13 +16,12 @@ export async function fetchSubjectsFromSupabase() {
     }
 
     const subjectMap = new Map();
-    
-    // Seed map with default catalog subjects (27 COMSATS subjects)
+
+    // Seed map with default catalog subjects (27 COMSATS subjects).
     DEFAULT_SUBJECTS.forEach(sub => {
       subjectMap.set(sub.code.toUpperCase(), { ...sub, papers: 0 });
     });
 
-    // Merge Supabase past_papers data
     data.forEach(item => {
       const code = String(item.subject_code || '').trim().toUpperCase();
       const name = String(item.subject_name || '').trim();
@@ -47,16 +46,13 @@ export async function fetchSubjectsFromSupabase() {
       }
     });
 
-    // Normalize paper counts so subjects display active count
-    const finalSubjects = Array.from(subjectMap.values()).map(sub => {
+    return Array.from(subjectMap.values()).map(sub => {
       if (sub.papers === 0) {
         const defaultMatch = DEFAULT_SUBJECTS.find(d => d.code === sub.code);
         sub.papers = defaultMatch ? defaultMatch.papers : 12;
       }
       return sub;
     });
-
-    return finalSubjects;
   } catch (err) {
     console.error('Fetch subjects error:', err);
     return DEFAULT_SUBJECTS;
@@ -70,10 +66,16 @@ export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName
   try {
     let query = supabase.from('past_papers').select('*');
 
-    if (subjectCode) {
-      query = query.ilike('subject_code', `%${subjectCode}%`);
-    } else if (subjectName) {
-      query = query.ilike('subject_name', `%${subjectName}%`);
+    const code = String(subjectCode || '').trim();
+    const name = String(subjectName || '').trim();
+
+    if (code || name) {
+      const normalizedCode = code.replace(/[-\s]/g, '');
+      const filters = [];
+      if (code) filters.push(`subject_code.ilike.%${code}%`);
+      if (normalizedCode && normalizedCode !== code) filters.push(`subject_code.ilike.%${normalizedCode}%`);
+      if (name) filters.push(`subject_name.ilike.%${name}%`);
+      query = query.or(filters.join(','));
     }
 
     const { data, error } = await query.order('year', { ascending: false });
@@ -89,15 +91,67 @@ export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName
 
     return data.map(item => ({
       id: item.id || Math.random(),
-      title: item.title || item.paper_title || `${item.term || 'Exam'} Paper — ${item.year || 'COMSATS'}`,
-      term: item.term || 'Exam',
+      title: item.title || item.paper_title || buildPaperTitle(item),
+      term: item.term || item.exam_type || 'Exam',
       year: item.year || new Date().getFullYear(),
-      file_url: item.file_url || item.pdf_url || item.url || null
+      semester: item.semester || '',
+      file_url: item.file_url || item.pdf_url || item.url || null,
+      subjectCode: item.subject_code || subjectCode || '',
+      subjectName: item.subject_name || subjectName || '',
+      totalMarks: item.total_marks || null,
+      instructorName: item.instructor_name || null,
+      createdAt: item.created_at || null
     }));
   } catch (err) {
     console.error('Fetch papers error:', err);
     return null;
   }
+}
+
+/**
+ * Fetches the real questions attached to a selected paper from Supabase.
+ */
+export async function fetchQuestionsForPaperFromSupabase(paperId) {
+  if (!paperId) return [];
+
+  try {
+    const { data, error } = await supabase
+      .from('questions')
+      .select('*')
+      .eq('paper_id', paperId)
+      .order('question_number', { ascending: true });
+
+    if (error) {
+      console.warn('Supabase fetch paper questions error:', error.message);
+      return [];
+    }
+
+    return (data || [])
+      .filter(item => item.question_text || item.model_answer)
+      .map((item, idx) => ({
+        id: item.id || `${paperId}-${idx + 1}`,
+        number: item.question_number ? `Question ${item.question_number}` : `Question ${idx + 1}`,
+        section: item.clo || 'Past paper question',
+        marks: item.marks ? `${item.marks} Marks` : 'Marks not specified',
+        questionText: String(item.question_text || '').trim(),
+        answerText: String(item.model_answer || 'No model answer is available for this question yet.').trim(),
+        subParts: item.sub_parts || null,
+        options: item.options || null,
+        graph: item.graph || null,
+        answerGraph: item.answer_graph || null,
+        source: 'supabase'
+      }));
+  } catch (err) {
+    console.error('Fetch paper questions error:', err);
+    return [];
+  }
+}
+
+function buildPaperTitle(item) {
+  const term = item.exam_type || item.term || 'Exam';
+  const semester = item.semester ? `${item.semester} ` : '';
+  const year = item.year || 'COMSATS';
+  return `${term} - ${semester}${year}`;
 }
 
 function getSubjectIcon(code, name) {
