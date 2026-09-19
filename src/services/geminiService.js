@@ -10,7 +10,8 @@ const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || import.met
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'llama-3.1-70b-versatile', 'mixtral-8x7b-32768', 'gemma2-9b-it'];
+const GROQ_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-70b-versatile', 'llama-3.1-8b-instant', 'llama3-70b-8192', 'llama3-8b-8192', 'gemma2-9b-it', 'mixtral-8x7b-32768'];
+const SERVER_QUIZ_API_URL = '/api/generate-quiz';
 
 /**
  * Call OpenRouter API (OpenRouter Free Tier Models)
@@ -287,11 +288,64 @@ const SUBJECT_QUESTION_BANKS = {
   ]
 };
 
+async function callServerQuizApi({ subject, subjectCode, numQuestions, difficulty }) {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 25000);
+
+  try {
+    const response = await fetch(SERVER_QUIZ_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        subject,
+        subjectCode,
+        difficulty,
+        questionCount: numQuestions
+      })
+    });
+
+    if (!response.ok) return null;
+
+    const payload = await response.json();
+    const sourceQuestions = Array.isArray(payload) ? payload : payload.questions;
+    if (!Array.isArray(sourceQuestions) || sourceQuestions.length === 0) return null;
+
+    return sourceQuestions
+      .map((item) => {
+        if (!item.question || !Array.isArray(item.options) || item.options.length !== 4) return null;
+        const correct = Number.isInteger(item.correctAnswer)
+          ? item.correctAnswer
+          : Number.isInteger(item.correct)
+            ? item.correct
+            : 0;
+
+        return {
+          question: String(item.question).trim(),
+          options: item.options.map(option => String(option).trim()),
+          correct: Math.max(0, Math.min(3, correct)),
+          hint: String(item.explanation || item.hint || 'Review the core concept behind this answer.').trim(),
+          source: 'api'
+        };
+      })
+      .filter(Boolean)
+      .slice(0, numQuestions);
+  } catch (err) {
+    console.warn('Server quiz API unavailable:', err.message);
+    return null;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
+
 /**
  * Generate MCQ questions for a given subject using Google Gemini AI or Groq AI with automatic fallbacks.
  */
 export async function generateQuizWithGemini({ subject, subjectCode, numQuestions = 10, difficulty = 'Medium' }) {
   const prompt = buildPrompt(subject, subjectCode, numQuestions, difficulty);
+
+  const serverQuestions = await callServerQuizApi({ subject, subjectCode, numQuestions, difficulty });
+  if (serverQuestions && serverQuestions.length > 0) return serverQuestions;
 
   // 0. Try OpenRouter API if OpenRouter key is provided (sk-or-v1-...)
   if (OPENROUTER_API_KEY && OPENROUTER_API_KEY.trim().startsWith('sk-or-v1-')) {

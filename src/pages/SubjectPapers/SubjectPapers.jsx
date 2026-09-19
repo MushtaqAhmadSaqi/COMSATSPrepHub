@@ -21,7 +21,7 @@ export default function SubjectPapers({
   onViewPaper = () => {},
   onBack = () => {}
 }) {
-  const [papers, setPapers] = useState(DEFAULT_PAPERS);
+  const [papers, setPapers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -32,6 +32,9 @@ export default function SubjectPapers({
       const dbPapers = await fetchPapersForSubjectFromSupabase(subject.code, subject.name);
       if (dbPapers && dbPapers.length > 0) {
         setPapers(dbPapers);
+      } else {
+        // No papers in DB for this subject — show placeholder set so the page isn't blank
+        setPapers(DEFAULT_PAPERS);
       }
     } catch (err) {
       setError(err.message || 'Failed to load papers.');

@@ -196,6 +196,19 @@ html.dark .paperview-q-badge {
   margin-bottom: 1.25rem;
 }
 
+.paperview-subparts-list,
+.paperview-options-list {
+  margin: -0.5rem 0 1.25rem 1.25rem;
+  padding: 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.paperview-subparts-list li,
+.paperview-options-list li {
+  margin-bottom: 0.375rem;
+}
+
 /* ─── Solution Toggle ───────────────────────────────────────────── */
 .paperview-toggle-sol-btn {
   background: var(--surface);
