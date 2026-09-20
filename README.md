@@ -1,133 +1,208 @@
+<div align="center">
+
+<img src="./public/logo.png" alt="COMSATSPrepHub logo" width="120" />
+
 # COMSATSPrepHub
 
-COMSATSPrepHub is a student-focused exam preparation platform for COMSATS University students. It brings together past papers, topic-based quizzes, AI-generated quiz support, GPA tracking, and a cleaner study workflow in one frontend app.
+### Prepare smarter. Practice better. Score higher.
 
-## Features
+<p>
+  A student-focused exam preparation platform for COMSATS University students.
+  Find past papers, practice with quizzes, generate AI-powered tests, and track
+  your GPA in one place.
+</p>
 
-- Verified past paper browsing by subject
-- Subject-based paper navigation and paper detail view
-- Quiz system for practice and revision
-- AI quiz generation using Gemini/OpenRouter/Groq-style integrations
-- GPA calculator with CGPA/SGPA support
-- User authentication via Supabase
-- Dashboard and progress tracking
-- Responsive UI with dark mode and mobile-friendly layout
-- Command palette and app-style navigation
+<p>
+  <a href="https://comsatsprephub.vercel.app">Live Demo</a>
+  &nbsp;&middot;&nbsp;
+  <a href="https://github.com/MushtaqAhmadSaqi/Full-front-end/issues">Report an Issue</a>
+  &nbsp;&middot;&nbsp;
+  <a href="https://github.com/MushtaqAhmadSaqi/Full-front-end">View Source</a>
+</p>
 
-## Tech Stack
+<p>
+  <img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=20232A" alt="React 18" />
+  <img src="https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite 5" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 3" />
+  <img src="https://img.shields.io/badge/License-Educational-1E3A8A?style=for-the-badge" alt="Educational license" />
+</p>
 
-- React 18
-- Vite
-- Tailwind CSS
-- Framer Motion
-- Supabase
-- Gemini / AI quiz support
+</div>
 
-## Project Structure
+---
+
+## Why COMSATSPrepHub?
+
+Exam preparation should not mean searching through scattered files and old
+messages. COMSATSPrepHub brings the most useful study tools into a focused,
+mobile-friendly workspace.
+
+| 📚 Past Papers | 🧠 Practice Quizzes | ✨ AI Quiz Generator | 🧮 GPA Calculator |
+|:---:|:---:|:---:|:---:|
+| Browse papers by subject | Revise important topics | Create personalized tests | Calculate SGPA and CGPA |
+
+## ✨ Features
+
+- **Past paper library** — Browse papers by subject and open detailed paper views.
+- **Practice quizzes** — Test your knowledge with topic-based revision quizzes.
+- **AI quiz generation** — Generate personalized COMSATS-style quizzes with AI.
+- **GPA calculator** — Calculate semester GPA and cumulative GPA using COMSATS grading rules.
+- **Student dashboard** — Keep useful study information and progress in one place.
+- **Authentication** — Sign in with Supabase to unlock account-based features.
+- **Dark mode** — Study comfortably in light or dark themes.
+- **Responsive design** — Works across desktop, tablet, and mobile screens.
+- **Command palette** — Quickly move between pages with `Ctrl + K` or `Cmd + K`.
+
+## 🧭 How it works
+
+```mermaid
+flowchart LR
+    A[Choose a subject] --> B[Browse past papers]
+    B --> C[Review important topics]
+    C --> D[Practice with a quiz]
+    D --> E[Track your progress]
+    C --> F[Generate an AI quiz]
+    F --> D
+    E --> G[Calculate GPA]
+```
+
+## 🛠️ Tech stack
+
+| Technology | Purpose |
+|---|---|
+| [React](https://react.dev/) | Component-based user interface |
+| [Vite](https://vitejs.dev/) | Fast development server and production builds |
+| [Tailwind CSS](https://tailwindcss.com/) | Utility-first styling |
+| [Framer Motion](https://motion.dev/) | UI animations and transitions |
+| [Supabase](https://supabase.com/) | Authentication and cloud data services |
+| Gemini / Groq / OpenRouter | AI-powered quiz generation |
+
+## 📁 Project structure
 
 ```text
 .
-├── api/                  # Backend/API-related code or route support
-├── legacy/              # Older app code and assets
-├── public/              # Static public files
-├── src/                 # Main React frontend source
+├── api/                  # API and serverless route support
+├── legacy/              # Older app code and legacy assets
+├── public/              # Logos, icons, and static files
+├── src/
 │   ├── components/      # Reusable UI components
+│   ├── constants/       # Shared application constants
 │   ├── pages/           # Page-level React components
-│   ├── services/        # API and external service clients
-│   ├── utils/           # Helper functions and utilities
-│   ├── App.jsx          # Root app layout and routing
-│   ├── main.jsx         # App bootstrap
+│   ├── services/        # Supabase and AI service integrations
+│   ├── utils/           # Shared helpers and utilities
+│   ├── App.jsx          # Root layout and client-side navigation
+│   ├── main.jsx         # React entry point
 │   └── index.css        # Global styles
-├── .env.example         # Example environment variables
-├── index.html           # Vite HTML entry
-├── package.json         # Scripts and dependencies
-├── tailwind.config.cjs  # Tailwind config
-├── vite.config.js       # Vite config
-├── llms.txt             # LLM-oriented project summary
-└── README.md            # Project documentation
+├── .env.example         # Environment variable template
+├── index.html            # Vite HTML entry
+├── package.json          # Scripts and dependencies
+├── tailwind.config.cjs   # Tailwind configuration
+├── vite.config.js        # Vite configuration
+└── README.md             # Project documentation
 ```
 
-## Getting Started
+## 🚀 Getting started
 
 ### Prerequisites
 
-- Node.js 18+
+- [Node.js](https://nodejs.org/) 18 or newer
 - npm
+- Supabase credentials for authentication features
+- An AI provider key for AI quiz generation
 
-### Install dependencies
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/MushtaqAhmadSaqi/Full-front-end.git
+cd Full-front-end
+```
+
+### 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-### Environment variables
+### 3. Configure environment variables
 
-Copy the example environment file and update it with your real credentials:
+Create a local `.env` file from the template:
 
 ```bash
 copy .env.example .env
 ```
 
-Then set values such as:
+Then configure the values required by your local setup:
 
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
-- optional AI keys depending on your quiz generation setup
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-## Available Scripts
-
-```bash
-npm run dev
+# Server-side AI keys
+GEMINI_API_KEY=your_gemini_api_key
+GROQ_API_KEY=your_groq_api_key
+OPENROUTER_API_KEY=your_openrouter_api_key
 ```
-Runs the app in development mode with Vite.
 
-```bash
-npm run build
-```
-Builds the production version of the frontend.
+> **Security note:** Never commit `.env` or expose server-side API keys in the browser.
+> The repository's `.env.example` contains placeholders only.
 
-```bash
-npm run preview
-```
-Serves the production build locally.
-
-```bash
-npm run test
-```
-Runs the project test script.
-
-```bash
-npm run build:css
-```
-Builds Tailwind CSS for the legacy frontend assets.
-
-```bash
-npm run watch:css
-```
-Watches and rebuilds Tailwind CSS during development.
-
-## Running the app locally
+### 4. Start the development server
 
 ```bash
 npm run dev
 ```
 
-Then open the local URL shown in the terminal, typically:
+Open the local URL shown in the terminal, usually
+[`http://localhost:5173`](http://localhost:5173).
 
-```text
-http://localhost:5173
-```
+## 📜 Available scripts
 
-## Notes
+| Command | Description |
+|---|---|
+| `npm run dev` | Start the Vite development server |
+| `npm run build` | Create a production build |
+| `npm run preview` | Preview the production build locally |
+| `npm run test` | Run the project test script |
+| `npm run analyze` | Build in analyze mode |
+| `npm run build:css` | Build Tailwind CSS for legacy assets |
+| `npm run watch:css` | Watch and rebuild legacy Tailwind CSS |
 
-- This repository mixes modern React frontend code with legacy assets under the `legacy/` directory.
-- Some features, like authentication and saved student data, rely on Supabase configuration.
-- AI quiz generation may require API keys configured in the environment.
+## 🌐 Deployment
 
-## Deployment
+The project is ready for Vercel-style deployment:
 
-This project is designed to work well with Vercel-style static/frontend deployment. Configure environment variables in your hosting platform before deployment.
+1. Import the repository into Vercel.
+2. Add the required environment variables in the project settings.
+3. Deploy the `main` branch.
+4. Verify authentication and AI quiz generation in the deployed environment.
 
-## License
+The public app is available at
+[`comsatsprephub.vercel.app`](https://comsatsprephub.vercel.app).
 
-This project is for educational use and is intended for COMSATS students. Check the repository and individual source files for any additional licensing or usage policies.
+## 🤝 Contributing
+
+Contributions and suggestions are welcome. Before opening a pull request:
+
+1. Create a focused branch for your change.
+2. Run `npm run build`.
+3. Run `npm run test`.
+4. Include a clear description of the change and any screenshots for UI work.
+
+## 📌 Notes
+
+- The project contains both modern React code and legacy assets under `legacy/`.
+- Authentication and saved student data depend on Supabase configuration.
+- AI quiz generation depends on the configured provider and available API keys.
+- Past papers are provided for educational revision and self-assessment.
+
+## 📄 License
+
+This project is intended for educational use by COMSATS students. Review the
+repository and individual source files for any additional usage or licensing
+requirements.
+
+<div align="center">
+
+Made for COMSATS students 💙
+
+</div>
