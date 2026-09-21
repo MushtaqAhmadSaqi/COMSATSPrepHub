@@ -1,0 +1,37 @@
+<svg width="900" height="220" viewBox="0 0 900 220" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">COMSATSPrepHub study loop</title>
+  <desc id="desc">An animated path from past papers to quizzes, progress, and better results.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="900" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#111936"/>
+      <stop offset="1" stop-color="#173E55"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="100" y1="0" x2="800" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#27C6B8"/>
+      <stop offset="1" stop-color="#8BE35A"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="220" rx="24" fill="url(#background)"/>
+  <circle cx="780" cy="32" r="120" fill="#27C6B8" fill-opacity=".08"/>
+  <circle cx="120" cy="210" r="150" fill="#8BE35A" fill-opacity=".06"/>
+  <text x="48" y="58" fill="white" font-family="Arial, sans-serif" font-size="25" font-weight="700">Your study loop, in one place</text>
+  <text x="48" y="87" fill="#B8C7D9" font-family="Arial, sans-serif" font-size="15">Find. Practice. Improve. Repeat.</text>
+  <path d="M114 151H786" stroke="#496177" stroke-width="4" stroke-linecap="round"/>
+  <path d="M114 151H786" stroke="url(#accent)" stroke-width="4" stroke-linecap="round" stroke-dasharray="130 542">
+    <animate attributeName="stroke-dashoffset" from="672" to="0" dur="3.5s" repeatCount="indefinite"/>
+  </path>
+  <g font-family="Arial, sans-serif" font-size="13" text-anchor="middle">
+    <g fill="#27C6B8">
+      <circle cx="114" cy="151" r="18"><animate attributeName="r" values="18;22;18" dur="2.8s" repeatCount="indefinite"/></circle>
+      <circle cx="338" cy="151" r="18"><animate attributeName="r" values="18;22;18" dur="2.8s" begin=".7s" repeatCount="indefinite"/></circle>
+      <circle cx="562" cy="151" r="18"><animate attributeName="r" values="18;22;18" dur="2.8s" begin="1.4s" repeatCount="indefinite"/></circle>
+      <circle cx="786" cy="151" r="18"><animate attributeName="r" values="18;22;18" dur="2.8s" begin="2.1s" repeatCount="indefinite"/></circle>
+    </g>
+    <g fill="white">
+      <text x="114" y="194">Past papers</text>
+      <text x="338" y="194">Practice</text>
+      <text x="562" y="194">Track progress</text>
+      <text x="786" y="194">Score higher</text>
+    </g>
+  </g>
+</svg>
