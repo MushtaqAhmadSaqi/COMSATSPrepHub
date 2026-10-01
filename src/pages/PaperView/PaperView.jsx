@@ -62,6 +62,126 @@ function getPartText(part) {
   return JSON.stringify(part, null, 2);
 }
 
+/* ── Lightweight markdown renderer ──────────────────────── */
+// Handles: headings (###), **bold**, *italic*, `code`,
+// - / * bullet lists, numbered lists, blank line paragraphs,
+// and horizontal rules. No external dependency needed.
+
+function renderInline(text) {
+  // We process inline patterns: **bold**, *italic*, `code`
+  const parts = [];
+  const re = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g;
+  let last = 0;
+  let match;
+
+  while ((match = re.exec(text)) !== null) {
+    if (match.index > last) {
+      parts.push(text.slice(last, match.index));
+    }
+    const token = match[0];
+    if (token.startsWith('`')) {
+      parts.push(<code key={match.index} className="paperview-inline-code">{token.slice(1, -1)}</code>);
+    } else if (token.startsWith('**')) {
+      parts.push(<strong key={match.index}>{token.slice(2, -2)}</strong>);
+    } else {
+      parts.push(<em key={match.index}>{token.slice(1, -1)}</em>);
+    }
+    last = match.index + token.length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts.length ? parts : text;
+}
+
+function MarkdownAnswer({ text }) {
+  const raw = String(text ?? '').replace(/\r\n?/g, '\n');
+  const lines = raw.split('\n');
+
+  const elements = [];
+  let i = 0;
+  let listBuffer = null; // { type: 'ul'|'ol', items: [jsx] }
+
+  const flushList = () => {
+    if (!listBuffer) return;
+    const Tag = listBuffer.type;
+    elements.push(
+      <Tag key={`list-${i}`} className="paperview-md-list">
+        {listBuffer.items}
+      </Tag>
+    );
+    listBuffer = null;
+  };
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Heading
+    const heading = line.match(/^(#{1,4})\s+(.+)/);
+    if (heading) {
+      flushList();
+      const level = Math.min(heading[1].length, 4);
+      const Tag = `h${level}`;
+      elements.push(
+        <Tag key={i} className={`paperview-md-h${level}`}>
+          {renderInline(heading[2])}
+        </Tag>
+      );
+      i++; continue;
+    }
+
+    // Horizontal rule
+    if (/^[-*_]{3,}\s*$/.test(line)) {
+      flushList();
+      elements.push(<hr key={i} className="paperview-md-hr" />);
+      i++; continue;
+    }
+
+    // Unordered list item
+    const ulItem = line.match(/^[\s]*[-*+]\s+(.*)/);
+    if (ulItem) {
+      if (!listBuffer || listBuffer.type !== 'ul') {
+        flushList();
+        listBuffer = { type: 'ul', items: [] };
+      }
+      listBuffer.items.push(
+        <li key={i}>{renderInline(ulItem[1])}</li>
+      );
+      i++; continue;
+    }
+
+    // Ordered list item
+    const olItem = line.match(/^[\s]*\d+\.\s+(.*)/);
+    if (olItem) {
+      if (!listBuffer || listBuffer.type !== 'ol') {
+        flushList();
+        listBuffer = { type: 'ol', items: [] };
+      }
+      listBuffer.items.push(
+        <li key={i}>{renderInline(olItem[1])}</li>
+      );
+      i++; continue;
+    }
+
+    // Blank line
+    if (line.trim() === '') {
+      flushList();
+      i++; continue;
+    }
+
+    // Plain paragraph
+    flushList();
+    elements.push(
+      <p key={i} className="paperview-md-p">
+        {renderInline(line)}
+      </p>
+    );
+    i++;
+  }
+
+  flushList();
+
+  return <div className="paperview-md-body">{elements}</div>;
+}
+
 /* ── Component ──────────────────────────────────────────── */
 
 export default function PaperView({
@@ -393,9 +513,9 @@ export default function PaperView({
                       <h4>Model answer</h4>
                     </div>
 
-                    <pre className="paperview-answer-text">
-                      {q.answerText || 'No model answer is available yet.'}
-                    </pre>
+                    <MarkdownAnswer
+                      text={q.answerText || 'No model answer is available yet.'}
+                    />
                   </section>
                 </article>
               );
