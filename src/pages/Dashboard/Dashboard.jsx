@@ -1,123 +1,300 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../../services/supabase';
-import PageHeader from '../../components/PageHeader/PageHeader';
 import './Dashboard.css';
 
-const STATS = [
+const DEFAULT_ROUTES = {
+  papers: 'subjects',
+  quiz: 'ai-quiz',
+  gpa: 'gpa',
+};
+
+const DEMO_ACTIVITY = [
   {
-    label: 'Quizzes Attempted',
-    value: '12',
-    sub: '+3 this week',
-    subClass: 'dash-sub-positive',
+    id: 'demo-1',
+    title: 'Data Structures & Algorithms',
+    description: 'Practice quiz',
+    time: 'Example activity',
     icon: 'quiz',
-    colors: ['var(--brand)', 'var(--accent)']
   },
   {
-    label: 'Average Accuracy',
-    value: '84%',
-    sub: 'Top 15% of cohort',
-    subClass: 'dash-sub-positive',
-    icon: 'track_changes',
-    colors: ['var(--success)', 'var(--accent)']
+    id: 'demo-2',
+    title: 'Calculus & Analytical Geometry',
+    description: 'Past paper',
+    time: 'Example activity',
+    icon: 'description',
   },
-  {
-    label: 'Saved Papers',
-    value: '8',
-    sub: 'Ready for offline study',
-    subClass: 'dash-sub-neutral',
-    icon: 'bookmark',
-    colors: ['#8b5cf6', '#6366f1']
-  }
 ];
 
-const ACTIVITY = [
-  { name: 'Data Structures & Algorithms Quiz', time: '2 hours ago', icon: 'quiz' },
-  { name: 'Calculus Terminal Paper — Fall 2023', time: 'Yesterday', icon: 'picture_as_pdf' },
-  { name: 'OOP Midterm Paper — Spring 2024', time: '3 days ago', icon: 'picture_as_pdf' },
-];
-
-export default function Dashboard({ user = null, onNavigate = () => {} }) {
-  const displayName = user?.user_metadata?.full_name?.split(' ')[0]
-    || user?.email?.split('@')[0]
-    || 'Student';
-  const userEmail = user?.email || '';
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    onNavigate('home');
-  };
-
+function Icon({ name, className = '' }) {
   return (
-    <div className="dash-container">
-      <PageHeader
-        badge="Overview"
-        title={`Hi, ${displayName}!`}
-        subtitle={`${userEmail ? userEmail + ' · ' : ''}Student Performance Analytics & Study Overview`}
-      >
-        {user && (
-          <button
-            type="button"
-            className="dash-signout-btn"
-            onClick={handleSignOut}
-            aria-label="Sign out"
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>logout</span>
-            Sign Out
-          </button>
-        )}
-      </PageHeader>
-
-      {/* Demo Notice */}
-      <div className="dash-demo-notice">
-        <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>info</span>
-        Stats shown below are sample data — personalized analytics coming soon.
-      </div>
-
-      {/* Stats Grid */}
-      <div className="dash-grid">
-        {STATS.map((s, i) => (
-          <div
-            key={i}
-            className="dash-card"
-            style={{
-              animationDelay: `${i * 0.08}s`,
-              '--card-color-1': s.colors[0],
-              '--card-color-2': s.colors[1]
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <span className="dash-card-label">{s.label}</span>
-              <div className="dash-activity-icon" style={{ background: `${s.colors[0]}18`, color: s.colors[0] }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>{s.icon}</span>
-              </div>
-            </div>
-            <div className="dash-stat-val" style={{ backgroundImage: `linear-gradient(135deg, ${s.colors[0]}, ${s.colors[1]})` }}>
-              {s.value}
-            </div>
-            <span className={`dash-card-sub ${s.subClass}`}>{s.sub}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Recent Activity */}
-      <div>
-        <h2 className="dash-section-title">Recent Activity</h2>
-        <div className="dash-activity-list">
-          {ACTIVITY.map((a, i) => (
-            <div key={i} className="dash-activity-item">
-              <div className="dash-activity-icon">
-                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>{a.icon}</span>
-              </div>
-              <div className="dash-activity-text">
-                <div className="dash-activity-name">{a.name}</div>
-                <div className="dash-activity-time">{a.time}</div>
-              </div>
-              <span className="material-symbols-outlined" style={{ color: 'var(--border-strong)', fontSize: '18px' }}>chevron_right</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <span
+      className={`material-symbols-outlined ${className}`}
+      aria-hidden="true"
+    >
+      {name}
+    </span>
   );
 }
 
+export default function Dashboard({
+  user = null,
+  onNavigate = () => {},
+  routes = DEFAULT_ROUTES,
+  stats = null,
+  activity = [],
+}) {
+  const [signingOut, setSigningOut] = useState(false);
+  const [signOutError, setSignOutError] = useState('');
+
+  const fullName = user?.user_metadata?.full_name?.trim();
+  const displayName =
+    fullName?.split(/\s+/)[0] ||
+    user?.email?.split('@')[0] ||
+    'Student';
+
+  const isDemo = stats == null;
+  const destinations = { ...DEFAULT_ROUTES, ...routes };
+
+  const metrics = [
+    {
+      label: 'Quizzes completed',
+      value: isDemo ? '12' : stats.quizzesAttempted ?? '—',
+      description: 'Practice builds confidence',
+      icon: 'quiz',
+    },
+    {
+      label: 'Average accuracy',
+      value: isDemo
+        ? '84%'
+        : Number.isFinite(stats.averageAccuracy)
+          ? `${stats.averageAccuracy}%`
+          : '—',
+      description: 'Across your completed quizzes',
+      icon: 'track_changes',
+    },
+    {
+      label: 'Saved papers',
+      value: isDemo ? '8' : stats.savedPapers ?? '—',
+      description: 'Your revision collection',
+      icon: 'bookmark',
+    },
+  ];
+
+  const recentActivity = isDemo ? DEMO_ACTIVITY : activity;
+
+  async function handleSignOut() {
+    if (signingOut) return;
+
+    setSigningOut(true);
+    setSignOutError('');
+
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      onNavigate('home');
+    } catch {
+      setSignOutError('Could not sign out. Please try again.');
+    } finally {
+      setSigningOut(false);
+    }
+  }
+
+  return (
+    <main className="study-dashboard">
+      <header className="study-dashboard__header">
+        <div>
+          <p className="study-dashboard__eyebrow">YOUR WORKSPACE</p>
+          <h1>Welcome back, {displayName}.</h1>
+          <p className="study-dashboard__intro">
+            A little practice today. A little more confidence tomorrow.
+          </p>
+        </div>
+
+        {user && (
+          <button
+            type="button"
+            className="study-dashboard__signout"
+            onClick={handleSignOut}
+            disabled={signingOut}
+          >
+            <Icon name="logout" />
+            {signingOut ? 'Signing out…' : 'Sign out'}
+          </button>
+        )}
+      </header>
+
+      {signOutError && (
+        <p className="study-dashboard__error" role="alert">
+          {signOutError}
+        </p>
+      )}
+
+      {isDemo && (
+        <div className="study-dashboard__preview">
+          <Icon name="info" />
+          <p>
+            <strong>Dashboard preview.</strong> The statistics and activity below
+            are examples, not your personal study history.
+          </p>
+        </div>
+      )}
+
+      <section
+        className="study-dashboard__metrics"
+        aria-label="Study overview"
+      >
+        {metrics.map(metric => (
+          <article
+            className="study-dashboard__metric"
+            key={metric.label}
+          >
+            <div className="study-dashboard__metric-top">
+              <span>{metric.label}</span>
+              <Icon name={metric.icon} />
+            </div>
+
+            <strong className="study-dashboard__metric-value">
+              {metric.value}
+            </strong>
+
+            <p>{metric.description}</p>
+          </article>
+        ))}
+      </section>
+
+      <div className="study-dashboard__layout">
+        <div className="study-dashboard__main">
+          <section className="study-dashboard__feature">
+            <div className="study-dashboard__feature-top">
+              <span className="study-dashboard__section-label">
+                THE PAPER LIBRARY
+              </span>
+              <Icon name="library_books" />
+            </div>
+
+            <h2>Start with the questions<br />that came before.</h2>
+            <p>
+              Explore past papers by subject. Get familiar with the format,
+              revisit the difficult topics, and make your next study session count.
+            </p>
+
+            <button
+              type="button"
+              className="study-dashboard__primary"
+              onClick={() => onNavigate(destinations.papers)}
+            >
+              Browse past papers
+              <Icon name="arrow_forward" />
+            </button>
+
+            <div className="study-dashboard__feature-foot">
+              <span>01 / Explore</span>
+              <span>02 / Understand</span>
+              <span>03 / Practice</span>
+            </div>
+          </section>
+
+          <section
+            className="study-dashboard__activity"
+            aria-labelledby="study-activity-title"
+          >
+            <div className="study-dashboard__section-heading">
+              <div>
+                <p className="study-dashboard__section-label">YOUR STUDY TRAIL</p>
+                <h2 id="study-activity-title">Recent activity</h2>
+              </div>
+
+              {isDemo && (
+                <span className="study-dashboard__sample-label">
+                  Sample
+                </span>
+              )}
+            </div>
+
+            {recentActivity.length > 0 ? (
+              <ul className="study-dashboard__activity-list">
+                {recentActivity.map(item => (
+                  <li key={item.id}>
+                    <div className="study-dashboard__activity-icon">
+                      <Icon name={item.icon || 'description'} />
+                    </div>
+
+                    <div className="study-dashboard__activity-copy">
+                      <h3>{item.title}</h3>
+                      <p>{item.description}</p>
+                    </div>
+
+                    <span className="study-dashboard__activity-time">
+                      {item.time}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="study-dashboard__empty">
+                <Icon name="history" />
+                <h3>Your study history starts here</h3>
+                <p>
+                  Your recorded activity will appear here when it is available.
+                </p>
+              </div>
+            )}
+          </section>
+        </div>
+
+        <aside className="study-dashboard__sidebar">
+          <section className="study-dashboard__tools">
+            <p className="study-dashboard__section-label">KEEP MOVING</p>
+            <h2>A good next step</h2>
+
+            <button
+              type="button"
+              className="study-dashboard__tool"
+              onClick={() => onNavigate(destinations.quiz)}
+            >
+              <span className="study-dashboard__tool-icon">
+                <Icon name="quiz" />
+              </span>
+              <span className="study-dashboard__tool-copy">
+                <strong>Test your understanding</strong>
+                <span>Create a quiz around your topic.</span>
+              </span>
+              <Icon name="arrow_forward" />
+            </button>
+
+            <button
+              type="button"
+              className="study-dashboard__tool"
+              onClick={() => onNavigate(destinations.gpa)}
+            >
+              <span className="study-dashboard__tool-icon">
+                <Icon name="calculate" />
+              </span>
+              <span className="study-dashboard__tool-copy">
+                <strong>Plan your semester</strong>
+                <span>Work out your SGPA and CGPA.</span>
+              </span>
+              <Icon name="arrow_forward" />
+            </button>
+          </section>
+
+          <section className="study-dashboard__note">
+            <Icon name="edit_note" />
+            <p className="study-dashboard__section-label">A SMALL STUDY HABIT</p>
+            <h2>Give one topic your full attention.</h2>
+            <p>
+              Pick something you find difficult. Review one paper, attempt a few
+              questions, then write down what you still need to understand.
+            </p>
+            <span>Keep the session small. Make it useful.</span>
+          </section>
+        </aside>
+      </div>
+
+      <footer className="study-dashboard__footer">
+        <span>COMSATSPrepHub</span>
+        <span>Your space to prepare.</span>
+      </footer>
+    </main>
+  );
+}

@@ -1,493 +1,551 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { fireConfetti } from '../../utils/confetti';
-import { useCounter } from '../../utils/useCounter';
-import PageHeader from '../../components/PageHeader/PageHeader';
+import React, { useId, useRef, useState } from 'react';
+import { GRADING_SCALE } from '../../services/gpaEngine';
 import './GpaCalculator.css';
 
-const GRADE_OPTIONS = [
-  { label: 'A', value: 4.0, color: 'emerald' },
-  { label: 'A-', value: 3.7, color: 'emerald' },
-  { label: 'B+', value: 3.33, color: 'sky' },
-  { label: 'B', value: 3.0, color: 'sky' },
-  { label: 'B-', value: 2.7, color: 'sky' },
-  { label: 'C+', value: 2.33, color: 'amber' },
-  { label: 'C', value: 2.0, color: 'amber' },
-  { label: 'C-', value: 1.7, color: 'orange' },
-  { label: 'D', value: 1.3, color: 'orange' },
-  { label: 'F', value: 0.0, color: 'red' },
-];
-
-/* ── Animated Grade Badge ── */
-function AnimatedGradeBadge({ className, children }) {
+function Icon({ name }) {
   return (
-    <motion.span
-      className={`grade-badge-animated ${className}`}
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-    >
-      {children}
-    </motion.span>
+    <span className="material-symbols-outlined" aria-hidden="true">
+      {name}
+    </span>
   );
 }
 
-/* ── Animated Input with Focus Ring ── */
-function AnimatedInput({ id, 'aria-label': ariaLabel, 'aria-describedby': ariaDescribedBy, type, placeholder, value, onChange, className = '', min, max, step, style }) {
-  return (
-    <motion.input
-      id={id}
-      aria-label={ariaLabel}
-      aria-describedby={ariaDescribedBy}
-      type={type}
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      className={`gpa-input animated ${className}`}
-      min={min}
-      max={max}
-      step={step}
-      style={style}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    />
-  );
-}
-
-/* ── Animated Select Dropdown ── */
-function AnimatedSelect({ id, 'aria-label': ariaLabel, 'aria-describedby': ariaDescribedBy, value, onChange, children, className = '' }) {
-  return (
-    <motion.select
-      id={id}
-      aria-label={ariaLabel}
-      aria-describedby={ariaDescribedBy}
-      value={value}
-      onChange={onChange}
-      className={`gpa-input animated ${className}`}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      {children}
-    </motion.select>
-  );
-}
-
-/* ── Animated Number Display ── */
-function AnimatedNumber({ value, suffix = '', className = '' }) {
-  return (
-    <motion.div
-      className={`gpa-number ${className}`}
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, type: 'spring', stiffness: 200 }}
-    >
-      <span className="gpa-number-value">{value}</span>
-      {suffix && <span className="gpa-number-suffix">{suffix}</span>}
-    </motion.div>
-  );
-}
-
-/* ── Confetti Trigger Hook ── */
-function useConfettiTrigger() {
-  const prevValueRef = useRef(null);
-  const triggerConfetti = (currentValue, threshold = 3.5) => {
-    if (
-      prevValueRef.current !== null &&
-      prevValueRef.current < threshold &&
-      currentValue >= threshold
-    ) {
-      fireConfetti({ count: 50, spread: 60 });
-    }
-    prevValueRef.current = currentValue;
+function createCourse(id) {
+  return {
+    id,
+    name: '',
+    credits: '3',
+    grade: '',
   };
-  return triggerConfetti;
 }
 
-/* ── Animated Card Container ── */
-function AnimatedCard({ children, className = '', delay = 0 }) {
-  return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay }}
-    >
-      {children}
-    </motion.div>
-  );
+function parseNumber(value) {
+  if (String(value).trim() === '') return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
 }
 
-/* ── SVG GPA Result Dial ── */
-function GpaDial({ scoreNum }) {
-  const CIRCUMFERENCE = 2 * Math.PI * 52; // ~326.726
-  const targetOffset = CIRCUMFERENCE * (1 - Math.min(4.0, Math.max(0, scoreNum)) / 4.0);
-  const { ref, display } = useCounter(scoreNum, { duration: 800, decimals: 2 });
-  const isReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  return (
-    <div className="gpa-dial-wrapper" ref={ref}>
-      <svg width="160" height="160" viewBox="0 0 120 120" className="gpa-dial-svg">
-        <defs>
-          <linearGradient id="gpaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#0ea5e9" />
-            <stop offset="100%" stopColor="#2563eb" />
-          </linearGradient>
-        </defs>
-        <circle
-          cx="60"
-          cy="60"
-          r="52"
-          stroke="var(--surface-3)"
-          strokeWidth="10"
-          fill="none"
-        />
-        <circle
-          cx="60"
-          cy="60"
-          r="52"
-          stroke="url(#gpaGrad)"
-          strokeWidth="10"
-          strokeLinecap="round"
-          fill="none"
-          strokeDasharray={CIRCUMFERENCE}
-          strokeDashoffset={targetOffset}
-          transform="rotate(-90 60 60)"
-          style={{
-            transition: isReducedMotion ? 'none' : 'stroke-dashoffset 800ms var(--ease-spring)'
-          }}
-        />
-      </svg>
-      <div className="gpa-dial-center">
-        <div className="gpa-dial-number text-gradient">{display}</div>
-        <div className="gpa-dial-denom">of 4.00</div>
-      </div>
-    </div>
-  );
-}
-
-/* ── Subject Card ── */
-function SubjectCard({ course, idx, updateCourse, removeCourse, gradeInfo }) {
-  const courseNum = idx + 1;
-  return (
-    <motion.div
-      key={course.id}
-      className="gpa-subject-card"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: idx * 0.08 }}
-    >
-      <div style={{ flex: 1 }}>
-        <AnimatedInput
-          type="text"
-          placeholder="Subject Name"
-          aria-label={`Course ${courseNum} name`}
-          value={course.name}
-          onChange={(e) => updateCourse(course.id, 'name', e.target.value)}
-          className="subject-name-input"
-          style={{ fontWeight: 700, marginBottom: '0.5rem' }}
-        />
-        <div className="gpa-subject-details">
-          <div className="subject-details-row">
-            <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>schedule</span>
-            <AnimatedInput
-              type="number"
-              min="1"
-              max="6"
-              placeholder="Credits"
-              aria-label={`Course ${courseNum} credits`}
-              value={course.credits}
-              onChange={(e) => updateCourse(course.id, 'credits', Number(e.target.value))}
-              className="credits-input"
-              style={{ width: '80px' }}
-            />
-            credit hrs
-          </div>
-          <AnimatedSelect
-            aria-label={`Course ${courseNum} grade`}
-            value={course.gradePoint}
-            onChange={(e) => updateCourse(course.id, 'gradePoint', Number(e.target.value))}
-            className="grade-select"
-          >
-            {GRADE_OPTIONS.map((g, i) => (
-              <option key={i} value={g.value}>
-                {g.label} ({g.value.toFixed(2)})
-              </option>
-            ))}
-          </AnimatedSelect>
-        </div>
-      </div>
-      <div className="gpa-subject-badge-col">
-        <AnimatedGradeBadge className={`gpa-grade-badge ${gradeInfo.color}`}>
-          {gradeInfo.label}
-        </AnimatedGradeBadge>
-        <button
-          type="button"
-          className="gpa-card-action-btn delete"
-          onClick={() => removeCourse(course.id)}
-          aria-label={`Remove course ${courseNum}`}
-          title={`Remove course ${courseNum}`}
-        >
-          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
-        </button>
-      </div>
-    </motion.div>
-  );
+function formatGpa(value) {
+  return value === null ? '—' : value.toFixed(2);
 }
 
 export default function GpaCalculator() {
-  const [courses, setCourses] = useState([
-    { id: 1, name: 'Data Structures & Algorithms', credits: 4, gradePoint: 4.0 },
-    { id: 2, name: 'Calculus & Analytical Geometry', credits: 3, gradePoint: 3.7 },
-    { id: 3, name: 'Linear Algebra', credits: 3, gradePoint: 3.33 },
-    { id: 4, name: 'Human Computer Interaction', credits: 3, gradePoint: 3.0 },
-  ]);
+  const componentId = useId();
+  const nextId = useRef(2);
 
+  const [courses, setCourses] = useState([createCourse(1)]);
+  const [includeHistory, setIncludeHistory] = useState(false);
   const [prevCgpa, setPrevCgpa] = useState('');
   const [prevCredits, setPrevCredits] = useState('');
 
-  const totalCredits = courses.reduce((acc, c) => acc + Number(c.credits || 0), 0);
-  const totalPoints = courses.reduce((acc, c) => acc + Number(c.credits || 0) * Number(c.gradePoint || 0), 0);
-  const sgpaNum = totalCredits > 0 ? totalPoints / totalCredits : 0;
-  const sgpa = sgpaNum.toFixed(2);
+  const evaluatedCourses = courses.map(course => {
+    const credits = parseNumber(course.credits);
+    const grade = GRADING_SCALE.find(item => item.letter === course.grade);
 
-  let cgpa = null;
-  let cgpaNum = sgpaNum;
-  if (prevCgpa && prevCredits && Number(prevCredits) > 0) {
-    const combined = Number(prevCgpa) * Number(prevCredits) + totalPoints;
-    cgpaNum = combined / (Number(prevCredits) + totalCredits);
-    cgpa = cgpaNum.toFixed(2);
+    // This editor accepts positive whole-number course credit hours.
+    const validCredits =
+      credits !== null &&
+      Number.isInteger(credits) &&
+      credits > 0;
+
+    return {
+      ...course,
+      parsedCredits: credits,
+      gradeInfo: grade,
+      validCredits,
+      complete: validCredits && Boolean(grade),
+    };
+  });
+
+  const completedCourses = evaluatedCourses.filter(course => course.complete);
+  const hasInvalidCredits = evaluatedCourses.some(
+    course => !course.validCredits
+  );
+
+  const ready =
+    courses.length > 0 &&
+    completedCourses.length === courses.length;
+
+  const totalCredits = completedCourses.reduce(
+    (sum, course) => sum + course.parsedCredits,
+    0
+  );
+
+  const totalQualityPoints = completedCourses.reduce(
+    (sum, course) =>
+      sum + course.parsedCredits * course.gradeInfo.point,
+    0
+  );
+
+  const sgpa = ready ? totalQualityPoints / totalCredits : null;
+
+  const previousGpa = parseNumber(prevCgpa);
+  const previousCreditCount = parseNumber(prevCredits);
+
+  const validPreviousGpa =
+    previousGpa !== null &&
+    previousGpa >= 0 &&
+    previousGpa <= 4;
+
+  const validPreviousCredits =
+    previousCreditCount !== null &&
+    Number.isInteger(previousCreditCount) &&
+    previousCreditCount > 0;
+
+  const historyReady = validPreviousGpa && validPreviousCredits;
+
+  const cgpa =
+    includeHistory && ready && historyReady
+      ? (
+          previousGpa * previousCreditCount +
+          totalQualityPoints
+        ) / (previousCreditCount + totalCredits)
+      : null;
+
+  const progress = sgpa === null ? 0 : (sgpa / 4) * 100;
+
+  let statusText = 'Choose a grade for each course to see your result.';
+
+  if (courses.length === 0) {
+    statusText = 'Add your first course to get started.';
+  } else if (hasInvalidCredits) {
+    statusText = 'Enter positive whole-number credits for every course.';
+  } else if (ready) {
+    statusText = `Calculated from ${courses.length} ${
+      courses.length === 1 ? 'course' : 'courses'
+    } and ${totalCredits} credit hours.`;
   }
 
-  // Fire confetti only when SGPA crosses INTO the ≥ 3.5 band
-  const triggerConfetti = useConfettiTrigger();
-  useEffect(() => {
-    triggerConfetti(sgpaNum, 3.5);
-  }, [sgpaNum]);
+  function updateCourse(id, field, value) {
+    setCourses(current =>
+      current.map(course =>
+        course.id === id ? { ...course, [field]: value } : course
+      )
+    );
+  }
 
-  const getGpaStanding = (val) => {
-    if (val >= 3.7) return { label: 'Rector List (High Distinction)', color: 'var(--success)' };
-    if (val >= 3.5) return { label: 'Dean List (Distinction)', color: 'var(--brand)' };
-    if (val >= 3.0) return { label: 'Good Standing', color: 'var(--accent)' };
-    if (val >= 2.0) return { label: 'Satisfactory', color: 'var(--warning)' };
-    return { label: 'Academic Warning Risk', color: 'var(--danger)' };
-  };
+  function addCourse() {
+    const id = nextId.current++;
+    setCourses(current => [...current, createCourse(id)]);
+  }
 
-  const standing = getGpaStanding(cgpaNum);
+  function removeCourse(id) {
+    setCourses(current => current.filter(course => course.id !== id));
+  }
 
-  const getGradeInfo = (gradePoint) => {
-    return GRADE_OPTIONS.find(g => g.value === Number(gradePoint)) || { label: 'N/A', color: 'gray' };
-  };
-
-  const updateCourse = (id, key, val) => {
-    setCourses(prev => prev.map(c => c.id === id ? { ...c, [key]: val } : c));
-  };
-
-  const addCourse = () => {
-    setCourses([...courses, {
-      id: Date.now(),
-      name: `Subject ${courses.length + 1}`,
-      credits: 3,
-      gradePoint: 4.0
-    }]);
-  };
-
-  const removeCourse = (id) => setCourses(courses.filter(c => c.id !== id));
+  function resetCalculator() {
+    const id = nextId.current++;
+    setCourses([createCourse(id)]);
+    setPrevCgpa('');
+    setPrevCredits('');
+    setIncludeHistory(false);
+  }
 
   return (
-    <motion.div
-      className="gpa-page-container"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <PageHeader
-        badge="Tools"
-        title="GPA Calculator"
-        subtitle="Instantly compute your Semester GPA (SGPA) and Cumulative GPA (CGPA) using the official COMSATS grading policy."
-      />
+    <main className="grade-workspace">
+      <header className="grade-workspace__header">
+        <div>
+          <p className="grade-workspace__eyebrow">ACADEMIC TOOLS</p>
+          <h1>A clearer view of your semester.</h1>
+          <p className="grade-workspace__intro">
+            Add your courses and grades. We’ll take care of the numbers.
+          </p>
+        </div>
 
-      {/* Two-Column Layout */}
-      <div className="gpa-layout-grid">
-        {/* Left Column — Course Input */}
-        <AnimatedCard delay={0.2}>
-          <div className="gpa-glass-card">
-            <div className="gpa-card-header">
-              <div className="gpa-card-title">
-                <span className="material-symbols-outlined">edit_note</span>
-                Current Semester
+        <div className="grade-workspace__header-tag">
+          <Icon name="calculate" />
+          GPA calculator
+        </div>
+      </header>
+
+      <div className="grade-workspace__layout">
+        <div className="grade-workspace__editor">
+          <section
+            className="grade-workspace__panel"
+            aria-labelledby={`${componentId}-courses-title`}
+          >
+            <div className="grade-workspace__panel-heading">
+              <div>
+                <p className="grade-workspace__section-label">01 / THIS SEMESTER</p>
+                <h2 id={`${componentId}-courses-title`}>Your courses</h2>
+                <p>Use the credit hours and final grade for each course.</p>
               </div>
-              <div className="gpa-live-badge">
-                <AnimatedNumber value={sgpa} />
-              </div>
+
+              <span className="grade-workspace__count">
+                {courses.length} {courses.length === 1 ? 'course' : 'courses'}
+              </span>
             </div>
 
-            {/* Previous CGPA Section */}
-            <div className="gpa-form-group">
-              <label className="gpa-label" htmlFor="gpa-prev-cgpa">Previous CGPA (Optional)</label>
-              <AnimatedInput
-                id="gpa-prev-cgpa"
-                type="number"
-                step="0.01"
-                min="0"
-                max="4.0"
-                className="gpa-input"
-                placeholder="e.g. 3.45"
-                value={prevCgpa}
-                onChange={(e) => setPrevCgpa(e.target.value)}
-              />
+            <div className="grade-workspace__table-heading" aria-hidden="true">
+              <span>Course name</span>
+              <span>Credits</span>
+              <span>Grade</span>
+              <span />
             </div>
 
-            <div className="gpa-form-group">
-              <label className="gpa-label" htmlFor="gpa-prev-credits">Previous Total Credits (Optional)</label>
-              <AnimatedInput
-                id="gpa-prev-credits"
-                type="number"
-                min="0"
-                className="gpa-input"
-                placeholder="e.g. 60"
-                value={prevCredits}
-                onChange={(e) => setPrevCredits(e.target.value)}
-              />
-            </div>
+            <div className="grade-workspace__course-list">
+              {evaluatedCourses.map((course, index) => {
+                const rowId = `${componentId}-course-${course.id}`;
 
-            <div className="gpa-section-title">Courses This Semester</div>
-
-            {/* Subject Cards List */}
-            <div className="gpa-subjects-list">
-              {courses.map((course, idx) => {
-                const gradeInfo = getGradeInfo(course.gradePoint);
                 return (
-                  <SubjectCard
-                    key={course.id}
-                    course={course}
-                    idx={idx}
-                    updateCourse={updateCourse}
-                    removeCourse={removeCourse}
-                    gradeInfo={gradeInfo}
-                  />
+                  <div className="grade-workspace__course" key={course.id}>
+                    <div className="grade-workspace__course-fields">
+                      <div className="grade-workspace__name-field">
+                        <label
+                          className="grade-workspace__mobile-label"
+                          htmlFor={`${rowId}-name`}
+                        >
+                          Course name
+                        </label>
+
+                        <div className="grade-workspace__name-wrap">
+                          <span className="grade-workspace__row-number">
+                            {String(index + 1).padStart(2, '0')}
+                          </span>
+
+                          <input
+                            id={`${rowId}-name`}
+                            type="text"
+                            value={course.name}
+                            onChange={event =>
+                              updateCourse(
+                                course.id,
+                                'name',
+                                event.target.value
+                              )
+                            }
+                            placeholder={`Course ${index + 1}`}
+                            aria-label={`Course ${index + 1} name, optional`}
+                            maxLength={100}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label
+                          className="grade-workspace__mobile-label"
+                          htmlFor={`${rowId}-credits`}
+                        >
+                          Credits
+                        </label>
+
+                        <input
+                          id={`${rowId}-credits`}
+                          type="number"
+                          min="1"
+                          step="1"
+                          inputMode="numeric"
+                          value={course.credits}
+                          aria-label={`Course ${index + 1} credit hours`}
+                          aria-invalid={!course.validCredits}
+                          aria-describedby={
+                            !course.validCredits
+                              ? `${rowId}-error`
+                              : undefined
+                          }
+                          onChange={event =>
+                            updateCourse(
+                              course.id,
+                              'credits',
+                              event.target.value
+                            )
+                          }
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          className="grade-workspace__mobile-label"
+                          htmlFor={`${rowId}-grade`}
+                        >
+                          Grade
+                        </label>
+
+                        <select
+                          id={`${rowId}-grade`}
+                          value={course.grade}
+                          aria-label={`Course ${index + 1} grade`}
+                          onChange={event =>
+                            updateCourse(
+                              course.id,
+                              'grade',
+                              event.target.value
+                            )
+                          }
+                        >
+                          <option value="">Select</option>
+                          {GRADING_SCALE.map(grade => (
+                            <option key={grade.letter} value={grade.letter}>
+                              {grade.letter} · {grade.point.toFixed(2)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="grade-workspace__remove"
+                        onClick={() => removeCourse(course.id)}
+                        aria-label={`Remove ${course.name || `course ${index + 1}`}`}
+                      >
+                        <Icon name="close" />
+                      </button>
+                    </div>
+
+                    {!course.validCredits && (
+                      <p
+                        className="grade-workspace__field-error"
+                        id={`${rowId}-error`}
+                      >
+                        Credits must be a positive whole number.
+                      </p>
+                    )}
+                  </div>
                 );
               })}
             </div>
 
-            {/* Add Subject Button */}
-            <motion.button
-              type="button"
-              className="gpa-row-add-btn quiz"
-              onClick={addCourse}
-              style={{ marginTop: '1rem' }}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.96 }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
-              Add Subject
-            </motion.button>
-          </div>
-        </AnimatedCard>
-
-        {/* Right Column — Results Panel */}
-        <AnimatedCard delay={0.3}>
-          <div className="gpa-glass-card">
-            <div className="gpa-card-header">
-              <div className="gpa-card-title">
-                <span className="material-symbols-outlined">analytics</span>
-                GPA Summary
-              </div>
-            </div>
-
-            {/* SGPA Result */}
-            <div className="gpa-overall-panel">
-              <div className="gpa-overall-label" style={{ marginBottom: '1rem' }}>Semester GPA (SGPA)</div>
-              <GpaDial scoreNum={sgpaNum} />
-              <div style={{ fontSize: '0.875rem', opacity: 0.9, marginBottom: '0.75rem' }}>
-                {totalCredits} Credit Hours
-              </div>
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.375rem',
-                background: 'rgba(255,255,255,0.2)',
-                padding: '0.35rem 0.85rem',
-                borderRadius: '9999px',
-                fontSize: '0.8rem',
-                fontWeight: 700
-              }}>
-                {standing.label}
-              </div>
-            </div>
-
-            {/* CGPA Result (if previous data provided) */}
-            {cgpa && (
-              <div className="gpa-overall-panel" style={{ marginTop: '1rem', background: 'var(--brand)' }}>
-                <div className="gpa-overall-label">Cumulative GPA (CGPA)</div>
-                <AnimatedNumber value={cgpa} className="cgpa-number-large" />
-                <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>
-                  {Number(prevCredits) + totalCredits} Total Credit Hours
-                </div>
+            {courses.length === 0 && (
+              <div className="grade-workspace__empty">
+                <Icon name="menu_book" />
+                <p>No courses yet. Add one below to begin.</p>
               </div>
             )}
 
-            {/* Insight Box */}
-            <div className="gpa-insight-box">
-              <div className="gpa-insight-header">
-                <span className="gpa-insight-title">Performance Insight</span>
-                <span className="material-symbols-outlined" style={{ fontSize: '1.1rem', color: '#0f766e' }}>lightbulb</span>
-              </div>
-              <motion.p
-                className="gpa-insight-msg"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }}
+            <div className="grade-workspace__editor-footer">
+              <button
+                type="button"
+                className="grade-workspace__add"
+                onClick={addCourse}
               >
-                {sgpaNum >= 3.7
-                  ? "Outstanding! You're on the Rector's List with high distinction."
-                  : sgpaNum >= 3.5
-                  ? "Excellent work! Dean's List distinction achieved."
-                  : sgpaNum >= 3.0
-                  ? "Good standing. Keep up the solid performance!"
-                  : sgpaNum >= 2.0
-                  ? "Satisfactory progress. Consider seeking academic support."
-                  : "Academic support recommended. Meet with your advisor."}
-              </motion.p>
-              <div className="gpa-insight-progress">
-                <motion.div
-                  className="gpa-insight-fill"
-                  initial={{ width: '0%' }}
-                  animate={{ width: `${Math.min(100, (sgpaNum / 4) * 100)}%` }}
-                  transition={{ duration: 1.2, type: 'spring' }}
-                />
+                <Icon name="add" />
+                Add course
+              </button>
+
+              <span>
+                {completedCourses.length} of {courses.length} completed
+              </span>
+            </div>
+          </section>
+
+          <section
+            className="grade-workspace__panel grade-workspace__history"
+            aria-labelledby={`${componentId}-history-title`}
+          >
+            <div className="grade-workspace__history-heading">
+              <div>
+                <p className="grade-workspace__section-label">
+                  02 / THE BIGGER PICTURE
+                </p>
+                <h2 id={`${componentId}-history-title`}>
+                  Include previous semesters
+                </h2>
+                <p>Add your previous record to estimate your CGPA.</p>
               </div>
+
+              <label className="grade-workspace__switch">
+                <input
+                  type="checkbox"
+                  checked={includeHistory}
+                  onChange={event => setIncludeHistory(event.target.checked)}
+                  aria-label="Include previous semesters in CGPA calculation"
+                />
+                <span className="grade-workspace__switch-track" />
+              </label>
             </div>
 
-            {/* Action Buttons */}
-            <div className="gpa-actions-row">
-              <motion.button
-                type="button"
-                className="gpa-btn-clear"
-                onClick={() => {
-                  setCourses([{ id: Date.now(), name: 'Subject 1', credits: 3, gradePoint: 4.0 }]);
-                  setPrevCgpa('');
-                  setPrevCredits('');
-                }}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.96 }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>restart_alt</span>
-                Reset
-              </motion.button>
+            {includeHistory && (
+              <div className="grade-workspace__history-inputs">
+                <div>
+                  <label htmlFor={`${componentId}-previous-gpa`}>
+                    Previous CGPA
+                  </label>
+
+                  <input
+                    id={`${componentId}-previous-gpa`}
+                    type="number"
+                    min="0"
+                    max="4"
+                    step="0.01"
+                    placeholder="e.g. 3.25"
+                    value={prevCgpa}
+                    onChange={event => setPrevCgpa(event.target.value)}
+                    aria-invalid={prevCgpa !== '' && !validPreviousGpa}
+                    aria-describedby={
+                      prevCgpa !== '' && !validPreviousGpa
+                        ? `${componentId}-previous-gpa-error`
+                        : undefined
+                    }
+                  />
+
+                  {prevCgpa !== '' && !validPreviousGpa && (
+                    <p
+                      className="grade-workspace__field-error"
+                      id={`${componentId}-previous-gpa-error`}
+                    >
+                      Enter a CGPA between 0 and 4.
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor={`${componentId}-previous-credits`}>
+                    Previous GPA credit hours
+                  </label>
+
+                  <input
+                    id={`${componentId}-previous-credits`}
+                    type="number"
+                    min="1"
+                    step="1"
+                    placeholder="e.g. 60"
+                    value={prevCredits}
+                    onChange={event => setPrevCredits(event.target.value)}
+                    aria-invalid={
+                      prevCredits !== '' && !validPreviousCredits
+                    }
+                    aria-describedby={
+                      prevCredits !== '' && !validPreviousCredits
+                        ? `${componentId}-previous-credits-error`
+                        : undefined
+                    }
+                  />
+
+                  {prevCredits !== '' && !validPreviousCredits && (
+                    <p
+                      className="grade-workspace__field-error"
+                      id={`${componentId}-previous-credits-error`}
+                    >
+                      Enter a positive whole number.
+                    </p>
+                  )}
+                </div>
+
+                <p className="grade-workspace__history-help">
+                  Use the previous credit hours included in your GPA calculation.
+                  Repeated courses or grade replacements may require adjustments.
+                </p>
+              </div>
+            )}
+          </section>
+
+          <details className="grade-workspace__reference">
+            <summary>
+              <span>
+                <Icon name="info" />
+                Grade-point reference
+              </span>
+              <Icon name="expand_more" />
+            </summary>
+
+            <div className="grade-workspace__grade-grid">
+              {GRADING_SCALE.map(grade => (
+                <div key={grade.letter}>
+                  <strong>{grade.letter}</strong>
+                  <span>{grade.point.toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+
+            <p>
+              Values come from this app’s configured grading scale. Confirm
+              the applicable rules against your academic record.
+            </p>
+          </details>
+        </div>
+
+        <aside className="grade-workspace__results">
+          <section
+            className="grade-workspace__result-card"
+            aria-labelledby={`${componentId}-result-title`}
+          >
+            <div className="grade-workspace__result-top">
+              <p className="grade-workspace__section-label">YOUR RESULT</p>
+              <span className="grade-workspace__live">
+                <span />
+                Live calculation
+              </span>
+            </div>
+
+            <h2 id={`${componentId}-result-title`}>Semester GPA</h2>
+
+            <div
+              className="grade-workspace__score"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              <strong>{formatGpa(sgpa)}</strong>
+              <span>/ 4.00</span>
+            </div>
+
+            <div className="grade-workspace__meter" aria-hidden="true">
+              <span style={{ width: `${progress}%` }} />
+            </div>
+
+            <div className="grade-workspace__meter-labels" aria-hidden="true">
+              <span>0.00</span>
+              <span>4.00</span>
+            </div>
+
+            <p className="grade-workspace__status">{statusText}</p>
+
+            <dl className="grade-workspace__breakdown">
+              <div>
+                <dt>Completed entries</dt>
+                <dd>{completedCourses.length} / {courses.length}</dd>
+              </div>
+              <div>
+                <dt>Semester credits</dt>
+                <dd>{ready ? totalCredits : '—'}</dd>
+              </div>
+              <div>
+                <dt>Quality points</dt>
+                <dd>{ready ? totalQualityPoints.toFixed(2) : '—'}</dd>
+              </div>
+            </dl>
+
+            {includeHistory && (
+              <div className="grade-workspace__cumulative">
+                <div>
+                  <span>Estimated cumulative GPA</span>
+                  <strong aria-live="polite">{formatGpa(cgpa)}</strong>
+                </div>
+
+                <p>
+                  {cgpa !== null
+                    ? `${previousCreditCount + totalCredits} combined credit hours`
+                    : 'Complete your courses and previous academic record.'}
+                </p>
+              </div>
+            )}
+
+            <button
+              type="button"
+              className="grade-workspace__reset"
+              onClick={resetCalculator}
+            >
+              <Icon name="restart_alt" />
+              Reset calculator
+            </button>
+          </section>
+
+          <div className="grade-workspace__formula">
+            <Icon name="functions" />
+            <div>
+              <strong>How it is calculated</strong>
+              <p>
+                Multiply each grade point by its course credits. Add those
+                values, then divide by the total credits.
+              </p>
             </div>
           </div>
-        </AnimatedCard>
+
+          <p className="grade-workspace__disclaimer">
+            A planning estimate, not an official transcript. CGPA may differ
+            when previous results are rounded or special academic rules apply.
+          </p>
+        </aside>
       </div>
-    </motion.div>
+    </main>
   );
 }
