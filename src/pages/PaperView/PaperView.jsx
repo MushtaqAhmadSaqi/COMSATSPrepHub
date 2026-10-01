@@ -5,10 +5,105 @@ import {
 import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 import './PaperView.css';
 
+/* ── LaTeX → Unicode converter ───────────────────────────── */
+// Converts inline $...$ math expressions to readable Unicode.
+// Handles the most common logic, set, and arithmetic symbols.
+
+const LATEX_SYMBOLS = [
+  // Logic
+  [/\\leftrightarrow/g,  '↔'],
+  [/\\rightarrow/g,      '→'],
+  [/\\leftarrow/g,       '←'],
+  [/\\Leftrightarrow/g,  '⟺'],
+  [/\\Rightarrow/g,      '⟹'],
+  [/\\vee/g,             '∨'],
+  [/\\lor/g,             '∨'],
+  [/\\wedge/g,           '∧'],
+  [/\\land/g,            '∧'],
+  [/\\neg/g,             '¬'],
+  [/\\sim/g,             '¬'],
+  [/\\oplus/g,           '⊕'],
+  [/\\top/g,             '⊤'],
+  [/\\bot/g,             '⊥'],
+  [/\\forall/g,          '∀'],
+  [/\\exists/g,          '∃'],
+  // Sets
+  [/\\cup/g,             '∪'],
+  [/\\cap/g,             '∩'],
+  [/\\setminus/g,        '∖'],
+  [/\\subset/g,          '⊂'],
+  [/\\subseteq/g,        '⊆'],
+  [/\\supset/g,          '⊃'],
+  [/\\supseteq/g,        '⊇'],
+  [/\\in/g,              '∈'],
+  [/\\notin/g,           '∉'],
+  [/\\emptyset/g,        '∅'],
+  [/\\varnothing/g,      '∅'],
+  // Relations
+  [/\\neq/g,             '≠'],
+  [/\\ne/g,              '≠'],
+  [/\\leq/g,             '≤'],
+  [/\\le\b/g,            '≤'],
+  [/\\geq/g,             '≥'],
+  [/\\ge\b/g,            '≥'],
+  [/\\equiv/g,           '≡'],
+  [/\\approx/g,          '≈'],
+  [/\\cong/g,            '≅'],
+  [/\\propto/g,          '∝'],
+  // Arithmetic & misc
+  [/\\times/g,           '×'],
+  [/\\cdot/g,            '·'],
+  [/\\div/g,             '÷'],
+  [/\\pm/g,              '±'],
+  [/\\mp/g,              '∓'],
+  [/\\infty/g,           '∞'],
+  [/\\sqrt\{([^}]+)\}/g, '√($1)'],
+  [/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)'],
+  // Greek lower
+  [/\\alpha/g,   'α'], [/\\beta/g,    'β'], [/\\gamma/g,   'γ'],
+  [/\\delta/g,   'δ'], [/\\epsilon/g, 'ε'], [/\\zeta/g,    'ζ'],
+  [/\\eta/g,     'η'], [/\\theta/g,   'θ'], [/\\iota/g,    'ι'],
+  [/\\kappa/g,   'κ'], [/\\lambda/g,  'λ'], [/\\mu/g,      'μ'],
+  [/\\nu/g,      'ν'], [/\\xi/g,      'ξ'], [/\\pi/g,      'π'],
+  [/\\rho/g,     'ρ'], [/\\sigma/g,   'σ'], [/\\tau/g,     'τ'],
+  [/\\upsilon/g, 'υ'], [/\\phi/g,     'φ'], [/\\chi/g,     'χ'],
+  [/\\psi/g,     'ψ'], [/\\omega/g,   'ω'],
+  // Greek upper
+  [/\\Gamma/g,   'Γ'], [/\\Delta/g,   'Δ'], [/\\Theta/g,   'Θ'],
+  [/\\Lambda/g,  'Λ'], [/\\Xi/g,      'Ξ'], [/\\Pi/g,      'Π'],
+  [/\\Sigma/g,   'Σ'], [/\\Phi/g,     'Φ'], [/\\Psi/g,     'Ψ'],
+  [/\\Omega/g,   'Ω'],
+  // Subscripts / superscripts (basic)
+  [/\^\{([^}]+)\}/g,  (_, s) => s.split('').map(c => '^' + c).join('')],
+  [/_\{([^}]+)\}/g,   (_, s) => '_' + s],
+  [/\^(\w)/g,         (_, c) => '^' + c],
+  [/_(\w)/g,          (_, c) => '_' + c],
+  // Remove remaining braces from simple LaTeX groups
+  [/\{([^{}]*)\}/g,   '$1'],
+  // Spaces
+  [/\\quad/g,  '  '], [/\\qquad/g, '   '], [/\\,/g, ' '], [/\\ /g, ' '],
+];
+
+function processLatexToUnicode(text) {
+  if (typeof text !== 'string') return text;
+  // Replace $...$ spans, then strip any remaining lone $ signs
+  return text.replace(/\$([^$]+)\$/g, (_, inner) => {
+    let result = inner;
+    for (const [pattern, replacement] of LATEX_SYMBOLS) {
+      result = result.replace(pattern, replacement);
+    }
+    return result;
+  });
+}
+
 /* ── Question text renderer ─────────────────────────────── */
 
+
 function QuestionText({ text }) {
-  const original = String(text ?? '').replace(/\r\n?/g, '\n');
+  // Convert LaTeX math first, then process structure
+  const original = processLatexToUnicode(
+    String(text ?? '').replace(/\r\n?/g, '\n')
+  );
 
   // Add paragraph breaks before explicit Task labels, unless code blocks present
   const formatted = original.includes('```')
@@ -68,15 +163,16 @@ function getPartText(part) {
 // and horizontal rules. No external dependency needed.
 
 function renderInline(text) {
-  // We process inline patterns: **bold**, *italic*, `code`
+  // First convert any LaTeX math in this line to Unicode
+  const processed = processLatexToUnicode(text);
   const parts = [];
   const re = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g;
   let last = 0;
   let match;
 
-  while ((match = re.exec(text)) !== null) {
+  while ((match = re.exec(processed)) !== null) {
     if (match.index > last) {
-      parts.push(text.slice(last, match.index));
+      parts.push(processed.slice(last, match.index));
     }
     const token = match[0];
     if (token.startsWith('`')) {
@@ -88,8 +184,8 @@ function renderInline(text) {
     }
     last = match.index + token.length;
   }
-  if (last < text.length) parts.push(text.slice(last));
-  return parts.length ? parts : text;
+  if (last < processed.length) parts.push(processed.slice(last));
+  return parts.length ? parts : processed;
 }
 
 function MarkdownAnswer({ text }) {
