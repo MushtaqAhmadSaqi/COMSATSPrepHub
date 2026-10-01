@@ -8,8 +8,6 @@ import PageHeader from '../../components/PageHeader/PageHeader';
 import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 import './SubjectPapers.css';
 
-
-
 export default function SubjectPapers({
   subject = { name: 'Data Structures & Algorithms', code: 'CSC211' },
   onViewPaper = () => {},
@@ -18,7 +16,6 @@ export default function SubjectPapers({
   const [papers, setPapers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [reloadKey, setReloadKey] = useState(0);
 
   const loadPapers = () => {
@@ -74,19 +71,49 @@ export default function SubjectPapers({
       className="papers-container"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.25 }}
     >
       <Breadcrumbs items={breadcrumbItems} />
 
-      <PageHeader
-        title={subject.name}
-        subtitle={`${subject.code} · ${subject.department || 'COMSATS Course'}`}
-      />
+      <header className="papers-intro">
+        <div className="papers-eyebrow">
+          <span className="material-symbols-outlined" aria-hidden="true">
+            library_books
+          </span>
+          Past paper library
+        </div>
+
+        <PageHeader
+          title={subject.name}
+          subtitle={`${subject.code} · ${subject.department || 'COMSATS Course'}`}
+        />
+
+        <p className="papers-intro-description">
+          Browse previous examinations and open a paper to study its
+          questions and available model answers.
+        </p>
+      </header>
+
+      <div className="papers-section-heading">
+        <h2>Available papers</h2>
+
+        {!loading && !error && (
+          <span className="papers-count" role="status">
+            {papers.length} {papers.length === 1 ? 'paper' : 'papers'}
+          </span>
+        )}
+      </div>
 
       {loading ? (
-        <div className="skeleton-list" aria-busy="true" aria-label="Loading papers">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <SkeletonListItem key={i} />
+        <div
+          className="papers-list"
+          aria-busy="true"
+          aria-label="Loading papers"
+        >
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div className="papers-skeleton-card" key={index}>
+              <SkeletonListItem />
+            </div>
           ))}
         </div>
       ) : error ? (
@@ -95,41 +122,57 @@ export default function SubjectPapers({
         <EmptyState
           icon="find_in_page"
           title={`No papers uploaded yet for ${subject.code}`}
-          description="Be the first student to upload a paper for this subject!"
+          description="New papers will appear here when they become available."
           actionLabel="Upload Paper"
-          onAction={() => window.location.hash = 'upload'}
+          onAction={() => {
+            window.location.hash = 'upload';
+          }}
         />
       ) : (
-        <div>
-          {papers.map((p, idx) => (
-            <motion.button
-              key={p.id || idx}
+        <div className="papers-list">
+          {papers.map((paper) => (
+            <button
+              key={paper.id}
               type="button"
-              className="paper-item-card btn-reset"
-              onClick={() => onViewPaper(p)}
-              aria-label={`View ${p.title}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: idx * 0.05 }}
+              className="paper-item-card"
+              onClick={() => onViewPaper(paper)}
+              aria-label={`View ${paper.title}`}
             >
-              <div className="paper-item-left">
-                <div className="paper-item-icon">
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>picture_as_pdf</span>
-                </div>
-                <div>
-                  <div className="paper-title">{p.title}</div>
-                  <span className="paper-badge">{p.term} · {p.year}</span>
-                </div>
-              </div>
-              <div className="btn-view-paper">
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>open_in_new</span>
-                View Paper
-              </div>
-            </motion.button>
+              <span className="paper-item-icon" aria-hidden="true">
+                <span className="material-symbols-outlined">description</span>
+              </span>
+
+              <span className="paper-item-copy">
+                <span className="paper-title">{paper.title}</span>
+
+                <span className="paper-item-meta">
+                  <span className="paper-badge">{paper.term || 'Exam'}</span>
+
+                  {paper.year && (
+                    <span className="paper-meta-detail">
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        calendar_month
+                      </span>
+                      {paper.year}
+                    </span>
+                  )}
+
+                  {paper.semester && (
+                    <span className="paper-meta-detail">{paper.semester}</span>
+                  )}
+                </span>
+              </span>
+
+              <span className="btn-view-paper">
+                View paper
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  arrow_forward
+                </span>
+              </span>
+            </button>
           ))}
         </div>
       )}
     </motion.div>
   );
 }
-
