@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { generateExamPaperQuestions } from '../../services/geminiService';
-import { fetchQuestionsForPaperFromSupabase } from '../../services/papersService';
+import {
+  fetchQuestionsForPaperFromSupabase
+} from '../../services/papersService';
 import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 import './PaperView.css';
 
@@ -10,7 +11,8 @@ export default function PaperView({
 }) {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [questionSource, setQuestionSource] = useState('supabase');
+  const [error, setError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const [expandedAnswers, setExpandedAnswers] = useState({});
   const [readProgress, setReadProgress] = useState(0);
 
@@ -27,44 +29,38 @@ export default function PaperView({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Load questions: Supabase first, AI fallback
   useEffect(() => {
-    let isMounted = true;
-    async function loadPaperQuestions() {
-      setLoading(true);
-      setExpandedAnswers({});
-      try {
-        if (paper.id) {
-          const dbQuestions = await fetchQuestionsForPaperFromSupabase(paper.id);
-          if (isMounted && dbQuestions.length > 0) {
-            setQuestions(dbQuestions);
-            setQuestionSource('supabase');
-            setLoading(false);
-            return;
-          }
-        }
+    let cancelled = false;
 
-        // Fallback: AI-generated questions
-        const generated = await generateExamPaperQuestions({
-          subjectName: paper.subjectName || paper.title || 'Course Exam',
-          subjectCode: paper.subjectCode || '',
-          paperTitle: paper.title || '',
-          term: paper.term || 'Terminal',
-          year: paper.year || '2023'
-        });
-        if (isMounted) {
-          setQuestions(generated || []);
-          setQuestionSource('ai');
-          setLoading(false);
+    async function loadStoredQuestions() {
+      setLoading(true);
+      setError(null);
+      setQuestions([]);
+      setExpandedAnswers({});
+
+      try {
+        const rows = await fetchQuestionsForPaperFromSupabase(paper?.id);
+
+        if (!cancelled) {
+          setQuestions(rows);
         }
       } catch (err) {
-        console.error('Failed to load paper questions:', err);
-        if (isMounted) setLoading(false);
+        if (!cancelled) {
+          setError(err.message || 'Failed to retrieve this paper.');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
-    loadPaperQuestions();
-    return () => { isMounted = false; };
-  }, [paper.id, paper.title, paper.subjectName, paper.subjectCode, paper.term, paper.year]);
+
+    loadStoredQuestions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [paper?.id, reloadKey]);
 
   const toggleAnswer = (id) => {
     setExpandedAnswers((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -90,7 +86,7 @@ export default function PaperView({
 
   const displaySubject = paper.subjectName || (paper.title ? paper.title.split('—')[0].trim() : 'Subject Exam');
   const totalMarks = paper.totalMarks ? `${paper.totalMarks} Marks` : '50 Marks';
-  const isSupabaseSource = questionSource === 'supabase';
+  const isSupabaseSource = true;
 
   const breadcrumbItems = [
     { label: 'Subjects', onClick: () => { window.location.hash = 'subjects'; } },
@@ -159,10 +155,10 @@ export default function PaperView({
         <div className="paperview-questions-section">
           <div className="paperview-questions-header">
             <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text)' }}>
-              {isSupabaseSource ? 'Past paper questions & solutions' : 'AI practice questions & solutions'}
+              Past paper questions & solutions
             </h3>
             <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--brand)', background: 'var(--brand-soft)', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-pill)', whiteSpace: 'nowrap' }}>
-              {isSupabaseSource ? 'Loaded from database' : 'AI-generated fallback'}
+              Loaded from database
             </span>
           </div>
 
@@ -171,11 +167,23 @@ export default function PaperView({
               <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', animation: 'spin 1s linear infinite' }}>
                 progress_activity
               </span>
-              <p style={{ marginTop: '0.75rem', fontWeight: 600 }}>Loading paper questions…</p>
+              <p style={{ marginTop: '0.75rem', fontWeight: 600 }}>Loading saved questions…</p>
+            </div>
+          ) : error ? (
+            <div role="alert" style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-subtle)' }}>
+              <p>{error}</p>
+              <button
+                type="button"
+                className="paperview-btn-secondary"
+                style={{ marginTop: '1rem' }}
+                onClick={() => setReloadKey(value => value + 1)}
+              >
+                Try again
+              </button>
             </div>
           ) : questions.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-subtle)' }}>
-              <p>No questions found for this paper.</p>
+              <p>No saved questions were found for this paper.</p>
             </div>
           ) : (
             questions.map((q) => {
@@ -216,7 +224,7 @@ export default function PaperView({
                     <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
                       {isExpanded ? 'expand_less' : 'key'}
                     </span>
-                    {isExpanded ? 'Hide suggested solution' : 'View suggested solution'}
+                    {isExpanded ? 'Hide model answer' : 'View model answer'}
                   </button>
 
                   {/* Solution Content */}
@@ -224,7 +232,7 @@ export default function PaperView({
                     <div className="paperview-answer-box">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: '#10b981', fontWeight: 800, fontSize: '0.8125rem', marginBottom: '0.5rem' }}>
                         <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>check_circle</span>
-                        Suggested answer:
+                        Model answer:
                       </div>
                       <pre style={{ fontFamily: 'inherit', whiteSpace: 'pre-wrap', margin: 0, fontSize: '0.9375rem', lineHeight: '1.65' }}>
                         {q.answerText}

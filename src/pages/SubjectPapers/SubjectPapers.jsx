@@ -8,13 +8,7 @@ import PageHeader from '../../components/PageHeader/PageHeader';
 import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 import './SubjectPapers.css';
 
-const DEFAULT_PAPERS = [
-  { id: 1, title: 'Terminal Examination — Fall 2023', term: 'Terminal', year: '2023' },
-  { id: 2, title: 'Midterm Examination — Fall 2023', term: 'Midterm', year: '2023' },
-  { id: 3, title: 'Sessional 1 Quiz & Solutions — Spring 2024', term: 'Sessional', year: '2024' },
-  { id: 4, title: 'Terminal Examination — Spring 2023', term: 'Terminal', year: '2023' },
-  { id: 5, title: 'Midterm Examination — Spring 2023', term: 'Midterm', year: '2023' },
-];
+
 
 export default function SubjectPapers({
   subject = { name: 'Data Structures & Algorithms', code: 'CSC211' },
@@ -25,27 +19,50 @@ export default function SubjectPapers({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const loadPapers = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const dbPapers = await fetchPapersForSubjectFromSupabase(subject.code, subject.name);
-      if (dbPapers && dbPapers.length > 0) {
-        setPapers(dbPapers);
-      } else {
-        // No papers in DB for this subject — show placeholder set so the page isn't blank
-        setPapers(DEFAULT_PAPERS);
-      }
-    } catch (err) {
-      setError(err.message || 'Failed to load papers.');
-    } finally {
-      setLoading(false);
-    }
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const loadPapers = () => {
+    setReloadKey(value => value + 1);
   };
 
   useEffect(() => {
-    loadPapers();
-  }, [subject.code, subject.name]);
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+      setPapers([]);
+
+      try {
+        const rows = await fetchPapersForSubjectFromSupabase(
+          subject.code,
+          subject.name
+        );
+
+        if (!Array.isArray(rows)) {
+          throw new Error('The paper service returned an invalid response.');
+        }
+
+        if (!cancelled) {
+          setPapers(rows);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.message || 'Failed to load papers.');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [subject.code, subject.name, reloadKey]);
 
   const breadcrumbItems = [
     { label: 'Subjects', onClick: onBack },

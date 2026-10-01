@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { generateQuizWithGemini } from '../../services/geminiService';
+import { generateQuizWithGemini } from '../../services/aiQuizService';
 import { fireConfetti } from '../../utils/confetti';
 import './TakeAiQuiz.css';
 import '../Quiz/Quiz.css';
@@ -23,30 +23,62 @@ export default function TakeAiQuiz({
 
   const prevStreakRef = useRef(0);
 
+  const [error, setError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
+
   useEffect(() => {
-    let isMounted = true;
-    async function fetchAiQuiz() {
+    let cancelled = false;
+    const controller = new AbortController();
+
+    async function loadQuiz() {
       setLoading(true);
+      setError(null);
+      setQuestions([]);
+      setCurrentIdx(0);
+      setSelectedOption(null);
+      setRevealed(false);
+      setScore(0);
+      setStreak(0);
+      setShowHint(false);
+      setIsFinished(false);
+      prevStreakRef.current = 0;
+
       try {
         const generated = await generateQuizWithGemini({
           subject: quizParams.topic || 'General Knowledge',
+          subjectCode: quizParams.subjectCode || '',
           numQuestions: quizParams.numQuestions || 10,
           difficulty: quizParams.difficulty || 'Medium',
+          signal: controller.signal
         });
-        if (isMounted) {
+
+        if (!cancelled) {
           setQuestions(generated);
-          setLoading(false);
         }
       } catch (err) {
-        console.error('Failed to load AI quiz:', err);
-        if (isMounted) {
+        if (!cancelled) {
+          setError(err.message || 'Quiz generation failed.');
+        }
+      } finally {
+        if (!cancelled) {
           setLoading(false);
         }
       }
     }
-    fetchAiQuiz();
-    return () => { isMounted = false; };
-  }, [quizParams.topic, quizParams.difficulty, quizParams.numQuestions]);
+
+    loadQuiz();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [
+    quizParams.topic,
+    quizParams.subjectCode,
+    quizParams.difficulty,
+    quizParams.numQuestions,
+    reloadKey
+  ]);
 
   const handleSubmitAnswer = () => {
     if (selectedOption === null || revealed) return;
@@ -124,6 +156,32 @@ export default function TakeAiQuiz({
             />
           </div>
         </motion.div>
+      </div>
+    );
+  }
+
+  if (error || questions.length === 0) {
+    return (
+      <div className="take-ai-container">
+        <div className="quiz-card" role="alert">
+          <h2>Could not generate your quiz</h2>
+
+          <p>{error || 'No questions were returned.'}</p>
+
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+            <button
+              type="button"
+              className="btn-quiz-next"
+              onClick={() => setReloadKey(value => value + 1)}
+            >
+              Try again
+            </button>
+
+            <button type="button" className="btn-quiz-next" style={{ background: 'var(--surface-2)', color: 'var(--text)', border: '1.5px solid var(--border)' }} onClick={onFinish}>
+              Change topic
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

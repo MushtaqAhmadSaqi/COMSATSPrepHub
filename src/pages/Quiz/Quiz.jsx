@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchSubjectsFromSupabase } from '../../services/papersService';
-import { generateQuizWithGemini } from '../../services/geminiService';
+import { generateQuizWithGemini } from '../../services/aiQuizService';
 import { DEFAULT_SUBJECTS } from '../../constants/subjects';
 import { fireConfetti } from '../../utils/confetti';
 import PageHeader from '../../components/PageHeader/PageHeader';
@@ -78,11 +78,7 @@ export default function Quiz() {
     setSubjectsError(null);
     try {
       const data = await fetchSubjectsFromSupabase();
-      if (data && data.length > 0) {
-        setSubjects(data);
-      } else {
-        setSubjects(DEFAULT_SUBJECTS);
-      }
+      setSubjects(data || []);
     } catch (err) {
       setSubjectsError('Couldn’t load subjects. Try again.');
     } finally {

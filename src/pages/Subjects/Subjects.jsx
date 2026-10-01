@@ -86,7 +86,7 @@ function DepartmentChip({ dept, isSelected, onClick }) {
 }
 
 export default function Subjects({ onSelectSubject = () => {} }) {
-  const [subjects, setSubjects] = useState(DEFAULT_SUBJECTS);
+  const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,9 +97,7 @@ export default function Subjects({ onSelectSubject = () => {} }) {
     setError(null);
     try {
       const dbSubjects = await fetchSubjectsFromSupabase();
-      if (dbSubjects && dbSubjects.length > 0) {
-        setSubjects(dbSubjects);
-      }
+      setSubjects(dbSubjects || []);
     } catch (err) {
       setError(err.message || 'Failed to load subjects.');
     } finally {

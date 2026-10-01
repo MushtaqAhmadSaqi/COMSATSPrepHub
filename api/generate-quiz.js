@@ -6,7 +6,7 @@ const GROQ_MODELS = (process.env.GROQ_MODEL || process.env.GROQ_MODELS || 'llama
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.2-3b-instruct:free';
 
 function getApiKey(name) {
-  return process.env[name] || process.env[`VITE_${name}`] || '';
+  return String(process.env[name] || '').trim();
 }
 
 function sendJson(res, status, body) {
@@ -25,6 +25,8 @@ Subject: ${subjectLabel}
 Difficulty: ${difficulty}
 
 Return ONLY valid JSON. No markdown. No explanation outside JSON.
+correctAnswer must be a zero-based integer: 0, 1, 2, or 3.
+Return exactly the requested number of questions.
 
 Use this exact format:
 {
@@ -40,42 +42,56 @@ Use this exact format:
 }
 
 function parseQuizText(text, expectedCount) {
-  if (!text) throw new Error('AI returned an empty response.');
+  if (typeof text !== 'string' || !text.trim()) {
+    throw new Error('AI returned an empty response.');
+  }
 
-  const cleaned = String(text).replace(/```json|```/gi, '').trim();
+  const cleaned = text
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/, '');
+
   let payload;
 
   try {
     payload = JSON.parse(cleaned);
   } catch {
-    const objectMatch = cleaned.match(/\{[\s\S]*\}/);
-    const arrayMatch = cleaned.match(/\[[\s\S]*\]/);
-    if (!objectMatch && !arrayMatch) throw new Error('AI did not return valid JSON.');
-    payload = JSON.parse((objectMatch || arrayMatch)[0]);
+    throw new Error('AI returned invalid JSON.');
   }
 
-  const sourceQuestions = Array.isArray(payload) ? payload : payload.questions;
-  if (!Array.isArray(sourceQuestions) || sourceQuestions.length === 0) {
-    throw new Error('AI returned no questions.');
+  const rows = Array.isArray(payload) ? payload : payload?.questions;
+
+  if (!Array.isArray(rows) || rows.length !== expectedCount) {
+    throw new Error(`AI must return exactly ${expectedCount} questions.`);
   }
 
-  return sourceQuestions.slice(0, expectedCount).map((item, index) => {
-    const options = Array.isArray(item.options) ? item.options.slice(0, 4) : [];
-    if (!item.question || options.length !== 4) {
-      throw new Error(`Question ${index + 1} is missing text or four options.`);
+  return rows.map((item, index) => {
+    const answer = item?.correctAnswer ?? item?.correct;
+
+    const valid =
+      typeof item?.question === 'string' &&
+      item.question.trim().length > 0 &&
+      Array.isArray(item.options) &&
+      item.options.length === 4 &&
+      item.options.every(
+        option => typeof option === 'string' && option.trim().length > 0
+      ) &&
+      Number.isInteger(answer) &&
+      answer >= 0 &&
+      answer <= 3;
+
+    if (!valid) {
+      throw new Error(`AI returned invalid question ${index + 1}.`);
     }
 
-    const rawCorrect = Number.isInteger(item.correctAnswer)
-      ? item.correctAnswer
-      : Number.isInteger(item.correct)
-        ? item.correct
-        : 0;
-
     return {
-      question: String(item.question).trim(),
-      options: options.map(option => String(option).trim()),
-      correctAnswer: Math.max(0, Math.min(3, rawCorrect)),
-      explanation: String(item.explanation || item.hint || 'Review the core concept behind this answer.').trim()
+      question: item.question.trim(),
+      options: item.options.map(option => option.trim()),
+      correctAnswer: answer,
+      explanation:
+        typeof item.explanation === 'string'
+          ? item.explanation.trim()
+          : ''
     };
   });
 }
@@ -122,7 +138,7 @@ async function callGroq(prompt) {
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 2048
+        max_tokens: 6000
       })
     });
 
@@ -183,7 +199,23 @@ export default async function handler(req, res) {
     return sendJson(res, 400, { error: 'Subject is required.' });
   }
 
-  const safeQuestionCount = Math.min(Math.max(Number(questionCount) || 10, 1), 20);
+  const safeQuestionCount = Number(questionCount);
+
+  if (
+    !Number.isInteger(safeQuestionCount) ||
+    safeQuestionCount < 1 ||
+    safeQuestionCount > 20
+  ) {
+    return sendJson(res, 400, {
+      error: 'questionCount must be an integer between 1 and 20.'
+    });
+  }
+
+  if (!['Easy', 'Medium', 'Hard'].includes(difficulty)) {
+    return sendJson(res, 400, {
+      error: 'difficulty must be Easy, Medium, or Hard.'
+    });
+  }
   const prompt = buildPrompt({
     subject: String(subject).trim(),
     subjectCode: String(subjectCode || '').trim(),

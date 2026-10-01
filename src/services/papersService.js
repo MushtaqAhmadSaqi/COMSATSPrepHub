@@ -10,17 +10,18 @@ export async function fetchSubjectsFromSupabase() {
       .from('past_papers')
       .select('subject_code, subject_name');
 
-    if (error || !data || data.length === 0) {
-      console.warn('Supabase past_papers query notice:', error?.message || 'No rows returned');
-      return DEFAULT_SUBJECTS;
+    if (error) {
+      throw new Error(`Could not load subjects: ${error.message}`);
+    }
+
+    if (!data || data.length === 0) {
+      return [];
     }
 
     const subjectMap = new Map();
 
-    // Seed map with default catalog subjects (27 COMSATS subjects).
-    DEFAULT_SUBJECTS.forEach(sub => {
-      subjectMap.set(sub.code.toUpperCase(), { ...sub, papers: 0 });
-    });
+    // Do not seed with DEFAULT_SUBJECTS.
+    // Build map exclusively from Supabase data so only subjects with papers are shown.
 
     data.forEach(item => {
       const code = String(item.subject_code || '').trim().toUpperCase();
@@ -46,16 +47,10 @@ export async function fetchSubjectsFromSupabase() {
       }
     });
 
-    return Array.from(subjectMap.values()).map(sub => {
-      if (sub.papers === 0) {
-        const defaultMatch = DEFAULT_SUBJECTS.find(d => d.code === sub.code);
-        sub.papers = defaultMatch ? defaultMatch.papers : 12;
-      }
-      return sub;
-    });
+    return Array.from(subjectMap.values());
   } catch (err) {
     console.error('Fetch subjects error:', err);
-    return DEFAULT_SUBJECTS;
+    throw err;
   }
 }
 
@@ -81,8 +76,7 @@ export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName
     const { data, error } = await query.order('year', { ascending: false });
 
     if (error) {
-      console.warn('Supabase fetch papers error:', error.message);
-      return null;
+      throw new Error(`Could not load papers: ${error.message}`);
     }
 
     if (!data || data.length === 0) {
@@ -90,7 +84,7 @@ export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName
     }
 
     return data.map(item => ({
-      id: item.id || Math.random(),
+      id: item.id,
       title: item.title || item.paper_title || buildPaperTitle(item),
       term: item.term || item.exam_type || 'Exam',
       year: item.year || new Date().getFullYear(),
@@ -104,7 +98,7 @@ export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName
     }));
   } catch (err) {
     console.error('Fetch papers error:', err);
-    return null;
+    throw err;
   }
 }
 
@@ -112,7 +106,9 @@ export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName
  * Fetches the real questions attached to a selected paper from Supabase.
  */
 export async function fetchQuestionsForPaperFromSupabase(paperId) {
-  if (!paperId) return [];
+  if (paperId === undefined || paperId === null || paperId === '') {
+    throw new Error('No database paper ID was supplied.');
+  }
 
   try {
     const { data, error } = await supabase
@@ -122,8 +118,7 @@ export async function fetchQuestionsForPaperFromSupabase(paperId) {
       .order('question_number', { ascending: true });
 
     if (error) {
-      console.warn('Supabase fetch paper questions error:', error.message);
-      return [];
+      throw new Error(`Could not load paper questions: ${error.message}`);
     }
 
     return (data || [])
@@ -143,7 +138,7 @@ export async function fetchQuestionsForPaperFromSupabase(paperId) {
       }));
   } catch (err) {
     console.error('Fetch paper questions error:', err);
-    return [];
+    throw err;
   }
 }
 
