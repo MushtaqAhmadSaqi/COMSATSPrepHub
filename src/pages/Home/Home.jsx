@@ -30,7 +30,7 @@ function addRipple(e) {
 }
 
 /* ── Spotlight Card Effect with Magnetic Hover ── */
-function SpotlightCard({ children, className = '', delay = 0 }) {
+function SpotlightCard({ children, className = '', delay = 0, onClick, ariaLabel }) {
   const cardRef = useRef(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [magneticOffset, setMagneticOffset] = useState({ x: 0, y: 0 });
@@ -61,9 +61,12 @@ function SpotlightCard({ children, className = '', delay = 0 }) {
   };
 
   return (
-    <motion.div
+    <motion.button
+      type="button"
       ref={cardRef}
       className={`spotlight-card ${className}`}
+      onClick={onClick}
+      aria-label={ariaLabel}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -75,13 +78,15 @@ function SpotlightCard({ children, className = '', delay = 0 }) {
         '--mouse-x': `${mousePosition.x}px`,
         '--mouse-y': `${mousePosition.y}px`,
         transform: `translate3d(${magneticOffset.x}px, ${magneticOffset.y}px, 0)`,
+        cursor: 'pointer',
+        fontFamily: 'inherit',
         transition: isHovered
           ? 'transform 150ms var(--ease), box-shadow 0.3s var(--ease-spring)'
           : 'transform 300ms var(--ease), box-shadow 0.3s var(--ease-spring)'
       }}
     >
       {children}
-    </motion.div>
+    </motion.button>
   );
 }
 
@@ -96,7 +101,7 @@ function AnimatedButton({ children, onClick, variant = 'primary', className = ''
       whileTap={{ scale: 0.96 }}
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}
     >
-      {icon && <span className="material-symbols-outlined">{icon}</span>}
+      {icon && <span className="material-symbols-outlined" aria-hidden="true">{icon}</span>}
       {children}
     </motion.button>
   );
@@ -104,10 +109,10 @@ function AnimatedButton({ children, onClick, variant = 'primary', className = ''
 
 export default function Home({ onNavigate = () => {} }) {
   const features = [
-    { icon: 'picture_as_pdf', title: 'Past Papers',     desc: 'Verified COMSATS exam papers from multiple semesters' },
-    { icon: 'quiz',           title: 'Practice Quizzes', desc: 'MCQ-based quizzes designed for exam preparation' },
-    { icon: 'auto_awesome',   title: 'AI Generator',     desc: 'Generate custom quizzes with Gemini AI on any topic' },
-    { icon: 'calculate',      title: 'GPA Calculator',   desc: 'COMSATS-accurate SGPA & CGPA computation tool' }
+    { icon: 'picture_as_pdf', title: 'Past Papers',      desc: 'Verified COMSATS exam papers from multiple semesters', path: 'subjects' },
+    { icon: 'quiz',           title: 'Practice Quizzes', desc: 'MCQ-based quizzes designed for exam preparation',       path: 'quiz' },
+    { icon: 'auto_awesome',   title: 'AI Generator',     desc: 'Generate custom quizzes with Gemini AI on any topic',   path: 'ai-quiz-generator' },
+    { icon: 'calculate',      title: 'GPA Calculator',   desc: 'COMSATS-accurate SGPA & CGPA computation tool',         path: 'gpa' }
   ];
 
   const stats = [
@@ -117,12 +122,12 @@ export default function Home({ onNavigate = () => {} }) {
   ];
 
   /* Scroll-reveal for feature cards */
-  const { containerRef: featuresRef, visibleSet } = useScrollRevealList(features.length, { threshold: 0.12 });
+  const { containerRef: featuresRef } = useScrollRevealList(features.length, { threshold: 0.12 });
 
   return (
     <div className="home-page-wrapper">
       <section className="home-hero-section">
-        {/* Floating particles — reduced to 4 for less visual noise */}
+        {/* Floating particles */}
         <div className="home-particles" aria-hidden="true">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className={`particle particle-${i + 1}`} />
@@ -130,14 +135,8 @@ export default function Home({ onNavigate = () => {} }) {
         </div>
 
         {/* Background Blobs */}
-        <div
-          className="hero-blob hero-blob-1"
-          aria-hidden="true"
-        />
-        <div
-          className="hero-blob hero-blob-2"
-          aria-hidden="true"
-        />
+        <div className="hero-blob hero-blob-1" aria-hidden="true" />
+        <div className="hero-blob hero-blob-2" aria-hidden="true" />
 
         {/* Badge */}
         <motion.div
@@ -147,7 +146,7 @@ export default function Home({ onNavigate = () => {} }) {
           transition={{ duration: 0.6, delay: 0.1 }}
         >
           <div className="home-badge-pill">
-            <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>school</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '15px' }} aria-hidden="true">school</span>
             Built for COMSATS Students
           </div>
         </motion.div>
@@ -199,16 +198,18 @@ export default function Home({ onNavigate = () => {} }) {
           </AnimatedButton>
         </motion.div>
 
-        {/* Feature Cards — Scroll reveal with spotlight effect */}
+        {/* Feature Cards — Interactive navigation cards with spotlight effect */}
         <div className="home-features-grid" ref={featuresRef}>
           {features.map((f, i) => (
             <SpotlightCard
-              key={i}
+              key={f.title}
               className="home-feature-card"
               delay={i * 0.1}
+              onClick={() => onNavigate(f.path)}
+              ariaLabel={`Open ${f.title}: ${f.desc}`}
             >
               <div className="home-feature-icon">
-                <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>{f.icon}</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '22px' }} aria-hidden="true">{f.icon}</span>
               </div>
               <div className="home-feature-title">{f.title}</div>
               <p className="home-feature-desc">{f.desc}</p>
@@ -218,8 +219,8 @@ export default function Home({ onNavigate = () => {} }) {
 
         {/* Stats — Animated counters */}
         <div className="home-stats-grid">
-          {stats.map((s, i) => (
-            <StatItem key={i} num={s.num} label={s.label} suffix={s.suffix} />
+          {stats.map((s) => (
+            <StatItem key={s.label} num={s.num} label={s.label} suffix={s.suffix} />
           ))}
         </div>
       </section>

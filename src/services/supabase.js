@@ -1,10 +1,60 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Use environment variables for security
-export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://xylyiscatznexduatjmg.supabase.co';
-export const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_K0t4H7M3LU96jy8_z_TJHg_ok_u-7HC';
+// Read exclusively from environment variables — never hardcode project credentials in source code
+export const SUPABASE_URL = String(import.meta.env?.VITE_SUPABASE_URL || '').trim();
+export const SUPABASE_KEY = String(import.meta.env?.VITE_SUPABASE_ANON_KEY || '').trim();
+export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_KEY);
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+function createFallbackSupabaseClient() {
+  const unconfiguredError = {
+    message: 'Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file.'
+  };
+
+  const createQueryBuilder = () => {
+    const builder = {
+      select: () => builder,
+      eq: () => builder,
+      ilike: () => builder,
+      or: () => builder,
+      is: () => builder,
+      order: () => builder,
+      limit: () => builder,
+      single: async () => ({ data: null, error: unconfiguredError }),
+      insert: () => builder,
+      update: () => builder,
+      then: (resolve) => Promise.resolve({ data: [], error: null }).then(resolve)
+    };
+    return builder;
+  };
+
+  return {
+    from: () => createQueryBuilder(),
+    auth: {
+      async getSession() {
+        return { data: { session: null }, error: null };
+      },
+      onAuthStateChange() {
+        return { data: { subscription: { unsubscribe: () => {} } } };
+      },
+      async signInWithPassword() {
+        return { data: null, error: unconfiguredError };
+      },
+      async signUp() {
+        return { data: null, error: unconfiguredError };
+      },
+      async signInWithOAuth() {
+        return { data: null, error: unconfiguredError };
+      },
+      async signOut() {
+        return { error: null };
+      }
+    }
+  };
+}
+
+export const supabase = isSupabaseConfigured
+  ? createClient(SUPABASE_URL, SUPABASE_KEY)
+  : createFallbackSupabaseClient();
 
 export const authHelper = {
   async getSession() {

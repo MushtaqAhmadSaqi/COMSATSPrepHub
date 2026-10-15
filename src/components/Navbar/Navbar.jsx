@@ -3,7 +3,7 @@ import './Navbar.css';
 
 // Defined at module scope so the array is created once, not on every render
 const navItems = [
-  { id: 'home',     label: 'Home',    icon: 'home' },
+  { id: 'home',     label: 'Home',     icon: 'home' },
   { id: 'subjects', label: 'Subjects', icon: 'menu_book' },
   { id: 'quiz',     label: 'Quiz',     icon: 'quiz' },
   { id: 'gpa',      label: 'GPA Calc', icon: 'calculate' },
@@ -79,7 +79,7 @@ export default function Navbar({
                 className="cmd-trigger-btn"
                 aria-label="Open command palette"
               >
-                <span className="material-symbols-outlined">search</span>
+                <span className="material-symbols-outlined" aria-hidden="true">search</span>
                 <span className="cmd-trigger-text">Search</span>
                 <kbd className="cmd-trigger-kbd">⌘K</kbd>
               </button>
@@ -105,7 +105,7 @@ export default function Navbar({
                   className="signin-gradient-btn btn-shimmer"
                   aria-label="Go to dashboard"
                 >
-                  <span className="material-symbols-outlined">account_circle</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">account_circle</span>
                   <span>{firstName || 'Dashboard'}</span>
                 </button>
               ) : (
@@ -115,7 +115,7 @@ export default function Navbar({
                   className="signin-gradient-btn btn-shimmer"
                   aria-label="Sign in to your account"
                 >
-                  <span className="material-symbols-outlined">person</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">person</span>
                   <span>Sign In</span>
                 </button>
               )}
@@ -124,24 +124,22 @@ export default function Navbar({
         </div>
       </header>
 
-      {/* Mobile Navigation Bar — shows 4 items (excluding GPA Calc) */}
+      {/* Mobile Navigation Bar — includes all 5 primary destinations including GPA Calc */}
       <nav className="mobile-bottom-nav" aria-label="Main navigation">
         <div className="mobile-grid">
-          {navItems
-            .filter((item) => item.id !== 'gpa')
-            .map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => onNavigate(item.id)}
-                className={`mobile-nav-item${activePath === item.id ? ' active' : ''}`}
-                aria-label={item.label}
-                aria-current={activePath === item.id ? 'page' : undefined}
-              >
-                <span className="material-symbols-outlined">{item.icon}</span>
-                <span className="text-label">{item.label}</span>
-              </button>
-            ))}
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onNavigate(item.id)}
+              className={`mobile-nav-item${activePath === item.id ? ' active' : ''}`}
+              aria-label={item.label}
+              aria-current={activePath === item.id ? 'page' : undefined}
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">{item.icon}</span>
+              <span className="text-label">{item.label}</span>
+            </button>
+          ))}
         </div>
       </nav>
     </>

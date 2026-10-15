@@ -38,11 +38,10 @@ export default function GpaCalculator() {
   const [prevCgpa, setPrevCgpa] = useState('');
   const [prevCredits, setPrevCredits] = useState('');
 
-  const evaluatedCourses = courses.map(course => {
+  const evaluatedCourses = courses.map((course) => {
     const credits = parseNumber(course.credits);
-    const grade = GRADING_SCALE.find(item => item.letter === course.grade);
+    const grade = GRADING_SCALE.find((item) => item.letter === course.grade);
 
-    // This editor accepts positive whole-number course credit hours.
     const validCredits =
       credits !== null &&
       Number.isInteger(credits) &&
@@ -57,9 +56,9 @@ export default function GpaCalculator() {
     };
   });
 
-  const completedCourses = evaluatedCourses.filter(course => course.complete);
+  const completedCourses = evaluatedCourses.filter((course) => course.complete);
   const hasInvalidCredits = evaluatedCourses.some(
-    course => !course.validCredits
+    (course) => !course.validCredits
   );
 
   const ready =
@@ -117,8 +116,8 @@ export default function GpaCalculator() {
   }
 
   function updateCourse(id, field, value) {
-    setCourses(current =>
-      current.map(course =>
+    setCourses((current) =>
+      current.map((course) =>
         course.id === id ? { ...course, [field]: value } : course
       )
     );
@@ -126,11 +125,11 @@ export default function GpaCalculator() {
 
   function addCourse() {
     const id = nextId.current++;
-    setCourses(current => [...current, createCourse(id)]);
+    setCourses((current) => [...current, createCourse(id)]);
   }
 
   function removeCourse(id) {
-    setCourses(current => current.filter(course => course.id !== id));
+    setCourses((current) => current.filter((course) => course.id !== id));
   }
 
   function resetCalculator() {
@@ -142,7 +141,7 @@ export default function GpaCalculator() {
   }
 
   return (
-    <main className="grade-workspace">
+    <div className="grade-workspace">
       <header className="grade-workspace__header">
         <div>
           <p className="grade-workspace__eyebrow">ACADEMIC TOOLS</p>
@@ -207,7 +206,7 @@ export default function GpaCalculator() {
                             id={`${rowId}-name`}
                             type="text"
                             value={course.name}
-                            onChange={event =>
+                            onChange={(event) =>
                               updateCourse(
                                 course.id,
                                 'name',
@@ -243,7 +242,7 @@ export default function GpaCalculator() {
                               ? `${rowId}-error`
                               : undefined
                           }
-                          onChange={event =>
+                          onChange={(event) =>
                             updateCourse(
                               course.id,
                               'credits',
@@ -265,7 +264,7 @@ export default function GpaCalculator() {
                           id={`${rowId}-grade`}
                           value={course.grade}
                           aria-label={`Course ${index + 1} grade`}
-                          onChange={event =>
+                          onChange={(event) =>
                             updateCourse(
                               course.id,
                               'grade',
@@ -274,7 +273,7 @@ export default function GpaCalculator() {
                           }
                         >
                           <option value="">Select</option>
-                          {GRADING_SCALE.map(grade => (
+                          {GRADING_SCALE.map((grade) => (
                             <option key={grade.letter} value={grade.letter}>
                               {grade.letter} · {grade.point.toFixed(2)}
                             </option>
@@ -347,7 +346,7 @@ export default function GpaCalculator() {
                 <input
                   type="checkbox"
                   checked={includeHistory}
-                  onChange={event => setIncludeHistory(event.target.checked)}
+                  onChange={(event) => setIncludeHistory(event.target.checked)}
                   aria-label="Include previous semesters in CGPA calculation"
                 />
                 <span className="grade-workspace__switch-track" />
@@ -369,7 +368,7 @@ export default function GpaCalculator() {
                     step="0.01"
                     placeholder="e.g. 3.25"
                     value={prevCgpa}
-                    onChange={event => setPrevCgpa(event.target.value)}
+                    onChange={(event) => setPrevCgpa(event.target.value)}
                     aria-invalid={prevCgpa !== '' && !validPreviousGpa}
                     aria-describedby={
                       prevCgpa !== '' && !validPreviousGpa
@@ -400,7 +399,7 @@ export default function GpaCalculator() {
                     step="1"
                     placeholder="e.g. 60"
                     value={prevCredits}
-                    onChange={event => setPrevCredits(event.target.value)}
+                    onChange={(event) => setPrevCredits(event.target.value)}
                     aria-invalid={
                       prevCredits !== '' && !validPreviousCredits
                     }
@@ -439,7 +438,7 @@ export default function GpaCalculator() {
             </summary>
 
             <div className="grade-workspace__grade-grid">
-              {GRADING_SCALE.map(grade => (
+              {GRADING_SCALE.map((grade) => (
                 <div key={grade.letter}>
                   <strong>{grade.letter}</strong>
                   <span>{grade.point.toFixed(2)}</span>
@@ -546,6 +545,6 @@ export default function GpaCalculator() {
           </p>
         </aside>
       </div>
-    </main>
+    </div>
   );
 }

@@ -11,6 +11,7 @@ export default function CommandPalette({
   isOpen,
   onClose,
   onNavigate,
+  onSelectSubject,
   onExecuteAction,
   isLoggedIn = false
 }) {
@@ -25,24 +26,20 @@ export default function CommandPalette({
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
     : { initial: { opacity: 0, y: 8, scale: 0.98 }, animate: { opacity: 1, y: 0, scale: 1 }, exit: { opacity: 0, y: 8, scale: 0.98 } };
 
-  // Compute search results based on query and auth state
   const results = useMemo(() => {
     return getCommandPaletteResults(query, { isLoggedIn });
   }, [query, isLoggedIn]);
 
-  // Reset index when query changes or results change
   useEffect(() => {
     setSelectedIndex(0);
   }, [query, results]);
 
-  // Handle open / close side-effects (body scroll lock, focus trap store/restore)
   useEffect(() => {
     if (isOpen) {
       previousFocusRef.current = document.activeElement;
       document.body.style.overflow = 'hidden';
       setQuery('');
       setSelectedIndex(0);
-      // Focus input after transition
       const timer = setTimeout(() => {
         if (inputRef.current) inputRef.current.focus();
       }, 50);
@@ -55,7 +52,6 @@ export default function CommandPalette({
     }
   }, [isOpen]);
 
-  // Scroll selected item into view smoothly
   useEffect(() => {
     if (!listRef.current) return;
     const selectedEl = listRef.current.querySelector('.cmd-palette__item--selected');
@@ -68,6 +64,8 @@ export default function CommandPalette({
     onClose();
     if (item.actionId) {
       onExecuteAction(item.actionId);
+    } else if (item.subject && typeof onSelectSubject === 'function') {
+      onSelectSubject(item.subject);
     } else if (item.path) {
       onNavigate(item.path);
     }
@@ -100,7 +98,6 @@ export default function CommandPalette({
         handleSelect(results[selectedIndex]);
       }
     } else if (e.key === 'Tab') {
-      // Focus trap for Tab key inside input/dialog
       e.preventDefault();
       if (e.shiftKey) {
         setSelectedIndex((prev) => (prev - 1 + results.length) % results.length);
@@ -110,7 +107,6 @@ export default function CommandPalette({
     }
   };
 
-  // Group results for rendering with section headers
   const groupedResults = useMemo(() => {
     const groups = [];
     let flatIdx = 0;

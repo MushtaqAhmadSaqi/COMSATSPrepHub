@@ -1,15 +1,9 @@
-import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './toast.css';
 
 /* ─────────────────────────────────────────────────────────────────
    TOAST CONTEXT & PROVIDER
-   Usage:
-     // In App.jsx — wrap children with <ToastProvider>
-     // In any component — const toast = useToast();
-     //                     toast.success('Saved!');
-     //                     toast.error('Failed to load');
-     //                     toast.info('Copied to clipboard');
 ───────────────────────────────────────────────────────────────── */
 
 const ToastContext = createContext(null);
@@ -29,6 +23,14 @@ export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const timersRef = useRef({});
 
+  // Clear all active timers on unmount to prevent memory leaks
+  useEffect(() => {
+    const timers = timersRef.current;
+    return () => {
+      Object.values(timers).forEach((timerId) => clearTimeout(timerId));
+    };
+  }, []);
+
   const removeToast = useCallback((id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
     if (timersRef.current[id]) {
@@ -41,11 +43,9 @@ export function ToastProvider({ children }) {
     const id = ++toastIdCounter;
     setToasts((prev) => {
       const next = [...prev, { id, type, message }];
-      // Keep only the latest MAX_TOASTS
       return next.length > MAX_TOASTS ? next.slice(next.length - MAX_TOASTS) : next;
     });
 
-    // Auto-dismiss
     timersRef.current[id] = setTimeout(() => {
       removeToast(id);
     }, AUTO_DISMISS_MS);
@@ -53,17 +53,15 @@ export function ToastProvider({ children }) {
     return id;
   }, [removeToast]);
 
-  const toast = useCallback(
-    {
+  const toast = useMemo(
+    () => ({
       success: (msg) => addToast('success', msg),
       error: (msg) => addToast('error', msg),
       info: (msg) => addToast('info', msg),
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }),
     [addToast]
   );
 
-  // Check reduced-motion preference
   const prefersReducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -88,7 +86,7 @@ export function ToastProvider({ children }) {
               exit={variants.exit}
               transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
             >
-              <span className="material-symbols-outlined toast__icon">
+              <span className="material-symbols-outlined toast__icon" aria-hidden="true">
                 {ICONS[t.type]}
               </span>
               <span className="toast__content">{t.message}</span>
@@ -98,7 +96,7 @@ export function ToastProvider({ children }) {
                 onClick={() => removeToast(t.id)}
                 aria-label="Dismiss notification"
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>close</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">close</span>
               </button>
             </motion.div>
           ))}
@@ -114,7 +112,6 @@ export function ToastProvider({ children }) {
 export function useToast() {
   const ctx = useContext(ToastContext);
   if (!ctx) {
-    // Fallback if used outside provider — log to console instead
     return {
       success: (msg) => console.log('[toast:success]', msg),
       error: (msg) => console.error('[toast:error]', msg),

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   fetchQuestionsForPaperFromSupabase
 } from '../../services/papersService';
+import { isSafeHttpUrl } from '../../utils/adminGuard';
+import { recordPaperView } from '../../utils/studyTracker';
 import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 import './PaperView.css';
 
@@ -10,7 +12,6 @@ import './PaperView.css';
 function QuestionText({ text }) {
   const original = String(text ?? '').replace(/\r\n?/g, '\n');
 
-  // Add paragraph breaks before explicit Task labels, unless code blocks present
   const formatted = original.includes('```')
     ? original
     : original.replace(
@@ -20,7 +21,7 @@ function QuestionText({ text }) {
 
   const paragraphs = formatted
     .split(/\n[ \t]*\n+/)
-    .map(p => p.trim())
+    .map((p) => p.trim())
     .filter(Boolean);
 
   return (
@@ -63,9 +64,6 @@ function getPartText(part) {
 }
 
 /* ── Lightweight markdown renderer ──────────────────────── */
-// Handles: headings (###), **bold**, *italic*, `code`,
-// - / * bullet lists, numbered lists, blank line paragraphs,
-// and horizontal rules. No external dependency needed.
 
 function renderInline(text) {
   const parts = [];
@@ -97,7 +95,7 @@ function MarkdownAnswer({ text }) {
 
   const elements = [];
   let i = 0;
-  let listBuffer = null; // { type: 'ul'|'ol', items: [jsx] }
+  let listBuffer = null;
 
   const flushList = () => {
     if (!listBuffer) return;
@@ -113,7 +111,6 @@ function MarkdownAnswer({ text }) {
   while (i < lines.length) {
     const line = lines[i];
 
-    // Heading
     const heading = line.match(/^(#{1,4})\s+(.+)/);
     if (heading) {
       flushList();
@@ -127,14 +124,12 @@ function MarkdownAnswer({ text }) {
       i++; continue;
     }
 
-    // Horizontal rule
     if (/^[-*_]{3,}\s*$/.test(line)) {
       flushList();
       elements.push(<hr key={i} className="paperview-md-hr" />);
       i++; continue;
     }
 
-    // Unordered list item
     const ulItem = line.match(/^[\s]*[-*+]\s+(.*)/);
     if (ulItem) {
       if (!listBuffer || listBuffer.type !== 'ul') {
@@ -147,7 +142,6 @@ function MarkdownAnswer({ text }) {
       i++; continue;
     }
 
-    // Ordered list item
     const olItem = line.match(/^[\s]*\d+\.\s+(.*)/);
     if (olItem) {
       if (!listBuffer || listBuffer.type !== 'ol') {
@@ -160,13 +154,11 @@ function MarkdownAnswer({ text }) {
       i++; continue;
     }
 
-    // Blank line
     if (line.trim() === '') {
       flushList();
       i++; continue;
     }
 
-    // Plain paragraph
     flushList();
     elements.push(
       <p key={i} className="paperview-md-p">
@@ -192,7 +184,8 @@ export default function PaperView({
     subjectName: '',
     subjectCode: ''
   },
-  onBack = () => {}
+  onBack = () => {},
+  onNavigate
 }) {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -200,6 +193,15 @@ export default function PaperView({
   const [reloadKey, setReloadKey] = useState(0);
   const [expandedAnswers, setExpandedAnswers] = useState({});
   const [readProgress, setReadProgress] = useState(0);
+
+  const safeFileUrl = isSafeHttpUrl(paper?.file_url) ? paper.file_url.trim() : null;
+
+  // Record paper view in student study history
+  useEffect(() => {
+    if (paper?.title || paper?.id) {
+      recordPaperView(paper);
+    }
+  }, [paper]);
 
   // Reading progress bar
   useEffect(() => {
@@ -225,7 +227,7 @@ export default function PaperView({
       setExpandedAnswers({});
 
       try {
-        const rows = await fetchQuestionsForPaperFromSupabase(paper?.id);
+        const rows = await fetchQuestionsForPaperFromSupabase(paper?.id, paper);
         if (!cancelled) setQuestions(rows);
       } catch (err) {
         if (!cancelled) setError(err.message || 'Failed to retrieve this paper.');
@@ -236,9 +238,10 @@ export default function PaperView({
 
     loadStoredQuestions();
     return () => { cancelled = true; };
-  }, [paper?.id, reloadKey]);
+  }, [paper, reloadKey]);
+
   const toggleAnswer = (id) => {
-    setExpandedAnswers(prev => ({ ...prev, [id]: !prev[id] }));
+    setExpandedAnswers((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   // Trigger MathJax whenever questions or expanded states change
@@ -251,24 +254,23 @@ export default function PaperView({
   }, [questions, expandedAnswers]);
 
   const allExpanded =
-    questions.length > 0 && questions.every(q => Boolean(expandedAnswers[q.id]));
+    questions.length > 0 && questions.every((q) => Boolean(expandedAnswers[q.id]));
 
   const toggleAll = () => {
     const nextState = !allExpanded;
     const next = {};
-    questions.forEach(q => { next[q.id] = nextState; });
+    questions.forEach((q) => { next[q.id] = nextState; });
     setExpandedAnswers(next);
   };
 
   const handleDownload = () => {
-    if (paper.file_url) {
-      window.open(paper.file_url, '_blank');
+    if (safeFileUrl) {
+      window.open(safeFileUrl, '_blank', 'noopener,noreferrer');
     } else {
       window.print();
     }
   };
 
-  // Metadata — no invented defaults
   const displaySubject =
     paper.subjectName || paper.subjectCode || 'Past paper';
 
@@ -280,7 +282,13 @@ export default function PaperView({
       : 'Not specified';
 
   const breadcrumbItems = [
-    { label: 'Subjects', onClick: () => { window.location.hash = 'subjects'; } },
+    {
+      label: 'Subjects',
+      onClick: () => {
+        if (typeof onNavigate === 'function') onNavigate('subjects');
+        else onBack();
+      }
+    },
     { label: displaySubject, onClick: onBack },
     { label: paper.title || 'Paper View' }
   ];
@@ -305,7 +313,7 @@ export default function PaperView({
             onClick={toggleAll}
             disabled={loading || questions.length === 0}
           >
-            <span className="material-symbols-outlined">
+            <span className="material-symbols-outlined" aria-hidden="true">
               {allExpanded ? 'visibility_off' : 'visibility'}
             </span>
             {allExpanded ? 'Hide all answers' : 'Show all answers'}
@@ -316,7 +324,7 @@ export default function PaperView({
             className="btn-download"
             onClick={handleDownload}
           >
-            <span className="material-symbols-outlined">download</span>
+            <span className="material-symbols-outlined" aria-hidden="true">download</span>
             Download / Print
           </button>
         </div>
@@ -361,8 +369,8 @@ export default function PaperView({
           </div>
         </div>
 
-        {/* PDF embed */}
-        {paper.file_url && (
+        {/* Safe PDF embed */}
+        {safeFileUrl && (
           <div style={{
             margin: '1.5rem 0',
             borderRadius: '12px',
@@ -370,10 +378,12 @@ export default function PaperView({
             border: '1px solid var(--border)'
           }}>
             <iframe
-              src={paper.file_url}
-              title={paper.title}
+              src={safeFileUrl}
+              title={paper.title || 'Past examination paper PDF'}
               width="100%"
               height="500px"
+              sandbox="allow-scripts allow-same-origin"
+              referrerPolicy="no-referrer"
               style={{ border: 'none', display: 'block' }}
             />
           </div>
@@ -400,6 +410,7 @@ export default function PaperView({
               <span
                 className="material-symbols-outlined"
                 style={{ fontSize: '2.5rem', animation: 'spin 1s linear infinite', display: 'block' }}
+                aria-hidden="true"
               >
                 progress_activity
               </span>
@@ -414,7 +425,7 @@ export default function PaperView({
                 type="button"
                 className="paperview-btn-secondary"
                 style={{ marginTop: '1rem' }}
-                onClick={() => setReloadKey(v => v + 1)}
+                onClick={() => setReloadKey((v) => v + 1)}
               >
                 Try again
               </button>
@@ -549,7 +560,7 @@ export default function PaperView({
             </div>
 
             <button type="button" className="btn-download" onClick={handleDownload}>
-              <span className="material-symbols-outlined">download</span>
+              <span className="material-symbols-outlined" aria-hidden="true">download</span>
               Download / Print
             </button>
           </div>

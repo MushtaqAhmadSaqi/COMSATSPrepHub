@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchSubjectsFromSupabase } from '../../services/papersService';
-import { DEFAULT_SUBJECTS, DEPARTMENTS } from '../../constants/subjects';
-import { SkeletonCard, SubjectCardSkeleton } from '../../components/ui/Skeleton';
+import { DEPARTMENTS } from '../../constants/subjects';
+import { SubjectCardSkeleton } from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
 import PageHeader from '../../components/PageHeader/PageHeader';
@@ -49,7 +49,7 @@ function SubjectCard({ subject, idx, searchQuery = '', onSelect }) {
       <div className="subject-meta">
         <span>{subject.department}</span>
         <span className="subject-papers-count">
-          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>description</span>
+          <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">description</span>
           {subject.papers} Papers
         </span>
       </div>
@@ -63,6 +63,7 @@ function DepartmentChip({ dept, isSelected, onClick }) {
     <motion.button
       type="button"
       onClick={onClick}
+      aria-pressed={isSelected}
       className={`department-chip ${isSelected ? 'selected' : ''}`}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -109,11 +110,12 @@ export default function Subjects({ onSelectSubject = () => {} }) {
     loadSubjects();
   }, []);
 
-  const filtered = subjects.filter(s => {
+  const filtered = subjects.filter((s) => {
     const matchesDept = selectedDept === 'All' || s.department === selectedDept;
-    const matchesQuery = s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         s.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         s.department.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesQuery =
+      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.department.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesDept && matchesQuery;
   });
 
@@ -158,13 +160,13 @@ export default function Subjects({ onSelectSubject = () => {} }) {
               onClick={() => setSearchQuery('')}
               aria-label="Clear search"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>close</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '1rem' }} aria-hidden="true">close</span>
             </button>
           )}
         </div>
 
         <div className="subjects-filter-row">
-          <div className="subjects-filter-chips" aria-label="Filter by department">
+          <div className="subjects-filter-chips" role="group" aria-label="Filter by department">
             {DEPARTMENTS.map((dept) => (
               <DepartmentChip
                 key={dept}
@@ -200,9 +202,12 @@ export default function Subjects({ onSelectSubject = () => {} }) {
         )}
 
         <p className="subjects-result-count" aria-live="polite">
-          {loading ? 'Loading subjects...' : filtered.length === 0 && hasSearch ? `No subjects match "${searchQuery}"` : `${filtered.length} ${filtered.length === 1 ? 'subject' : 'subjects'}`}
+          {loading
+            ? 'Loading subjects...'
+            : filtered.length === 0 && hasSearch
+              ? `No subjects match "${searchQuery}"`
+              : `${filtered.length} ${filtered.length === 1 ? 'subject' : 'subjects'}`}
         </p>
-
       </div>
 
       {loading ? (
@@ -218,6 +223,11 @@ export default function Subjects({ onSelectSubject = () => {} }) {
           icon="search_off"
           title="No subjects match your filter"
           description='Try selecting "All" or typing a different keyword'
+          actionLabel="Reset Filters"
+          onAction={() => {
+            setSelectedDept('All');
+            setSearchQuery('');
+          }}
         />
       ) : (
         <motion.div

@@ -1,42 +1,68 @@
-import { supabase } from './supabase';
+import { supabase, isSupabaseConfigured } from './supabase';
 import { DEFAULT_SUBJECTS } from '../constants/subjects';
+import { getOfflineExamQuestions } from './geminiService';
+
+const catalogByCode = new Map(
+  DEFAULT_SUBJECTS.map((subj) => [subj.code.toUpperCase(), subj])
+);
 
 /**
- * Fetches all unique subjects with paper counts from Supabase 'past_papers' table merged with standard catalog.
+ * Sanitizes user/route input before interpolating into PostgREST .or() filters
+ * to prevent filter syntax injection.
+ */
+export function sanitizeFilterValue(val) {
+  return String(val || '')
+    .replace(/[,()*%\\]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 80);
+}
+
+/**
+ * Fetches all unique subjects with paper counts from Supabase 'past_papers' table,
+ * enriched with department and icon metadata from DEFAULT_SUBJECTS.
+ * Falls back gracefully to DEFAULT_SUBJECTS when Supabase is unconfigured or unreachable.
  */
 export async function fetchSubjectsFromSupabase() {
+  if (!isSupabaseConfigured) {
+    return DEFAULT_SUBJECTS;
+  }
+
   try {
     const { data, error } = await supabase
       .from('past_papers')
       .select('subject_code, subject_name');
 
     if (error) {
-      throw new Error(`Could not load subjects: ${error.message}`);
+      console.warn('Supabase past_papers fetch warning, using catalog fallback:', error.message);
+      return DEFAULT_SUBJECTS;
     }
 
     if (!data || data.length === 0) {
-      return [];
+      return DEFAULT_SUBJECTS;
     }
 
     const subjectMap = new Map();
 
-    // Do not seed with DEFAULT_SUBJECTS.
-    // Build map exclusively from Supabase data so only subjects with papers are shown.
-
-    data.forEach(item => {
+    data.forEach((item) => {
       const code = String(item.subject_code || '').trim().toUpperCase();
-      const name = String(item.subject_name || '').trim();
-      const department = String(item.department || '').trim() || 'CS & IT';
-
       if (!code) return;
+
+      const catalogMatch = catalogByCode.get(code);
+      const name = String(item.subject_name || '').trim() || catalogMatch?.name || code;
+      const department =
+        String(item.department || '').trim() ||
+        catalogMatch?.department ||
+        inferDepartment(code, name);
+      const icon = catalogMatch?.icon || getSubjectIcon(code, name);
 
       if (!subjectMap.has(code)) {
         subjectMap.set(code, {
           code,
-          name: name || code,
+          name,
           papers: 1,
           department,
-          icon: getSubjectIcon(code, name)
+          icon
         });
       } else {
         const existing = subjectMap.get(code);
@@ -49,41 +75,93 @@ export async function fetchSubjectsFromSupabase() {
 
     return Array.from(subjectMap.values());
   } catch (err) {
-    console.error('Fetch subjects error:', err);
-    throw err;
+    console.warn('Fetch subjects network error, using catalog fallback:', err.message);
+    return DEFAULT_SUBJECTS;
   }
+}
+
+function buildFallbackPapers(subjectCode, subjectName) {
+  const code = String(subjectCode || 'CSC211').trim().toUpperCase();
+  const name = String(subjectName || catalogByCode.get(code)?.name || 'Course').trim();
+  return [
+    {
+      id: `fallback-${code.toLowerCase()}-terminal-2024`,
+      title: `${name} — Terminal Examination (Spring 2024)`,
+      term: 'Terminal',
+      year: 2024,
+      semester: 'Spring 2024',
+      file_url: null,
+      subjectCode: code,
+      subjectName: name,
+      totalMarks: 50,
+      instructorName: 'COMSATS Faculty'
+    },
+    {
+      id: `fallback-${code.toLowerCase()}-midterm-2024`,
+      title: `${name} — Midterm Examination (Spring 2024)`,
+      term: 'Midterm',
+      year: 2024,
+      semester: 'Spring 2024',
+      file_url: null,
+      subjectCode: code,
+      subjectName: name,
+      totalMarks: 25,
+      instructorName: 'COMSATS Faculty'
+    },
+    {
+      id: `fallback-${code.toLowerCase()}-terminal-2023`,
+      title: `${name} — Terminal Examination (Fall 2023)`,
+      term: 'Terminal',
+      year: 2023,
+      semester: 'Fall 2023',
+      file_url: null,
+      subjectCode: code,
+      subjectName: name,
+      totalMarks: 50,
+      instructorName: 'COMSATS Faculty'
+    }
+  ];
 }
 
 /**
  * Fetches past papers for a specific subject from Supabase 'past_papers' table.
  */
 export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName) {
+  if (!isSupabaseConfigured) {
+    return buildFallbackPapers(subjectCode, subjectName);
+  }
+
   try {
     let query = supabase.from('past_papers').select('*');
 
-    const code = String(subjectCode || '').trim();
-    const name = String(subjectName || '').trim();
+    const code = sanitizeFilterValue(subjectCode);
+    const name = sanitizeFilterValue(subjectName);
 
     if (code || name) {
       const normalizedCode = code.replace(/[-\s]/g, '');
       const filters = [];
       if (code) filters.push(`subject_code.ilike.%${code}%`);
-      if (normalizedCode && normalizedCode !== code) filters.push(`subject_code.ilike.%${normalizedCode}%`);
+      if (normalizedCode && normalizedCode !== code) {
+        filters.push(`subject_code.ilike.%${normalizedCode}%`);
+      }
       if (name) filters.push(`subject_name.ilike.%${name}%`);
-      query = query.or(filters.join(','));
+      if (filters.length > 0) {
+        query = query.or(filters.join(','));
+      }
     }
 
     const { data, error } = await query.order('year', { ascending: false });
 
     if (error) {
-      throw new Error(`Could not load papers: ${error.message}`);
+      console.warn('Supabase fetch papers warning, using fallback papers:', error.message);
+      return buildFallbackPapers(subjectCode, subjectName);
     }
 
     if (!data || data.length === 0) {
-      return [];
+      return buildFallbackPapers(subjectCode, subjectName);
     }
 
-    return data.map(item => ({
+    return data.map((item) => ({
       id: item.id,
       title: item.title || item.paper_title || buildPaperTitle(item),
       term: item.term || item.exam_type || 'Exam',
@@ -97,17 +175,26 @@ export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName
       createdAt: item.created_at || null
     }));
   } catch (err) {
-    console.error('Fetch papers error:', err);
-    throw err;
+    console.warn('Fetch papers network error, using fallback papers:', err.message);
+    return buildFallbackPapers(subjectCode, subjectName);
   }
 }
 
 /**
- * Fetches the real questions attached to a selected paper from Supabase.
+ * Fetches the real questions attached to a selected paper from Supabase,
+ * with a fallback to curated subject exam questions when offline or for sample papers.
  */
-export async function fetchQuestionsForPaperFromSupabase(paperId) {
-  if (paperId === undefined || paperId === null || paperId === '') {
-    throw new Error('No database paper ID was supplied.');
+export async function fetchQuestionsForPaperFromSupabase(paperId, paperMeta = {}) {
+  const isFallbackPaper = String(paperId || '').startsWith('fallback-');
+
+  if (!isSupabaseConfigured || isFallbackPaper || paperId === undefined || paperId === null || paperId === '') {
+    return getOfflineExamQuestions(
+      paperMeta.subjectName,
+      paperMeta.subjectCode,
+      paperMeta.title,
+      paperMeta.term,
+      paperMeta.year
+    );
   }
 
   try {
@@ -118,11 +205,18 @@ export async function fetchQuestionsForPaperFromSupabase(paperId) {
       .order('question_number', { ascending: true });
 
     if (error) {
-      throw new Error(`Could not load paper questions: ${error.message}`);
+      console.warn('Fetch paper questions warning, using fallback questions:', error.message);
+      return getOfflineExamQuestions(
+        paperMeta.subjectName,
+        paperMeta.subjectCode,
+        paperMeta.title,
+        paperMeta.term,
+        paperMeta.year
+      );
     }
 
-    return (data || [])
-      .filter(item => item.question_text || item.model_answer)
+    const rows = (data || [])
+      .filter((item) => item.question_text || item.model_answer)
       .map((item, idx) => ({
         id: item.id || `${paperId}-${idx + 1}`,
         number: item.question_number ? `Question ${item.question_number}` : `Question ${idx + 1}`,
@@ -136,9 +230,25 @@ export async function fetchQuestionsForPaperFromSupabase(paperId) {
         answerGraph: item.answer_graph || null,
         source: 'supabase'
       }));
+
+    if (rows.length > 0) return rows;
+
+    return getOfflineExamQuestions(
+      paperMeta.subjectName,
+      paperMeta.subjectCode,
+      paperMeta.title,
+      paperMeta.term,
+      paperMeta.year
+    );
   } catch (err) {
-    console.error('Fetch paper questions error:', err);
-    throw err;
+    console.warn('Fetch paper questions error, using fallback questions:', err.message);
+    return getOfflineExamQuestions(
+      paperMeta.subjectName,
+      paperMeta.subjectCode,
+      paperMeta.title,
+      paperMeta.term,
+      paperMeta.year
+    );
   }
 }
 
@@ -147,6 +257,21 @@ function buildPaperTitle(item) {
   const semester = item.semester ? `${item.semester} ` : '';
   const year = item.year || 'COMSATS';
   return `${term} - ${semester}${year}`;
+}
+
+function inferDepartment(code, name) {
+  const upper = String(code || '').toUpperCase();
+  if (upper.startsWith('SWE')) return 'Software Eng';
+  if (upper.startsWith('MTH')) return 'Math';
+  if (upper.startsWith('EEE')) return 'Electrical';
+  if (upper.startsWith('PHY')) return 'Physics & Sciences';
+  if (upper.startsWith('HUM') || upper.startsWith('MGT')) return 'Humanities & Management';
+  const text = `${code} ${name}`.toLowerCase();
+  if (text.includes('math') || text.includes('calculus') || text.includes('algebra')) return 'Math';
+  if (text.includes('software')) return 'Software Eng';
+  if (text.includes('physics')) return 'Physics & Sciences';
+  if (text.includes('english') || text.includes('management')) return 'Humanities & Management';
+  return 'CS & IT';
 }
 
 function getSubjectIcon(code, name) {

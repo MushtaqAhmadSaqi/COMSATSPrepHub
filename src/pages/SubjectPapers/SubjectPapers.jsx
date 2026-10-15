@@ -11,7 +11,8 @@ import './SubjectPapers.css';
 export default function SubjectPapers({
   subject = { name: 'Data Structures & Algorithms', code: 'CSC211' },
   onViewPaper = () => {},
-  onBack = () => {}
+  onBack = () => {},
+  onNavigate
 }) {
   const [papers, setPapers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +20,7 @@ export default function SubjectPapers({
   const [reloadKey, setReloadKey] = useState(0);
 
   const loadPapers = () => {
-    setReloadKey(value => value + 1);
+    setReloadKey((value) => value + 1);
   };
 
   useEffect(() => {
@@ -65,6 +66,14 @@ export default function SubjectPapers({
     { label: 'Subjects', onClick: onBack },
     { label: subject.name }
   ];
+
+  const handleUploadRedirect = () => {
+    if (typeof onNavigate === 'function') {
+      onNavigate('upload');
+    } else {
+      window.location.hash = 'upload';
+    }
+  };
 
   return (
     <motion.div
@@ -124,9 +133,7 @@ export default function SubjectPapers({
           title={`No papers uploaded yet for ${subject.code}`}
           description="New papers will appear here when they become available."
           actionLabel="Upload Paper"
-          onAction={() => {
-            window.location.hash = 'upload';
-          }}
+          onAction={handleUploadRedirect}
         />
       ) : (
         <div className="papers-list">

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { supabase } from '../../services/supabase';
+import { getStudyStats, getRecentActivity } from '../../utils/studyTracker';
 import './Dashboard.css';
 
 const DEFAULT_ROUTES = {
   papers: 'subjects',
-  quiz: 'ai-quiz',
+  quiz: 'ai-quiz-generator',
+  practiceQuiz: 'quiz',
   gpa: 'gpa',
 };
 
@@ -39,6 +41,7 @@ function Icon({ name, className = '' }) {
 export default function Dashboard({
   user = null,
   onNavigate = () => {},
+  onOpenAuth,
   routes = DEFAULT_ROUTES,
   stats = null,
   activity = [],
@@ -52,13 +55,15 @@ export default function Dashboard({
     user?.email?.split('@')[0] ||
     'Student';
 
-  const isDemo = stats == null;
+  const localStats = stats || getStudyStats();
+  const localActivity = activity && activity.length > 0 ? activity : getRecentActivity();
+  const isDemo = localStats == null;
   const destinations = { ...DEFAULT_ROUTES, ...routes };
 
   const metrics = [
     {
       label: 'Quizzes completed',
-      value: isDemo ? '12' : stats.quizzesAttempted ?? '—',
+      value: isDemo ? '12' : localStats.quizzesAttempted ?? '0',
       description: 'Practice builds confidence',
       icon: 'quiz',
     },
@@ -66,21 +71,21 @@ export default function Dashboard({
       label: 'Average accuracy',
       value: isDemo
         ? '84%'
-        : Number.isFinite(stats.averageAccuracy)
-          ? `${stats.averageAccuracy}%`
+        : Number.isFinite(localStats.averageAccuracy)
+          ? `${localStats.averageAccuracy}%`
           : '—',
       description: 'Across your completed quizzes',
       icon: 'track_changes',
     },
     {
-      label: 'Saved papers',
-      value: isDemo ? '8' : stats.savedPapers ?? '—',
+      label: 'Papers reviewed',
+      value: isDemo ? '8' : localStats.savedPapers ?? '0',
       description: 'Your revision collection',
       icon: 'bookmark',
     },
   ];
 
-  const recentActivity = isDemo ? DEMO_ACTIVITY : activity;
+  const recentActivity = isDemo ? DEMO_ACTIVITY : localActivity;
 
   async function handleSignOut() {
     if (signingOut) return;
@@ -100,7 +105,7 @@ export default function Dashboard({
   }
 
   return (
-    <main className="study-dashboard">
+    <div className="study-dashboard">
       <header className="study-dashboard__header">
         <div>
           <p className="study-dashboard__eyebrow">YOUR WORKSPACE</p>
@@ -110,7 +115,7 @@ export default function Dashboard({
           </p>
         </div>
 
-        {user && (
+        {user ? (
           <button
             type="button"
             className="study-dashboard__signout"
@@ -119,6 +124,19 @@ export default function Dashboard({
           >
             <Icon name="logout" />
             {signingOut ? 'Signing out…' : 'Sign out'}
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="study-dashboard__primary"
+            style={{ marginTop: 0 }}
+            onClick={() => {
+              if (typeof onOpenAuth === 'function') onOpenAuth();
+              else onNavigate('auth');
+            }}
+          >
+            <Icon name="login" />
+            Sign in to sync
           </button>
         )}
       </header>
@@ -133,8 +151,8 @@ export default function Dashboard({
         <div className="study-dashboard__preview">
           <Icon name="info" />
           <p>
-            <strong>Dashboard preview.</strong> The statistics and activity below
-            are examples, not your personal study history.
+            <strong>Dashboard preview.</strong> Complete a quiz or open a past paper
+            to replace these sample metrics with your real study history.
           </p>
         </div>
       )}
@@ -143,7 +161,7 @@ export default function Dashboard({
         className="study-dashboard__metrics"
         aria-label="Study overview"
       >
-        {metrics.map(metric => (
+        {metrics.map((metric) => (
           <article
             className="study-dashboard__metric"
             key={metric.label}
@@ -213,7 +231,7 @@ export default function Dashboard({
 
             {recentActivity.length > 0 ? (
               <ul className="study-dashboard__activity-list">
-                {recentActivity.map(item => (
+                {recentActivity.map((item) => (
                   <li key={item.id}>
                     <div className="study-dashboard__activity-icon">
                       <Icon name={item.icon || 'description'} />
@@ -253,11 +271,26 @@ export default function Dashboard({
               onClick={() => onNavigate(destinations.quiz)}
             >
               <span className="study-dashboard__tool-icon">
+                <Icon name="auto_awesome" />
+              </span>
+              <span className="study-dashboard__tool-copy">
+                <strong>AI Quiz Generator</strong>
+                <span>Create a custom quiz around any topic.</span>
+              </span>
+              <Icon name="arrow_forward" />
+            </button>
+
+            <button
+              type="button"
+              className="study-dashboard__tool"
+              onClick={() => onNavigate(destinations.practiceQuiz)}
+            >
+              <span className="study-dashboard__tool-icon">
                 <Icon name="quiz" />
               </span>
               <span className="study-dashboard__tool-copy">
-                <strong>Test your understanding</strong>
-                <span>Create a quiz around your topic.</span>
+                <strong>Course Practice Quiz</strong>
+                <span>Revise COMSATS subjects with MCQs.</span>
               </span>
               <Icon name="arrow_forward" />
             </button>
@@ -295,6 +328,6 @@ export default function Dashboard({
         <span>COMSATSPrepHub</span>
         <span>Your space to prepare.</span>
       </footer>
-    </main>
+    </div>
   );
 }

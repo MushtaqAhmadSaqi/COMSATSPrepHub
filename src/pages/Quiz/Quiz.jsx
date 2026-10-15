@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchSubjectsFromSupabase } from '../../services/papersService';
 import { generateQuizWithGemini } from '../../services/aiQuizService';
-import { DEFAULT_SUBJECTS } from '../../constants/subjects';
+import { recordQuizAttempt } from '../../utils/studyTracker';
 import { fireConfetti } from '../../utils/confetti';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import './Quiz.css';
@@ -12,7 +12,7 @@ const QUESTION_COUNTS = [5, 10, 15, 20];
 const LETTERS = ['A', 'B', 'C', 'D'];
 
 /* ── Animated Option Button ── */
-function AnimatedOption({ letter, opt, index, selectedOption, revealed, correct, isCorrect, onClick, disabled }) {
+function AnimatedOption({ letter, opt, index, selectedOption, revealed, correct, onClick, disabled }) {
   let optionClass = 'quiz-option-btn';
   if (selectedOption === index) optionClass += ' selected';
   if (revealed) {
@@ -27,6 +27,7 @@ function AnimatedOption({ letter, opt, index, selectedOption, revealed, correct,
       className={optionClass}
       onClick={() => !revealed && onClick(index)}
       disabled={disabled}
+      aria-pressed={selectedOption === index}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
@@ -40,12 +41,13 @@ function AnimatedOption({ letter, opt, index, selectedOption, revealed, correct,
           transition={{ type: 'spring', stiffness: 300 }}
           className="material-symbols-outlined"
           style={{ fontSize: '20px', color: '#10b981' }}
+          aria-hidden="true"
         >
           check_circle
         </motion.span>
       )}
       {revealed && selectedOption === index && index !== correct && (
-        <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#ef4444' }}>
+        <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#ef4444' }} aria-hidden="true">
           cancel
         </span>
       )}
@@ -79,7 +81,7 @@ export default function Quiz() {
     try {
       const data = await fetchSubjectsFromSupabase();
       setSubjects(data || []);
-    } catch (err) {
+    } catch {
       setSubjectsError('Couldn’t load subjects. Try again.');
     } finally {
       setSubjectsLoading(false);
@@ -90,7 +92,7 @@ export default function Quiz() {
     loadSubjects();
   }, []);
 
-  const filteredSubjects = subjects.filter(s =>
+  const filteredSubjects = subjects.filter((s) =>
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.code.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -145,6 +147,12 @@ export default function Quiz() {
     if (currentIdx + 1 >= questions.length) {
       const finalScore = score;
       const pct = Math.round((finalScore / questions.length) * 100);
+      recordQuizAttempt({
+        subject: selectedSubject?.name || 'Practice Quiz',
+        score: finalScore,
+        totalQuestions: questions.length,
+        difficulty
+      });
       if (pct >= 70) { fireConfetti({ count: 100, spread: 80, originY: 0.5 }); }
       setStep('finished');
     } else {
@@ -197,7 +205,7 @@ export default function Quiz() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [step, questions, currentIdx, selectedOption, revealed]);
+  });
 
   // SELECT SUBJECT
   if (step === 'select') {
@@ -231,7 +239,7 @@ export default function Quiz() {
 
         {subjectsLoading ? (
           <motion.div className="quiz-loading-state" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', animation: 'spin 1s linear infinite' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', animation: 'spin 1s linear infinite' }} aria-hidden="true">
               progress_activity
             </span>
             <p>Loading subjects...</p>
@@ -245,7 +253,7 @@ export default function Quiz() {
               onClick={loadSubjects}
               style={{ marginBottom: 0 }}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>refresh</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">refresh</span>
               Try again
             </button>
           </div>
@@ -271,7 +279,7 @@ export default function Quiz() {
                 <div className="quiz-subject-meta">
                   <span>{subj.department}</span>
                   <span className="quiz-subject-papers">
-                    <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>description</span>
+                    <span className="material-symbols-outlined" style={{ fontSize: '14px' }} aria-hidden="true">description</span>
                     {subj.papers} Papers
                   </span>
                 </div>
@@ -294,13 +302,13 @@ export default function Quiz() {
       >
         <div className="quiz-config-card">
           <button type="button" className="quiz-back-btn" onClick={() => { setSelectedSubject(null); setStep('select'); }}>
-            <span className="material-symbols-outlined">arrow_back</span>
+            <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
             Change Subject
           </button>
 
           <div className="quiz-selected-subject">
             <div className="quiz-selected-badge">
-              <span className="material-symbols-outlined">menu_book</span>
+              <span className="material-symbols-outlined" aria-hidden="true">menu_book</span>
               {selectedSubject?.code}
             </div>
             <h2>{selectedSubject?.name}</h2>
@@ -308,11 +316,12 @@ export default function Quiz() {
 
           <div className="quiz-config-field">
             <label className="quiz-config-label">Difficulty Level</label>
-            <div className="quiz-difficulty-grid">
+            <div className="quiz-difficulty-grid" role="group" aria-label="Select difficulty level">
               {DIFFICULTIES.map((d) => (
                 <motion.button
                   key={d}
                   type="button"
+                  aria-pressed={difficulty === d}
                   className={`quiz-chip ${difficulty === d ? 'selected' : ''}`}
                   onClick={() => setDifficulty(d)}
                   whileHover={{ scale: 1.05 }}
@@ -329,11 +338,12 @@ export default function Quiz() {
 
           <div className="quiz-config-field">
             <label className="quiz-config-label">Number of Questions</label>
-            <div className="quiz-count-grid">
+            <div className="quiz-count-grid" role="group" aria-label="Select number of questions">
               {QUESTION_COUNTS.map((n) => (
                 <motion.button
                   key={n}
                   type="button"
+                  aria-pressed={numQuestions === n}
                   className={`quiz-count-chip ${numQuestions === n ? 'selected' : ''}`}
                   onClick={() => setNumQuestions(n)}
                   whileHover={{ scale: 1.05 }}
@@ -346,8 +356,8 @@ export default function Quiz() {
           </div>
 
           {error && (
-            <div className="quiz-error-alert">
-              <span className="material-symbols-outlined">error</span>
+            <div className="quiz-error-alert" role="alert">
+              <span className="material-symbols-outlined" aria-hidden="true">error</span>
               {error}
             </div>
           )}
@@ -359,7 +369,7 @@ export default function Quiz() {
             whileHover={{ scale: 1.02, boxShadow: '0 12px 40px rgba(14,165,233,0.35)' }}
             whileTap={{ scale: 0.98 }}
           >
-            <span className="material-symbols-outlined">auto_awesome</span>
+            <span className="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
             Generate AI Quiz
           </motion.button>
         </div>
@@ -382,7 +392,7 @@ export default function Quiz() {
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '3rem' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '3rem' }} aria-hidden="true">
               auto_awesome
             </span>
           </motion.div>
@@ -423,7 +433,7 @@ export default function Quiz() {
           <span className="quiz-counter-text">Question {currentIdx + 1} of {questions.length}</span>
           {streak >= 3 && (
             <span className="quiz-streak-indicator">
-              <span className="material-symbols-outlined" style={{ fontSize: '1rem', verticalAlign: 'middle' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '1rem', verticalAlign: 'middle' }} aria-hidden="true">
                 local_fire_department
               </span>
               {streak} streak
@@ -431,7 +441,7 @@ export default function Quiz() {
           )}
         </div>
 
-        <div className="quiz-progress-bar">
+        <div className="quiz-progress-bar" role="progressbar" aria-valuenow={currentIdx + 1} aria-valuemin={1} aria-valuemax={questions.length}>
           <div
             className="quiz-progress-fill"
             style={{ width: `${progress}%` }}
@@ -439,14 +449,14 @@ export default function Quiz() {
         </div>
 
         <div className="quiz-card" key={currentIdx}>
-          <motion.h3
+          <motion.h2
             className="quiz-question"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
             {q.question}
-          </motion.h3>
+          </motion.h2>
 
           <div className="quiz-options">
             {q.options.map((opt, i) => (
@@ -458,7 +468,6 @@ export default function Quiz() {
                 selectedOption={selectedOption}
                 revealed={revealed}
                 correct={q.correct}
-                isCorrect={isCorrect}
                 onClick={(idx) => !revealed && setSelectedOption(idx)}
                 disabled={revealed}
               />
@@ -475,10 +484,11 @@ export default function Quiz() {
                 type="button"
                 onClick={() => setShowHint(!showHint)}
                 className="quiz-hint-toggle"
+                aria-expanded={showHint}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>lightbulb</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">lightbulb</span>
                 {showHint ? 'Hide Hint' : 'Need a Hint?'}
               </motion.button>
 
@@ -501,11 +511,12 @@ export default function Quiz() {
           {revealed && q.hint && (
             <motion.div
               className="quiz-explanation-box"
+              role="status"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>info</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">info</span>
               <div>
                 <strong>{isCorrect ? '✅ Correct!' : '❌ Incorrect'}</strong>
                 <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', opacity: 0.9 }}>
@@ -527,7 +538,7 @@ export default function Quiz() {
                 whileTap={{ scale: 0.97 }}
               >
                 Submit Answer
-                <span className="material-symbols-outlined">check</span>
+                <span className="material-symbols-outlined" aria-hidden="true">check</span>
               </motion.button>
             ) : (
               <motion.button
@@ -539,7 +550,7 @@ export default function Quiz() {
                 whileTap={{ scale: 0.97 }}
               >
                 {currentIdx + 1 === questions.length ? 'View Results' : 'Next Question'}
-                <span className="material-symbols-outlined">arrow_forward</span>
+                <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
               </motion.button>
             )}
           </div>
@@ -565,7 +576,7 @@ export default function Quiz() {
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '3.5rem', color: pct >= 60 ? '#10b981' : '#f59e0b' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '3.5rem', color: pct >= 60 ? '#10b981' : '#f59e0b' }} aria-hidden="true">
               {pct >= 75 ? 'military_tech' : pct >= 50 ? 'emoji_events' : 'school'}
             </span>
           </motion.div>
@@ -612,7 +623,7 @@ export default function Quiz() {
             </motion.div>
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '2rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '2rem' }}>
             <motion.button
               type="button"
               className="btn-quiz-next"
@@ -621,7 +632,7 @@ export default function Quiz() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
-              <span className="material-symbols-outlined">refresh</span>
+              <span className="material-symbols-outlined" aria-hidden="true">refresh</span>
               New Quiz
             </motion.button>
             <motion.button
@@ -632,7 +643,7 @@ export default function Quiz() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >
-              <span className="material-symbols-outlined">menu_book</span>
+              <span className="material-symbols-outlined" aria-hidden="true">menu_book</span>
               Change Subject
             </motion.button>
           </div>
