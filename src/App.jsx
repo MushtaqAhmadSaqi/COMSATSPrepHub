@@ -118,8 +118,10 @@ export default function App() {
     try { return localStorage.getItem('pph_dark') === 'true'; } catch { return false; }
   });
   const [user, setUser] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isCmdPaletteOpen, setIsCmdPaletteOpen] = useState(false);
+  const [pendingPaper, setPendingPaper] = useState(null);
 
   const [selectedSubject, setSelectedSubject] = useState(() => {
     try {
@@ -203,13 +205,24 @@ export default function App() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data?.session?.user) {
-        setUser(data.session.user);
+      setUser(data?.session?.user ?? null);
+      setAuthReady(true);
+      if (data?.session?.user && sessionStorage.getItem('pph_pendingPaper') === 'true') {
+        setActivePath('paper-view');
+        window.history.replaceState({ path: 'paper-view' }, '', '#paper-view');
       }
+    }).catch((error) => {
+      console.error('Unable to restore authentication session:', error);
+      setAuthReady(true);
     });
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setAuthReady(true);
+      if (session?.user && sessionStorage.getItem('pph_pendingPaper') === 'true') {
+        setActivePath('paper-view');
+        window.history.replaceState({ path: 'paper-view' }, '', '#paper-view');
+      }
     });
 
     return () => {
@@ -271,7 +284,13 @@ export default function App() {
             onNavigate={handleNavigate}
             onViewPaper={(paper) => {
               setSelectedPaper(paper);
-              handleNavigate('paper-view');
+              if (user) {
+                handleNavigate('paper-view');
+              } else {
+                setPendingPaper(paper);
+                sessionStorage.setItem('pph_pendingPaper', 'true');
+                setIsAuthOpen(true);
+              }
             }}
           />
         );
@@ -281,6 +300,13 @@ export default function App() {
             paper={selectedPaper || undefined}
             onBack={() => handleNavigate('subject-papers')}
             onNavigate={handleNavigate}
+            user={user}
+            authReady={authReady}
+            onRequireAuth={() => {
+              setPendingPaper(selectedPaper);
+              sessionStorage.setItem('pph_pendingPaper', 'true');
+              setIsAuthOpen(true);
+            }}
           />
         );
       case 'quiz':
@@ -435,7 +461,15 @@ export default function App() {
         <AuthModal
           isOpen={isAuthOpen}
           onClose={() => setIsAuthOpen(false)}
-          onLoginSuccess={(u) => setUser(u)}
+          onLoginSuccess={(u) => {
+            setUser(u);
+            if (pendingPaper) {
+              setPendingPaper(null);
+              sessionStorage.removeItem('pph_pendingPaper');
+              setIsAuthOpen(false);
+              handleNavigate('paper-view');
+            }
+          }}
         />
 
         <CommandPalette

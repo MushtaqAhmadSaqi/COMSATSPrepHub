@@ -185,7 +185,10 @@ export default function PaperView({
     subjectCode: ''
   },
   onBack = () => {},
-  onNavigate
+  onNavigate,
+  user = null,
+  authReady = true,
+  onRequireAuth = () => {}
 }) {
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -196,12 +199,20 @@ export default function PaperView({
 
   const safeFileUrl = isSafeHttpUrl(paper?.file_url) ? paper.file_url.trim() : null;
 
+  const requiresAuthentication = authReady && !user;
+
+  useEffect(() => {
+    if (!authReady || user) return;
+    setLoading(false);
+    setQuestions([]);
+  }, [authReady, user]);
+
   // Record paper view in student study history
   useEffect(() => {
-    if (paper?.title || paper?.id) {
+    if (user && (paper?.title || paper?.id)) {
       recordPaperView(paper);
     }
-  }, [paper]);
+  }, [paper, user]);
 
   // Reading progress bar
   useEffect(() => {
@@ -218,6 +229,8 @@ export default function PaperView({
 
   // Load questions
   useEffect(() => {
+    if (!authReady || !user) return undefined;
+
     let cancelled = false;
 
     async function loadStoredQuestions() {
@@ -238,7 +251,7 @@ export default function PaperView({
 
     loadStoredQuestions();
     return () => { cancelled = true; };
-  }, [paper, reloadKey]);
+  }, [paper, reloadKey, authReady, user]);
 
   const toggleAnswer = (id) => {
     setExpandedAnswers((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -292,6 +305,51 @@ export default function PaperView({
     { label: displaySubject, onClick: onBack },
     { label: paper.title || 'Paper View' }
   ];
+
+  if (!authReady) {
+    return (
+      <div className="paperview-container" role="status" aria-live="polite">
+        <div className="paperview-exam-sheet" style={{ textAlign: 'center', padding: '4rem 1.5rem' }}>
+          <span
+            className="material-symbols-outlined"
+            style={{ fontSize: '2.5rem', animation: 'spin 1s linear infinite' }}
+            aria-hidden="true"
+          >
+            progress_activity
+          </span>
+          <p style={{ marginTop: '0.75rem', fontWeight: 600 }}>Checking your sign-in…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (requiresAuthentication) {
+    return (
+      <div className="paperview-container">
+        <Breadcrumbs items={breadcrumbItems} />
+        <div
+          className="paperview-exam-sheet"
+          style={{ textAlign: 'center', padding: '4rem 1.5rem' }}
+        >
+          <span
+            className="material-symbols-outlined"
+            style={{ fontSize: '3rem', color: 'var(--brand)' }}
+            aria-hidden="true"
+          >
+            lock
+          </span>
+          <h1 style={{ margin: '1rem 0 0.5rem' }}>Sign in to view this paper</h1>
+          <p style={{ color: 'var(--text-muted)', margin: '0 auto 1.5rem', maxWidth: '30rem' }}>
+            You can browse subjects and paper titles without an account, but sign-in is required to open the questions and answers.
+          </p>
+          <button type="button" className="paperview-btn-secondary" onClick={onRequireAuth}>
+            <span className="material-symbols-outlined" aria-hidden="true">login</span>
+            Sign in to continue
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="paperview-container">
