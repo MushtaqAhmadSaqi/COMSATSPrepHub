@@ -7,24 +7,23 @@
 ### Prepare smarter. Practice better. Score higher.
 
 <p>
-  A focused exam-preparation workspace for COMSATS University students.
-  Find past papers, practise with quizzes, generate AI-powered tests, and
-  keep your academic progress in one place.
+  A focused, mobile-first exam-preparation workspace for COMSATS University students across all campuses.
+  Find verified past papers, practice with timed &amp; AI-powered quizzes, review spaced-repetition flashcards, and calculate your SGPA/CGPA in one place.
 </p>
 
 <p>
-  <a href="https://comsatsprephub.vercel.app">Live demo</a>
+  <a href="https://comsatsprephub.vercel.app">Live Demo</a>
   &nbsp;&middot;&nbsp;
-  <a href="https://github.com/MushtaqAhmadSaqi/Full-front-end/issues">Report an issue</a>
+  <a href="https://github.com/MushtaqAhmadSaqi/COMSATSPrepHub/issues">Report an Issue</a>
   &nbsp;&middot;&nbsp;
-  <a href="https://github.com/MushtaqAhmadSaqi/Full-front-end">View source</a>
+  <a href="https://github.com/MushtaqAhmadSaqi/COMSATSPrepHub">View Source</a>
 </p>
 
 <p>
   <img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=20232A" alt="React 18" />
   <img src="https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite 5" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 3" />
-  <img src="https://img.shields.io/badge/License-Educational-1E3A8A?style=for-the-badge" alt="Educational use" />
+  <img src="https://img.shields.io/badge/License-MIT-1E3A8A?style=for-the-badge" alt="MIT License" />
 </p>
 
 </div>
@@ -33,173 +32,88 @@
   <img src="./public/readme-study-loop.svg" alt="Animated COMSATSPrepHub study loop" width="900" />
 </p>
 
-## At a glance
+## 📸 Screenshots & Preview Placeholders
 
-| 📚 Past papers | 🧠 Practice quizzes | ✨ AI quiz generator | 🧮 GPA calculator |
+| Home & Global Course Search | Past Paper Viewer & Topic Insights | Timed Quiz & Bilingual Helper | COMSATS GPA & Target Planner |
 |:---:|:---:|:---:|:---:|
-| Browse by subject | Revise key topics | Build custom tests | Calculate SGPA and CGPA |
-
-## Why COMSATSPrepHub?
-
-Exam preparation should not mean searching through scattered files and old
-messages. COMSATSPrepHub brings the most useful study tools into a
-mobile-friendly workspace that is quick to navigate and easy to return to.
+| `docs/screenshots/home-preview.png` | `docs/screenshots/paper-viewer.png` | `docs/screenshots/quiz-mode.png` | `docs/screenshots/gpa-calculator.png` |
 
 ## ✨ Features
 
-- **Past paper library** — Browse papers by subject and open detailed paper views.
-- **Practice quizzes** — Test your knowledge with topic-based revision quizzes.
-- **AI quiz generation** — Generate personalised COMSATS-style quizzes.
-- **GPA calculator** — Calculate semester GPA and cumulative GPA using COMSATS grading rules.
-- **Student dashboard** — Keep useful study information and progress in one place.
-- **Authentication** — Sign in with Supabase for account-based features.
-- **Dark mode** — Study comfortably in light or dark themes.
-- **Responsive design** — Works across desktop, tablet, and mobile screens.
-- **Command palette** — Jump between pages with `Ctrl + K` or `Cmd + K`.
+- **Past Paper Library (`/#subjects`)** — Filter by department, semester, year, and exam type (Midterm/Terminal/Quiz), with in-page zoom, bookmarks, personal notes, topic-frequency insights, and one-click *"Quiz from this paper"*.
+- **Timed & Practice Quizzes (`/#quiz`)** — Switch between untimed practice and 45s/question exam timer mode, with a question navigator, mark-for-review, bilingual (`EN / اردو`) step-by-step explanations, wrong-answer review, and targeted weak-topic drills.
+- **AI Quiz Generator (`/#ai-quiz-generator`)** — Generate custom COMSATS-style MCQs or conceptual questions with automatic server-side provider fallback (`Google Gemini` → `Groq` → `OpenRouter` → curated offline question bank).
+- **Study Hub (`/#study-hub`)** — Daily 5-Question Challenge with streaks, Leitner spaced-repetition flashcards, high-yield course cheat-sheets, exam-date study planner, and an opt-in campus leaderboard.
+- **COMSATS GPA & CGPA Calculator (`/#gpa`)** — Full COMSATS 4.00 grading scale with course retake replacement, Target CGPA calculator, Semester GPA History chart, and PDF/Print export.
+- **Student Dashboard & Guest Mode (`/#dashboard`)** — Use quizzes, flashcards, and the GPA calculator without signing in, or sign in with Supabase to sync your progress, exam countdowns, and bookmarks.
+- **PWA & Offline Support** — Installable mobile web app with service-worker caching and an offline status banner for unreliable campus Wi-Fi.
 
-## 🧭 Typical study flow
-
-```mermaid
-flowchart LR
-    A[Choose a subject] --> B[Browse past papers]
-    B --> C[Review important topics]
-    C --> D[Practice with a quiz]
-    D --> E[Track your progress]
-    C --> F[Generate an AI quiz]
-    F --> D
-    E --> G[Calculate GPA]
-```
-
-## 🛠️ Built with
-
-| Technology | Role |
-|---|---|
-| [React](https://react.dev/) | Component-based user interface |
-| [Vite](https://vitejs.dev/) | Development server and production builds |
-| [Tailwind CSS](https://tailwindcss.com/) | Utility-first styling |
-| [Framer Motion](https://motion.dev/) | UI animations and transitions |
-| [Supabase](https://supabase.com/) | Authentication and cloud data services |
-| Gemini / Groq / OpenRouter | AI-powered quiz generation |
-
-## 📁 Project structure
-
-```text
-.
-├── api/                  # Serverless API routes
-├── legacy/              # Older app code and legacy assets
-├── public/              # Logos, icons, and README media
-├── src/
-│   ├── components/      # Reusable UI components
-│   ├── constants/       # Shared application constants
-│   ├── pages/           # Page-level React components
-│   ├── services/        # Supabase and AI integrations
-│   ├── utils/           # Shared helpers
-│   ├── App.jsx          # Root layout and client-side navigation
-│   ├── main.jsx         # React entry point
-│   └── index.css        # Global styles
-├── .env.example         # Environment variable template
-├── package.json          # Scripts and dependencies
-├── tailwind.config.cjs   # Tailwind configuration
-├── vite.config.js        # Vite configuration
-└── README.md             # Project documentation
-```
-
-## 🚀 Getting started
+## 🚀 Getting Started
 
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) 18 or newer
-- npm
-- Supabase credentials for authentication features
-- An AI provider key for AI quiz generation
+- npm 9+
+- A Supabase project (optional for Guest Mode; required for cloud auth & database sync)
+- At least one AI provider key (`GEMINI_API_KEY`, `GROQ_API_KEY`, or `OPENROUTER_API_KEY`) for live AI quiz generation
 
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/MushtaqAhmadSaqi/Full-front-end.git
-cd Full-front-end
+git clone https://github.com/MushtaqAhmadSaqi/COMSATSPrepHub.git
+cd COMSATSPrepHub
 npm install
 ```
 
 ### 2. Configure environment variables
 
-Create a local `.env` file from the template:
+Copy `.env.example` to `.env`:
 
 ```bash
-copy .env.example .env
+cp .env.example .env
 ```
 
-Then add the credentials for the services you want to use:
+| Variable | Scope | Required | Description |
+|---|---|---|---|
+| `VITE_SUPABASE_URL` | Client (`VITE_`) | Optional (Guest mode fallback) | Your Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Client (`VITE_`) | Optional (Guest mode fallback) | Your Supabase public `anon` key (RLS enforced) |
+| `VITE_ADMIN_EMAILS` | Client (`VITE_`) | Optional | Comma-separated admin emails for UI route guard |
+| `VITE_GA_MEASUREMENT_ID` | Client (`VITE_`) | Optional | Consent-gated Google Analytics 4 ID |
+| `GEMINI_API_KEY` | Server (`/api` only) | Recommended | Google Gemini API key (primary AI provider) |
+| `GROQ_API_KEY` | Server (`/api` only) | Optional | Groq API key (secondary fallback provider) |
+| `OPENROUTER_API_KEY` | Server (`/api` only) | Optional | OpenRouter API key (tertiary fallback provider) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server (`/api` only) | Optional | Server-only key for atomic quota RPC verification |
+| `UPSTASH_REDIS_REST_URL` | Server (`/api` only) | Optional | Upstash Redis URL for distributed rate limiting |
+| `UPSTASH_REDIS_REST_TOKEN` | Server (`/api` only) | Optional | Upstash Redis REST token |
 
-```env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+### 3. Apply Supabase Row Level Security (RLS) migration
 
-GEMINI_API_KEY=your_gemini_api_key_here
-GROQ_API_KEY=your_groq_api_key_here
-OPENROUTER_API_KEY=your_openrouter_api_key_here
-```
+Open the Supabase SQL Editor and run:
+- `supabase/migrations/20261027000000_rls_security_schema.sql`
 
-> **Keep secrets server-side.** Never commit `.env` or expose server-side API
-> keys in browser code. `.env.example` contains placeholders only.
-
-### 3. Start developing
+### 4. Start developing
 
 ```bash
 npm run dev
 ```
 
-Open the local URL shown in the terminal, usually
-[`http://localhost:5173`](http://localhost:5173).
-
-## 📜 Available scripts
+## 📜 Available Scripts
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Start the Vite development server |
-| `npm run build` | Create a production build |
-| `npm run preview` | Preview the production build locally |
-| `npm run test` | Run the GPA logic test |
-| `npm run analyze` | Build in analyze mode |
-| `npm run build:css` | Build Tailwind CSS for legacy assets |
-| `npm run watch:css` | Watch and rebuild legacy Tailwind CSS |
+| `npm run dev` | Start the local Vite development server + `/api/generate-quiz` middleware |
+| `npm run lint` | Run the AST syntax & security linter across `src/`, `api/`, and `tests/` |
+| `npm run test` | Run the unit, GPA boundary, API validation, rate-limit, and security test suite |
+| `npm run build` | Build the production bundle into `dist/` |
+| `npm run analyze` | Build and generate `dist/bundle-stats.html` |
 
-## 🌐 Deployment
+## 🔒 Security Architecture
 
-The project is ready for Vercel-style deployment:
+- **Zero Client-Side AI Keys**: `GEMINI_API_KEY`, `GROQ_API_KEY`, and `OPENROUTER_API_KEY` are read exclusively inside `/api/generate-quiz.js` and enforced by `scripts/lint.cjs`.
+- **Supabase RLS**: Every table (`profiles`, `past_papers`, `questions`, `user_subject_progress`, `user_quiz_attempts`, `user_visits`, `user_gpa_data`, `paper_bookmarks`, `paper_submissions`, `ai_quiz_usage`) has Row Level Security enabled.
+- **Prompt Injection & XSS Defense**: User inputs are sanitized, isolated in XML tags, and validated against a strict JSON schema with HTML tag stripping before rendering.
+- **Strict HTTP Headers**: Configured in `vercel.json` (`Content-Security-Policy`, `Strict-Transport-Security`, `X-Frame-Options`, `X-Content-Type-Options`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`).
 
-1. Import the repository into Vercel.
-2. Add the required environment variables in project settings.
-3. Deploy the `main` branch.
-4. Verify authentication and AI quiz generation in the deployed environment.
+## 🤝 Contributing & License
 
-Try the hosted app at
-[comsatsprephub.vercel.app](https://comsatsprephub.vercel.app).
-
-## 🤝 Contributing
-
-Contributions and suggestions are welcome. Before opening a pull request:
-
-1. Create a focused branch for your change.
-2. Run `npm run build`.
-3. Run `npm run test`.
-4. Include a clear description and screenshots for UI changes.
-
-## 📌 Notes
-
-- The project contains modern React code and legacy assets under `legacy/`.
-- Authentication and saved student data depend on Supabase configuration.
-- AI quiz generation depends on the configured provider and available API keys.
-- Past papers are provided for educational revision and self-assessment.
-
-## 📄 License
-
-This project is intended for educational use by COMSATS students. Review the
-repository and individual source files for any additional usage or licensing
-requirements.
-
-<div align="center">
-
-Made for COMSATS students 💙
-
-</div>
+Please read [CONTRIBUTING.md](./CONTRIBUTING.md) and [SECURITY.md](./SECURITY.md) before submitting a pull request. Licensed under the [MIT License](./LICENSE).

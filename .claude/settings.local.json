@@ -1,16 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pip list *)",
-      "Bash(python *)",
-      "WebFetch(domain:magicui.design)",
-      "Bash(cd D:/PastPaperPrep/Full front end)",
-      "Bash(npm install *)",
-      "Bash(npm run *)"
+      "Bash(npm run build)",
+      "Bash(npm run test)",
+      "Bash(npm run lint)"
     ]
   },
-  "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "code-review-graph"
-  ]
+  "enableAllProjectMcpServers": false,
+  "enabledMcpjsonServers": []
 }

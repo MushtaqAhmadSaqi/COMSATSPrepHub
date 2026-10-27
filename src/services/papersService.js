@@ -1,10 +1,28 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 import { DEFAULT_SUBJECTS } from '../constants/subjects';
 import { getOfflineExamQuestions } from './geminiService';
+import { logger } from '../utils/logger';
 
 const catalogByCode = new Map(
   DEFAULT_SUBJECTS.map((subj) => [subj.code.toUpperCase(), subj])
 );
+
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const memoryCache = new Map();
+
+function getCached(key) {
+  const entry = memoryCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+    memoryCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setCached(key, data) {
+  memoryCache.set(key, { timestamp: Date.now(), data });
+}
 
 /**
  * Sanitizes user/route input before interpolating into PostgREST .or() filters
@@ -21,10 +39,14 @@ export function sanitizeFilterValue(val) {
 /**
  * Fetches all unique subjects with paper counts from Supabase 'past_papers' table,
  * enriched with department and icon metadata from DEFAULT_SUBJECTS.
- * Falls back gracefully to DEFAULT_SUBJECTS when Supabase is unconfigured or unreachable.
+ * Uses a 5-minute in-memory cache and falls back gracefully to DEFAULT_SUBJECTS.
  */
 export async function fetchSubjectsFromSupabase() {
+  const cached = getCached('subjects_all');
+  if (cached) return cached;
+
   if (!isSupabaseConfigured) {
+    setCached('subjects_all', DEFAULT_SUBJECTS);
     return DEFAULT_SUBJECTS;
   }
 
@@ -34,11 +56,12 @@ export async function fetchSubjectsFromSupabase() {
       .select('subject_code, subject_name');
 
     if (error) {
-      console.warn('Supabase past_papers fetch warning, using catalog fallback:', error.message);
+      logger.warn('papersService.fetchSubjects', error.message);
       return DEFAULT_SUBJECTS;
     }
 
     if (!data || data.length === 0) {
+      setCached('subjects_all', DEFAULT_SUBJECTS);
       return DEFAULT_SUBJECTS;
     }
 
@@ -73,9 +96,11 @@ export async function fetchSubjectsFromSupabase() {
       }
     });
 
-    return Array.from(subjectMap.values());
+    const result = Array.from(subjectMap.values());
+    setCached('subjects_all', result);
+    return result;
   } catch (err) {
-    console.warn('Fetch subjects network error, using catalog fallback:', err.message);
+    logger.warn('papersService.fetchSubjects', err?.message || err);
     return DEFAULT_SUBJECTS;
   }
 }
@@ -124,11 +149,17 @@ function buildFallbackPapers(subjectCode, subjectName) {
 }
 
 /**
- * Fetches past papers for a specific subject from Supabase 'past_papers' table.
+ * Fetches past papers for a specific subject from Supabase 'past_papers' table with 5-minute caching.
  */
 export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName) {
+  const cacheKey = `papers_${String(subjectCode || '').toUpperCase()}_${String(subjectName || '').toLowerCase()}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
   if (!isSupabaseConfigured) {
-    return buildFallbackPapers(subjectCode, subjectName);
+    const fallback = buildFallbackPapers(subjectCode, subjectName);
+    setCached(cacheKey, fallback);
+    return fallback;
   }
 
   try {
@@ -153,15 +184,17 @@ export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName
     const { data, error } = await query.order('year', { ascending: false });
 
     if (error) {
-      console.warn('Supabase fetch papers warning, using fallback papers:', error.message);
+      logger.warn('papersService.fetchPapers', error.message);
       return buildFallbackPapers(subjectCode, subjectName);
     }
 
     if (!data || data.length === 0) {
-      return buildFallbackPapers(subjectCode, subjectName);
+      const fallback = buildFallbackPapers(subjectCode, subjectName);
+      setCached(cacheKey, fallback);
+      return fallback;
     }
 
-    return data.map((item) => ({
+    const mapped = data.map((item) => ({
       id: item.id,
       title: item.title || item.paper_title || buildPaperTitle(item),
       term: item.term || item.exam_type || 'Exam',
@@ -174,8 +207,11 @@ export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName
       instructorName: item.instructor_name || null,
       createdAt: item.created_at || null
     }));
+
+    setCached(cacheKey, mapped);
+    return mapped;
   } catch (err) {
-    console.warn('Fetch papers network error, using fallback papers:', err.message);
+    logger.warn('papersService.fetchPapers', err?.message || err);
     return buildFallbackPapers(subjectCode, subjectName);
   }
 }
@@ -197,6 +233,10 @@ export async function fetchQuestionsForPaperFromSupabase(paperId, paperMeta = {}
     );
   }
 
+  const cacheKey = `questions_${paperId}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
   try {
     const { data, error } = await supabase
       .from('questions')
@@ -205,7 +245,7 @@ export async function fetchQuestionsForPaperFromSupabase(paperId, paperMeta = {}
       .order('question_number', { ascending: true });
 
     if (error) {
-      console.warn('Fetch paper questions warning, using fallback questions:', error.message);
+      logger.warn('papersService.fetchQuestions', error.message);
       return getOfflineExamQuestions(
         paperMeta.subjectName,
         paperMeta.subjectCode,
@@ -231,7 +271,10 @@ export async function fetchQuestionsForPaperFromSupabase(paperId, paperMeta = {}
         source: 'supabase'
       }));
 
-    if (rows.length > 0) return rows;
+    if (rows.length > 0) {
+      setCached(cacheKey, rows);
+      return rows;
+    }
 
     return getOfflineExamQuestions(
       paperMeta.subjectName,
@@ -241,7 +284,7 @@ export async function fetchQuestionsForPaperFromSupabase(paperId, paperMeta = {}
       paperMeta.year
     );
   } catch (err) {
-    console.warn('Fetch paper questions error, using fallback questions:', err.message);
+    logger.warn('papersService.fetchQuestions', err?.message || err);
     return getOfflineExamQuestions(
       paperMeta.subjectName,
       paperMeta.subjectCode,

@@ -31,9 +31,9 @@ function SubjectCard({ subject, idx, searchQuery = '', onSelect }) {
       className="subject-card"
       onClick={() => onSelect(subject)}
       aria-label={`Browse ${subject.name} papers`}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: idx * 0.04 }}
+      transition={{ duration: 0.25, delay: Math.min(idx * 0.03, 0.3) }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.625rem' }}>
         <div className="subject-code">{subject.code}</div>
@@ -65,11 +65,12 @@ function DepartmentChip({ dept, isSelected, onClick }) {
       onClick={onClick}
       aria-pressed={isSelected}
       className={`department-chip ${isSelected ? 'selected' : ''}`}
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, scale: 0.94 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.2 }}
       style={{
-        padding: '0.4rem 1rem',
+        padding: '0.45rem 1rem',
+        minHeight: '40px',
         borderRadius: '9999px',
         border: '1.5px solid var(--border)',
         background: isSelected ? 'var(--brand)' : 'var(--surface)',
@@ -91,7 +92,16 @@ export default function Subjects({ onSelectSubject = () => {} }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedDept, setSelectedDept] = useState('All');
+
+  // 180ms search debounce for smooth typing on mobile devices
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 180);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const loadSubjects = async () => {
     setLoading(true);
@@ -112,10 +122,12 @@ export default function Subjects({ onSelectSubject = () => {} }) {
 
   const filtered = subjects.filter((s) => {
     const matchesDept = selectedDept === 'All' || s.department === selectedDept;
+    const q = debouncedQuery.toLowerCase();
     const matchesQuery =
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.department.toLowerCase().includes(searchQuery.toLowerCase());
+      !q ||
+      s.name.toLowerCase().includes(q) ||
+      s.code.toLowerCase().includes(q) ||
+      s.department.toLowerCase().includes(q);
     return matchesDept && matchesQuery;
   });
 
@@ -127,7 +139,7 @@ export default function Subjects({ onSelectSubject = () => {} }) {
       className="subjects-container"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.3 }}
     >
       <PageHeader
         badge="Live catalog"
@@ -145,19 +157,19 @@ export default function Subjects({ onSelectSubject = () => {} }) {
             id="subject-search"
             type="text"
             className="subjects-search-bar"
-            placeholder="Search subjects by name or code"
+            placeholder="Search subjects by name or code (e.g. CSC211)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search subjects"
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.25 }}
           />
           {hasSearch && (
             <button
               type="button"
               className="subjects-search-clear-btn"
-              onClick={() => setSearchQuery('')}
+              onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }}
               aria-label="Clear search"
             >
               <span className="material-symbols-outlined" style={{ fontSize: '1rem' }} aria-hidden="true">close</span>
@@ -193,8 +205,8 @@ export default function Subjects({ onSelectSubject = () => {} }) {
               </button>
             )}
             {hasSearch && (
-              <button type="button" className="active-filter-chip" onClick={() => setSearchQuery('')}>
-                Search: "{searchQuery}"
+              <button type="button" className="active-filter-chip" onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }}>
+                Search: &ldquo;{searchQuery}&rdquo;
                 <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             )}
@@ -227,6 +239,7 @@ export default function Subjects({ onSelectSubject = () => {} }) {
           onAction={() => {
             setSelectedDept('All');
             setSearchQuery('');
+            setDebouncedQuery('');
           }}
         />
       ) : (
@@ -234,7 +247,7 @@ export default function Subjects({ onSelectSubject = () => {} }) {
           className="subjects-grid"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
+          transition={{ duration: 0.25 }}
         >
           <AnimatePresence>
             {filtered.map((subj, idx) => (
@@ -242,7 +255,7 @@ export default function Subjects({ onSelectSubject = () => {} }) {
                 key={subj.code}
                 subject={subj}
                 idx={idx}
-                searchQuery={searchQuery}
+                searchQuery={debouncedQuery}
                 onSelect={onSelectSubject}
               />
             ))}

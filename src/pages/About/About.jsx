@@ -1,5 +1,6 @@
 import React from 'react';
 import PageHeader from '../../components/PageHeader/PageHeader';
+import { getInitialsAvatarDataUri } from '../../utils/sanitize';
 import './About.css';
 
 const CONTRIBUTORS = [
@@ -17,9 +18,9 @@ export default function About() {
   return (
     <div className="about-container">
       <PageHeader
-        badge="Our Team"
+        badge="Our Team & Mission"
         title="Meet the Team"
-        subtitle="Built by students, for students. We're passionate about helping COMSATS students excel academically through better tools."
+        subtitle="Built by students, for students. We're passionate about helping COMSATS students across Islamabad, Lahore, Wah, Abbottabad, Sahiwal, Attock, and Vehari campuses excel academically."
       />
 
       {/* Founder Card */}
@@ -32,20 +33,20 @@ export default function About() {
           height={FOUNDER_SIZE.height}
           decoding="async"
           onError={(e) => {
-            e.target.style.display = 'none';
+            e.target.onerror = null;
+            e.target.src = getInitialsAvatarDataUri('Mushtaq Ahmad');
           }}
         />
         <div className="founder-info">
           <div className="founder-role-badge">
             <span className="material-symbols-outlined" style={{ fontSize: '12px' }}>star</span>
-            Founder & Lead Developer
+            Founder &amp; Lead Developer
           </div>
           <h3>Mushtaq Ahmad Saqi</h3>
           <p className="founder-bio">
             Dedicated to bridging the gap between academic pressure and digital efficiency.
             Designed and built this platform from scratch to ensure students have a
-            distraction-free, resource-rich study environment. Every feature is crafted
-            with students' real needs in mind.
+            distraction-free, resource-rich study environment optimized for mobile phones and campus networks.
           </p>
         </div>
       </div>
@@ -68,7 +69,8 @@ export default function About() {
               loading="lazy"
               decoding="async"
               onError={(e) => {
-                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name)}&background=0ea5e9&color=fff&size=56`;
+                e.target.onerror = null;
+                e.target.src = getInitialsAvatarDataUri(c.name);
               }}
             />
             <div>

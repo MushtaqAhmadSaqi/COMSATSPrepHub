@@ -1,21 +1,14 @@
-# COMSATSPrepHub LLM Guide
+# COMSATSPrepHub — LLM & AI Crawler Guide (llms.txt)
 
-> Information about COMSATSPrepHub for Language Models and AI crawlers.
+> Comprehensive exam-preparation and academic planning workspace for COMSATS University students across all campuses (Islamabad, Lahore, Wah, Abbottabad, Sahiwal, Attock, Vehari).
 
-## About
-COMSATSPrepHub is a platform dedicated to helping students of COMSATS University prepare for their exams smarter and faster. We provide access to verified past papers, practice quizzes, AI quiz generation tools (using Gemini), and a GPA calculator. 
+## Core Capabilities
+- **Past Papers Library (`/#subjects`):** Categorized COMSATS Midterm and Terminal past papers with model answers, topic-frequency insights, personal study notes, and PDF downloads across Computer Science (`CSC101`, `CSC102`, `CSC211`, `CSC241`, `CSC301`, `CSC311`, `CSC322`, `CSC371`, `CSC441`), Software Engineering (`SWE301`, `SWE302`, `SWE401`), Mathematics (`MTH104`, `MTH105`, `MTH231`, `MTH242`), Electrical (`EEE241`), Physics (`PHY120`), and Management (`HUM100`, `MGT101`).
+- **Practice & Timed Quizzes (`/#quiz`):** Topic-based MCQs with exam timer mode, question navigator, mark-for-review, bilingual (English & Urdu / اردو) step-by-step explanations, wrong-answer review, and weak-topic drills.
+- **AI Quiz Generator (`/#ai-quiz-generator`):** Custom COMSATS-style quiz creation powered by server-side Gemini, Groq, and OpenRouter fallback plus an offline question bank.
+- **Study Hub (`/#study-hub`):** Daily 5-Question Challenge, Leitner spaced-repetition flashcards, bilingual course cheat-sheets, exam-date study planner, and opt-in campus leaderboard.
+- **COMSATS GPA & CGPA Calculator (`/#gpa`):** Official COMSATS 4.00 grading scale calculator supporting theory/lab credits, course retakes, target CGPA calculation, and semester history charts.
+- **Support, FAQ & Legal (`/#faq`, `/#terms`, `/#privacy`, `/#disclaimer`):** Guest mode support, transparent privacy controls, JSON data export/deletion, and 24-hour copyright takedown procedure.
 
-## Key Tools
-- **Past Papers:** A categorized repository of past papers across various subjects including Calculus, Data Structures, OOP, Networks, and AI.
-- **Practice Quizzes:** Instant topic-based practice tests.
-- **AI Quiz Generator:** Generates personalized COMSATS-style quizzes based on user selection.
-- **GPA Calculator:** Calculates semester GPA based on COMSATS grading schemes.
-
-## Target Audience
-COMSATS University Students
-
-## Access
-The platform is free to use. Some advanced features, like AI Quiz Generation and saving GPA calculations, require user authentication.
-
-## Official Link
+## Official URL
 https://comsatsprephub.vercel.app

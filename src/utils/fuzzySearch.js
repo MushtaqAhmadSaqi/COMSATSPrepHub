@@ -1,27 +1,25 @@
 import { DEFAULT_SUBJECTS } from '../constants/subjects.js';
 
 /**
- * Scoring logic for fuzzy search in Command Palette.
+ * Scoring logic for fuzzy search in Command Palette & Global Search.
  *
  * @param {string} query
  * @param {string} text
  * @returns {number} score 0..100
  */
-function calculateScore(query, text) {
+export function calculateScore(query, text) {
   if (!query || !text) return 0;
   const q = query.toLowerCase().trim();
   const t = text.toLowerCase().trim();
   if (!q) return 0;
 
   if (t === q || t.includes(q)) {
-    if (t.startsWith(q) || t.includes(' ' + q)) return 80;
-    return 100;
+    if (t.startsWith(q) || t.includes(' ' + q)) return 100;
+    return 85;
   }
 
   const words = t.split(/[\s\-_\/()]+/);
   if (words.some((w) => w.startsWith(q))) return 80;
-
-  if (t.includes(q)) return 60;
 
   let qIdx = 0;
   for (let i = 0; i < t.length && qIdx < q.length; i++) {
@@ -33,7 +31,7 @@ function calculateScore(query, text) {
 }
 
 /**
- * Returns filtered and sorted command palette items.
+ * Returns filtered and sorted command palette items across Pages, Subjects, Papers, and Actions.
  */
 export function getCommandPaletteResults(query = '', { isLoggedIn = false } = {}) {
   const allItems = [
@@ -42,10 +40,14 @@ export function getCommandPaletteResults(query = '', { isLoggedIn = false } = {}
     { id: 'page_subjects', group: 'Pages', label: 'Subjects & Past Papers', icon: 'menu_book', path: 'subjects' },
     { id: 'page_quiz', group: 'Pages', label: 'Practice Quiz', icon: 'quiz', path: 'quiz' },
     { id: 'page_ai_quiz', group: 'Pages', label: 'AI Quiz Generator', icon: 'auto_awesome', path: 'ai-quiz-generator' },
-    { id: 'page_gpa', group: 'Pages', label: 'GPA Calculator', icon: 'calculate', path: 'gpa' },
-    { id: 'page_upload', group: 'Pages', label: 'Upload Past Paper', icon: 'upload_file', path: 'upload' },
+    { id: 'page_study_hub', group: 'Pages', label: 'Study Hub — Daily Challenge, Flashcards & AI Helper', icon: 'psychology', path: 'study-hub' },
+    { id: 'page_gpa', group: 'Pages', label: 'GPA & CGPA Calculator', icon: 'calculate', path: 'gpa' },
+    { id: 'page_upload', group: 'Pages', label: 'Upload or Request Past Paper', icon: 'upload_file', path: 'upload' },
     { id: 'page_dashboard', group: 'Pages', label: 'Student Dashboard', icon: 'dashboard', path: 'dashboard' },
-    { id: 'page_about', group: 'Pages', label: 'Our Team', icon: 'groups', path: 'about' },
+    { id: 'page_account', group: 'Pages', label: 'Account & Profile Settings', icon: 'manage_accounts', path: 'account' },
+    { id: 'page_faq', group: 'Pages', label: 'FAQ, Contact & Feedback', icon: 'help', path: 'faq' },
+    { id: 'page_about', group: 'Pages', label: 'About & Our Team', icon: 'groups', path: 'about' },
+    { id: 'page_terms', group: 'Pages', label: 'Terms, Privacy Policy & Disclaimer', icon: 'gavel', path: 'terms' },
 
     // Subjects Group (includes full subject object for direct deep-linking to subject-papers)
     ...DEFAULT_SUBJECTS.map((subj) => ({
@@ -58,18 +60,35 @@ export function getCommandPaletteResults(query = '', { isLoggedIn = false } = {}
       subject: subj
     })),
 
+    // Past Papers Quick-Access Group
+    ...DEFAULT_SUBJECTS.slice(0, 12).map((subj) => ({
+      id: `paper_${subj.code}_term`,
+      group: 'Papers',
+      label: `${subj.code} Terminal & Midterm Past Papers (${subj.name})`,
+      icon: 'description',
+      path: 'subject-papers',
+      subjectCode: subj.code,
+      subject: subj
+    })),
+
     // Actions Group
-    { id: 'action_dark_mode', group: 'Actions', label: 'Toggle dark mode', icon: 'dark_mode', actionId: 'toggle_dark_mode' },
+    { id: 'action_daily', group: 'Actions', label: 'Start Today’s 5-Question Daily Challenge', icon: 'local_fire_department', path: 'study-hub' },
+    { id: 'action_flashcards', group: 'Actions', label: 'Review Spaced-Repetition Flashcards', icon: 'style', path: 'study-hub' },
+    { id: 'action_dark_mode', group: 'Actions', label: 'Toggle dark / light mode', icon: 'dark_mode', actionId: 'toggle_dark_mode' },
+    { id: 'action_lang_toggle', group: 'Actions', label: 'Toggle English / Urdu (اردو) study helper', icon: 'translate', actionId: 'toggle_language' },
     ...(isLoggedIn
-      ? [{ id: 'action_sign_out', group: 'Actions', label: 'Sign out', icon: 'logout', actionId: 'sign_out' }]
-      : [{ id: 'action_sign_in', group: 'Actions', label: 'Sign in', icon: 'login', actionId: 'open_auth' }]
+      ? [
+          { id: 'action_profile', group: 'Actions', label: 'Profile & Account Settings', icon: 'settings', path: 'account' },
+          { id: 'action_sign_out', group: 'Actions', label: 'Sign out', icon: 'logout', actionId: 'sign_out' }
+        ]
+      : [{ id: 'action_sign_in', group: 'Actions', label: 'Sign in or Create Account', icon: 'login', actionId: 'open_auth' }]
     )
   ];
 
   const trimmed = query.trim();
 
   if (!trimmed) {
-    return allItems.filter((item) => item.group === 'Pages' || item.group === 'Actions');
+    return allItems.filter((item) => item.group === 'Pages' || item.group === 'Actions').slice(0, 12);
   }
 
   const scored = allItems
@@ -81,7 +100,7 @@ export function getCommandPaletteResults(query = '', { isLoggedIn = false } = {}
     })
     .filter((item) => item.score > 0);
 
-  const groups = ['Pages', 'Subjects', 'Actions'];
+  const groups = ['Subjects', 'Papers', 'Pages', 'Actions'];
   let results = [];
 
   for (const groupName of groups) {
@@ -91,5 +110,5 @@ export function getCommandPaletteResults(query = '', { isLoggedIn = false } = {}
     results = results.concat(groupItems);
   }
 
-  return results.slice(0, 12);
+  return results.slice(0, 14);
 }

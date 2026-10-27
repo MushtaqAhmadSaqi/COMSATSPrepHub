@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { logger } from '../utils/logger';
 
 // Read exclusively from environment variables — never hardcode project credentials in source code
 export const SUPABASE_URL = String(import.meta.env?.VITE_SUPABASE_URL || '').trim();
@@ -22,6 +23,8 @@ function createFallbackSupabaseClient() {
       single: async () => ({ data: null, error: unconfiguredError }),
       insert: () => builder,
       update: () => builder,
+      upsert: () => builder,
+      delete: () => builder,
       then: (resolve) => Promise.resolve({ data: [], error: null }).then(resolve)
     };
     return builder;
@@ -29,6 +32,7 @@ function createFallbackSupabaseClient() {
 
   return {
     from: () => createQueryBuilder(),
+    rpc: async () => ({ data: null, error: unconfiguredError }),
     auth: {
       async getSession() {
         return { data: { session: null }, error: null };
@@ -45,6 +49,12 @@ function createFallbackSupabaseClient() {
       async signInWithOAuth() {
         return { data: null, error: unconfiguredError };
       },
+      async resetPasswordForEmail() {
+        return { data: null, error: null };
+      },
+      async updateUser() {
+        return { data: null, error: unconfiguredError };
+      },
       async signOut() {
         return { error: null };
       }
@@ -52,8 +62,20 @@ function createFallbackSupabaseClient() {
   };
 }
 
+/**
+ * Supabase client note on session storage:
+ * By default, @supabase/supabase-js stores the short-lived access JWT and refresh token
+ * in localStorage under `sb-<project-ref>-auth-token` for automatic PKCE session persistence.
+ * No custom sensitive tokens or passwords are ever written to localStorage/sessionStorage.
+ */
 export const supabase = isSupabaseConfigured
-  ? createClient(SUPABASE_URL, SUPABASE_KEY)
+  ? createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    })
   : createFallbackSupabaseClient();
 
 export const authHelper = {
@@ -62,9 +84,18 @@ export const authHelper = {
     return data?.session ?? null;
   },
 
+  async getAccessToken() {
+    try {
+      const { data } = await supabase.auth.getSession();
+      return data?.session?.access_token ?? null;
+    } catch {
+      return null;
+    }
+  },
+
   async signOut() {
     const { error } = await supabase.auth.signOut();
-    if (error) console.error('Sign out error:', error);
+    if (error) logger.error('authHelper.signOut', error);
   },
 
   getUserName(user) {

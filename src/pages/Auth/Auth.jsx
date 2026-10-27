@@ -1,35 +1,65 @@
 import React, { useState } from 'react';
-import { signInWithEmail, signUpWithEmail, signInWithGoogle } from '../../services/auth';
+import {
+  signInWithEmail,
+  signUpWithEmail,
+  signInWithGoogle,
+  requestPasswordReset,
+  validatePasswordStrength
+} from '../../services/auth';
 import { useToast } from '../../utils/toast';
 import '../../components/AuthModal/AuthModal.css';
 import './Auth.css';
 
 export default function Auth({ onLoginSuccess = () => {} }) {
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [mode, setMode] = useState('login'); // 'login' | 'signup' | 'reset'
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [honeypot, setHoneypot] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
   const toast = useToast();
+  const isSignUp = mode === 'signup';
+  const isReset = mode === 'reset';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (honeypot) return;
+
     setErrorMsg('');
     setSuccessMsg('');
 
-    if (isSignUp && !fullName.trim()) {
-      setErrorMsg('Please enter your full name.');
-      return;
-    }
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       setErrorMsg('Please enter a valid email address.');
       return;
     }
-    if (password.length < 8) {
+
+    if (isReset) {
+      setLoading(true);
+      const res = await requestPasswordReset(email);
+      setLoading(false);
+      if (!res.ok) setErrorMsg(res.error);
+      else {
+        setSuccessMsg(res.message);
+        toast.info('Reset instructions sent if account exists.');
+      }
+      return;
+    }
+
+    if (isSignUp) {
+      if (!fullName.trim()) {
+        setErrorMsg('Please enter your full name.');
+        return;
+      }
+      const pwdCheck = validatePasswordStrength(password);
+      if (!pwdCheck.valid) {
+        setErrorMsg(pwdCheck.error);
+        return;
+      }
+    } else if (password.length < 8) {
       setErrorMsg('Password must be at least 8 characters long.');
       return;
     }
@@ -75,14 +105,18 @@ export default function Auth({ onLoginSuccess = () => {} }) {
         <div className="auth-header">
           <div className="auth-icon-badge">
             <span className="material-symbols-outlined" style={{ fontSize: '24px' }} aria-hidden="true">
-              {isSignUp ? 'person_add' : 'login'}
+              {isReset ? 'lock_reset' : isSignUp ? 'person_add' : 'login'}
             </span>
           </div>
-          <h1 className="auth-title">{isSignUp ? 'Create Account' : 'Student Sign In'}</h1>
+          <h1 className="auth-title">
+            {isReset ? 'Reset Password' : isSignUp ? 'Create Account' : 'Student Sign In'}
+          </h1>
           <p className="auth-subtitle">
-            {isSignUp
-              ? 'Join COMSATSPrepHub to track your progress & save papers'
-              : 'Sign in with your Supabase account to access your study workspace'}
+            {isReset
+              ? 'We will send a password recovery link to your registered email'
+              : isSignUp
+                ? 'Join COMSATSPrepHub to track your progress & save papers'
+                : 'Sign in with your account to access your study workspace'}
           </p>
         </div>
 
@@ -101,6 +135,17 @@ export default function Auth({ onLoginSuccess = () => {} }) {
         )}
 
         <form onSubmit={handleSubmit} noValidate>
+          <input
+            type="text"
+            name="website_url"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+          />
+
           {isSignUp && (
             <div className="auth-form-group">
               <label className="auth-label" htmlFor="page-auth-fullname">Full Name</label>
@@ -131,32 +176,50 @@ export default function Auth({ onLoginSuccess = () => {} }) {
             />
           </div>
 
-          <div className="auth-form-group">
-            <label className="auth-label" htmlFor="page-auth-password">Password</label>
-            <div className="auth-password-wrapper">
-              <input
-                id="page-auth-password"
-                type={showPassword ? 'text' : 'password'}
-                className="auth-input"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete={isSignUp ? 'new-password' : 'current-password'}
-                required
-                style={{ paddingRight: '3rem' }}
-              />
-              <button
-                type="button"
-                className="auth-eye-btn"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '20px' }} aria-hidden="true">
-                  {showPassword ? 'visibility_off' : 'visibility'}
+          {!isReset && (
+            <div className="auth-form-group">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label className="auth-label" htmlFor="page-auth-password">Password</label>
+                {!isSignUp && (
+                  <button
+                    type="button"
+                    onClick={() => { setMode('reset'); setErrorMsg(''); setSuccessMsg(''); }}
+                    style={{ background: 'none', border: 'none', fontSize: '0.75rem', fontWeight: 600, color: 'var(--brand)' }}
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
+              <div className="auth-password-wrapper">
+                <input
+                  id="page-auth-password"
+                  type={showPassword ? 'text' : 'password'}
+                  className="auth-input"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                  required
+                  style={{ paddingRight: '3rem' }}
+                />
+                <button
+                  type="button"
+                  className="auth-eye-btn"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }} aria-hidden="true">
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
+              </div>
+              {isSignUp && (
+                <span style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-subtle)', marginTop: '0.25rem' }}>
+                  Use 8+ characters with uppercase, lowercase, and a number.
                 </span>
-              </button>
+              )}
             </div>
-          </div>
+          )}
 
           <button type="submit" className="auth-submit-btn" disabled={loading}>
             {loading && (
@@ -164,32 +227,63 @@ export default function Auth({ onLoginSuccess = () => {} }) {
                 progress_activity
               </span>
             )}
-            {loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Sign In')}
+            {loading
+              ? 'Processing...'
+              : isReset
+                ? 'Send Reset Link'
+                : isSignUp
+                  ? 'Create Account'
+                  : 'Sign In'}
           </button>
         </form>
 
-        <div className="auth-divider">or continue with</div>
-
-        <button type="button" className="auth-google-btn" onClick={handleGoogleSignIn}>
-          <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--brand)' }} aria-hidden="true">
-            account_circle
-          </span>
-          Sign in with Google
-        </button>
+        {!isReset && (
+          <>
+            <div className="auth-divider">or continue with</div>
+            <button type="button" className="auth-google-btn" onClick={handleGoogleSignIn}>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--brand)' }} aria-hidden="true">
+                account_circle
+              </span>
+              Sign in with Google
+            </button>
+          </>
+        )}
 
         <div className="auth-switch-prompt">
-          {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-          <button
-            type="button"
-            className="auth-switch-btn"
-            onClick={() => {
-              setIsSignUp(!isSignUp);
-              setErrorMsg('');
-              setSuccessMsg('');
-            }}
-          >
-            {isSignUp ? 'Sign In' : 'Sign Up'}
-          </button>
+          {isReset ? (
+            <>
+              Remembered your password?
+              <button
+                type="button"
+                className="auth-switch-btn"
+                onClick={() => { setMode('login'); setErrorMsg(''); setSuccessMsg(''); }}
+              >
+                Sign In
+              </button>
+            </>
+          ) : isSignUp ? (
+            <>
+              Already have an account?
+              <button
+                type="button"
+                className="auth-switch-btn"
+                onClick={() => { setMode('login'); setErrorMsg(''); setSuccessMsg(''); }}
+              >
+                Sign In
+              </button>
+            </>
+          ) : (
+            <>
+              Don&apos;t have an account?
+              <button
+                type="button"
+                className="auth-switch-btn"
+                onClick={() => { setMode('signup'); setErrorMsg(''); setSuccessMsg(''); }}
+              >
+                Sign Up
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

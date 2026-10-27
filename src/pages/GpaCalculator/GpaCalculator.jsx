@@ -1,5 +1,7 @@
 import React, { useId, useRef, useState } from 'react';
 import { GRADING_SCALE } from '../../services/gpaEngine';
+import { getSemesterGpaHistory, saveSemesterGpaEntry } from '../../utils/studyTracker';
+import { useToast } from '../../utils/toast';
 import './GpaCalculator.css';
 
 function Icon({ name }) {
@@ -16,6 +18,8 @@ function createCourse(id) {
     name: '',
     credits: '3',
     grade: '',
+    isRetake: false,
+    oldGrade: 'F'
   };
 }
 
@@ -32,15 +36,25 @@ function formatGpa(value) {
 export default function GpaCalculator() {
   const componentId = useId();
   const nextId = useRef(2);
+  const toast = useToast();
 
   const [courses, setCourses] = useState([createCourse(1)]);
   const [includeHistory, setIncludeHistory] = useState(false);
   const [prevCgpa, setPrevCgpa] = useState('');
   const [prevCredits, setPrevCredits] = useState('');
 
+  // Target CGPA planner state
+  const [targetCgpa, setTargetCgpa] = useState('3.50');
+  const [upcomingCredits, setUpcomingCredits] = useState('15');
+
+  // Semester history chart state
+  const [semesterHistory, setSemesterHistory] = useState(() => getSemesterGpaHistory());
+  const [semesterLabel, setSemesterLabel] = useState('Current Sem');
+
   const evaluatedCourses = courses.map((course) => {
     const credits = parseNumber(course.credits);
     const grade = GRADING_SCALE.find((item) => item.letter === course.grade);
+    const oldGradeInfo = GRADING_SCALE.find((item) => item.letter === course.oldGrade);
 
     const validCredits =
       credits !== null &&
@@ -51,6 +65,7 @@ export default function GpaCalculator() {
       ...course,
       parsedCredits: credits,
       gradeInfo: grade,
+      oldGradeInfo,
       validCredits,
       complete: validCredits && Boolean(grade),
     };
@@ -93,12 +108,47 @@ export default function GpaCalculator() {
 
   const historyReady = validPreviousGpa && validPreviousCredits;
 
+  // Retake-aware CGPA calculation:
+  // If a course is marked as a retake, its credits were already counted in previousCreditCount,
+  // so we replace the old grade's quality points with the new grade's quality points.
+  const retakeCredits = completedCourses
+    .filter((c) => c.isRetake)
+    .reduce((sum, c) => sum + c.parsedCredits, 0);
+
+  const retakeOldQualityPoints = completedCourses
+    .filter((c) => c.isRetake)
+    .reduce((sum, c) => sum + c.parsedCredits * (c.oldGradeInfo?.point ?? 0), 0);
+
+  const netCombinedCredits =
+    historyReady
+      ? Math.max(1, previousCreditCount + totalCredits - retakeCredits)
+      : 0;
+
   const cgpa =
     includeHistory && ready && historyReady
-      ? (
-          previousGpa * previousCreditCount +
-          totalQualityPoints
-        ) / (previousCreditCount + totalCredits)
+      ? Math.min(
+          4.0,
+          Math.max(
+            0,
+            (previousGpa * previousCreditCount - retakeOldQualityPoints + totalQualityPoints) /
+              netCombinedCredits
+          )
+        )
+      : null;
+
+  // Target CGPA planner calculation
+  const parsedTarget = parseNumber(targetCgpa);
+  const parsedUpcomingCr = parseNumber(upcomingCredits);
+  const requiredSgpaForTarget =
+    historyReady &&
+    parsedTarget !== null &&
+    parsedTarget > 0 &&
+    parsedTarget <= 4 &&
+    parsedUpcomingCr !== null &&
+    parsedUpcomingCr > 0
+      ? (parsedTarget * (previousCreditCount + parsedUpcomingCr) -
+          previousGpa * previousCreditCount) /
+        parsedUpcomingCr
       : null;
 
   const progress = sgpa === null ? 0 : (sgpa / 4) * 100;
@@ -140,6 +190,21 @@ export default function GpaCalculator() {
     setIncludeHistory(false);
   }
 
+  function handleSaveSemesterToHistory() {
+    if (sgpa === null) return;
+    const next = saveSemesterGpaEntry({
+      label: semesterLabel || `Sem ${semesterHistory.length + 1}`,
+      sgpa,
+      credits: totalCredits
+    });
+    setSemesterHistory(next);
+    toast.success('Semester SGPA saved to your history chart!');
+  }
+
+  function handleExportPrint() {
+    window.print();
+  }
+
   return (
     <div className="grade-workspace">
       <header className="grade-workspace__header">
@@ -147,13 +212,20 @@ export default function GpaCalculator() {
           <p className="grade-workspace__eyebrow">ACADEMIC TOOLS</p>
           <h1>A clearer view of your semester.</h1>
           <p className="grade-workspace__intro">
-            Add your courses and grades. We’ll take care of the numbers.
+            Add your courses, credit hours, and grades — including course retakes and target CGPA planning.
           </p>
         </div>
 
-        <div className="grade-workspace__header-tag">
-          <Icon name="calculate" />
-          GPA calculator
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className="grade-workspace__header-tag"
+            onClick={handleExportPrint}
+            style={{ cursor: 'pointer', border: '1px solid var(--gw-line)' }}
+          >
+            <Icon name="print" />
+            Export PDF / Print
+          </button>
         </div>
       </header>
 
@@ -167,7 +239,7 @@ export default function GpaCalculator() {
               <div>
                 <p className="grade-workspace__section-label">01 / THIS SEMESTER</p>
                 <h2 id={`${componentId}-courses-title`}>Your courses</h2>
-                <p>Use the credit hours and final grade for each course.</p>
+                <p>Use the credit hours and final grade for each course. Toggle &ldquo;Retake&rdquo; if repeating a course.</p>
               </div>
 
               <span className="grade-workspace__count">
@@ -232,6 +304,7 @@ export default function GpaCalculator() {
                           id={`${rowId}-credits`}
                           type="number"
                           min="1"
+                          max="6"
                           step="1"
                           inputMode="numeric"
                           value={course.credits}
@@ -291,6 +364,52 @@ export default function GpaCalculator() {
                       </button>
                     </div>
 
+                    {/* Retake / Course Repeat Option */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.75rem',
+                        flexWrap: 'wrap',
+                        marginTop: '0.5rem',
+                        fontSize: '0.78rem',
+                        color: 'var(--gw-muted)'
+                      }}
+                    >
+                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={Boolean(course.isRetake)}
+                          onChange={(e) => updateCourse(course.id, 'isRetake', e.target.checked)}
+                        />
+                        Repeating / improving previous grade?
+                      </label>
+
+                      {course.isRetake && (
+                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                          Previous grade replaced:
+                          <select
+                            value={course.oldGrade}
+                            onChange={(e) => updateCourse(course.id, 'oldGrade', e.target.value)}
+                            style={{
+                              padding: '0.2rem 0.5rem',
+                              borderRadius: '6px',
+                              border: '1px solid var(--gw-line)',
+                              background: 'var(--gw-surface)',
+                              color: 'var(--gw-text)',
+                              fontSize: '0.75rem'
+                            }}
+                          >
+                            {GRADING_SCALE.slice(5).map((g) => (
+                              <option key={g.letter} value={g.letter}>
+                                {g.letter} ({g.point.toFixed(2)})
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      )}
+                    </div>
+
                     {!course.validCredits && (
                       <p
                         className="grade-workspace__field-error"
@@ -334,12 +453,12 @@ export default function GpaCalculator() {
             <div className="grade-workspace__history-heading">
               <div>
                 <p className="grade-workspace__section-label">
-                  02 / THE BIGGER PICTURE
+                  02 / THE BIGGER PICTURE &amp; TARGET CGPA
                 </p>
                 <h2 id={`${componentId}-history-title`}>
-                  Include previous semesters
+                  Include previous semesters &amp; Target CGPA Planner
                 </h2>
-                <p>Add your previous record to estimate your CGPA.</p>
+                <p>Add your previous record to estimate your new CGPA and calculate required future SGPA.</p>
               </div>
 
               <label className="grade-workspace__switch">
@@ -420,12 +539,149 @@ export default function GpaCalculator() {
                   )}
                 </div>
 
-                <p className="grade-workspace__history-help">
-                  Use the previous credit hours included in your GPA calculation.
-                  Repeated courses or grade replacements may require adjustments.
-                </p>
+                {/* Target GPA Calculator */}
+                <div>
+                  <label htmlFor={`${componentId}-target-cgpa`}>
+                    Desired Target CGPA
+                  </label>
+                  <input
+                    id={`${componentId}-target-cgpa`}
+                    type="number"
+                    min="0"
+                    max="4"
+                    step="0.01"
+                    value={targetCgpa}
+                    onChange={(e) => setTargetCgpa(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor={`${componentId}-upcoming-cr`}>
+                    Target Semester Credits
+                  </label>
+                  <input
+                    id={`${componentId}-upcoming-cr`}
+                    type="number"
+                    min="1"
+                    max="24"
+                    step="1"
+                    value={upcomingCredits}
+                    onChange={(e) => setUpcomingCredits(e.target.value)}
+                  />
+                </div>
+
+                {requiredSgpaForTarget !== null && (
+                  <p className="grade-workspace__history-help" style={{ fontWeight: 700, color: 'var(--gw-brand)' }}>
+                    🎯 Target GPA Planner: To reach a {Number(targetCgpa).toFixed(2)} CGPA over the next {upcomingCredits} credit hours, you need an SGPA of{' '}
+                    <strong>{requiredSgpaForTarget.toFixed(2)}</strong>
+                    {requiredSgpaForTarget > 4
+                      ? ' (exceeds 4.00 max — achievable across 2+ semesters).'
+                      : requiredSgpaForTarget <= 0
+                        ? ' (already achieved!).'
+                        : '.'}
+                  </p>
+                )}
               </div>
             )}
+          </section>
+
+          {/* Semester History Chart */}
+          <section
+            className="grade-workspace__panel"
+            style={{ marginTop: '1.25rem' }}
+            aria-label="Semester GPA history chart"
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div>
+                <p className="grade-workspace__section-label">03 / SEMESTER TREND</p>
+                <h2 style={{ fontSize: '1.125rem', fontWeight: 800, margin: '0.2rem 0' }}>Semester GPA History</h2>
+              </div>
+              {sgpa !== null && (
+                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input
+                    type="text"
+                    value={semesterLabel}
+                    onChange={(e) => setSemesterLabel(e.target.value)}
+                    aria-label="Semester label"
+                    style={{
+                      padding: '0.4rem 0.65rem',
+                      borderRadius: '8px',
+                      border: '1px solid var(--gw-line)',
+                      background: 'var(--gw-subtle)',
+                      color: 'var(--gw-text)',
+                      fontSize: '0.8125rem',
+                      width: '120px'
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="grade-workspace__add"
+                    onClick={handleSaveSemesterToHistory}
+                  >
+                    <Icon name="save" />
+                    Save SGPA ({sgpa.toFixed(2)})
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${Math.max(1, semesterHistory.length)}, minmax(48px, 1fr))`,
+                gap: '0.75rem',
+                alignItems: 'end',
+                height: '130px',
+                padding: '1rem 0.5rem 0',
+                borderBottom: '1px solid var(--gw-line)'
+              }}
+            >
+              {semesterHistory.map((item) => {
+                const heightPct = Math.max(12, Math.min(100, Math.round((item.sgpa / 4) * 100)));
+                return (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      height: '100%',
+                      justifyContent: 'flex-end',
+                      gap: '0.35rem'
+                    }}
+                  >
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--gw-brand)' }}>
+                      {Number(item.sgpa).toFixed(2)}
+                    </span>
+                    <div
+                      style={{
+                        width: '100%',
+                        maxWidth: '42px',
+                        height: `${heightPct}%`,
+                        background: 'var(--gw-brand)',
+                        borderRadius: '6px 6px 0 0'
+                      }}
+                      title={`${item.label}: ${item.sgpa} SGPA (${item.credits} Cr)`}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${Math.max(1, semesterHistory.length)}, minmax(48px, 1fr))`,
+                gap: '0.75rem',
+                paddingTop: '0.4rem',
+                textAlign: 'center',
+                fontSize: '0.72rem',
+                color: 'var(--gw-muted)'
+              }}
+            >
+              {semesterHistory.map((item) => (
+                <span key={item.id}>{item.label}</span>
+              ))}
+            </div>
           </section>
 
           <details className="grade-workspace__reference">
@@ -447,8 +703,8 @@ export default function GpaCalculator() {
             </div>
 
             <p>
-              Values come from this app’s configured grading scale. Confirm
-              the applicable rules against your academic record.
+              Values come from COMSATS University’s official grading scale. Confirm
+              the applicable rules against your campus academic record.
             </p>
           </details>
         </div>
@@ -512,7 +768,7 @@ export default function GpaCalculator() {
 
                 <p>
                   {cgpa !== null
-                    ? `${previousCreditCount + totalCredits} combined credit hours`
+                    ? `${netCombinedCredits} combined credit hours${retakeCredits > 0 ? ` (${retakeCredits} retake cr replaced)` : ''}`
                     : 'Complete your courses and previous academic record.'}
                 </p>
               </div>

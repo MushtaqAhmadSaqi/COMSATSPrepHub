@@ -1,26 +1,46 @@
 import React, { useState } from 'react';
+import { DEFAULT_SUBJECTS } from '../../constants/subjects';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import './AiQuizGenerator.css';
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 const QUESTION_COUNTS = [5, 10, 15, 20];
+const QUESTION_TYPES = [
+  { id: 'mcq', label: 'Standard Exam MCQs' },
+  { id: 'conceptual', label: 'Conceptual (Why / How)' },
+  { id: 'mixed', label: 'Mixed Scenario & Analytical' }
+];
 const SUGGESTED_TOPICS = [
   'Data Structures & Algorithms',
   'Object Oriented Programming',
-  'Database Systems (SQL)',
-  'Operating Systems',
+  'Database Systems (SQL & Normalization)',
+  'Operating Systems (Deadlocks & Scheduling)',
   'Calculus & Analytical Geometry',
-  'Computer Networks'
+  'Computer Networks (OSI & TCP/IP)'
 ];
 
 export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
-  const [topic, setTopic] = useState('Data Structures & Algorithms');
+  const [selectedCourseCode, setSelectedCourseCode] = useState('CSC211');
+  const [topic, setTopic] = useState('Data Structures & Algorithms — Binary Search Trees & Graphs');
   const [difficulty, setDifficulty] = useState('Medium');
   const [numQuestions, setNumQuestions] = useState(10);
+  const [questionType, setQuestionType] = useState('mcq');
+  const [honeypot, setHoneypot] = useState('');
   const [topicError, setTopicError] = useState('');
+
+  const handleCourseChange = (code) => {
+    setSelectedCourseCode(code);
+    const match = DEFAULT_SUBJECTS.find((s) => s.code === code);
+    if (match) {
+      setTopic(match.name);
+      setTopicError('');
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (honeypot) return;
+
     const cleaned = topic.trim();
     if (!cleaned) {
       setTopicError('Please enter a subject or topic to generate a quiz.');
@@ -31,7 +51,13 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
       return;
     }
     setTopicError('');
-    onStartAiQuiz({ topic: cleaned, difficulty, numQuestions });
+    onStartAiQuiz({
+      topic: cleaned,
+      subjectCode: selectedCourseCode,
+      difficulty,
+      numQuestions,
+      questionType
+    });
   };
 
   return (
@@ -39,13 +65,43 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
       <PageHeader
         badge="AI Tools"
         title="AI Quiz Generator"
-        subtitle="Generate custom COMSATS-style practice quizzes on any subject, instantly powered by AI."
+        subtitle="Generate custom COMSATS-style practice quizzes on any course or topic, with automatic fallback across Gemini, Groq, and OpenRouter."
       />
 
       <form className="ai-gen-card" onSubmit={handleSubmit} noValidate>
+        {/* Honeypot anti-bot field */}
+        <input
+          type="text"
+          name="website"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+        />
+
+        {/* Course Selector */}
+        <div className="ai-field">
+          <label className="ai-label" htmlFor="ai-course-select">COMSATS Course (Optional)</label>
+          <select
+            id="ai-course-select"
+            className="ai-input"
+            value={selectedCourseCode}
+            onChange={(e) => handleCourseChange(e.target.value)}
+          >
+            <option value="">Custom Topic / Any Course</option>
+            {DEFAULT_SUBJECTS.map((subj) => (
+              <option key={subj.code} value={subj.code}>
+                {subj.code} — {subj.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Topic */}
         <div className="ai-field">
-          <label className="ai-label" htmlFor="ai-topic-input">Subject / Topic</label>
+          <label className="ai-label" htmlFor="ai-topic-input">Specific Topic or Chapter</label>
           <input
             id="ai-topic-input"
             type="text"
@@ -58,7 +114,7 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
               setTopic(e.target.value);
               if (topicError) setTopicError('');
             }}
-            placeholder="e.g. Binary Search Trees, Object Oriented Programming..."
+            placeholder="e.g. AVL Tree Rotations, SQL Normalization, Deadlock Prevention..."
             required
           />
           {topicError && (
@@ -79,7 +135,7 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
                   setTopicError('');
                 }}
                 style={{
-                  padding: '0.3rem 0.75rem',
+                  padding: '0.35rem 0.75rem',
                   borderRadius: '9999px',
                   border: '1px solid var(--border)',
                   background: topic === item ? 'var(--brand-soft)' : 'var(--surface-2)',
@@ -90,6 +146,24 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
                 }}
               >
                 {item}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Question Type */}
+        <div className="ai-field">
+          <label className="ai-label">Question Style</label>
+          <div className="ai-difficulty-grid" role="group" aria-label="Select question style">
+            {QUESTION_TYPES.map((qt) => (
+              <button
+                key={qt.id}
+                type="button"
+                aria-pressed={questionType === qt.id}
+                className={`ai-chip ${questionType === qt.id ? 'selected' : ''}`}
+                onClick={() => setQuestionType(qt.id)}
+              >
+                {qt.label}
               </button>
             ))}
           </div>
@@ -135,10 +209,7 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
         </div>
 
         {/* Generate */}
-        <button
-          type="submit"
-          className="btn-generate-ai"
-        >
+        <button type="submit" className="btn-generate-ai">
           <span className="material-symbols-outlined" aria-hidden="true">bolt</span>
           Generate Practice Quiz
         </button>

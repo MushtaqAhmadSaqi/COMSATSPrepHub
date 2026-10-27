@@ -1,6 +1,8 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
+const MAX_LOCAL_API_BYTES = 16 * 1024;
+
 export default defineConfig(({ mode }) => {
   Object.assign(process.env, loadEnv(mode, process.cwd(), ''));
 
@@ -12,7 +14,7 @@ export default defineConfig(({ mode }) => {
       plugins.push(
         visualizer({ open: true, filename: 'dist/bundle-stats.html', gzipSize: true })
       );
-    });
+    }).catch(() => {});
   }
 
   return {
@@ -28,7 +30,6 @@ export default defineConfig(({ mode }) => {
             'vendor-react': ['react', 'react-dom'],
             'vendor-motion': ['framer-motion'],
             'vendor-supabase': ['@supabase/supabase-js'],
-            'vendor-gemini': ['@google/generative-ai'],
           }
         }
       }
@@ -41,7 +42,7 @@ function localApiPlugin() {
     name: 'local-api-routes',
     configureServer(server) {
       server.middlewares.use('/api/generate-quiz', async (req, res) => {
-        if (req.method !== 'POST') {
+        if (req.method !== 'POST' && req.method !== 'OPTIONS') {
           res.statusCode = 405;
           res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify({ error: 'Method not allowed' }));
@@ -67,9 +68,16 @@ function localApiPlugin() {
 
           await handler(req, res);
         } catch (error) {
-          res.statusCode = 500;
+          const isTooLarge = error?.message === 'PAYLOAD_TOO_LARGE';
+          res.statusCode = isTooLarge ? 413 : 500;
           res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ error: error.message || 'Local API route failed.' }));
+          res.end(
+            JSON.stringify({
+              error: isTooLarge
+                ? 'Request payload is too large.'
+                : 'Local API route encountered an unexpected error.'
+            })
+          );
         }
       });
     }
@@ -79,8 +87,11 @@ function localApiPlugin() {
 function readJsonBody(req) {
   return new Promise((resolve, reject) => {
     let raw = '';
-    req.on('data', chunk => {
+    req.on('data', (chunk) => {
       raw += chunk;
+      if (raw.length > MAX_LOCAL_API_BYTES) {
+        reject(new Error('PAYLOAD_TOO_LARGE'));
+      }
     });
     req.on('end', () => {
       if (!raw) {

@@ -7,9 +7,14 @@ import ScrollTop from './components/ScrollTop/ScrollTop';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import InstallPrompt from './components/InstallPrompt/InstallPrompt';
 import CommandPalette from './components/CommandPalette/CommandPalette';
+import CookieNotice from './components/CookieNotice/CookieNotice';
+import OfflineBanner from './components/ui/OfflineBanner';
 import EmptyState from './components/ui/EmptyState';
+import { SkeletonCard } from './components/ui/Skeleton';
 import { ToastProvider } from './utils/toast';
 import { isAdminUser } from './utils/adminGuard';
+import { updatePageSeo } from './utils/seo';
+import { getStudentPrefs, saveStudentPrefs } from './utils/studyTracker';
 import { supabase } from './services/supabase';
 
 import Home from './pages/Home/Home';
@@ -30,48 +35,40 @@ const Terms = lazy(() => import('./pages/Terms/Terms'));
 const AdminGenerateQuizzes = lazy(() => import('./pages/AdminGenerateQuizzes/AdminGenerateQuizzes'));
 const AdminPaste = lazy(() => import('./pages/AdminPaste/AdminPaste'));
 const GpaCalculator = lazy(() => import('./pages/GpaCalculator/GpaCalculator'));
+const StudyHub = lazy(() => import('./pages/StudyHub/StudyHub'));
+const FaqContact = lazy(() => import('./pages/FaqContact/FaqContact'));
+const Account = lazy(() => import('./pages/Account/Account'));
 
-const PAGE_TITLES = {
-  home: 'COMSATSPrepHub — Prepare Smarter for COMSATS Exams',
-  about: 'Meet the Team — COMSATSPrepHub',
-  subjects: 'Browse Subjects & Past Papers — COMSATSPrepHub',
-  'subject-papers': 'Subject Past Papers — COMSATSPrepHub',
-  'paper-view': 'Exam Paper & Solutions — COMSATSPrepHub',
-  quiz: 'Practice Quizzes — COMSATSPrepHub',
-  'ai-quiz-generator': 'AI Quiz Generator — COMSATSPrepHub',
-  'take-ai-quiz': 'AI Practice Quiz — COMSATSPrepHub',
-  dashboard: 'Student Dashboard — COMSATSPrepHub',
-  upload: 'Upload Past Paper — COMSATSPrepHub',
-  auth: 'Sign In — COMSATSPrepHub',
-  terms: 'Terms of Service — COMSATSPrepHub',
-  'admin-generate': 'Admin Quiz Generator — COMSATSPrepHub',
-  'admin-paste': 'Admin Paper Parser — COMSATSPrepHub',
-  gpa: 'COMSATS GPA & CGPA Calculator — COMSATSPrepHub'
+const ROUTE_ALIASES = {
+  'ai-quiz': 'ai-quiz-generator',
+  'daily-challenge': 'study-hub',
+  flashcards: 'study-hub',
+  'study-helper': 'study-hub'
 };
+
+function normalizeRoute(path = 'home') {
+  const clean = String(path || 'home').replace(/^#/, '').trim();
+  return ROUTE_ALIASES[clean] || clean || 'home';
+}
 
 function RouteLoadingFallback() {
   return (
     <div
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '50vh',
-        gap: '0.75rem',
-        color: 'var(--text-subtle)'
+        maxWidth: '64rem',
+        margin: '2.5rem auto',
+        padding: '0 1.5rem',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+        gap: '1rem'
       }}
       role="status"
       aria-live="polite"
+      aria-label="Loading page content"
     >
-      <span
-        className="material-symbols-outlined"
-        style={{ fontSize: '2.25rem', color: 'var(--brand)', animation: 'spin 1s linear infinite' }}
-        aria-hidden="true"
-      >
-        progress_activity
-      </span>
-      <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>Loading workspace…</span>
+      <SkeletonCard />
+      <SkeletonCard />
+      <SkeletonCard />
     </div>
   );
 }
@@ -100,7 +97,7 @@ function AdminGuardView({ user, onOpenAuth, onNavigate, children }) {
           <EmptyState
             icon="admin_panel_settings"
             title="Admin Access Restricted"
-            description="Your account does not have administrator permissions for this page. Note: Backend Row-Level Security (RLS) also enforces write permissions."
+            description="Your account does not have administrator permissions for this page. Backend Row-Level Security (RLS) also enforces write permissions."
             actionLabel="Return Home"
             onAction={() => onNavigate('home')}
           />
@@ -117,6 +114,7 @@ export default function App() {
   const [isDark, setIsDark] = useState(() => {
     try { return localStorage.getItem('pph_dark') === 'true'; } catch { return false; }
   });
+  const [lang, setLang] = useState(() => getStudentPrefs().lang || 'en');
   const [user, setUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -154,15 +152,9 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, []);
 
-  // Update document title on route changes for SEO and screen-reader announcements
+  // Update document title, meta description, canonical URL, and Open Graph tags on route changes
   useEffect(() => {
-    let title = PAGE_TITLES[activePath] || 'Page Not Found — COMSATSPrepHub';
-    if (activePath === 'subject-papers' && selectedSubject?.code) {
-      title = `${selectedSubject.code} — ${selectedSubject.name} Past Papers | COMSATSPrepHub`;
-    } else if (activePath === 'paper-view' && selectedPaper?.title) {
-      title = `${selectedPaper.title} | COMSATSPrepHub`;
-    }
-    document.title = title;
+    updatePageSeo(activePath, { selectedSubject, selectedPaper });
   }, [activePath, selectedSubject, selectedPaper]);
 
   // Initialize Dark Mode
@@ -211,8 +203,7 @@ export default function App() {
         setActivePath('paper-view');
         window.history.replaceState({ path: 'paper-view' }, '', '#paper-view');
       }
-    }).catch((error) => {
-      console.error('Unable to restore authentication session:', error);
+    }).catch(() => {
       setAuthReady(true);
     });
 
@@ -236,13 +227,12 @@ export default function App() {
       const pathFromState = e?.state?.path;
       const pathFromHash = window.location.hash.replace(/^#/, '');
       const targetPath = pathFromState || pathFromHash || 'home';
-      // Normalize legacy 'ai-quiz' alias to 'ai-quiz-generator'
-      setActivePath(targetPath === 'ai-quiz' ? 'ai-quiz-generator' : targetPath);
+      setActivePath(normalizeRoute(targetPath));
     };
 
     const initialHash = window.location.hash.replace(/^#/, '');
     if (initialHash) {
-      setActivePath(initialHash === 'ai-quiz' ? 'ai-quiz-generator' : initialHash);
+      setActivePath(normalizeRoute(initialHash));
     } else {
       window.history.replaceState({ path: 'home' }, '', '/');
     }
@@ -256,7 +246,7 @@ export default function App() {
   }, []);
 
   const handleNavigate = (path) => {
-    const normalized = path === 'ai-quiz' ? 'ai-quiz-generator' : path;
+    const normalized = normalizeRoute(path);
     setActivePath(normalized);
     const newUrl = normalized === 'home' ? '/' : `#${normalized}`;
     window.history.pushState({ path: normalized }, '', newUrl);
@@ -268,10 +258,22 @@ export default function App() {
     handleNavigate('subject-papers');
   };
 
+  const handleToggleLanguage = () => {
+    const next = lang === 'en' ? 'ur' : 'en';
+    setLang(next);
+    saveStudentPrefs({ lang: next });
+  };
+
   const renderCurrentPage = () => {
     switch (activePath) {
       case 'home':
-        return <Home onNavigate={handleNavigate} />;
+        return (
+          <Home
+            onNavigate={handleNavigate}
+            onSelectSubject={handleSelectSubject}
+            user={user}
+          />
+        );
       case 'about':
         return <About />;
       case 'subjects':
@@ -300,6 +302,10 @@ export default function App() {
             paper={selectedPaper || undefined}
             onBack={() => handleNavigate('subject-papers')}
             onNavigate={handleNavigate}
+            onStartPaperQuiz={(params) => {
+              setAiQuizParams(params);
+              handleNavigate('take-ai-quiz');
+            }}
             user={user}
             authReady={authReady}
             onRequireAuth={() => {
@@ -327,16 +333,33 @@ export default function App() {
             onFinish={() => handleNavigate('ai-quiz-generator')}
           />
         );
+      case 'study-hub':
+        return <StudyHub />;
       case 'dashboard':
         return (
           <Dashboard
             user={user || undefined}
             onNavigate={handleNavigate}
             onOpenAuth={() => setIsAuthOpen(true)}
+            onStartTargetedDrill={(params) => {
+              setAiQuizParams(params);
+              handleNavigate('take-ai-quiz');
+            }}
+          />
+        );
+      case 'account':
+        return (
+          <Account
+            user={user}
+            onNavigate={handleNavigate}
+            onOpenAuth={() => setIsAuthOpen(true)}
           />
         );
       case 'upload':
         return <Upload />;
+      case 'faq':
+      case 'contact':
+        return <FaqContact />;
       case 'auth':
         return (
           <Auth
@@ -347,7 +370,11 @@ export default function App() {
           />
         );
       case 'terms':
-        return <Terms />;
+        return <Terms section="terms" />;
+      case 'privacy':
+        return <Terms section="privacy" />;
+      case 'disclaimer':
+        return <Terms section="disclaimer" />;
       case 'admin-generate':
         return (
           <AdminGuardView
@@ -390,6 +417,8 @@ export default function App() {
   const handleExecuteCmdAction = async (actionId) => {
     if (actionId === 'toggle_dark_mode') {
       setIsDark(!isDark);
+    } else if (actionId === 'toggle_language') {
+      handleToggleLanguage();
     } else if (actionId === 'open_auth') {
       setIsAuthOpen(true);
     } else if (actionId === 'sign_out') {
@@ -401,11 +430,11 @@ export default function App() {
   const reduceMotion = useReducedMotion();
 
   const [routeDuration] = useState(() => {
-    if (typeof window === 'undefined') return 0.24;
+    if (typeof window === 'undefined') return 0.22;
     const value = getComputedStyle(document.documentElement)
       .getPropertyValue('--dur-base')
       .trim();
-    if (!value) return 0.24;
+    if (!value) return 0.22;
     return parseFloat(value) / (value.endsWith('ms') ? 1000 : 1);
   });
 
@@ -426,11 +455,15 @@ export default function App() {
         {/* Accessibility: skip-to-content link */}
         <a href="#main-content" className="skip-link">Skip to content</a>
 
+        <OfflineBanner />
+
         <Navbar
           activePath={activePath}
           onNavigate={handleNavigate}
           isDark={isDark}
           onToggleDarkMode={() => setIsDark(!isDark)}
+          lang={lang}
+          onToggleLanguage={handleToggleLanguage}
           user={user}
           onOpenAuth={() => setIsAuthOpen(true)}
           onOpenCommandPalette={() => setIsCmdPaletteOpen(true)}
@@ -481,6 +514,7 @@ export default function App() {
           isLoggedIn={!!user}
         />
 
+        <CookieNotice onNavigate={handleNavigate} />
         <ScrollTop />
         <InstallPrompt />
       </div>

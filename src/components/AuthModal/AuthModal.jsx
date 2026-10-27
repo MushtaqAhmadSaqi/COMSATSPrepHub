@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { signInWithEmail, signUpWithEmail, signInWithGoogle } from '../../services/auth';
+import {
+  signInWithEmail,
+  signUpWithEmail,
+  signInWithGoogle,
+  requestPasswordReset,
+  validatePasswordStrength
+} from '../../services/auth';
 import { useToast } from '../../utils/toast';
 import './AuthModal.css';
 
@@ -20,10 +26,11 @@ export default function AuthModal({
   onClose = () => {},
   onLoginSuccess = () => {}
 }) {
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [mode, setMode] = useState('login'); // 'login' | 'signup' | 'reset'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [honeypot, setHoneypot] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -36,7 +43,9 @@ export default function AuthModal({
   const firstInputRef = useRef(null);
   const triggerRef = useRef(null);
 
-  /* Store trigger element on open and restore on close */
+  const isSignUp = mode === 'signup';
+  const isReset = mode === 'reset';
+
   useEffect(() => {
     if (isOpen) {
       triggerRef.current = document.activeElement;
@@ -46,9 +55,8 @@ export default function AuthModal({
     } else if (triggerRef.current) {
       triggerRef.current.focus?.();
     }
-  }, [isOpen, isSignUp]);
+  }, [isOpen, mode]);
 
-  /* Focus trap & Escape key listener */
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e) => {
@@ -58,7 +66,7 @@ export default function AuthModal({
       }
       if (e.key === 'Tab' && cardRef.current) {
         const focusables = cardRef.current.querySelectorAll(
-          'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          'button:not([disabled]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]), textarea:not([disabled])'
         );
         if (!focusables.length) return;
         const first = focusables[0];
@@ -80,32 +88,50 @@ export default function AuthModal({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (honeypot) return; // Silently drop bot submissions
+
     setErrorMsg('');
     setSuccessMsg('');
-    setLoading(true);
+
+    if (isReset) {
+      setLoading(true);
+      const res = await requestPasswordReset(email);
+      setLoading(false);
+      if (!res.ok) {
+        setErrorMsg(res.error);
+      } else {
+        setSuccessMsg(res.message);
+        toast.info('Password reset instructions sent if account exists.');
+      }
+      return;
+    }
 
     if (isSignUp) {
       if (!fullName.trim()) {
         setErrorMsg('Please enter your full name.');
-        setLoading(false);
         return;
       }
-      if (password.length < 8) {
-        setErrorMsg('Password must be at least 8 characters.');
-        setLoading(false);
+      const pwdCheck = validatePasswordStrength(password);
+      if (!pwdCheck.valid) {
+        setErrorMsg(pwdCheck.error);
         return;
       }
+      setLoading(true);
       const res = await signUpWithEmail(fullName, email, password);
       setLoading(false);
       if (!res.ok) {
         setErrorMsg(res.error);
         toast.error(res.error);
       } else {
-        setSuccessMsg('Account created! Signing you in...');
+        setSuccessMsg('Account created! Check your email or continue...');
         toast.success('Account created successfully!');
-        if (res.user) { onLoginSuccess(res.user); setTimeout(onClose, 1000); }
+        if (res.user) {
+          onLoginSuccess(res.user);
+          setTimeout(onClose, 900);
+        }
       }
     } else {
+      setLoading(true);
       const res = await signInWithEmail(email, password);
       setLoading(false);
       if (!res.ok) {
@@ -114,7 +140,10 @@ export default function AuthModal({
       } else {
         setSuccessMsg('Signed in successfully!');
         toast.success('Welcome back!');
-        if (res.user) { onLoginSuccess(res.user); setTimeout(onClose, 800); }
+        if (res.user) {
+          onLoginSuccess(res.user);
+          setTimeout(onClose, 700);
+        }
       }
     }
   };
@@ -128,33 +157,43 @@ export default function AuthModal({
     }
   };
 
-  const switchMode = () => {
-    setIsSignUp(!isSignUp);
+  const switchToMode = (nextMode) => {
+    setMode(nextMode);
     setErrorMsg('');
     setSuccessMsg('');
     setFieldErrors({});
   };
 
-  /* Blur validation for individual fields */
   const validateField = (field, value) => {
     const errs = { ...fieldErrors };
     switch (field) {
       case 'email':
         if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           errs.email = 'Please enter a valid email address';
-        } else { delete errs.email; }
+        } else {
+          delete errs.email;
+        }
         break;
       case 'password':
-        if (value && value.length < 8) {
+        if (isSignUp && value) {
+          const check = validatePasswordStrength(value);
+          if (!check.valid) errs.password = check.error;
+          else delete errs.password;
+        } else if (value && value.length < 8) {
           errs.password = 'Must be at least 8 characters';
-        } else { delete errs.password; }
+        } else {
+          delete errs.password;
+        }
         break;
       case 'fullName':
         if (isSignUp && value !== undefined && !value.trim()) {
           errs.fullName = 'Name is required';
-        } else { delete errs.fullName; }
+        } else {
+          delete errs.fullName;
+        }
         break;
-      default: break;
+      default:
+        break;
     }
     setFieldErrors(errs);
   };
@@ -170,27 +209,28 @@ export default function AuthModal({
         aria-modal="true"
         aria-labelledby="auth-modal-title"
       >
-        {/* Close */}
         <button type="button" className="auth-close-btn" onClick={onClose} aria-label="Close modal">
           <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
         </button>
 
-        {/* Header */}
         <div className="auth-header">
           <div className="auth-icon-badge">
             <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>
-              {isSignUp ? 'person_add' : 'login'}
+              {isReset ? 'lock_reset' : isSignUp ? 'person_add' : 'login'}
             </span>
           </div>
-          <h3 className="auth-title" id="auth-modal-title">{isSignUp ? 'Create Account' : 'Welcome Back'}</h3>
+          <h3 className="auth-title" id="auth-modal-title">
+            {isReset ? 'Reset Password' : isSignUp ? 'Create Account' : 'Welcome Back'}
+          </h3>
           <p className="auth-subtitle">
-            {isSignUp
-              ? 'Join COMSATSPrepHub to track your progress & save papers'
-              : 'Sign in to access your saved papers & quiz scores'}
+            {isReset
+              ? 'Enter your email to receive a password reset link'
+              : isSignUp
+                ? 'Join COMSATSPrepHub to track your progress & save papers'
+                : 'Sign in to access your saved papers & quiz scores'}
           </p>
         </div>
 
-        {/* Alerts */}
         {errorMsg && (
           <div className="auth-alert auth-alert-error" role="alert">
             <span className="material-symbols-outlined" style={{ fontSize: '18px', flexShrink: 0 }}>error</span>
@@ -204,8 +244,19 @@ export default function AuthModal({
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleSubmit}>
+          {/* Anti-bot honeypot field */}
+          <input
+            type="text"
+            name="website_url"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+          />
+
           {isSignUp && (
             <div className="auth-form-group">
               <label className="auth-label" htmlFor="auth-fullname">Full Name</label>
@@ -244,59 +295,110 @@ export default function AuthModal({
             {fieldErrors.email && <span className="auth-field-error">{fieldErrors.email}</span>}
           </div>
 
-          <div className="auth-form-group">
-            <label className="auth-label" htmlFor="auth-password">Password</label>
-            <div className="auth-password-wrapper">
-              <input
-                id="auth-password"
-                type={showPassword ? 'text' : 'password'}
-                className={`auth-input${fieldErrors.password ? ' auth-input--error' : ''}`}
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onBlur={(e) => validateField('password', e.target.value)}
-                autoComplete={isSignUp ? 'new-password' : 'current-password'}
-                enterKeyHint="done"
-                required
-                style={{ paddingRight: '3rem' }}
-              />
-              <button
-                type="button"
-                className="auth-eye-btn"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                  {showPassword ? 'visibility_off' : 'visibility'}
+          {!isReset && (
+            <div className="auth-form-group">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label className="auth-label" htmlFor="auth-password">Password</label>
+                {!isSignUp && (
+                  <button
+                    type="button"
+                    onClick={() => switchToMode('reset')}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      color: 'var(--brand)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
+              <div className="auth-password-wrapper">
+                <input
+                  id="auth-password"
+                  type={showPassword ? 'text' : 'password'}
+                  className={`auth-input${fieldErrors.password ? ' auth-input--error' : ''}`}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onBlur={(e) => validateField('password', e.target.value)}
+                  autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                  enterKeyHint="done"
+                  required
+                  style={{ paddingRight: '3rem' }}
+                />
+                <button
+                  type="button"
+                  className="auth-eye-btn"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
+                </button>
+              </div>
+              {isSignUp && !fieldErrors.password && (
+                <span style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-subtle)', marginTop: '0.25rem' }}>
+                  Min 8 characters with uppercase, lowercase &amp; a number
                 </span>
-              </button>
+              )}
+              {fieldErrors.password && <span className="auth-field-error">{fieldErrors.password}</span>}
             </div>
-            {fieldErrors.password && <span className="auth-field-error">{fieldErrors.password}</span>}
-          </div>
+          )}
 
           <button type="submit" className="auth-submit-btn" disabled={loading}>
             {loading && (
-              <span className="material-symbols-outlined auth-submit-spinner" style={{ fontSize: '18px' }}>progress_activity</span>
+              <span className="material-symbols-outlined auth-submit-spinner" style={{ fontSize: '18px' }}>
+                progress_activity
+              </span>
             )}
-            {loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Sign In')}
+            {loading
+              ? 'Processing...'
+              : isReset
+                ? 'Send Reset Link'
+                : isSignUp
+                  ? 'Create Account'
+                  : 'Sign In'}
           </button>
         </form>
 
-        {/* Divider */}
-        <div className="auth-divider">or continue with</div>
+        {!isReset && (
+          <>
+            <div className="auth-divider">or continue with</div>
+            <button type="button" className="auth-google-btn" onClick={handleGoogleSignIn}>
+              <GoogleIcon />
+              Sign in with Google
+            </button>
+          </>
+        )}
 
-        {/* Google */}
-        <button type="button" className="auth-google-btn" onClick={handleGoogleSignIn}>
-          <GoogleIcon />
-          Sign in with Google
-        </button>
-
-        {/* Switch */}
         <div className="auth-switch-prompt">
-          {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-          <button type="button" className="auth-switch-btn" onClick={switchMode}>
-            {isSignUp ? 'Sign In' : 'Sign Up'}
-          </button>
+          {isReset ? (
+            <>
+              Remembered your password?
+              <button type="button" className="auth-switch-btn" onClick={() => switchToMode('login')}>
+                Back to Sign In
+              </button>
+            </>
+          ) : isSignUp ? (
+            <>
+              Already have an account?
+              <button type="button" className="auth-switch-btn" onClick={() => switchToMode('login')}>
+                Sign In
+              </button>
+            </>
+          ) : (
+            <>
+              Don&apos;t have an account?
+              <button type="button" className="auth-switch-btn" onClick={() => switchToMode('signup')}>
+                Sign Up
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

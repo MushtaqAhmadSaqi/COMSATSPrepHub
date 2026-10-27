@@ -4,41 +4,51 @@ import './Terms.css';
 
 const SECTIONS = [
   {
-    icon: 'school',
-    title: 'Academic Integrity',
-    body: 'COMSATSPrepHub is designed strictly for study and self-assessment purposes. All past papers are contributed by students for educational reference only. Misuse for academic dishonesty is strictly prohibited.'
+    icon: 'gavel',
+    title: '1. Terms of Use & Academic Integrity',
+    body: 'COMSATSPrepHub is an independent, student-built educational platform designed strictly for revision, self-assessment, and academic planning. All past papers, model solutions, and AI-generated practice quizzes are provided for educational reference only. Using the platform for live exam misconduct or academic dishonesty is strictly prohibited.'
   },
   {
-    icon: 'lock',
-    title: 'Privacy & Data Usage',
-    body: 'Your quiz progress, GPA calculations, and user profile details are managed for your personal performance tracking. Local study progress is stored in your browser and can be cleared at any time. We do not sell your personal data to third parties.'
+    icon: 'shield_lock',
+    title: '2. Privacy Policy & Minimal Data Handling',
+    body: 'We collect only the minimum information required to provide your study workspace: (a) if you use Guest Mode, your quiz history, bookmarks, flashcards, and GPA calculations stay locally in your browser (localStorage/sessionStorage under `pph_*` keys) and are never sent to our servers; (b) if you create a Supabase account, your email address, display name, and synced study progress are stored in our Row-Level-Security (RLS) protected database where only you can read or modify your rows; (c) AI quiz generation sends only the sanitized course/topic name to our server endpoint (`/api/generate-quiz`) and never transmits your personal identity or email to AI providers. We never sell or rent student data.'
   },
   {
-    icon: 'upload_file',
-    title: 'Content Contributions',
-    body: 'Users who upload past papers certify that the content is shared educational revision material. The platform team reserves the right to remove any content that violates academic or copyright policies.'
+    icon: 'cookie',
+    title: '3. LocalStorage, SessionStorage & Analytics Notice',
+    body: 'COMSATSPrepHub uses browser storage strictly for essential functionality: `pph_dark` (theme preference), `pph_study_history` / `pph_bookmarks` / `pph_paper_notes` (local study progress), `sessionStorage` navigation state, and Supabase PKCE session tokens when signed in. Optional anonymous analytics only load if you accept the analytics notice and do not have Do Not Track enabled.'
+  },
+  {
+    icon: 'copyright',
+    title: '4. Educational Disclaimer & Copyright Takedown Policy',
+    body: 'COMSATSPrepHub is not an official website of COMSATS University Islamabad. Course codes and past examination questions are shared by students under fair educational study principles. If you are a faculty member, department representative, or copyright holder and wish to request the removal or modification of any specific past paper or resource, please email mushtaqahmedsaqi1234@gmail.com with the subject code and paper title — we process takedown requests within 24–48 hours.'
   },
   {
     icon: 'manage_accounts',
-    title: 'Account & Data Deletion',
-    body: 'You are responsible for maintaining the confidentiality of your account credentials. To request account or contributed-content removal, contact the support email listed in the footer.'
+    title: '5. Account Control, Data Export & Deletion',
+    body: 'You can export all of your study data as JSON or permanently clear all local and cloud study records at any time from the Account Settings page (#account), or by contacting mushtaqahmedsaqi1234@gmail.com.'
   }
 ];
 
-export default function Terms() {
+export default function Terms({ section = 'terms' }) {
+  const headerTitles = {
+    terms: 'Terms of Use, Privacy Policy & Disclaimer',
+    privacy: 'Privacy Policy & Data Handling',
+    disclaimer: 'Educational Disclaimer & Copyright Takedown'
+  };
+
   return (
     <div className="terms-container">
       <PageHeader
-        badge="Legal & Privacy"
-        title="Terms of Service & Privacy"
-        subtitle="Guidelines for using COMSATSPrepHub's past paper library, AI quiz tools, and GPA calculator."
+        badge="Legal, Privacy & Copyright"
+        title={headerTitles[section] || headerTitles.terms}
+        subtitle="Transparent policies for COMSATSPrepHub's past paper library, AI quiz tools, GPA calculator, and student privacy."
       />
 
       <div className="terms-card">
         <p className="terms-intro">
-          Welcome to COMSATSPrepHub. By accessing our platform, past paper repository,
-          and AI quiz features, you agree to follow these community and privacy guidelines.
-          <em> (Note: Draft educational platform policy — review with institutional guidelines before commercial deployment.)</em>
+          Last updated: October 2026. Welcome to COMSATSPrepHub. By accessing our platform, past paper repository,
+          and study tools, you agree to these community, privacy, and educational use guidelines.
         </p>
 
         {SECTIONS.map((s) => (

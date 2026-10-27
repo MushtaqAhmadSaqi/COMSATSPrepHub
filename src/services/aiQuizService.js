@@ -1,8 +1,13 @@
 import { getOfflineQuestions } from './geminiService.js';
+import { authHelper } from './supabase.js';
+import { sanitizePlainText } from '../utils/sanitize.js';
+import { logger } from '../utils/logger.js';
 
 export async function generateQuizWithGemini({
   subject,
   subjectCode = '',
+  topic = '',
+  questionType = 'mcq',
   numQuestions = 10,
   difficulty = 'Medium',
   signal
@@ -22,14 +27,22 @@ export async function generateQuizWithGemini({
   }
 
   try {
+    const token = await authHelper.getAccessToken();
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
     const response = await fetch('/api/generate-quiz', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers,
       body: JSON.stringify({
-        subject: String(subject).trim(),
-        subjectCode,
+        subject: sanitizePlainText(subject, 120),
+        subjectCode: sanitizePlainText(subjectCode, 20),
+        topic: sanitizePlainText(topic, 140),
+        questionType,
         difficulty,
         questionCount
       }),
@@ -62,13 +75,14 @@ export async function generateQuizWithGemini({
           }
 
           return {
-            question: item.question.trim(),
-            options: item.options.map((option) => option.trim()),
+            question: sanitizePlainText(item.question, 500),
+            options: item.options.map((option) => sanitizePlainText(option, 240)),
             correct: item.correctAnswer,
             hint:
               typeof item.explanation === 'string'
-                ? item.explanation.trim()
-                : ''
+                ? sanitizePlainText(item.explanation, 600)
+                : '',
+            provider: payload?.metadata?.provider || 'AI'
           };
         });
       }
@@ -77,9 +91,9 @@ export async function generateQuizWithGemini({
     if (err?.name === 'AbortError') {
       throw err;
     }
-    console.warn(
-      'Server AI quiz endpoint unavailable; using curated COMSATS question bank fallback:',
-      err?.message || err
+    logger.warn(
+      'aiQuizService',
+      `Server AI quiz endpoint unavailable; using curated COMSATS question bank fallback: ${err?.message || ''}`
     );
   }
 

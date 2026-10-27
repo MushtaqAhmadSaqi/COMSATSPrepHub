@@ -3,16 +3,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { generateQuizWithGemini } from '../../services/aiQuizService';
 import { recordQuizAttempt } from '../../utils/studyTracker';
 import { fireConfetti } from '../../utils/confetti';
+import { useToast } from '../../utils/toast';
 import './TakeAiQuiz.css';
 import '../Quiz/Quiz.css';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
+const PROGRESS_MESSAGES = [
+  'Connecting to AI exam coach…',
+  'Drafting COMSATS syllabus-aligned questions…',
+  'Validating options and model explanations…'
+];
 
 export default function TakeAiQuiz({
-  quizParams = { topic: 'Data Structures', difficulty: 'Medium', numQuestions: 10 },
+  quizParams = { topic: 'Data Structures', subjectCode: 'CSC211', difficulty: 'Medium', numQuestions: 10, questionType: 'mcq' },
   onFinish = () => {}
 }) {
   const [loading, setLoading] = useState(true);
+  const [progressStep, setProgressStep] = useState(0);
   const [questions, setQuestions] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -21,11 +28,20 @@ export default function TakeAiQuiz({
   const [streak, setStreak] = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
-
-  const prevStreakRef = useRef(0);
-
+  const [userAnswers, setUserAnswers] = useState({});
   const [error, setError] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
+
+  const toast = useToast();
+  const prevStreakRef = useRef(0);
+
+  useEffect(() => {
+    if (!loading) return undefined;
+    const interval = setInterval(() => {
+      setProgressStep((s) => (s + 1) % PROGRESS_MESSAGES.length);
+    }, 900);
+    return () => clearInterval(interval);
+  }, [loading]);
 
   useEffect(() => {
     let cancelled = false;
@@ -42,12 +58,15 @@ export default function TakeAiQuiz({
       setStreak(0);
       setShowHint(false);
       setIsFinished(false);
+      setUserAnswers({});
       prevStreakRef.current = 0;
 
       try {
         const generated = await generateQuizWithGemini({
           subject: quizParams.topic || 'General Knowledge',
           subjectCode: quizParams.subjectCode || '',
+          topic: quizParams.topic || '',
+          questionType: quizParams.questionType || 'mcq',
           numQuestions: quizParams.numQuestions || 10,
           difficulty: quizParams.difficulty || 'Medium',
           signal: controller.signal
@@ -78,6 +97,7 @@ export default function TakeAiQuiz({
     quizParams.subjectCode,
     quizParams.difficulty,
     quizParams.numQuestions,
+    quizParams.questionType,
     reloadKey
   ]);
 
@@ -86,6 +106,10 @@ export default function TakeAiQuiz({
     setRevealed(true);
     const q = questions[currentIdx];
     const isCorrect = selectedOption === q.correct;
+    setUserAnswers((prev) => ({
+      ...prev,
+      [currentIdx]: { selected: selectedOption, isCorrect }
+    }));
 
     if (isCorrect) {
       const newScore = score + 1;
@@ -102,11 +126,14 @@ export default function TakeAiQuiz({
   const handleNextQuestion = () => {
     if (currentIdx + 1 >= questions.length) {
       const pct = Math.round((score / questions.length) * 100);
+      const wrongQuestions = questions.filter((_, idx) => !userAnswers[idx]?.isCorrect);
       recordQuizAttempt({
         subject: quizParams.topic || 'AI Practice Quiz',
+        subjectCode: quizParams.subjectCode || '',
         score,
         totalQuestions: questions.length,
-        difficulty: quizParams.difficulty || 'Medium'
+        difficulty: quizParams.difficulty || 'Medium',
+        wrongTopics: wrongQuestions.map((wq) => wq.question.slice(0, 70))
       });
       if (pct >= 70) {
         fireConfetti({ count: 100, spread: 80, originY: 0.5 });
@@ -127,10 +154,32 @@ export default function TakeAiQuiz({
     setScore(0);
     setStreak(0);
     setShowHint(false);
+    setUserAnswers({});
     setIsFinished(false);
   };
 
-  // Keyboard navigation during active quiz (1-4 select, Enter submits/advances)
+  const handleExportQuizJson = () => {
+    const exportPayload = {
+      title: `${quizParams.topic} (${quizParams.difficulty})`,
+      exportedAt: new Date().toISOString(),
+      questions
+    };
+    const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `comsats-ai-quiz-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Quiz exported as JSON!');
+  };
+
+  const handleShareWhatsApp = () => {
+    const pct = Math.round((score / questions.length) * 100);
+    const text = `I scored ${score}/${questions.length} (${pct}%) on an AI-generated "${quizParams.topic}" quiz on COMSATSPrepHub! Try it: ${window.location.origin}/#ai-quiz-generator`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+  };
+
   useEffect(() => {
     if (loading || error || isFinished || questions.length === 0) return;
 
@@ -161,15 +210,14 @@ export default function TakeAiQuiz({
     return () => window.removeEventListener('keydown', handleKeyDown);
   });
 
-  // LOADING STATE
   if (loading) {
     return (
       <div className="take-ai-container" aria-busy="true" aria-label="Generating AI practice quiz">
         <motion.div
           className="quiz-loading-card"
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.25 }}
         >
           <motion.div
             className="quiz-loading-icon"
@@ -182,7 +230,10 @@ export default function TakeAiQuiz({
           </motion.div>
           <h2>Generating AI Practice Quiz...</h2>
           <p>
-            Preparing {quizParams.numQuestions || 10} {quizParams.difficulty || 'Medium'} level questions for <strong>"{quizParams.topic || 'General'}"</strong>
+            Preparing {quizParams.numQuestions || 10} {quizParams.difficulty || 'Medium'} level questions for <strong>&ldquo;{quizParams.topic || 'General'}&rdquo;</strong>
+          </p>
+          <p style={{ fontSize: '0.8125rem', color: 'var(--brand)', fontWeight: 700, marginTop: '0.5rem' }} role="status">
+            {PROGRESS_MESSAGES[progressStep]}
           </p>
           <div className="quiz-loading-bar">
             <motion.div
@@ -227,17 +278,16 @@ export default function TakeAiQuiz({
     );
   }
 
-  // FINISHED STATE
   if (isFinished) {
     const pct = Math.round((score / questions.length) * 100);
     return (
       <motion.div
         className="take-ai-container"
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.35 }}
       >
-        <div className="quiz-card" style={{ textAlign: 'center', padding: '3.5rem 2rem' }}>
+        <div className="quiz-card" style={{ textAlign: 'center', padding: '3rem 1.75rem' }}>
           <motion.div
             className="quiz-finish-badge"
             initial={{ scale: 0, rotate: -180 }}
@@ -276,37 +326,52 @@ export default function TakeAiQuiz({
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '2.5rem' }}>
-            <motion.button
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '2.25rem' }}>
+            <button
               type="button"
               className="btn-quiz-next"
               onClick={handleRestartQuiz}
               style={{ background: 'var(--brand)' }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
             >
               <span className="material-symbols-outlined" aria-hidden="true">refresh</span>
               Retry Quiz
-            </motion.button>
+            </button>
 
-            <motion.button
+            <button
+              type="button"
+              className="btn-quiz-next"
+              onClick={handleExportQuizJson}
+              style={{ background: 'var(--surface-2)', color: 'var(--text)', border: '1.5px solid var(--border)' }}
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">download</span>
+              Export Quiz JSON
+            </button>
+
+            <button
+              type="button"
+              className="btn-quiz-next"
+              onClick={handleShareWhatsApp}
+              style={{ background: '#10b981' }}
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">share</span>
+              Share on WhatsApp
+            </button>
+
+            <button
               type="button"
               className="btn-quiz-next"
               onClick={onFinish}
               style={{ background: 'var(--surface-2)', color: 'var(--text)', border: '1.5px solid var(--border)' }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
             >
               <span className="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
               New Topic
-            </motion.button>
+            </button>
           </div>
         </div>
       </motion.div>
     );
   }
 
-  // PLAYING STATE
   const q = questions[currentIdx] || { question: 'Question loading...', options: [], correct: 0, hint: '' };
   const progress = ((currentIdx + 1) / questions.length) * 100;
   const isCorrect = selectedOption === q.correct;
@@ -315,19 +380,34 @@ export default function TakeAiQuiz({
     <motion.div
       className="take-ai-container"
       key={currentIdx}
-      initial={{ opacity: 0, x: 15 }}
+      initial={{ opacity: 0, x: 14 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.25 }}
     >
-      {/* Header Banner */}
       <div className="ai-quiz-header">
         <div>
           <div className="ai-quiz-topic-badge">
-            ✨ AI Generated · {quizParams.difficulty || 'Medium'}
+            ✨ {q.isOfflineFallback ? 'Curated Bank' : 'AI Generated'} · {quizParams.difficulty || 'Medium'}
           </div>
           <h1 className="ai-quiz-topic-name" style={{ margin: 0 }}>{quizParams.topic || 'Practice Quiz'}</h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button
+            type="button"
+            onClick={handleExportQuizJson}
+            title="Save / Export Quiz JSON"
+            style={{
+              background: 'rgba(255,255,255,0.18)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '9999px',
+              padding: '0.35rem 0.75rem',
+              fontSize: '0.75rem',
+              fontWeight: 700
+            }}
+          >
+            Export
+          </button>
           {streak >= 2 && (
             <span className="ai-quiz-counter" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
               🔥 {streak} Streak!
@@ -339,18 +419,16 @@ export default function TakeAiQuiz({
         </div>
       </div>
 
-      {/* Progress Bar */}
       <div className="quiz-progress-bar" role="progressbar" aria-valuenow={currentIdx + 1} aria-valuemin={1} aria-valuemax={questions.length}>
         <motion.div
           className="quiz-progress-fill"
           style={{ background: 'var(--brand)' }}
           initial={{ width: `${(currentIdx / questions.length) * 100}%` }}
           animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.4 }}
+          transition={{ duration: 0.3 }}
         />
       </div>
 
-      {/* Question Card */}
       <div className="quiz-card" key={currentIdx}>
         <h2 className="quiz-question">{q.question}</h2>
 
@@ -393,7 +471,6 @@ export default function TakeAiQuiz({
           Tip: press 1–4 to answer, Enter to continue
         </div>
 
-        {/* Hint toggle */}
         {q.hint && !revealed && (
           <div style={{ marginBottom: '1.5rem' }}>
             <button
@@ -413,7 +490,7 @@ export default function TakeAiQuiz({
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.25 }}
+                  transition={{ duration: 0.22 }}
                 >
                   💡 <strong>Hint:</strong> {q.hint}
                 </motion.div>
@@ -422,14 +499,13 @@ export default function TakeAiQuiz({
           </div>
         )}
 
-        {/* Answer Explanation */}
         {revealed && q.hint && (
           <motion.div
             className="quiz-explanation-box"
             role="status"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.25 }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">info</span>
             <div>
