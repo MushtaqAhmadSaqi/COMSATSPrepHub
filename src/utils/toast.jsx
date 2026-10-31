@@ -19,6 +19,8 @@ const AUTO_DISMISS_MS = 4000;
 
 let toastIdCounter = 0;
 
+let activeToastHandler = null;
+
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const timersRef = useRef({});
@@ -53,7 +55,7 @@ export function ToastProvider({ children }) {
     return id;
   }, [removeToast]);
 
-  const toast = useMemo(
+  const toastObj = useMemo(
     () => ({
       success: (msg) => addToast('success', msg),
       error: (msg) => addToast('error', msg),
@@ -61,6 +63,13 @@ export function ToastProvider({ children }) {
     }),
     [addToast]
   );
+
+  useEffect(() => {
+    activeToastHandler = toastObj;
+    return () => {
+      if (activeToastHandler === toastObj) activeToastHandler = null;
+    };
+  }, [toastObj]);
 
   const prefersReducedMotion =
     typeof window !== 'undefined' &&
@@ -71,7 +80,7 @@ export function ToastProvider({ children }) {
     : { initial: { opacity: 0, y: 24, scale: 0.95 }, animate: { opacity: 1, y: 0, scale: 1 }, exit: { opacity: 0, y: 12, scale: 0.95 } };
 
   return (
-    <ToastContext.Provider value={toast}>
+    <ToastContext.Provider value={toastObj}>
       {children}
       <div className="toast-container" aria-live="polite" role="status">
         <AnimatePresence mode="popLayout">
@@ -120,3 +129,9 @@ export function useToast() {
   }
   return ctx;
 }
+
+export const toast = {
+  success: (msg) => (activeToastHandler ? activeToastHandler.success(msg) : console.log('[toast:success]', msg)),
+  error: (msg) => (activeToastHandler ? activeToastHandler.error(msg) : console.error('[toast:error]', msg)),
+  info: (msg) => (activeToastHandler ? activeToastHandler.info(msg) : console.info('[toast:info]', msg)),
+};
