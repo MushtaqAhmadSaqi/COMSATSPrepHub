@@ -7,7 +7,6 @@ const desktopNavItems = [
   { id: 'subjects',  label: 'Papers',    icon: 'menu_book' },
   { id: 'quiz',      label: 'Quizzes',   icon: 'quiz' },
   { id: 'ai-quiz-generator', label: 'AI Quiz', icon: 'auto_awesome' },
-  { id: 'study-hub', label: 'Study Hub', icon: 'psychology' },
   { id: 'gpa',       label: 'GPA Calc',  icon: 'calculate' }
 ];
 

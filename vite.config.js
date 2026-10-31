@@ -26,10 +26,12 @@ export default defineConfig(({ mode }) => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            'vendor-react': ['react', 'react-dom'],
-            'vendor-motion': ['framer-motion'],
-            'vendor-supabase': ['@supabase/supabase-js'],
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-dom')) return 'vendor-react';
+              if (id.includes('framer-motion')) return 'vendor-motion';
+              if (id.includes('@supabase')) return 'vendor-supabase';
+            }
           }
         }
       }

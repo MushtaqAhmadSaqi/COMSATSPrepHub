@@ -150,9 +150,9 @@ export default function Home({
   ];
 
   const stats = [
-    { num: `${DEFAULT_SUBJECTS.reduce((acc, s) => acc + (s.papers || 12), 150)}+`, label: 'Past Papers', suffix: '+' },
+    { num: '203+', label: 'Past Papers', suffix: '+' },
     { num: `${DEFAULT_SUBJECTS.length}+`,  label: 'COMSATS Courses', suffix: '+' },
-    { num: '1200+', label: 'Active Students', suffix: '+' }
+    { num: '500+', label: 'Active Students', suffix: '+' }
   ];
 
   const suggestions = useMemo(() => {
@@ -557,7 +557,316 @@ export default function Home({
             <StatItem key={s.label} num={s.num} label={s.label} suffix={s.suffix} />
           ))}
         </div>
+
+        {/* ── Coming Soon Banner ────────────────────────────────────── */}
+        <ComingSoonBanner />
       </section>
     </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   COMING SOON — Upcoming features teaser section
+───────────────────────────────────────────────────────────────── */
+const COMING_SOON_FEATURES = [
+  {
+    icon: 'smart_toy',
+    gradient: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+    glow: 'rgba(99, 102, 241, 0.3)',
+    label: 'AI Study Buddy',
+    tag: 'AI',
+    tagColor: '#6366f1',
+    desc: 'Your personal 24/7 tutor — ask any COMSATS course question in plain Urdu or English and get step-by-step explanations, formula breakdowns, and past-paper hints instantly.',
+    eta: 'Coming Q1 2027'
+  },
+  {
+    icon: 'groups',
+    gradient: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
+    glow: 'rgba(14, 165, 233, 0.3)',
+    label: 'Study Groups',
+    tag: 'Social',
+    tagColor: '#0ea5e9',
+    desc: 'Create or join private study rooms with your class batch. Share notes, quiz each other live, and tackle past papers together with real-time collaborative annotations.',
+    eta: 'Coming Q1 2027'
+  },
+  {
+    icon: 'auto_graph',
+    gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    glow: 'rgba(16, 185, 129, 0.3)',
+    label: 'Smart Weak-Point Radar',
+    tag: 'Analytics',
+    tagColor: '#10b981',
+    desc: "Auto-detects your shakiest topics from quiz history and generates a targeted 7-day study schedule — so you spend zero time guessing what to revise.",
+    eta: 'Coming Q2 2027'
+  },
+  {
+    icon: 'model_training',
+    gradient: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
+    glow: 'rgba(245, 158, 11, 0.3)',
+    label: 'Mock Exam Simulator',
+    tag: 'Exams',
+    tagColor: '#f59e0b',
+    desc: 'Full 3-hour timed midterm & terminal simulations with official COMSATS marking schemes. Get auto-graded, see your predicted grade, and compare with the class.',
+    eta: 'Coming Q2 2027'
+  },
+  {
+    icon: 'notifications_active',
+    gradient: 'linear-gradient(135deg, #14b8a6 0%, #2563eb 100%)',
+    glow: 'rgba(20, 184, 166, 0.3)',
+    label: 'Exam Countdown Alerts',
+    tag: 'Reminders',
+    tagColor: '#14b8a6',
+    desc: 'Set your COMSATS exam dates and receive smart push / WhatsApp reminders with daily revision tasks, so you never miss a beat in the final week.',
+    eta: 'Coming Q3 2027'
+  }
+];
+
+function ComingSoonBanner() {
+  return (
+    <motion.section
+      aria-label="Coming Soon Features"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+      style={{
+        maxWidth: '64rem',
+        margin: '4rem auto 1.5rem',
+        padding: '0 0.5rem'
+      }}
+    >
+      {/* Section header */}
+      <div style={{ textAlign: 'center', marginBottom: '2.25rem' }}>
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.12))',
+            border: '1px solid rgba(99,102,241,0.25)',
+            borderRadius: '9999px',
+            padding: '0.35rem 1rem',
+            fontSize: '0.75rem',
+            fontWeight: 800,
+            color: '#6366f1',
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            marginBottom: '0.875rem'
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '15px' }} aria-hidden="true">rocket_launch</span>
+          What's Coming Next
+        </div>
+        <h2
+          style={{
+            fontSize: 'clamp(1.5rem, 3vw, 2rem)',
+            fontWeight: 900,
+            color: 'var(--text)',
+            letterSpacing: '-0.025em',
+            marginBottom: '0.5rem'
+          }}
+        >
+          Big features are on the way 🚀
+        </h2>
+        <p style={{ fontSize: '0.9375rem', color: 'var(--text-subtle)', maxWidth: '32rem', margin: '0 auto' }}>
+          We're building the most powerful exam-prep platform ever made for COMSATS students. Here's a sneak peek.
+        </p>
+      </div>
+
+      {/* Feature cards grid */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
+          gap: '1.125rem'
+        }}
+      >
+        {COMING_SOON_FEATURES.map((f, i) => (
+          <motion.div
+            key={f.label}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: i * 0.07, ease: 'easeOut' }}
+            style={{
+              position: 'relative',
+              background: 'var(--surface)',
+              borderRadius: 'var(--radius-xl)',
+              border: '1px solid var(--border)',
+              padding: '1.5rem',
+              overflow: 'hidden',
+              boxShadow: `0 4px 24px ${f.glow}, var(--shadow-1)`
+            }}
+          >
+            {/* Subtle glow blob behind icon */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                top: '-30px',
+                right: '-20px',
+                width: '120px',
+                height: '120px',
+                background: `radial-gradient(circle, ${f.glow} 0%, transparent 70%)`,
+                pointerEvents: 'none'
+              }}
+            />
+
+            {/* Top row: icon + COMING SOON badge */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <div
+                style={{
+                  width: '46px',
+                  height: '46px',
+                  borderRadius: 'var(--radius-md)',
+                  background: f.gradient,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  boxShadow: `0 4px 12px ${f.glow}`
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '22px', color: '#fff' }} aria-hidden="true">
+                  {f.icon}
+                </span>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem' }}>
+                {/* Category tag */}
+                <span
+                  style={{
+                    fontSize: '0.65rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    color: f.tagColor,
+                    background: `${f.tagColor}18`,
+                    border: `1px solid ${f.tagColor}40`,
+                    borderRadius: '9999px',
+                    padding: '0.2rem 0.55rem'
+                  }}
+                >
+                  {f.tag}
+                </span>
+                {/* Coming soon pill */}
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    fontSize: '0.65rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                    color: '#94a3b8',
+                    background: 'var(--surface-3)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '9999px',
+                    padding: '0.2rem 0.55rem'
+                  }}
+                >
+                  <span
+                    style={{
+                      width: '6px',
+                      height: '6px',
+                      borderRadius: '50%',
+                      background: '#f59e0b',
+                      animation: 'pulse 2s infinite',
+                      flexShrink: 0
+                    }}
+                  />
+                  Coming Soon
+                </span>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h3
+              style={{
+                fontSize: '1rem',
+                fontWeight: 800,
+                color: 'var(--text)',
+                marginBottom: '0.4rem',
+                letterSpacing: '-0.01em'
+              }}
+            >
+              {f.label}
+            </h3>
+
+            {/* Description */}
+            <p
+              style={{
+                fontSize: '0.8125rem',
+                color: 'var(--text-subtle)',
+                lineHeight: 1.65,
+                marginBottom: '1rem'
+              }}
+            >
+              {f.desc}
+            </p>
+
+            {/* ETA footer */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                color: '#94a3b8',
+                borderTop: '1px solid var(--border)',
+                paddingTop: '0.875rem'
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '14px' }} aria-hidden="true">schedule</span>
+              {f.eta}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Bottom CTA */}
+      <div
+        style={{
+          textAlign: 'center',
+          marginTop: '2rem',
+          padding: '1.5rem',
+          background: 'linear-gradient(135deg, rgba(30,58,138,0.06) 0%, rgba(99,102,241,0.06) 100%)',
+          borderRadius: 'var(--radius-xl)',
+          border: '1px dashed var(--border-strong)'
+        }}
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: '28px', color: 'var(--brand)', display: 'block', marginBottom: '0.5rem' }} aria-hidden="true">
+          campaign
+        </span>
+        <p style={{ fontWeight: 700, fontSize: '0.9375rem', color: 'var(--text)', marginBottom: '0.25rem' }}>
+          Want to shape what gets built next?
+        </p>
+        <p style={{ fontSize: '0.8125rem', color: 'var(--text-subtle)' }}>
+          Share your ideas with the student team — every voice counts.
+        </p>
+        <a
+          href="mailto:mushtaqahmedsaqi1234@gmail.com?subject=Feature%20Suggestion%20for%20COMSATSPrepHub"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            marginTop: '0.875rem',
+            padding: '0.6rem 1.4rem',
+            borderRadius: '9999px',
+            border: '1.5px solid var(--brand)',
+            background: 'transparent',
+            color: 'var(--brand)',
+            fontWeight: 700,
+            fontSize: '0.875rem',
+            textDecoration: 'none'
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '17px' }} aria-hidden="true">mail</span>
+          Suggest a Feature
+        </a>
+      </div>
+    </motion.section>
   );
 }

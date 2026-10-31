@@ -4,7 +4,7 @@ const NOTES_KEY = 'pph_paper_notes';
 const FLASHCARDS_KEY = 'pph_flashcards_srs';
 const DAILY_KEY = 'pph_daily_challenge';
 const EXAMS_KEY = 'pph_exam_countdowns';
-constPREFS_KEY = 'pph_student_prefs';
+const PREFS_KEY = 'pph_student_prefs';
 const SUBMISSIONS_KEY = 'pph_moderation_queue';
 const GPA_HISTORY_KEY = 'pph_gpa_semesters';
 
