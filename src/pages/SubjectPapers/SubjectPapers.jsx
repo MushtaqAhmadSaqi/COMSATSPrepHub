@@ -174,7 +174,7 @@ export default function SubjectPapers({
           padding: '1.125rem',
           marginBottom: '1.5rem',
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(140px, 100%), 1fr))',
           gap: '0.75rem',
           alignItems: 'end'
         }}
@@ -344,82 +344,70 @@ export default function SubjectPapers({
                 <div
                   key={paper.id}
                   className="paper-item-card"
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+                  onClick={() => onViewPaper(paper)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onViewPaper(paper);
+                    }
+                  }}
+                  aria-label={`View ${paper.title}`}
                 >
+                  <div className="paper-item-icon" aria-hidden="true">
+                    <span className="material-symbols-outlined">description</span>
+                  </div>
+
+                  <div className="paper-item-copy">
+                    <span className="paper-title">{paper.title}</span>
+
+                    <div className="paper-item-meta">
+                      <span className="paper-badge">{paper.term || 'Exam'}</span>
+
+                      {paper.year && (
+                        <span className="paper-meta-detail">
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            calendar_month
+                          </span>
+                          {paper.year}
+                        </span>
+                      )}
+
+                      {paper.semester && (
+                        <span className="paper-meta-detail">{paper.semester}</span>
+                      )}
+
+                      {paper.totalMarks && (
+                        <span className="paper-meta-detail">{paper.totalMarks} Marks</span>
+                      )}
+                    </div>
+                  </div>
+
                   <button
                     type="button"
-                    onClick={() => onViewPaper(paper)}
-                    aria-label={`View ${paper.title}`}
-                    style={{
-                      flex: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1rem',
-                      background: 'none',
-                      border: 'none',
-                      padding: 0,
-                      textAlign: 'left',
-                      color: 'inherit',
-                      minWidth: 0
+                    className="btn-view-paper"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onViewPaper(paper);
                     }}
+                    aria-label={`Open past paper ${paper.title}`}
                   >
-                    <span className="paper-item-icon" aria-hidden="true">
-                      <span className="material-symbols-outlined">description</span>
-                    </span>
-
-                    <span className="paper-item-copy" style={{ flex: 1, minWidth: 0 }}>
-                      <span className="paper-title">{paper.title}</span>
-
-                      <span className="paper-item-meta">
-                        <span className="paper-badge">{paper.term || 'Exam'}</span>
-
-                        {paper.year && (
-                          <span className="paper-meta-detail">
-                            <span className="material-symbols-outlined" aria-hidden="true">
-                              calendar_month
-                            </span>
-                            {paper.year}
-                          </span>
-                        )}
-
-                        {paper.semester && (
-                          <span className="paper-meta-detail">{paper.semester}</span>
-                        )}
-
-                        {paper.totalMarks && (
-                          <span className="paper-meta-detail">{paper.totalMarks} Marks</span>
-                        )}
-                      </span>
-                    </span>
-
-                    <span className="btn-view-paper">
-                      View paper
-                      <span className="material-symbols-outlined" aria-hidden="true">
-                        arrow_forward
-                      </span>
+                    <span>View paper</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      arrow_forward
                     </span>
                   </button>
 
                   <button
                     type="button"
+                    className={`btn-bookmark-paper ${bookmarked ? 'is-bookmarked' : ''}`}
                     onClick={(e) => handleToggleBookmark(e, paper)}
                     aria-label={bookmarked ? `Remove ${paper.title} from bookmarks` : `Bookmark ${paper.title}`}
                     aria-pressed={bookmarked}
                     title={bookmarked ? 'Bookmarked' : 'Save paper'}
-                    style={{
-                      width: '44px',
-                      height: '44px',
-                      borderRadius: '50%',
-                      border: '1px solid var(--border)',
-                      background: bookmarked ? 'var(--brand-soft)' : 'var(--surface-2)',
-                      color: bookmarked ? 'var(--brand)' : 'var(--text-subtle)',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }} aria-hidden="true">
+                    <span className="material-symbols-outlined" aria-hidden="true">
                       {bookmarked ? 'bookmark_added' : 'bookmark_add'}
                     </span>
                   </button>

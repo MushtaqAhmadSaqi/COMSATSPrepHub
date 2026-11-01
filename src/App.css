@@ -4,6 +4,8 @@
   min-height: 100vh;
   position: relative;
   width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Decorative animated background mesh */

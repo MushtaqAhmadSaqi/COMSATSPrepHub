@@ -285,7 +285,7 @@ html.dark .subject-code {
 /* ─── Mobile Responsiveness (Full Width Edge-to-Edge) ───────────── */
 @media (max-width: 640px) {
   .subjects-container {
-    padding: 0.75rem 0.375rem 6.5rem 0.375rem;
+    padding: 1rem 0.875rem 6.5rem 0.875rem;
   }
 
   .subjects-header {

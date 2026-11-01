@@ -2,15 +2,18 @@
 .home-page-wrapper {
   animation: fadeInUp 0.5s var(--ease) both;
   width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 /* ─── Hero Section ──────────────────────────────────────────────── */
 .home-hero-section {
   position: relative;
   overflow: hidden;
-  padding: 2.5rem 1rem 3rem;
+  padding: 2rem 0.875rem 2.5rem;
   text-align: center;
   width: 100%;
+  box-sizing: border-box;
 }
 
 @media (min-width: 640px) {
@@ -243,50 +246,70 @@ html.dark .home-badge-pill {
 /* ─── Features Grid ─────────────────────────────────────────────── */
 .home-features-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.875rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  width: 100%;
   max-width: 60rem;
-  margin: 2.5rem auto 0;
+  margin: 2rem auto 0;
   padding: 0;
+  box-sizing: border-box;
   animation: fadeInUp 0.55s 0.3s var(--ease) both;
 }
 
 @media (max-width: 360px) {
   .home-features-grid {
     grid-template-columns: 1fr;
+    gap: 0.625rem;
   }
 }
 
 @media (min-width: 640px) {
   .home-features-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.25rem;
+    margin-top: 2.5rem;
   }
 }
 
 @media (min-width: 900px) {
   .home-features-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
-.home-feature-card {
+.home-feature-card,
+.spotlight-card {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   background: var(--surface);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 1.25rem 0.875rem;
+  padding: 1.125rem 0.625rem;
   text-align: center;
   box-shadow: var(--shadow-1);
+  overflow: hidden;
   transition: all 0.3s var(--ease-spring);
 }
 
+@media (min-width: 480px) {
+  .home-feature-card,
+  .spotlight-card {
+    padding: 1.25rem 0.875rem;
+  }
+}
+
 @media (min-width: 640px) {
-  .home-feature-card {
+  .home-feature-card,
+  .spotlight-card {
     padding: 1.5rem;
   }
 }
 
-.home-feature-card:hover {
+.home-feature-card:hover,
+.spotlight-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-3);
   border-color: rgba(14, 165, 233, 0.3);
@@ -299,9 +322,10 @@ html.dark .home-badge-pill {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 0.75rem;
+  margin: 0 auto 0.625rem;
   background: linear-gradient(135deg, var(--brand-soft), var(--brand-soft-2));
   color: var(--brand);
+  flex-shrink: 0;
 }
 
 @media (min-width: 640px) {
@@ -313,10 +337,19 @@ html.dark .home-badge-pill {
 }
 
 .home-feature-title {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 800;
   color: var(--text);
   margin-bottom: 0.25rem;
+  overflow-wrap: break-word;
+  word-break: normal;
+  line-height: 1.35;
+}
+
+@media (min-width: 480px) {
+  .home-feature-title {
+    font-size: 0.875rem;
+  }
 }
 
 @media (min-width: 640px) {
@@ -327,9 +360,19 @@ html.dark .home-badge-pill {
 }
 
 .home-feature-desc {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: var(--text-subtle);
-  line-height: 1.45;
+  line-height: 1.4;
+  overflow-wrap: break-word;
+  word-break: normal;
+  margin: 0;
+}
+
+@media (min-width: 480px) {
+  .home-feature-desc {
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
 }
 
 @media (min-width: 640px) {

@@ -40,29 +40,28 @@ function SpotlightCard({ children, className = '', delay = 0, onClick, ariaLabel
   const cardRef = useRef(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [magneticOffset, setMagneticOffset] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseMove = (e) => {
     if (!cardRef.current) return;
+    if (typeof window !== 'undefined' && (
+      window.matchMedia('(hover: none)').matches ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    )) {
+      return;
+    }
     const rect = cardRef.current.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
     setMousePosition({ x: mouseX, y: mouseY });
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setMagneticOffset({ x: 0, y: 0 });
-      return;
-    }
-
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    const dx = Math.max(-6, Math.min(6, ((mouseX - centerX) / centerX) * 6));
-    const dy = Math.max(-6, Math.min(6, ((mouseY - centerY) / centerY) * 6));
+    const dx = Math.max(-4, Math.min(4, ((mouseX - centerX) / centerX) * 4));
+    const dy = Math.max(-4, Math.min(4, ((mouseY - centerY) / centerY) * 4));
     setMagneticOffset({ x: dx, y: dy });
   };
 
   const handleMouseLeave = () => {
-    setIsHovered(false);
     setMagneticOffset({ x: 0, y: 0 });
   };
 
@@ -73,22 +72,21 @@ function SpotlightCard({ children, className = '', delay = 0, onClick, ariaLabel
       className={`spotlight-card ${className}`}
       onClick={onClick}
       aria-label={ariaLabel}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.4, delay, ease: 'easeOut' }}
+      transition={{ duration: 0.35, delay, ease: 'easeOut' }}
       onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
+      animate={{
+        x: magneticOffset.x,
+        y: magneticOffset.y
+      }}
       style={{
         '--mouse-x': `${mousePosition.x}px`,
         '--mouse-y': `${mousePosition.y}px`,
-        transform: `translate3d(${magneticOffset.x}px, ${magneticOffset.y}px, 0)`,
         cursor: 'pointer',
-        fontFamily: 'inherit',
-        transition: isHovered
-          ? 'transform 150ms var(--ease), box-shadow 0.3s var(--ease-spring)'
-          : 'transform 300ms var(--ease), box-shadow 0.3s var(--ease-spring)'
+        fontFamily: 'inherit'
       }}
     >
       {children}
@@ -441,7 +439,7 @@ export default function Home({
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))',
                 gap: '0.875rem'
               }}
             >
@@ -517,7 +515,7 @@ export default function Home({
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))',
               gap: '1.25rem'
             }}
           >
@@ -677,7 +675,7 @@ function ComingSoonBanner() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
           gap: '1.125rem'
         }}
       >
