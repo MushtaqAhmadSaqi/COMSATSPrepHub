@@ -17,38 +17,6 @@ import Modal from '../../components/ui/Modal';
 import { SkeletonListItem } from '../../components/ui/Skeleton';
 import './PaperView.css';
 
-/* ── Topic-frequency insights helper ───────────────────────── */
-function getTopicFrequencyInsights(subjectCode = '', subjectName = '') {
-  const key = `${subjectCode} ${subjectName}`.toLowerCase();
-  if (key.includes('csc211') || key.includes('data structure')) {
-    return [
-      { topic: 'AVL & Binary Search Trees', freq: '92% of past papers' },
-      { topic: 'Graph Traversal (BFS/DFS & Dijkstra)', freq: '85% of past papers' },
-      { topic: 'Time Complexity & Recurrence Relations', freq: '80% of past papers' },
-      { topic: 'Linked List Pointer Manipulation', freq: '75% of past papers' }
-    ];
-  }
-  if (key.includes('csc371') || key.includes('database')) {
-    return [
-      { topic: 'Normalization (1NF, 2NF, 3NF, BCNF)', freq: '95% of past papers' },
-      { topic: 'SQL Joins, GROUP BY & HAVING', freq: '90% of past papers' },
-      { topic: 'ACID Transactions & Concurrency', freq: '78% of past papers' }
-    ];
-  }
-  if (key.includes('mth104') || key.includes('calculus')) {
-    return [
-      { topic: "L'Hôpital's Rule & Limits", freq: '90% of past papers' },
-      { topic: 'Definite Integrals & Area Under Curve', freq: '88% of past papers' },
-      { topic: 'Maxima / Minima & Optimization', freq: '82% of past papers' }
-    ];
-  }
-  return [
-    { topic: 'Core Conceptual Definitions & Comparisons', freq: '90% of past papers' },
-    { topic: 'Applied Problem Solving & Dry Runs', freq: '85% of past papers' },
-    { topic: 'Scenario-Based Design & Edge Cases', freq: '72% of past papers' }
-  ];
-}
-
 /* ── Question text renderer ─────────────────────────────── */
 
 function QuestionText({ text }) {
@@ -601,58 +569,6 @@ export default function PaperView({
         </section>
       )}
 
-      {/* Topic-Frequency Insights Across Years */}
-      <section
-        aria-label="Topic frequency insights across years"
-        style={{
-          background: 'var(--surface)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '1rem 1.25rem',
-          marginBottom: '1.5rem'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.65rem' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            📊 Topic-Frequency Insights Across Past Years ({paper.subjectCode || 'Course'})
-          </span>
-          <button
-            type="button"
-            onClick={handleShareWhatsApp}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--brand)',
-              fontSize: '0.8125rem',
-              fontWeight: 700,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.25rem'
-            }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">share</span>
-            Share on WhatsApp
-          </button>
-        </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-          {topicInsights.map((ins) => (
-            <span
-              key={ins.topic}
-              style={{
-                fontSize: '0.75rem',
-                padding: '0.35rem 0.75rem',
-                borderRadius: '9999px',
-                background: 'var(--surface-2)',
-                border: '1px solid var(--border)',
-                color: 'var(--text)'
-              }}
-            >
-              <strong>{ins.topic}</strong> · <span style={{ color: 'var(--brand)' }}>{ins.freq}</span>
-            </span>
-          ))}
-        </div>
-      </section>
-
       {/* Exam sheet */}
       <div className="paperview-exam-sheet" style={{ fontSize: `${zoomScale}rem` }}>
         <div className="paperview-sheet-header">
@@ -673,6 +589,11 @@ export default function PaperView({
                   ? ` (${paper.subjectCode})`
                   : ''}
               </span>
+            </div>
+
+            <div>
+              <strong>Teacher / Instructor</strong>
+              <span>{paper.instructorName || paper.teacher || 'COMSATS Faculty'}</span>
             </div>
 
             <div>

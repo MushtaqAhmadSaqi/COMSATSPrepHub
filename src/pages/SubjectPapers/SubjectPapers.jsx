@@ -28,6 +28,7 @@ export default function SubjectPapers({
   const [examFilter, setExamFilter] = useState('All');
   const [semesterFilter, setSemesterFilter] = useState('All');
   const [yearFilter, setYearFilter] = useState('All');
+  const [teacherFilter, setTeacherFilter] = useState('All');
   const [sortBy, setSortBy] = useState('newest');
   const [searchText, setSearchText] = useState('');
   const [visibleCount, setVisibleCount] = useState(8);
@@ -85,6 +86,13 @@ export default function SubjectPapers({
     return ['All', ...years];
   }, [papers]);
 
+  const availableTeachers = useMemo(() => {
+    const teachers = Array.from(
+      new Set(papers.map((p) => String(p.instructorName || p.teacher || '')).filter(Boolean))
+    ).sort();
+    return ['All', ...teachers];
+  }, [papers]);
+
   const filteredPapers = useMemo(() => {
     const q = searchText.trim().toLowerCase();
     const list = papers.filter((paper) => {
@@ -92,6 +100,7 @@ export default function SubjectPapers({
       const sem = String(paper.semester || '').toLowerCase();
       const yr = String(paper.year || '');
       const title = String(paper.title || '').toLowerCase();
+      const teacher = String(paper.instructorName || paper.teacher || '').toLowerCase();
 
       if (examFilter !== 'All' && !term.includes(examFilter.toLowerCase())) {
         return false;
@@ -102,7 +111,10 @@ export default function SubjectPapers({
       if (yearFilter !== 'All' && yr !== yearFilter) {
         return false;
       }
-      if (q && !title.includes(q) && !term.includes(q) && !sem.includes(q)) {
+      if (teacherFilter !== 'All' && teacher !== teacherFilter.toLowerCase()) {
+        return false;
+      }
+      if (q && !title.includes(q) && !term.includes(q) && !sem.includes(q) && !teacher.includes(q)) {
         return false;
       }
       return true;
@@ -113,7 +125,7 @@ export default function SubjectPapers({
       if (sortBy === 'title') return String(a.title || '').localeCompare(String(b.title || ''));
       return Number(b.year || 0) - Number(a.year || 0);
     });
-  }, [papers, examFilter, semesterFilter, yearFilter, sortBy, searchText]);
+  }, [papers, examFilter, semesterFilter, yearFilter, teacherFilter, sortBy, searchText]);
 
   const visiblePapers = filteredPapers.slice(0, visibleCount);
 
@@ -188,7 +200,7 @@ export default function SubjectPapers({
             type="search"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            placeholder="e.g. Spring 2024…"
+            placeholder="Search by exam, teacher (e.g. Dr. Naveed), or year…"
             style={{
               width: '100%',
               minHeight: '42px',
@@ -277,6 +289,33 @@ export default function SubjectPapers({
           </select>
         </div>
 
+        {availableTeachers.length > 2 && (
+          <div>
+            <label htmlFor="paper-teacher-filter" style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-subtle)', marginBottom: '0.25rem' }}>
+              Teacher / Instructor
+            </label>
+            <select
+              id="paper-teacher-filter"
+              value={teacherFilter}
+              onChange={(e) => setTeacherFilter(e.target.value)}
+              style={{
+                width: '100%',
+                minHeight: '42px',
+                padding: '0.5rem 0.75rem',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border-strong)',
+                background: 'var(--surface-2)',
+                color: 'var(--text)',
+                fontSize: '0.875rem'
+              }}
+            >
+              {availableTeachers.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div>
           <label htmlFor="paper-sort-select" style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-subtle)', marginBottom: '0.25rem' }}>
             Sort By
@@ -364,6 +403,15 @@ export default function SubjectPapers({
 
                     <div className="paper-item-meta">
                       <span className="paper-badge">{paper.term || 'Exam'}</span>
+
+                      {(paper.instructorName || paper.teacher) && (
+                        <span className="paper-meta-detail" title={`Instructor: ${paper.instructorName || paper.teacher}`}>
+                          <span className="material-symbols-outlined" aria-hidden="true">
+                            person
+                          </span>
+                          {paper.instructorName || paper.teacher}
+                        </span>
+                      )}
 
                       {paper.year && (
                         <span className="paper-meta-detail">

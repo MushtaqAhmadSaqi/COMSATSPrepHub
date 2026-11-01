@@ -204,7 +204,7 @@ export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName
       subjectCode: item.subject_code || subjectCode || '',
       subjectName: item.subject_name || subjectName || '',
       totalMarks: item.total_marks || null,
-      instructorName: item.instructor_name || null,
+      instructorName: item.instructor_name || item.instructor || item.teacher_name || item.teacher || item.faculty || null,
       createdAt: item.created_at || null
     }));
 

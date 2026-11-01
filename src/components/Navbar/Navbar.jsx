@@ -123,10 +123,9 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={onToggleLanguage}
-                className="icon-circle-btn"
+                className="icon-circle-btn lang-toggle-btn"
                 aria-label={lang === 'ur' ? 'Switch explanations to English' : 'Switch explanations to Urdu'}
                 title={lang === 'ur' ? 'Language: اردو (Click for EN)' : 'Language: EN (Click for اردو)'}
-                style={{ fontSize: '0.7rem', fontWeight: 800, padding: '0 0.5rem', width: 'auto', minWidth: '2.25rem' }}
               >
                 {lang === 'ur' ? 'اردو' : 'EN'}
               </button>
@@ -138,6 +137,7 @@ export default function Navbar({
                 className="icon-circle-btn"
                 aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
                 aria-pressed={isDark}
+                title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 <span className="material-symbols-outlined" aria-hidden="true">
                   {isDark ? 'light_mode' : 'dark_mode'}
@@ -151,9 +151,10 @@ export default function Navbar({
                   onClick={() => onNavigate('dashboard')}
                   className="signin-gradient-btn btn-shimmer"
                   aria-label="Go to student dashboard"
+                  title={firstName || 'Dashboard'}
                 >
                   <span className="material-symbols-outlined" aria-hidden="true">account_circle</span>
-                  <span>{firstName || 'Dashboard'}</span>
+                  <span className="signin-btn-text">{firstName || 'Dashboard'}</span>
                 </button>
               ) : (
                 <button
@@ -161,9 +162,10 @@ export default function Navbar({
                   onClick={onOpenAuth}
                   className="signin-gradient-btn btn-shimmer"
                   aria-label="Sign in to your account"
+                  title="Sign In"
                 >
                   <span className="material-symbols-outlined" aria-hidden="true">person</span>
-                  <span>Sign In</span>
+                  <span className="signin-btn-text">Sign In</span>
                 </button>
               )}
             </div>
