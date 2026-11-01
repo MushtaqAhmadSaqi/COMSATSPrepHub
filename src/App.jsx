@@ -43,7 +43,8 @@ const ROUTE_ALIASES = {
   'ai-quiz': 'ai-quiz-generator',
   'daily-challenge': 'study-hub',
   flashcards: 'study-hub',
-  'study-helper': 'study-hub'
+  'study-helper': 'study-hub',
+  team: 'about'
 };
 
 function normalizeRoute(path = 'home') {
@@ -275,6 +276,7 @@ export default function App() {
           />
         );
       case 'about':
+      case 'team':
         return <About />;
       case 'subjects':
         return <Subjects onSelectSubject={handleSelectSubject} />;

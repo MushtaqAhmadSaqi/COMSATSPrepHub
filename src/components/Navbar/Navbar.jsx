@@ -5,17 +5,17 @@ import './Navbar.css';
 const desktopNavItems = [
   { id: 'home',      label: 'Home',      icon: 'home' },
   { id: 'subjects',  label: 'Papers',    icon: 'menu_book' },
-  { id: 'quiz',      label: 'Quizzes',   icon: 'quiz' },
   { id: 'ai-quiz-generator', label: 'AI Quiz', icon: 'auto_awesome' },
-  { id: 'gpa',       label: 'GPA Calc',  icon: 'calculate' }
+  { id: 'gpa',       label: 'GPA Calc',  icon: 'calculate' },
+  { id: 'about',     label: 'Team',      icon: 'groups' }
 ];
 
 // Mobile bottom navigation bar — exact 5 student tabs requested: Papers, Quizzes, AI Quiz, GPA, Profile
 const mobileNavItems = [
   { id: 'subjects',          label: 'Papers',   icon: 'menu_book' },
-  { id: 'quiz',              label: 'Quizzes',  icon: 'quiz' },
   { id: 'ai-quiz-generator', label: 'AI Quiz',  icon: 'auto_awesome' },
   { id: 'gpa',               label: 'GPA',      icon: 'calculate' },
+  { id: 'about',             label: 'Team',     icon: 'groups' },
   { id: 'dashboard',         label: 'Profile',  icon: 'person' }
 ];
 
@@ -54,6 +54,9 @@ export default function Navbar({
       return true;
     }
     if (itemId === 'dashboard' && (activePath === 'dashboard' || activePath === 'account')) {
+      return true;
+    }
+    if (itemId === 'about' && (activePath === 'about' || activePath === 'team')) {
       return true;
     }
     return activePath === itemId;
