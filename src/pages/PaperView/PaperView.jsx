@@ -224,11 +224,6 @@ export default function PaperView({
   const safeFileUrl = isSafeHttpUrl(paper?.file_url) ? paper.file_url.trim() : null;
   const requiresAuthentication = authReady && !user;
 
-  const topicInsights = useMemo(
-    () => getTopicFrequencyInsights(paper?.subjectCode, paper?.subjectName),
-    [paper?.subjectCode, paper?.subjectName]
-  );
-
   useEffect(() => {
     setBookmarked(isPaperBookmarked(paperKey));
     setNoteText(getPaperNote(paperKey));
