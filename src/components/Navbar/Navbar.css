@@ -169,19 +169,6 @@ html.dark .desktop-nav-links {
   font-weight: 800;
 }
 
-/* Active nav item: animated gradient underline dot */
-.nav-link-btn.active::after {
-  content: '';
-  position: absolute;
-  bottom: 5px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #0ea5e9, #2563eb);
-  animation: scaleIn 0.25s var(--ease-spring) both;
-}
 
 html.dark .nav-link-btn.active {
   background: rgba(37, 99, 235, 0.25);
