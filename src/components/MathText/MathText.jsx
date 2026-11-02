@@ -23,7 +23,12 @@ if (typeof window !== 'undefined') {
  */
 function renderKaTeX(formula, isDisplay = false) {
   try {
-    return katex.renderToString(formula.trim(), {
+    const normalizedFormula = formula
+      .trim()
+      // Some AI responses contain JSON-style double escaping in stored text.
+      .replace(/\\\\(?=[A-Za-z])/g, '\\');
+
+    return katex.renderToString(normalizedFormula, {
       displayMode: isDisplay,
       throwOnError: false,
       strict: false
@@ -123,7 +128,7 @@ function renderInlineWithMath(text, keyPrefix = '') {
     }
 
     const inlineParts = [];
-    const inlineRegex = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g;
+    const inlineRegex = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|\\textbf\{[^{}]*\}|\\textit\{[^{}]*\}|\\text\{[^{}]*\})/g;
     let textLast = 0;
     let tMatch;
 
@@ -144,6 +149,18 @@ function renderInlineWithMath(text, keyPrefix = '') {
             {tok.slice(2, -2)}
           </strong>
         );
+      } else if (tok.startsWith('\\textbf{')) {
+        inlineParts.push(
+          <strong key={`${k}-latex-bold-${tMatch.index}`} className="math-bold-text">
+            {tok.slice(8, -1)}
+          </strong>
+        );
+      } else if (tok.startsWith('\\textit{')) {
+        inlineParts.push(
+          <em key={`${k}-latex-italic-${tMatch.index}`}>{tok.slice(8, -1)}</em>
+        );
+      } else if (tok.startsWith('\\text{')) {
+        inlineParts.push(tok.slice(6, -1));
       } else {
         inlineParts.push(
           <em key={`${k}-em-${tMatch.index}`}>{tok.slice(1, -1)}</em>
@@ -418,6 +435,42 @@ export default function MathText({ text, className = '' }) {
         codeBuffer.codeLines.push(line);
         i++;
         continue;
+      }
+
+      // Collect multi-line display equations, especially piecewise functions.
+      if (trimmed.startsWith('$$') || trimmed.startsWith('\\[')) {
+        const delimiter = trimmed.startsWith('$$') ? '$$' : '\\[';
+        const closingDelimiter = delimiter === '$$' ? '$$' : '\\]';
+        const formulaLines = [trimmed.slice(delimiter.length)];
+        let foundClosingDelimiter = trimmed.slice(delimiter.length).includes(closingDelimiter);
+
+        while (!foundClosingDelimiter && i + 1 < lines.length) {
+          i++;
+          const nextLine = lines[i];
+          const closingIndex = nextLine.indexOf(closingDelimiter);
+          if (closingIndex >= 0) {
+            formulaLines.push(nextLine.slice(0, closingIndex));
+            foundClosingDelimiter = true;
+          } else {
+            formulaLines.push(nextLine);
+          }
+        }
+
+        if (foundClosingDelimiter) {
+          const formula = formulaLines.join('\n').replace(new RegExp(`${closingDelimiter.replace(/[\\$]/g, '\\$&')}\\s*$`), '');
+          flushList();
+          flushTable();
+          const html = renderKaTeX(formula, true);
+          elements.push(
+            <div
+              key={`math-disp-${i}`}
+              className="math-display-container"
+              dangerouslySetInnerHTML={{ __html: html || formula }}
+            />
+          );
+          i++;
+          continue;
+        }
       }
 
       // Check table lines starting with |
