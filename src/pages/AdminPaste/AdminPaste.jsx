@@ -7,6 +7,31 @@ import { DEFAULT_SUBJECTS } from '../../constants/subjects';
 import { useToast } from '../../utils/toast';
 import './AdminPaste.css';
 
+export const RLS_FIX_SQL = `-- 1. Ensure Row-Level Security is enabled
+ALTER TABLE past_papers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE questions ENABLE ROW LEVEL SECURITY;
+
+-- 2. Allow everyone to view (read) past papers and questions
+DROP POLICY IF EXISTS "Allow public read on past_papers" ON past_papers;
+CREATE POLICY "Allow public read on past_papers" ON past_papers FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow public read on questions" ON questions;
+CREATE POLICY "Allow public read on questions" ON questions FOR SELECT USING (true);
+
+-- 3. Allow inserting, updating, and deleting past papers
+DROP POLICY IF EXISTS "Allow write access on past_papers" ON past_papers;
+CREATE POLICY "Allow write access on past_papers" 
+ON past_papers FOR ALL 
+USING (true) 
+WITH CHECK (true);
+
+-- 4. Allow inserting, updating, and deleting questions
+DROP POLICY IF EXISTS "Allow write access on questions" ON questions;
+CREATE POLICY "Allow write access on questions" 
+ON questions FOR ALL 
+USING (true) 
+WITH CHECK (true);`;
+
 export const AI_MASTER_PROMPT = `You are an expert COMSATS University examination paper transcriber and academic solution specialist.
 I will attach or provide raw content (images, scan, PDF, or text) of a COMSATS examination paper.
 
@@ -199,6 +224,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
   const [errorMsg, setErrorMsg] = useState('');
   const [isPromptExpanded, setIsPromptExpanded] = useState(false);
   const [hasCopiedPrompt, setHasCopiedPrompt] = useState(false);
+  const [hasCopiedSql, setHasCopiedSql] = useState(false);
 
   // Duplicate detection state
   const [checkingDuplicates, setCheckingDuplicates] = useState(false);
@@ -225,6 +251,17 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
     } catch {
       toast.error('Unable to copy to clipboard automatically. Please copy the text below.');
       setIsPromptExpanded(true);
+    }
+  };
+
+  const handleCopySql = async () => {
+    try {
+      await navigator.clipboard.writeText(RLS_FIX_SQL);
+      setHasCopiedSql(true);
+      toast.success('SQL Script copied to clipboard! Paste it in Supabase SQL Editor and click Run.');
+      setTimeout(() => setHasCopiedSql(false), 4000);
+    } catch {
+      toast.error('Unable to copy to clipboard automatically.');
     }
   };
 
@@ -535,6 +572,13 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
     setErrorMsg('');
   };
 
+  const isRlsError = uploadError && (
+    uploadError.includes('Row Level Security') ||
+    uploadError.includes('row-level security') ||
+    uploadError.includes('RLS') ||
+    uploadError.includes('42501')
+  );
+
   return (
     <div className="admin-paste-container">
       <PageHeader
@@ -722,14 +766,61 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
         </div>
       )}
 
-      {/* Upload Error Banner */}
+      {/* Upload Error Banner / 1-Click RLS Fix Card */}
       {uploadError && (
-        <div className="admin-alert admin-alert-danger" role="alert">
-          <span className="material-symbols-outlined" aria-hidden="true">dangerous</span>
-          <div>
-            <strong>Database Upload Failed:</strong> {uploadError}
+        isRlsError ? (
+          <div className="admin-rls-error-card" role="alert">
+            <div className="rls-error-header">
+              <div className="rls-error-icon-wrap">
+                <span className="material-symbols-outlined rls-error-icon" aria-hidden="true">lock_reset</span>
+              </div>
+              <div className="rls-error-header-text">
+                <h3 className="rls-error-title">Supabase Blocked Upload (Row Level Security Policy)</h3>
+                <p className="rls-error-subtitle">
+                  By default, PostgreSQL blocks browser inserts until an RLS policy is added. 
+                  Run this quick 1-minute SQL script in your Supabase Dashboard to grant write permissions.
+                </p>
+              </div>
+            </div>
+
+            <div className="rls-steps-box">
+              <div className="rls-steps-title">3 Steps to Fix (Takes 30 seconds):</div>
+              <ol className="rls-steps-list">
+                <li>
+                  Open your <a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer" className="rls-link">Supabase Dashboard</a> and open your project.
+                </li>
+                <li>
+                  In the left sidebar, click <strong>SQL Editor</strong>, then click <strong>New Query</strong>.
+                </li>
+                <li>
+                  Copy the script below, paste it into the editor, and click <strong>Run</strong>.
+                </li>
+              </ol>
+
+              <div className="rls-action-buttons">
+                <button
+                  type="button"
+                  className={`btn-copy-prompt ${hasCopiedSql ? 'copied' : ''}`}
+                  onClick={handleCopySql}
+                >
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    {hasCopiedSql ? 'check_circle' : 'content_copy'}
+                  </span>
+                  {hasCopiedSql ? 'Copied SQL Script!' : 'Copy Supabase SQL Script'}
+                </button>
+              </div>
+
+              <pre className="rls-code-preview">{RLS_FIX_SQL}</pre>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="admin-alert admin-alert-danger" role="alert">
+            <span className="material-symbols-outlined" aria-hidden="true">dangerous</span>
+            <div>
+              <strong>Database Upload Failed:</strong> {uploadError}
+            </div>
+          </div>
+        )
       )}
 
       {/* Step 3: Exact Subject Page & PaperView Style Preview */}
