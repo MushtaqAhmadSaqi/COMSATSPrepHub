@@ -15,45 +15,13 @@ import { useToast } from '../../utils/toast';
 import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 import Modal from '../../components/ui/Modal';
 import { SkeletonListItem } from '../../components/ui/Skeleton';
+import MathText from '../../components/MathText/MathText';
 import './PaperView.css';
 
 /* ── Question text renderer ─────────────────────────────── */
 
 function QuestionText({ text }) {
-  const original = String(text ?? '').replace(/\r\n?/g, '\n');
-
-  const formatted = original.includes('```')
-    ? original
-    : original.replace(
-        /([^\n])[ \t]+(?=Task\s*[-–]?\s*\d+\s*:)/gi,
-        '$1\n\n'
-      );
-
-  const paragraphs = formatted
-    .split(/\n[ \t]*\n+/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-
-  return (
-    <div className="paperview-question-content">
-      {paragraphs.map((paragraph, index) => {
-        const task = paragraph.match(
-          /^(Task\s*[-–]?\s*\d+\s*:)\s*([\s\S]*)$/i
-        );
-
-        if (task) {
-          return (
-            <div className="paperview-task" key={index}>
-              <strong className="paperview-task-label">{task[1]}</strong>
-              <p>{task[2]}</p>
-            </div>
-          );
-        }
-
-        return <p key={index}>{paragraph}</p>;
-      })}
-    </div>
-  );
+  return <MathText text={text} className="paperview-question-content" />;
 }
 
 function getPartText(part) {
@@ -100,88 +68,7 @@ function renderInline(text) {
 }
 
 function MarkdownAnswer({ text }) {
-  const raw = String(text ?? '').replace(/\r\n?/g, '\n');
-  const lines = raw.split('\n');
-
-  const elements = [];
-  let i = 0;
-  let listBuffer = null;
-
-  const flushList = () => {
-    if (!listBuffer) return;
-    const Tag = listBuffer.type;
-    elements.push(
-      <Tag key={`list-${i}`} className="paperview-md-list">
-        {listBuffer.items}
-      </Tag>
-    );
-    listBuffer = null;
-  };
-
-  while (i < lines.length) {
-    const line = lines[i];
-
-    const heading = line.match(/^(#{1,4})\s+(.+)/);
-    if (heading) {
-      flushList();
-      const level = Math.min(heading[1].length, 4);
-      const Tag = `h${level}`;
-      elements.push(
-        <Tag key={i} className={`paperview-md-h${level}`}>
-          {renderInline(heading[2])}
-        </Tag>
-      );
-      i++;
-      continue;
-    }
-
-    if (/^[-*_]{3,}\s*$/.test(line)) {
-      flushList();
-      elements.push(<hr key={i} className="paperview-md-hr" />);
-      i++;
-      continue;
-    }
-
-    const ulItem = line.match(/^[\s]*[-*+]\s+(.*)/);
-    if (ulItem) {
-      if (!listBuffer || listBuffer.type !== 'ul') {
-        flushList();
-        listBuffer = { type: 'ul', items: [] };
-      }
-      listBuffer.items.push(<li key={i}>{renderInline(ulItem[1])}</li>);
-      i++;
-      continue;
-    }
-
-    const olItem = line.match(/^[\s]*\d+\.\s+(.*)/);
-    if (olItem) {
-      if (!listBuffer || listBuffer.type !== 'ol') {
-        flushList();
-        listBuffer = { type: 'ol', items: [] };
-      }
-      listBuffer.items.push(<li key={i}>{renderInline(olItem[1])}</li>);
-      i++;
-      continue;
-    }
-
-    if (line.trim() === '') {
-      flushList();
-      i++;
-      continue;
-    }
-
-    flushList();
-    elements.push(
-      <p key={i} className="paperview-md-p">
-        {renderInline(line)}
-      </p>
-    );
-    i++;
-  }
-
-  flushList();
-
-  return <div className="paperview-md-body">{elements}</div>;
+  return <MathText text={text} className="paperview-md-body" />;
 }
 
 /* ── Component ──────────────────────────────────────────── */

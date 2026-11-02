@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PageHeader from '../../components/PageHeader/PageHeader';
+import MathText from '../../components/MathText/MathText';
 import { supabase, isSupabaseConfigured } from '../../services/supabase';
 import { clearPapersCache } from '../../services/papersService';
 import { DEFAULT_SUBJECTS } from '../../constants/subjects';
@@ -16,8 +17,8 @@ Your task is to transcribe, structure, and provide model answers in the EXACT JS
 2. For every question, generate a comprehensive, high-scoring MODEL ANSWER tailored to COMSATS marking schemes. Include formulas, bullet points, algorithms, or code where applicable.
 3. Extract or specify realistic marks for each question (e.g., 5, 10, or 15 marks).
 4. Identify or infer the course details:
-   - "subject_code": Course code (e.g. "CSC211", "MTH262", "EEE241", "CSC102")
-   - "subject_name": Full title of the course (e.g. "Statistics and Probability Theory")
+   - "subject_code": Course code (e.g. "CSC211", "MTH262", "MTH104", "EEE241")
+   - "subject_name": Full title of the course
    - "title": Clean title (e.g. "MTH262 – Terminal Examination (Spring 2026)")
    - "term": Either "Terminal" or "Midterm"
    - "year": Integer year (e.g. 2026)
@@ -25,7 +26,15 @@ Your task is to transcribe, structure, and provide model answers in the EXACT JS
    - "total_marks": Sum of question marks (e.g. 50 or 25)
    - "instructor_name": "COMSATS Faculty"
 5. Assign a Course Learning Outcome tag to each question (e.g., "CLO-1", "CLO-2", "CLO-3", or topic name).
-6. OUTPUT ONLY VALID RAW JSON. Do NOT include markdown code blocks, backticks, or explanatory conversation.
+
+6. MATHEMATICAL & SCIENTIFIC NOTATION (CRITICAL FOR STUDENT READABILITY):
+   - Always format equations, formulas, integrals, fractions, piecewise functions, summations, and statistics using LaTeX notation.
+   - Use $ ... $ for inline math (e.g. "$\\bar{x} = \\frac{\\sum X}{n} = 1.37$", "$S_{xx} = 19.261$", "$P(80 \\le X \\le 120)$").
+   - Use $$ ... $$ for standalone/display equations and piecewise functions:
+     "$$f(x) = \\begin{cases} \\frac{20000}{(x + 100)^3} & x > 0 \\\\ 0, & \\text{elsewhere} \\end{cases}$$"
+   - In JSON strings, remember to double-escape backslashes (e.g., "\\\\frac", "\\\\sum", "\\\\begin{cases}", "\\\\approx").
+
+7. OUTPUT ONLY VALID RAW JSON. Do NOT include markdown code blocks, backticks, or explanatory conversation.
 
 ### EXACT JSON FORMAT:
 {
@@ -40,8 +49,8 @@ Your task is to transcribe, structure, and provide model answers in the EXACT JS
   "questions": [
     {
       "question_number": 1,
-      "question_text": "The probabilities are 0.4, 0.3, 0.2, and 0.1, respectively, that a delegate to a certain convention arrives by air, bus, automobile, or train. What is the probability that among 12 delegates randomly selected at this convention, 5 arrived by air, 3 arrived by bus, 2 arrived by automobile, and 2 arrived by train?",
-      "model_answer": "Step 1: Identify the Distribution\\nThis problem follows a Multinomial Distribution because there are k = 4 mutually exclusive categories with fixed probabilities across n = 12 independent trials.\\n\\nLet:\\n- x1 = 5, p1 = 0.4 (Air)\\n- x2 = 3, p2 = 0.3 (Bus)\\n- x3 = 2, p3 = 0.2 (Automobile)\\n- x4 = 2, p4 = 0.1 (Train)\\n\\nStep 2: Multinomial Formula\\nP = [ n! / (x1! * x2! * x3! * x4!) ] * (p1^x1) * (p2^x2) * (p3^x3) * (p4^x4)\\n\\nStep 3: Calculation\\nCoefficient = 12! / (5! * 3! * 2! * 2!) = 166,320\\nProduct = (0.4)^5 * (0.3)^3 * (0.2)^2 * (0.1)^2 = 1.10592 * 10^(-7)\\nP = 166,320 * (1.10592 * 10^(-7)) ≈ 0.0184 (or 1.84%)\\n\\nFinal Answer: The probability is approximately 0.0184.",
+      "question_text": "The shelf life, in days, for bottles of a certain prescribed medicine is a random variable having the density function:\\n$$f(x) = \\\\begin{cases} \\\\frac{20000}{(x + 100)^3} & x > 0 \\\\\\\\ 0, & \\\\text{elsewhere} \\\\end{cases}$$\\nFind the probability that a bottle of this medicine will have a shelf life of anywhere between 80 to 120 days.",
+      "model_answer": "Step 1: Set up the Definite Integral\\nTo find the probability $P(80 \\\\le X \\\\le 120)$, integrate $f(x)$:\\n$$P(80 \\\\le X \\\\le 120) = \\\\int_{80}^{120} \\\\frac{20000}{(x + 100)^3} \\\\, dx$$\\n\\nStep 2: Evaluate the Integral\\n$$= 20000 \\\\left[ -\\\\frac{1}{2(x + 100)^2} \\\\right]_{80}^{120}$$\\n$$= -10000 \\\\left[ \\\\frac{1}{(220)^2} - \\\\frac{1}{(180)^2} \\\\right] \\\\approx 0.102$$\\n\\nFinal Answer: The probability is approximately $0.102$ (or 10.2%).",
       "marks": 7,
       "clo": "CLO-2"
     }
@@ -49,35 +58,21 @@ Your task is to transcribe, structure, and provide model answers in the EXACT JS
 }`;
 
 const SAMPLE_PAYLOAD = {
-  subject_code: 'CSC211',
-  subject_name: 'Data Structures & Algorithms',
-  title: 'CSC211 — Terminal Examination (Spring 2024)',
+  subject_code: 'MTH262',
+  subject_name: 'Statistics and Probability Theory',
+  title: 'MTH262 – Terminal Examination (Spring 2026)',
   term: 'Terminal',
-  year: 2024,
-  semester: 'Spring 2024',
+  year: 2026,
+  semester: 'Spring 2026',
   total_marks: 50,
   instructor_name: 'COMSATS Faculty',
   questions: [
     {
-      question_number: 1,
-      question_text: 'Explain the differences between AVL Tree and Red-Black Tree. Under what circumstances is an AVL tree preferred over a Red-Black tree?',
-      model_answer: 'AVL trees are more strictly balanced than Red-Black trees. The balance factor of each node in an AVL tree can only be -1, 0, or +1. Because of this strict balancing, AVL trees provide faster O(log n) lookups. In contrast, Red-Black trees require fewer rotations during insertions and deletions. Therefore, an AVL tree is preferred in lookup-intensive applications like database index search trees.',
-      marks: 10,
-      clo: 'CLO-2'
-    },
-    {
-      question_number: 2,
-      question_text: 'Write the algorithm to detect a cycle in a directed graph using Depth First Search (DFS).',
-      model_answer: '1. Initialize two boolean arrays: visited[] and inStack[] of size V, set all to false.\n2. For each unvisited vertex v:\n   a. Mark v as visited and inStack[v] = true.\n   b. For each adjacent vertex u of v:\n      - If u is not visited, recursively call isCyclic(u).\n      - If inStack[u] is true, a back-edge exists, cycle is detected.\n   c. Pop v from recursion stack (inStack[v] = false).\n3. If no cycle is found, return false.',
-      marks: 10,
-      clo: 'CLO-3'
-    },
-    {
-      question_number: 3,
-      question_text: 'What is open addressing in Hash Tables? Differentiate between Linear Probing, Quadratic Probing, and Double Hashing.',
-      model_answer: 'In Open Addressing, all elements are stored directly within the hash table array (no linked lists). When collision occurs, an alternative cell is probed:\n- Linear Probing: Uses h(k, i) = (h\'(k) + i) mod m. Suffers from primary clustering.\n- Quadratic Probing: Uses h(k, i) = (h\'(k) + c1*i + c2*i^2) mod m. Avoids primary clustering but causes secondary clustering.\n- Double Hashing: Uses h(k, i) = (h1(k) + i*h2(k)) mod m. Best uniform distribution among probing techniques.',
-      marks: 10,
-      clo: 'CLO-1'
+      "question_number": 1,
+      "question_text": "The shelf life, in days, for bottles of a certain prescribed medicine is a random variable having the density function:\n$$f(x) = \\begin{cases} \\frac{20000}{(x + 100)^3} & x > 0 \\\\ 0, & \\text{elsewhere} \\end{cases}$$\nFind the probability that a bottle of this medicine will have a shelf life of anywhere between 80 to 120 days.",
+      "model_answer": "Step 1: Set up the Definite Integral\nTo find the probability $P(80 \\le X \\le 120)$, integrate $f(x)$:\n$$P(80 \\le X \\le 120) = \\int_{80}^{120} \\frac{20000}{(x + 100)^3} \\, dx$$\n\nStep 2: Evaluate the Integral\n$$= 20000 \\left[ -\\frac{1}{2(x + 100)^2} \\right]_{80}^{120}$$\n$$= -10000 \\left[ \\frac{1}{(220)^2} - \\frac{1}{(180)^2} \\right] \\approx 0.102$$\n\nStep 3: Sample Statistics Summary\n- n = 10\n- x̄ = (∑X) / n = 13.7 / 10 = 1.37\n- ȳ = (∑Y) / n = 1282 / 10 = 128.2\n- Sxx = ∑X^2 - (∑X)^2 / n = 38.03 - (13.7)^2 / 10 = 19.261\n- Syy = ∑Y^2 - (∑Y)^2 / n = 164430 - (1282)^2 / 10 = 77.6\n- Sxy = ∑XY - (∑X * ∑Y) / n = 1788.2 - (13.7 * 1282) / 10 = 31.86\n\nFinal Answer: The probability is approximately 0.102 (or 10.2%).",
+      "marks": 7,
+      "clo": "CLO-2"
     }
   ]
 };
@@ -162,7 +157,7 @@ function normalizePapersPayload(rawData) {
   }
 
   return papers.map((p, pIdx) => {
-    const rawCode = String(p.subject_code || p.subjectCode || 'CSC211').toUpperCase().trim();
+    const rawCode = String(p.subject_code || p.subjectCode || 'MTH262').toUpperCase().trim();
     const catalogMatch = DEFAULT_SUBJECTS.find((s) => s.code.toUpperCase() === rawCode);
     const subjectName = String(p.subject_name || p.subjectName || catalogMatch?.name || rawCode).trim();
     const term = String(p.term || 'Terminal').trim();
@@ -194,24 +189,6 @@ function normalizePapersPayload(rawData) {
       }))
     };
   });
-}
-
-/**
- * Renders text paragraphs cleanly, respecting newline breaks.
- */
-function FormattedText({ text, className = '' }) {
-  if (!text) return null;
-  const lines = text.split(/\r?\n/);
-  return (
-    <div className={`formatted-body-text ${className}`}>
-      {lines.map((line, idx) => {
-        if (!line.trim()) {
-          return <div key={idx} className="line-break-spacer" />;
-        }
-        return <p key={idx} className="formatted-paragraph">{line}</p>;
-      })}
-    </div>
-  );
 }
 
 export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelectPaper }) {
@@ -256,7 +233,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
     setErrorMsg('');
     setUploadResults(null);
     setUploadError('');
-    toast.info('Loaded CSC211 sample paper JSON into editor.');
+    toast.info('Loaded MTH262 sample paper JSON with piecewise & stats formulas into editor.');
   };
 
   // Check Supabase for existing papers whenever parsed papers change
@@ -355,7 +332,6 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
         `Validated ${normalized.length} paper(s) with ${normalized.reduce((s, p) => s + p.questions.length, 0)} questions!`
       );
     } catch (err) {
-      // ONLY if text DOES NOT look like JSON at all (no { or [ at start), allow plain text fallback
       if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) {
         const blocks = trimmed
           .split(/\n\s*\n+/)
@@ -377,7 +353,6 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
         }
       }
 
-      // If it looks like JSON or parsing failed, show exact error without treating JSON as question text!
       setErrorMsg(`JSON Syntax Error: ${err.message}. Please check your JSON brackets, quotes, or trailing characters.`);
     }
   };
@@ -565,7 +540,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
       <PageHeader
         badge="Admin Workspace"
         title="AI Past Paper Ingestor"
-        subtitle="Extract questions and model answers with AI, validate the preview matching the subject page style, and sync directly to Supabase. Existing papers are automatically replaced; new papers are added."
+        subtitle="Extract questions, render textbook LaTeX math formulas, validate preview in subject page style, and sync directly to Supabase. Existing papers are automatically replaced; new papers are added."
       />
 
       {/* Top AI Master Prompt Banner */}
@@ -573,13 +548,13 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
         <div className="ai-prompt-helper-header">
           <div className="ai-prompt-helper-info">
             <div className="ai-prompt-tag">
-              <span className="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
-              AI Paper Prompt (ChatGPT / Claude / Gemini)
+              <span className="material-symbols-outlined" aria-hidden="true">functions</span>
+              AI LaTeX Math & Formula Enabled
             </div>
             <h3 className="ai-prompt-helper-title">Step 1: Get structured JSON from your AI</h3>
             <p className="ai-prompt-helper-desc">
               Copy this prompt, open ChatGPT or Claude, attach your exam paper images or PDF, and paste it. 
-              The AI will read every question, solve step-by-step model answers, and return valid JSON to paste below.
+              The AI will extract all questions, typeset piecewise formulas and statistics in KaTeX, and return clean JSON.
             </p>
           </div>
           <div className="ai-prompt-helper-actions">
@@ -621,17 +596,17 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
           <div>
             <h2 className="paste-card-title">Step 2: Paste AI Output & Inspect</h2>
             <p className="paste-card-subtitle">
-              Paste the AI-generated JSON below. LaTeX equations (\approx, \times, \frac), markdown backticks, and trailing commas are repaired automatically.
+              Paste the AI-generated JSON below. Piecewise equations, integrals, fractions, summations, and sample statistics are rendered with KaTeX.
             </p>
           </div>
           <button
             type="button"
             className="btn-load-sample"
             onClick={handleLoadSample}
-            title="Load sample CSC211 past paper JSON"
+            title="Load sample MTH262 past paper JSON with formulas"
           >
-            <span className="material-symbols-outlined" aria-hidden="true">bolt</span>
-            Load Sample JSON
+            <span className="material-symbols-outlined" aria-hidden="true">functions</span>
+            Load Math Sample JSON
           </button>
         </div>
 
@@ -770,7 +745,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                 Step 3: Review Live Appearance & Save to Supabase
               </h2>
               <p className="preview-subheading">
-                Below is the exact paper card and question layout that students will see on the subject page.
+                Below is the exact paper card and mathematical question layout that students will see on the subject page.
               </p>
             </div>
 
@@ -822,7 +797,6 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                     )}
                   </div>
 
-                  {/* The authentic .paper-item-card layout identical to SubjectPapers.jsx */}
                   <div className="paper-item-card-preview">
                     <div className="paper-item-icon" aria-hidden="true">
                       <span className="material-symbols-outlined">description</span>
@@ -881,13 +855,13 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                   </div>
                 )}
 
-                {/* 2. AUTHENTIC QUESTION LIST (PaperView Style) */}
+                {/* 2. AUTHENTIC QUESTION LIST (PaperView Style with MathText) */}
                 <div className="preview-questions-header">
                   <h3 className="preview-questions-title">
                     Extracted Exam Questions ({paper.questions.length})
                   </h3>
                   <span className="preview-questions-hint">
-                    Each question and step-by-step model answer is structured for students:
+                    Piecewise equations, integrals, and statistical calculations are rendered in textbook mathematical typesetting:
                   </span>
                 </div>
 
@@ -919,7 +893,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                         </header>
 
                         <div className="paperview-mock-body">
-                          <FormattedText text={q.question_text} className="question-statement" />
+                          <MathText text={q.question_text} className="question-statement" />
                         </div>
 
                         {q.model_answer && (
@@ -942,7 +916,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                                   Model Answer (COMSATS Marking Standard)
                                 </div>
                                 <div className="paperview-mock-solution-content">
-                                  <FormattedText text={q.model_answer} />
+                                  <MathText text={q.model_answer} />
                                 </div>
                               </div>
                             )}
