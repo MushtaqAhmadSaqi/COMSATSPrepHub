@@ -107,14 +107,31 @@ function AdminGuardView({ user, onOpenAuth, onNavigate, children }) {
   if (!isAdminUser(user)) {
     return (
       <div style={{ maxWidth: '40rem', margin: '3rem auto', padding: '0 1.5rem' }}>
-        <div className="card" style={{ padding: '2rem' }}>
+        <div className="card" style={{ padding: '2rem', textAlign: 'center' }}>
           <EmptyState
             icon="admin_panel_settings"
             title="Admin Access Restricted"
-            description="Your account does not have administrator permissions for this page. Backend Row-Level Security (RLS) also enforces write permissions."
-            actionLabel="Return Home"
-            onAction={() => onNavigate('home')}
+            description={`Signed in as "${user.email}". This email is not in the administrator allowlist (VITE_ADMIN_EMAILS) or Supabase admin role.`}
+            actionLabel="Switch Account"
+            onAction={onOpenAuth}
           />
+          <div style={{ marginTop: '1rem' }}>
+            <button
+              type="button"
+              onClick={() => onNavigate('home')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--brand)',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                textDecoration: 'underline'
+              }}
+            >
+              Return Home
+            </button>
+          </div>
         </div>
       </div>
     );
