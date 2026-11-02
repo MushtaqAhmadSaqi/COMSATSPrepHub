@@ -32,55 +32,84 @@ ON questions FOR ALL
 USING (true) 
 WITH CHECK (true);`;
 
-export const AI_MASTER_PROMPT = `You are an expert COMSATS University examination paper transcriber and academic solution specialist.
-I will attach or provide raw content (images, scan, PDF, or text) of a COMSATS examination paper.
+export const AI_MASTER_PROMPT = `You are a Senior Academic Examiner and Solutions Specialist for COMSATS University Islamabad.
+I will attach or provide raw content(photos, scans, PDF, or text) of an official COMSATS examination paper.
 
-Your task is to transcribe, structure, and provide model answers in the EXACT JSON format specified below so it can be directly imported into the COMSATSPrepHub database.
+Your mission is to transcribe, structure, and provide complete, high - scoring model answers in the EXACT JSON format below so it directly renders with rich LaTeX math, interactive tables, and diagrams in COMSATSPrepHub.
 
-### RULES & INSTRUCTIONS:
-1. Extract ALL questions and sub-parts accurately without omitting any question.
-2. For every question, generate a comprehensive, high-scoring MODEL ANSWER tailored to COMSATS marking schemes. Include formulas, bullet points, algorithms, or code where applicable.
-3. Extract or specify realistic marks for each question (e.g., 5, 10, or 15 marks).
-4. Identify or infer the course details:
-   - "subject_code": Course code (e.g. "CSC211", "MTH262", "MTH104", "EEE241")
-   - "subject_name": Full title of the course
-   - "title": Clean title (e.g. "MTH262 – Terminal Examination (Spring 2026)")
-   - "term": Either "Terminal" or "Midterm"
-   - "year": Integer year (e.g. 2026)
-   - "semester": e.g. "Spring 2026" or "Fall 2023"
-   - "total_marks": Sum of question marks (e.g. 50 or 25)
-   - "instructor_name": "COMSATS Faculty"
-5. Assign a Course Learning Outcome tag to each question (e.g., "CLO-1", "CLO-2", "CLO-3", or topic name).
+---
 
-6. MATHEMATICAL & SCIENTIFIC NOTATION (CRITICAL FOR STUDENT READABILITY):
-   - Always format equations, formulas, integrals, fractions, piecewise functions, summations, and statistics using LaTeX notation.
-   - Use $ ... $ for inline math (e.g. "$\\bar{x} = \\frac{\\sum X}{n} = 1.37$", "$S_{xx} = 19.261$", "$P(80 \\le X \\le 120)$").
-   - Use $$ ... $$ for standalone/display equations and piecewise functions:
-     "$$f(x) = \\begin{cases} \\frac{20000}{(x + 100)^3} & x > 0 \\\\ 0, & \\text{elsewhere} \\end{cases}$$"
-   - In JSON strings, remember to double-escape backslashes (e.g., "\\\\frac", "\\\\sum", "\\\\begin{cases}", "\\\\approx").
+### UNIVERSAL SUBJECT GUIDELINES(Applies to All Courses):
+1. COURSE COVERAGE:
+- CS & IT: CSC101, CSC102(PF), CSC211(DSA), CSC241(OOP), CSC301(Algo), CSC311(Networks), CSC322(OS), CSC339(Assembly), CSC354(HCI), CSC371(Database), CSC441(AI), CSC455(Security), CSC461(Mobile), CSC471(Web), CSC481(ML / Data Mining)
+  - Software Engineering: SWE301(SE Concepts), SWE302(Requirements), SWE401(SQE)
+    - Mathematics & Stats: MTH104(Calculus), MTH105(Multivariable), MTH231(Linear Algebra), MTH242(Differential Eq), MTH262(Stats & Probability), MTH375(Numerical)
+      - Electrical & Physics: EEE241(DLD), PHY120(Applied Physics)
+        - Humanities & Management: HUM100(English), MGT101(Management)
 
-7. OUTPUT ONLY VALID RAW JSON. Do NOT include markdown code blocks, backticks, or explanatory conversation.
+2. STEP - BY - STEP PEDAGOGICAL SOLUTIONS:
+- Break every answer into structured steps: "Step 1: Given Data & Formulas", "Step 2: Derivation/Calculation", etc.
+   - Use "Formula:" or "Definition:" for core rules.
+   - Always conclude numerical and algorithmic problems with "Final Answer: [result]"(this renders as an emerald green verified card for students).
+   - Use "Tip:" or "Note:" for common exam pitfalls, shortcuts, or marking scheme hints.
 
-### EXACT JSON FORMAT:
+3. MATHEMATICAL & FORMULA TYPESETTING(CRITICAL):
+- Wrap inline math in single dollar signs: $ ...$(e.g., "$\\\\bar{x} = \\\\frac{\\\\sum X}{n} = 1.37$", "$S_{xx} = 19.261$", "$P(80 \\\\le X \\\\le 120)$").
+   - Wrap standalone equations in double dollar signs: $$ ...$$
+  - For piecewise density functions or systems, use LaTeX cases:
+"$$f(x) = \\\\begin{cases} \\\\frac{20000}{(x + 100)^3} & x > 0 \\\\\\\\ 0, & \\\\text{elsewhere} \\\\end{cases}$$"
+  - Use proper LaTeX for matrices, summations($\\\\sum$), integrals($\\\\int$), fractions($\\\\frac{ a }{ b }$), roots($\\\\sqrt{ x }$), and Greek symbols($\\\\alpha, \\\\beta, \\\\lambda, \\\\sigma, \\\\mu$).
+
+4. TABLES(TRUTH TABLES, SCHEDULING, RELATIONAL DATA, PROBABILITY):
+- Whenever questions involve tabular data(e.g.CPU Scheduling Gantt data, Truth Tables in DLD, Routing Tables in Networks, Normalization schemas, Probability distributions, ANOVA):
+     Always format as clean Markdown tables with headers and alignment:
+     | Process | Arrival Time | Burst Time | Priority |
+     | : --- | : ---: | : ---: | : ---: |
+     | P1 | 0 ms | 8 ms | 2 |
+     | P2 | 1 ms | 4 ms | 1 |
+
+  5. DIAGRAMS & TREES(MERMAID OR STRUCTURED ASCII):
+- When a question involves trees(BST, AVL, Red - Black), state machines, flowcharts, or system architecture:
+     Output Mermaid code blocks:
+\`\`\`mermaid
+     graph TD
+       A[Root: 50] --> B[Left: 30]
+       A --> C[Right: 70]
+     \`\`\`
+     Or clear ASCII box diagrams in \`\`\`text ... \`\`\`.
+
+6. CODE & ALGORITHMS (C++, JAVA, PYTHON, SQL):
+   - Provide complete, robust code snippets enclosed in language-tagged blocks (\`\`\`cpp, \`\`\`java, \`\`\`python, \`\`\`sql).
+   - Always state Time Complexity: $O(...)$ and Space Complexity: $O(...)$.
+
+7. JSON STRING ESCAPING (CRITICAL):
+   - Inside JSON strings, backslashes must be double-escaped: \\\\frac, \\\\sum, \\\\bar, \\\\begin{cases}, \\\\le, \\\\approx, and \\\\n for newlines.
+   - Output ONLY the raw JSON object. Do not include introductory text, conversational remarks, or markdown wrapping.
+
+---
+
+### REQUIRED JSON SCHEMA:
 {
-  "subject_code": "MTH262",
-  "subject_name": "Statistics and Probability Theory",
-  "title": "MTH262 – Terminal Examination (Spring 2026)",
+  "subject_code": "CSC322",
+  "subject_name": "Operating Systems",
+  "title": "CSC322 — Terminal Examination (Spring 2024)",
   "term": "Terminal",
-  "year": 2026,
-  "semester": "Spring 2026",
+  "year": 2024,
+  "semester": "Spring 2024",
   "total_marks": 50,
   "instructor_name": "COMSATS Faculty",
   "questions": [
     {
       "question_number": 1,
-      "question_text": "The shelf life, in days, for bottles of a certain prescribed medicine is a random variable having the density function:\\n$$f(x) = \\\\begin{cases} \\\\frac{20000}{(x + 100)^3} & x > 0 \\\\\\\\ 0, & \\\\text{elsewhere} \\\\end{cases}$$\\nFind the probability that a bottle of this medicine will have a shelf life of anywhere between 80 to 120 days.",
-      "model_answer": "Step 1: Set up the Definite Integral\\nTo find the probability $P(80 \\\\le X \\\\le 120)$, integrate $f(x)$:\\n$$P(80 \\\\le X \\\\le 120) = \\\\int_{80}^{120} \\\\frac{20000}{(x + 100)^3} \\\\, dx$$\\n\\nStep 2: Evaluate the Integral\\n$$= 20000 \\\\left[ -\\\\frac{1}{2(x + 100)^2} \\\\right]_{80}^{120}$$\\n$$= -10000 \\\\left[ \\\\frac{1}{(220)^2} - \\\\frac{1}{(180)^2} \\\\right] \\\\approx 0.102$$\\n\\nFinal Answer: The probability is approximately $0.102$ (or 10.2%).",
-      "marks": 7,
+      "question_text": "Consider the following set of processes arriving at time 0 with given CPU burst times and priorities (smaller number = higher priority):\\n\\n| Process | Burst Time | Priority |\\n| :--- | :---: | :---: |\\n| P1 | 10 ms | 3 |\\n| P2 | 1 ms | 1 |\\n| P3 | 2 ms | 4 |\\n| P4 | 1 ms | 5 |\\n| P5 | 5 ms | 2 |\\n\\nDraw the Gantt chart and compute the average waiting time using Non-Preemptive Priority Scheduling.",
+      "model_answer": "Step 1: Order Processes by Priority\\nHigher priority (lowest number) runs first:\\nOrder: P2 (Priority 1) \\\\rightarrow P5 (Priority 2) \\\\rightarrow P1 (Priority 3) \\\\rightarrow P3 (Priority 4) \\\\rightarrow P4 (Priority 5).\\n\\nStep 2: Gantt Chart Execution Schedule\\n| Process | Start Time | Finish Time |\\n| :--- | :---: | :---: |\\n| P2 | 0 ms | 1 ms |\\n| P5 | 1 ms | 6 ms |\\n| P1 | 6 ms | 16 ms |\\n| P3 | 16 ms | 18 ms |\\n| P4 | 18 ms | 19 ms |\\n\\nStep 3: Compute Individual Waiting Times\\n- Waiting Time for P2 = $0 \\\\text{ ms}$\\n- Waiting Time for P5 = $1 \\\\text{ ms}$\\n- Waiting Time for P1 = $6 \\\\text{ ms}$\\n- Waiting Time for P3 = $16 \\\\text{ ms}$\\n- Waiting Time for P4 = $18 \\\\text{ ms}$\\n\\nStep 4: Compute Average Waiting Time (AWT)\\nFormula: $\\\\text{AWT} = \\\\frac{\\\\sum \\\\text{Waiting Times}}{N}$\\n$$\\\\text{AWT} = \\\\frac{0 + 1 + 6 + 16 + 18}{5} = \\\\frac{41}{5} = 8.2 \\\\text{ ms}$$\\n\\nFinal Answer: The Average Waiting Time (AWT) is $8.2 \\\\text{ ms}$.",
+      "marks": 10,
       "clo": "CLO-2"
     }
   ]
-}`;
+}
+
+Now examine the provided past paper and output ONLY the valid raw JSON: `;
 
 const SAMPLE_PAYLOAD = {
   subject_code: 'MTH262',
@@ -93,11 +122,11 @@ const SAMPLE_PAYLOAD = {
   instructor_name: 'COMSATS Faculty',
   questions: [
     {
-      "question_number": 1,
-      "question_text": "The shelf life, in days, for bottles of a certain prescribed medicine is a random variable having the density function:\n$$f(x) = \\begin{cases} \\frac{20000}{(x + 100)^3} & x > 0 \\\\ 0, & \\text{elsewhere} \\end{cases}$$\nFind the probability that a bottle of this medicine will have a shelf life of anywhere between 80 to 120 days.",
-      "model_answer": "Step 1: Set up the Definite Integral\nTo find the probability $P(80 \\le X \\le 120)$, integrate $f(x)$:\n$$P(80 \\le X \\le 120) = \\int_{80}^{120} \\frac{20000}{(x + 100)^3} \\, dx$$\n\nStep 2: Evaluate the Integral\n$$= 20000 \\left[ -\\frac{1}{2(x + 100)^2} \\right]_{80}^{120}$$\n$$= -10000 \\left[ \\frac{1}{(220)^2} - \\frac{1}{(180)^2} \\right] \\approx 0.102$$\n\nStep 3: Sample Statistics Summary\n- n = 10\n- x̄ = (∑X) / n = 13.7 / 10 = 1.37\n- ȳ = (∑Y) / n = 1282 / 10 = 128.2\n- Sxx = ∑X^2 - (∑X)^2 / n = 38.03 - (13.7)^2 / 10 = 19.261\n- Syy = ∑Y^2 - (∑Y)^2 / n = 164430 - (1282)^2 / 10 = 77.6\n- Sxy = ∑XY - (∑X * ∑Y) / n = 1788.2 - (13.7 * 1282) / 10 = 31.86\n\nFinal Answer: The probability is approximately 0.102 (or 10.2%).",
-      "marks": 7,
-      "clo": "CLO-2"
+      question_number: 1,
+      question_text: "The shelf life, in days, for bottles of a certain prescribed medicine is a random variable having the density function:\n$$f(x) = \\begin{cases} \\frac{20000}{(x + 100)^3} & x > 0 \\\\ 0, & \\text{elsewhere} \\end{cases}$$\nFind the probability that a bottle of this medicine will have a shelf life of anywhere between 80 to 120 days.",
+      model_answer: "Step 1: Set up the Definite Integral\nTo find the probability $P(80 \\le X \\le 120)$, integrate $f(x)$:\n$$P(80 \\le X \\le 120) = \\int_{80}^{120} \\frac{20000}{(x + 100)^3} \\, dx$$\n\nStep 2: Evaluate the Integral\n$$= 20000 \\left[ -\\frac{1}{2(x + 100)^2} \\right]_{80}^{120}$$\n$$= -10000 \\left[ \\frac{1}{(220)^2} - \\frac{1}{(180)^2} \\right] \\approx 0.102$$\n\nStep 3: Sample Statistics Summary\n| Variable | Formula | Computed Value |\n| :--- | :--- | :--- |\n| Sample Mean $\\bar{x}$ | $\\frac{\\sum X}{n} = \\frac{13.7}{10}$ | $1.37$ |\n| Sample Mean $\\bar{y}$ | $\\frac{\\sum Y}{n} = \\frac{1282}{10}$ | $128.2$ |\n| Sum of Squares $S_{xx}$ | $\\sum X^2 - \\frac{(\\sum X)^2}{n}$ | $19.261$ |\n| Sum of Squares $S_{yy}$ | $\\sum Y^2 - \\frac{(\\sum Y)^2}{n}$ | $77.6$ |\n\nFinal Answer: The probability is approximately $0.102$ (or 10.2%).",
+      marks: 7,
+      clo: "CLO-2"
     }
   ]
 };
@@ -110,7 +139,7 @@ function extractAndRepairJson(input) {
   let cleaned = String(input || '').trim();
 
   // Strip code fences if present (```json ... ```)
-  const codeBlockMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  const codeBlockMatch = cleaned.match(/```(?: json) ?\s * ([\s\S] *?) \s * ```/i);
   if (codeBlockMatch && codeBlockMatch[1]) {
     cleaned = codeBlockMatch[1].trim();
   } else {
@@ -139,8 +168,6 @@ function extractAndRepairJson(input) {
     return JSON.parse(cleaned);
   } catch (initialErr) {
     // Attempt escape repair for LaTeX commands and unescaped backslashes
-    // Valid escapes in JSON: ", \, /, b, f, n, r, t, uXXXX
-    // Any backslash NOT followed by these is an illegal escape (e.g. \approx, \cdot, \alpha)
     const repaired = cleaned.replace(/\\(?!["\\/bfnrt]|u[0-9a-fA-F]{4})/g, () => '\\\\');
 
     try {
@@ -165,12 +192,12 @@ function normalizePapersPayload(rawData) {
     } else {
       papers = [
         {
-          subject_code: 'CSC211',
-          subject_name: 'Data Structures & Algorithms',
+          subject_code: 'CSC322',
+          subject_name: 'Operating Systems',
           title: 'Imported Past Paper',
           term: 'Terminal',
           year: new Date().getFullYear(),
-          semester: `Spring ${new Date().getFullYear()}`,
+          semester: `Spring ${ new Date().getFullYear() } `,
           total_marks: rawData.reduce((sum, q) => sum + (Number(q.marks) || 0), 0) || 50,
           instructor_name: 'COMSATS Faculty',
           questions: rawData
@@ -182,13 +209,13 @@ function normalizePapersPayload(rawData) {
   }
 
   return papers.map((p, pIdx) => {
-    const rawCode = String(p.subject_code || p.subjectCode || 'MTH262').toUpperCase().trim();
+    const rawCode = String(p.subject_code || p.subjectCode || 'CSC322').toUpperCase().trim();
     const catalogMatch = DEFAULT_SUBJECTS.find((s) => s.code.toUpperCase() === rawCode);
     const subjectName = String(p.subject_name || p.subjectName || catalogMatch?.name || rawCode).trim();
     const term = String(p.term || 'Terminal').trim();
     const year = Number(p.year) || new Date().getFullYear();
-    const semester = String(p.semester || `${term} ${year}`).trim();
-    const title = String(p.title || `${rawCode} — ${term} Examination (${semester})`).trim();
+    const semester = String(p.semester || `${ term } ${ year } `).trim();
+    const title = String(p.title || `${ rawCode } — ${ term } Examination(${ semester })`).trim();
     const questions = Array.isArray(p.questions) ? p.questions : [];
 
     const computedMarks = questions.reduce((sum, q) => sum + (Number(q.marks) || 0), 0);
@@ -210,7 +237,7 @@ function normalizePapersPayload(rawData) {
         question_text: String(q.question_text || q.questionText || q.question || '').trim(),
         model_answer: String(q.model_answer || q.answerText || q.answer || '').trim(),
         marks: q.marks ? Number(q.marks) : 10,
-        clo: String(q.clo || `CLO-${(qIdx % 4) + 1}`).trim()
+        clo: String(q.clo || `CLO - ${ (qIdx % 4) + 1 } `).trim()
       }))
     };
   });
@@ -246,7 +273,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
     try {
       await navigator.clipboard.writeText(AI_MASTER_PROMPT);
       setHasCopiedPrompt(true);
-      toast.success('AI Master Prompt copied to clipboard! Paste it into ChatGPT or Claude.');
+      toast.success('Universal AI Master Prompt copied! Paste into ChatGPT, Claude, or Gemini.');
       setTimeout(() => setHasCopiedPrompt(false), 3000);
     } catch {
       toast.error('Unable to copy to clipboard automatically. Please copy the text below.');
@@ -270,7 +297,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
     setErrorMsg('');
     setUploadResults(null);
     setUploadError('');
-    toast.info('Loaded MTH262 sample paper JSON with piecewise & stats formulas into editor.');
+    toast.info('Loaded multi-subject sample past paper with formulas & tables into editor.');
   };
 
   // Check Supabase for existing papers whenever parsed papers change
@@ -366,7 +393,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
 
       setParsedPapers(normalized);
       toast.success(
-        `Validated ${normalized.length} paper(s) with ${normalized.reduce((s, p) => s + p.questions.length, 0)} questions!`
+        `Validated ${ normalized.length } paper(s) with ${ normalized.reduce((s, p) => s + p.questions.length, 0) } questions!`
       );
     } catch (err) {
       if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) {
@@ -379,18 +406,18 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
             question_text: block,
             model_answer: '',
             marks: 10,
-            clo: `CLO-${(idx % 4) + 1}`
+            clo: `CLO - ${ (idx % 4) + 1 } `
           }));
 
         if (blocks.length > 0 && blocks.some((b) => b.question_text.length > 10)) {
           const fallbackPaper = normalizePapersPayload(blocks);
           setParsedPapers(fallbackPaper);
-          toast.info(`Extracted ${blocks.length} text blocks as questions. Please review before uploading.`);
+          toast.info(`Extracted ${ blocks.length } text blocks as questions.Please review before uploading.`);
           return;
         }
       }
 
-      setErrorMsg(`JSON Syntax Error: ${err.message}. Please check your JSON brackets, quotes, or trailing characters.`);
+      setErrorMsg(`JSON Syntax Error: ${ err.message }. Please check your JSON brackets, quotes, or trailing characters.`);
     }
   };
 
@@ -434,7 +461,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
             .eq('id', targetPaperId);
 
           if (updateErr) {
-            throw new Error(`Failed to update paper "${paper.title}": ${updateErr.message}`);
+            throw new Error(`Failed to update paper "${paper.title}": ${ updateErr.message } `);
           }
 
           // B. Delete existing questions for this paper
@@ -444,7 +471,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
             .eq('paper_id', targetPaperId);
 
           if (delErr) {
-            throw new Error(`Failed to clear old questions for paper "${paper.title}": ${delErr.message}`);
+            throw new Error(`Failed to clear old questions for paper "${paper.title}": ${ delErr.message } `);
           }
         } else {
           // CASE 2: NEW PAPER -> INSERT IT
@@ -467,11 +494,11 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
           if (insertErr) {
             if (insertErr.message?.includes('row-level security') || insertErr.code === '42501') {
               throw new Error(
-                `Supabase Row Level Security (RLS) blocked INSERT on 'past_papers'. ` +
+                `Supabase Row Level Security(RLS) blocked INSERT on 'past_papers'. ` +
                 `Ensure your user has an admin policy or add an INSERT policy in Supabase Dashboard.`
               );
             }
-            throw new Error(`Failed to insert paper "${paper.title}": ${insertErr.message}`);
+            throw new Error(`Failed to insert paper "${paper.title}": ${ insertErr.message } `);
           }
 
           targetPaperId = newRow.id;
@@ -494,7 +521,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
             .insert(formattedQuestions);
 
           if (qErr) {
-            throw new Error(`Paper record was saved, but question insertion failed: ${qErr.message}`);
+            throw new Error(`Paper record was saved, but question insertion failed: ${ qErr.message } `);
           }
         }
 
@@ -519,11 +546,11 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
 
       let msg = '';
       if (replacedCount > 0 && createdCount > 0) {
-        msg = `Synced successfully: ${replacedCount} paper(s) replaced, ${createdCount} new paper(s) added!`;
+        msg = `Synced successfully: ${ replacedCount } paper(s) replaced, ${ createdCount } new paper(s) added!`;
       } else if (replacedCount > 0) {
-        msg = `Successfully updated and replaced ${replacedCount} existing paper(s)!`;
+        msg = `Successfully updated and replaced ${ replacedCount } existing paper(s)!`;
       } else {
-        msg = `Successfully uploaded ${createdCount} new paper(s) to Supabase!`;
+        msg = `Successfully uploaded ${ createdCount } new paper(s) to Supabase!`;
       }
 
       toast.success(msg);
@@ -584,7 +611,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
       <PageHeader
         badge="Admin Workspace"
         title="AI Past Paper Ingestor"
-        subtitle="Extract questions, render textbook LaTeX math formulas, validate preview in subject page style, and sync directly to Supabase. Existing papers are automatically replaced; new papers are added."
+        subtitle="Extract questions, render textbook LaTeX math, interactive tables, and system diagrams for all COMSATS courses, then sync directly to Supabase."
       />
 
       {/* Top AI Master Prompt Banner */}
@@ -592,26 +619,26 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
         <div className="ai-prompt-helper-header">
           <div className="ai-prompt-helper-info">
             <div className="ai-prompt-tag">
-              <span className="material-symbols-outlined" aria-hidden="true">functions</span>
-              AI LaTeX Math & Formula Enabled
+              <span className="material-symbols-outlined" aria-hidden="true">psychology</span>
+              Universal AI Master Prompt (All COMSATS Subjects)
             </div>
             <h3 className="ai-prompt-helper-title">Step 1: Get structured JSON from your AI</h3>
             <p className="ai-prompt-helper-desc">
-              Copy this prompt, open ChatGPT or Claude, attach your exam paper images or PDF, and paste it. 
-              The AI will extract all questions, typeset piecewise formulas and statistics in KaTeX, and return clean JSON.
+              Copy this prompt, open ChatGPT, Claude, or Gemini, attach your exam paper images/PDF, and paste it. 
+              The AI generates structured solutions with <strong>LaTeX formulas</strong>, <strong>formatted tables</strong>, <strong>system diagrams</strong>, and <strong>colored step breakdowns</strong>.
             </p>
           </div>
           <div className="ai-prompt-helper-actions">
             <button
               type="button"
-              className={`btn-copy-prompt ${hasCopiedPrompt ? 'copied' : ''}`}
+              className={`btn - copy - prompt ${ hasCopiedPrompt ? 'copied' : '' } `}
               onClick={handleCopyPrompt}
-              title="Copy prompt for ChatGPT or Claude"
+              title="Copy universal prompt for ChatGPT, Claude, or Gemini"
             >
               <span className="material-symbols-outlined" aria-hidden="true">
                 {hasCopiedPrompt ? 'check_circle' : 'content_copy'}
               </span>
-              {hasCopiedPrompt ? 'Copied Prompt!' : 'Copy AI Master Prompt'}
+              {hasCopiedPrompt ? 'Copied Universal Prompt!' : 'Copy AI Master Prompt'}
             </button>
             <button
               type="button"
@@ -628,7 +655,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
 
         {isPromptExpanded && (
           <div className="ai-prompt-preview-wrap">
-            <div className="ai-prompt-preview-label">Prompt Instructions & Schema:</div>
+            <div className="ai-prompt-preview-label">Universal Prompt Instructions & Schema:</div>
             <pre className="ai-prompt-code">{AI_MASTER_PROMPT}</pre>
           </div>
         )}
@@ -640,24 +667,24 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
           <div>
             <h2 className="paste-card-title">Step 2: Paste AI Output & Inspect</h2>
             <p className="paste-card-subtitle">
-              Paste the AI-generated JSON below. Piecewise equations, integrals, fractions, summations, and sample statistics are rendered with KaTeX.
+              Paste the AI-generated JSON below. Piecewise equations, integrals, fractions, truth tables, scheduling tables, and architecture diagrams are rendered live.
             </p>
           </div>
           <button
             type="button"
             className="btn-load-sample"
             onClick={handleLoadSample}
-            title="Load sample MTH262 past paper JSON with formulas"
+            title="Load sample past paper JSON with formulas and tables"
           >
-            <span className="material-symbols-outlined" aria-hidden="true">functions</span>
-            Load Math Sample JSON
+            <span className="material-symbols-outlined" aria-hidden="true">table_chart</span>
+            Load Sample (Tables & Math)
           </button>
         </div>
 
         <textarea
           id="admin-raw-paper-textarea"
           className="admin-textarea"
-          placeholder="Paste AI JSON output here... e.g. { 'subject_code': 'MTH262', 'questions': [...] }"
+          placeholder="Paste AI JSON output here... e.g. { 'subject_code': 'CSC322', 'questions': [...] }"
           value={rawText}
           onChange={(e) => {
             setRawText(e.target.value);
@@ -714,7 +741,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
               {uploadResults.map((r, i) => (
                 <div key={i} className="admin-result-item">
                   <div className="result-badge-wrap">
-                    <span className={`result-tag ${r.action === 'replaced' ? 'tag-replaced' : 'tag-created'}`}>
+                    <span className={`result - tag ${ r.action === 'replaced' ? 'tag-replaced' : 'tag-created' } `}>
                       <span className="material-symbols-outlined" aria-hidden="true">
                         {r.action === 'replaced' ? 'sync' : 'add_circle'}
                       </span>
@@ -800,7 +827,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
               <div className="rls-action-buttons">
                 <button
                   type="button"
-                  className={`btn-copy-prompt ${hasCopiedSql ? 'copied' : ''}`}
+                  className={`btn - copy - prompt ${ hasCopiedSql ? 'copied' : '' } `}
                   onClick={handleCopySql}
                 >
                   <span className="material-symbols-outlined" aria-hidden="true">
@@ -836,7 +863,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                 Step 3: Review Live Appearance & Save to Supabase
               </h2>
               <p className="preview-subheading">
-                Below is the exact paper card and mathematical question layout that students will see on the subject page.
+                Below is the exact paper card, LaTeX math, interactive tables, and architecture diagrams that students will see.
               </p>
             </div>
 
@@ -876,7 +903,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                         Checking Supabase...
                       </span>
                     ) : isReplaced ? (
-                      <span className="badge-mode-replace" title={`Matches ID: ${dup.existingId}`}>
+                      <span className="badge-mode-replace" title={`Matches ID: ${ dup.existingId } `}>
                         <span className="material-symbols-outlined" aria-hidden="true">sync</span>
                         Will REPLACE existing record
                       </span>
@@ -900,7 +927,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                         <span className="paper-badge">{paper.term || 'Exam'}</span>
 
                         {paper.instructor_name && (
-                          <span className="paper-meta-detail" title={`Instructor: ${paper.instructor_name}`}>
+                          <span className="paper-meta-detail" title={`Instructor: ${ paper.instructor_name } `}>
                             <span className="material-symbols-outlined" aria-hidden="true">person</span>
                             {paper.instructor_name}
                           </span>
@@ -952,13 +979,13 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                     Extracted Exam Questions ({paper.questions.length})
                   </h3>
                   <span className="preview-questions-hint">
-                    Piecewise equations, integrals, and statistical calculations are rendered in textbook mathematical typesetting:
+                    Formulas, tables, and diagrams are rendered live in university textbook formatting:
                   </span>
                 </div>
 
                 <div className="paperview-questions-preview-list">
                   {paper.questions.map((q, qIndex) => {
-                    const ansKey = `${paper.index}-${q.question_number}`;
+                    const ansKey = `${ paper.index } -${ q.question_number } `;
                     const isAnsOpen = expandedAnswers[ansKey] ?? true;
 
                     return (

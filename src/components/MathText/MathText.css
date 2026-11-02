@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────
-   MathText: University-grade LaTeX and Math Typesetting
+   MathText: University-grade LaTeX, Table, Diagram & Markdown Typesetting
 ───────────────────────────────────────────────────────────── */
 
 .math-text-container {
@@ -9,9 +9,11 @@
   word-break: break-word;
 }
 
-/* Standalone Display Math Equations ($$...$$, piecewise cases, integrals) */
+/* ─────────────────────────────────────────────────────────────
+   1. Standalone Display Math Equations ($$...$$, piecewise, integrals)
+───────────────────────────────────────────────────────────── */
 .math-display-container {
-  margin: 1rem 0;
+  margin: 1.125rem 0;
   padding: 0.875rem 1.25rem;
   background: var(--surface-2, #f8fafc);
   border: 1px solid var(--border, #e2e8f0);
@@ -41,14 +43,290 @@
 /* Auto-detected mathematical line */
 .math-paragraph-math-line {
   margin: 0.5rem 0;
-  padding: 0.35rem 0.75rem;
+  padding: 0.4rem 0.875rem;
   background: var(--surface-2, #f8fafc);
-  border-left: 3px solid var(--brand, #2543a1);
+  border-left: 3.5px solid var(--brand, #2543a1);
   border-radius: 0 var(--radius-sm, 6px) var(--radius-sm, 6px) 0;
   overflow-x: auto;
 }
 
-/* Step or Question Headings (e.g. "Step 1: Compute Means") */
+/* ─────────────────────────────────────────────────────────────
+   2. Tables (Truth Tables, Scheduling, Relational, Stats)
+───────────────────────────────────────────────────────────── */
+.table-wrapper-card {
+  margin: 1.25rem 0;
+  border-radius: var(--radius-lg, 12px);
+  border: 1.5px solid var(--border, #e2e8f0);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.table-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.math-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  text-align: left;
+  background: var(--surface, #ffffff);
+}
+
+.math-table thead {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(79, 70, 229, 0.12) 100%);
+  border-bottom: 2px solid var(--border-strong, #cbd5e1);
+}
+
+.math-table th {
+  padding: 0.75rem 1rem;
+  font-weight: 750;
+  color: var(--brand, #1e3a8a);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.math-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+  color: var(--text, #172033);
+  line-height: 1.5;
+}
+
+.math-table tbody tr:nth-child(even) {
+  background: var(--surface-2, #f8fafc);
+}
+
+.math-table tbody tr:hover {
+  background: rgba(37, 99, 235, 0.04);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   3. Interactive Diagrams (Mermaid & System Architecture)
+───────────────────────────────────────────────────────────── */
+.diagram-box {
+  margin: 1.25rem 0;
+  border: 1.5px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--radius-lg, 12px);
+  background: var(--surface, #ffffff);
+  overflow: hidden;
+  box-shadow: 0 3px 12px rgba(99, 102, 241, 0.06);
+}
+
+.diagram-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(99, 102, 241, 0.08);
+  padding: 0.625rem 1rem;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #4f46e5;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.diagram-header .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+
+.mermaid-svg-container {
+  padding: 1.25rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+  min-height: 80px;
+}
+
+.mermaid-svg-container svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.diagram-loading {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.diagram-code {
+  padding: 1rem;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 0.8125rem;
+  background: var(--surface-2);
+  overflow-x: auto;
+  margin: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   4. Code Blocks & ASCII Diagrams
+───────────────────────────────────────────────────────────── */
+.code-block-card {
+  margin: 1.125rem 0;
+  border-radius: var(--radius-lg, 12px);
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background: #1e293b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.code-lang-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 750;
+  color: #38bdf8;
+  letter-spacing: 0.05em;
+}
+
+.code-lang-tag .material-symbols-outlined {
+  font-size: 0.9375rem;
+}
+
+.btn-copy-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border: none;
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.btn-copy-code:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.btn-copy-code .material-symbols-outlined {
+  font-size: 0.875rem;
+}
+
+.code-content {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: #e2e8f0;
+  overflow-x: auto;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   5. Colorful Callout Cards (Final Answer, Formula, Note)
+───────────────────────────────────────────────────────────── */
+
+/* Final Answer / Conclusion: Vibrant Emerald Green */
+.math-final-answer-card {
+  margin: 1.25rem 0;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.12) 100%);
+  border: 1.5px solid #10b981;
+  border-radius: var(--radius-lg, 12px);
+  padding: 1rem 1.25rem;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+}
+
+.final-ans-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #059669;
+  margin-bottom: 0.375rem;
+}
+
+.final-ans-header .material-symbols-outlined {
+  font-size: 1.125rem;
+}
+
+.final-ans-body {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text, #172033);
+  line-height: 1.5;
+}
+
+/* Formula / Definition: Purple / Indigo */
+.math-formula-callout {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 0.875rem 0;
+  padding: 0.625rem 1rem;
+  background: rgba(139, 92, 246, 0.08);
+  border-left: 3.5px solid #8b5cf6;
+  border-radius: 0 var(--radius-md, 8px) var(--radius-md, 8px) 0;
+  flex-wrap: wrap;
+}
+
+.formula-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  background: #8b5cf6;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+.formula-tag-body {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text, #172033);
+}
+
+/* Note / Important: Amber Alert */
+.math-note-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin: 0.875rem 0;
+  padding: 0.75rem 1rem;
+  background: rgba(245, 158, 11, 0.08);
+  border-left: 3.5px solid #f59e0b;
+  border-radius: 0 var(--radius-md, 8px) var(--radius-md, 8px) 0;
+  font-size: 0.875rem;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.math-note-callout .note-icon {
+  color: #d97706;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   6. Step Headings & Lists
+───────────────────────────────────────────────────────────── */
 .math-step-heading {
   display: flex;
   align-items: center;
@@ -63,13 +341,13 @@
 .step-tag-pill {
   display: inline-flex;
   align-items: center;
-  background: rgba(37, 99, 235, 0.1);
+  background: rgba(37, 99, 235, 0.12);
   color: var(--brand, #2543a1);
   font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 0.2rem 0.5rem;
+  padding: 0.25rem 0.625rem;
   border-radius: 6px;
 }
 
@@ -77,7 +355,6 @@
   color: var(--text, #172033);
 }
 
-/* Lists */
 .math-list-wrap {
   margin: 0.5rem 0 0.875rem 1.25rem;
   padding: 0;
@@ -91,7 +368,6 @@
   color: var(--text, #172033);
 }
 
-/* Paragraphs */
 .math-paragraph {
   margin: 0 0 0.75rem;
   line-height: 1.7;
@@ -101,7 +377,6 @@
   margin-bottom: 0;
 }
 
-/* Code & Bold */
 .math-inline-code {
   font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
   background: var(--surface-2, #f1f5f9);
@@ -117,11 +392,14 @@
   color: var(--text, #172033);
 }
 
-/* Mobile Responsiveness */
+/* Responsive */
 @media (max-width: 640px) {
   .math-display-container {
     padding: 0.625rem 0.75rem;
-    font-size: 0.9em;
+  }
+
+  .math-table th,
+  .math-table td {
+    padding: 0.5rem 0.75rem;
   }
 }
-

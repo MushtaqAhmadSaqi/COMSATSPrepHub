@@ -1,7 +1,22 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import katex from 'katex';
+import mermaid from 'mermaid';
 import 'katex/dist/katex.min.css';
 import './MathText.css';
+
+// Initialize mermaid once safely on client
+if (typeof window !== 'undefined') {
+  try {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'neutral',
+      securityLevel: 'loose',
+      fontFamily: 'Inter, system-ui, sans-serif'
+    });
+  } catch {
+    // Ignore init errors
+  }
+}
 
 /**
  * Safely renders a LaTeX math formula using KaTeX into an HTML string.
@@ -27,7 +42,6 @@ function renderKaTeX(formula, isDisplay = false) {
 function tryAutoFormatStatsMath(line) {
   if (!line || typeof line !== 'string') return null;
 
-  // Check if line contains statistical or algebra notation: x̄, ȳ, ∑, Sxx, Syy, Sxy, etc.
   if (/[x̄ȳ∑]|S[xy]{2}\s*=/i.test(line)) {
     const bulletMatch = line.match(/^(\s*[-*•]\s*)(.*)$/);
     const prefix = bulletMatch ? bulletMatch[1] : '';
@@ -47,9 +61,7 @@ function tryAutoFormatStatsMath(line) {
       .replace(/≥/g, '\\ge ')
       .replace(/±/g, '\\pm ');
 
-    // Convert (Expression) / denominator -> \frac{Expression}{denominator}
     latex = latex.replace(/\(([^()]+)\)\s*\/\s*([a-zA-Z0-9]+)/g, '\\frac{$1}{$2}');
-    // Convert number / number e.g. 13.7 / 10 -> \frac{13.7}{10}
     latex = latex.replace(/([0-9.]+)\s*\/\s*([0-9.]+)/g, '\\frac{$1}{$2}');
 
     const html = renderKaTeX(latex, false);
@@ -68,7 +80,6 @@ function tryAutoFormatStatsMath(line) {
 function renderInlineWithMath(text, keyPrefix = '') {
   if (!text) return null;
 
-  // Regex to match inline math: $...$ or \(...\)
   const mathRegex = /(\$[^\$\n]+?\$|\\\([\s\S]*?\\\))/g;
   const segments = [];
   let lastIdx = 0;
@@ -111,7 +122,6 @@ function renderInlineWithMath(text, keyPrefix = '') {
       );
     }
 
-    // Parse simple markdown bold and code inside the text portion
     const inlineParts = [];
     const inlineRegex = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g;
     let textLast = 0;
@@ -151,24 +161,195 @@ function renderInlineWithMath(text, keyPrefix = '') {
 }
 
 /**
- * Universal Math and Markdown text renderer for university exam papers.
+ * Component to render a Mermaid diagram SVG cleanly with fallback.
+ */
+function MermaidDiagram({ chart }) {
+  const containerRef = useRef(null);
+  const [svgContent, setSvgContent] = useState('');
+  const [renderFailed, setRenderFailed] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const uniqueId = `mermaid-svg-${Math.random().toString(36).slice(2, 9)}`;
+
+    mermaid
+      .render(uniqueId, chart.trim())
+      .then(({ svg }) => {
+        if (isMounted) {
+          setSvgContent(svg);
+          setRenderFailed(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setRenderFailed(true);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [chart]);
+
+  if (renderFailed) {
+    return (
+      <div className="diagram-box">
+        <div className="diagram-header">
+          <span className="material-symbols-outlined" aria-hidden="true">account_tree</span>
+          <span>System Diagram (Source View)</span>
+        </div>
+        <pre className="diagram-code">{chart}</pre>
+      </div>
+    );
+  }
+
+  return (
+    <div className="diagram-box" ref={containerRef}>
+      <div className="diagram-header">
+        <span className="material-symbols-outlined" aria-hidden="true">schema</span>
+        <span>Interactive System Diagram / Architecture</span>
+      </div>
+      <div
+        className="mermaid-svg-container"
+        dangerouslySetInnerHTML={{ __html: svgContent || '<div class="diagram-loading">Generating diagram...</div>' }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Component to render syntax-styled code blocks with copy functionality.
+ */
+function CodeBlock({ code, language = '' }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // ignore
+    }
+  };
+
+  const isDiagramText = language === 'diagram' || language === 'text' || language === 'ascii';
+
+  return (
+    <div className={`code-block-card ${isDiagramText ? 'is-ascii-diagram' : ''}`}>
+      <div className="code-block-header">
+        <span className="code-lang-tag">
+          <span className="material-symbols-outlined" aria-hidden="true">
+            {isDiagramText ? 'account_tree' : 'code'}
+          </span>
+          {language ? language.toUpperCase() : 'SOURCE CODE'}
+        </span>
+        <button
+          type="button"
+          className="btn-copy-code"
+          onClick={handleCopy}
+          title="Copy to clipboard"
+        >
+          <span className="material-symbols-outlined" aria-hidden="true">
+            {copied ? 'check' : 'content_copy'}
+          </span>
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+      </div>
+      <pre className="code-content">
+        <code>{code}</code>
+      </pre>
+    </div>
+  );
+}
+
+/**
+ * Component to render a full Markdown Table with KaTeX-enabled cells.
+ */
+function MarkdownTable({ lines }) {
+  if (!lines || lines.length < 2) return null;
+
+  const parseCells = (line) =>
+    line
+      .split('|')
+      .map((c) => c.trim())
+      .filter((c, idx, arr) => (idx > 0 && idx < arr.length - 1) || c.length > 0);
+
+  const headers = parseCells(lines[0]);
+  const alignTokens = parseCells(lines[1]);
+  const alignments = alignTokens.map((t) => {
+    const left = t.startsWith(':');
+    const right = t.endsWith(':');
+    if (left && right) return 'center';
+    if (right) return 'right';
+    return 'left';
+  });
+
+  const rows = [];
+  for (let i = 2; i < lines.length; i++) {
+    const cells = parseCells(lines[i]);
+    if (cells.length > 0) {
+      rows.push(cells);
+    }
+  }
+
+  return (
+    <div className="table-wrapper-card">
+      <div className="table-scroll-container">
+        <table className="math-table">
+          <thead>
+            <tr>
+              {headers.map((h, hIdx) => (
+                <th
+                  key={hIdx}
+                  style={{ textAlign: alignments[hIdx] || 'left' }}
+                >
+                  {renderInlineWithMath(h, `th-${hIdx}`)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, rIdx) => (
+              <tr key={rIdx}>
+                {row.map((cell, cIdx) => (
+                  <td
+                    key={cIdx}
+                    style={{ textAlign: alignments[cIdx] || 'left' }}
+                  >
+                    {renderInlineWithMath(cell, `td-${rIdx}-${cIdx}`)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Universal Math, Table, Diagram, and Markdown text renderer for university exam papers.
  * Renders:
  * - Piecewise functions: $$f(x) = \begin{cases} ... \end{cases}$$
  * - Display equations: $$ ... $$ and \[ ... \]
  * - Inline math: $ ... $ and \( ... \)
+ * - Markdown tables with KaTeX math cells: | Col 1 | Col 2 |
+ * - Mermaid diagrams: ```mermaid ... ```
+ * - Code and ASCII diagrams: ```cpp ... ``` or ```text ... ```
  * - Auto-detected statistical formulas: x̄, ȳ, ∑, Sxx, Syy, Sxy
- * - Numbered steps, bullet lists, bold text, code blocks
+ * - Colorful callouts: Final Answer (green), Step (indigo), Formula (purple), Note/Alert (amber)
  */
 export default function MathText({ text, className = '' }) {
   const renderedElements = useMemo(() => {
     if (!text || typeof text !== 'string') return null;
 
-    // Normalize newlines
     const raw = text.replace(/\\n/g, '\n');
     const lines = raw.split(/\r?\n/);
 
     const elements = [];
     let listBuffer = null;
+    let tableBuffer = null;
+    let codeBuffer = null;
 
     const flushList = () => {
       if (!listBuffer) return;
@@ -181,10 +362,76 @@ export default function MathText({ text, className = '' }) {
       listBuffer = null;
     };
 
+    const flushTable = () => {
+      if (!tableBuffer) return;
+      elements.push(
+        <MarkdownTable
+          key={`table-${elements.length}`}
+          lines={tableBuffer}
+        />
+      );
+      tableBuffer = null;
+    };
+
     let i = 0;
     while (i < lines.length) {
       const line = lines[i];
       const trimmed = line.trim();
+
+      // Check code block fence ```lang
+      if (trimmed.startsWith('```')) {
+        flushList();
+        flushTable();
+
+        if (codeBuffer) {
+          // Closing code block
+          const { lang, codeLines } = codeBuffer;
+          const fullCode = codeLines.join('\n');
+
+          if (lang.toLowerCase() === 'mermaid') {
+            elements.push(
+              <MermaidDiagram
+                key={`mermaid-${elements.length}`}
+                chart={fullCode}
+              />
+            );
+          } else {
+            elements.push(
+              <CodeBlock
+                key={`code-${elements.length}`}
+                code={fullCode}
+                language={lang}
+              />
+            );
+          }
+          codeBuffer = null;
+        } else {
+          // Opening code block
+          const lang = trimmed.slice(3).trim();
+          codeBuffer = { lang, codeLines: [] };
+        }
+        i++;
+        continue;
+      }
+
+      if (codeBuffer) {
+        codeBuffer.codeLines.push(line);
+        i++;
+        continue;
+      }
+
+      // Check table lines starting with |
+      if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+        flushList();
+        if (!tableBuffer) {
+          tableBuffer = [];
+        }
+        tableBuffer.push(trimmed);
+        i++;
+        continue;
+      } else if (tableBuffer) {
+        flushTable();
+      }
 
       if (!trimmed) {
         flushList();
@@ -192,7 +439,7 @@ export default function MathText({ text, className = '' }) {
         continue;
       }
 
-      // 1. Check for standalone display math: $$...$$ or \[...\]
+      // 1. Standalone display math: $$...$$ or \[...\]
       const displayBlockMatch = trimmed.match(/^(\$\$|\\\[)([\s\S]*?)(\$\$|\\\])$/);
       if (displayBlockMatch) {
         flushList();
@@ -209,7 +456,7 @@ export default function MathText({ text, className = '' }) {
         continue;
       }
 
-      // 1b. Check for raw LaTeX piecewise environment like \begin{cases} ... \end{cases}
+      // 1b. Raw LaTeX piecewise environment like \begin{cases} ... \end{cases}
       if (/^f\(x\)\s*=\s*\\begin\{cases\}|\\begin\{(cases|matrix|aligned|array)\}/.test(trimmed)) {
         flushList();
         const html = renderKaTeX(trimmed, true);
@@ -224,7 +471,57 @@ export default function MathText({ text, className = '' }) {
         continue;
       }
 
-      // 2. Check for step or section headings (e.g. "Step 1: ...", "### Heading")
+      // 2. Final Answer / Conclusion Callout (Green Highlight Card)
+      const finalAnsMatch = trimmed.match(/^(Final Answer\s*:|Conclusion\s*:|Result\s*:)\s*(.*)$/i);
+      if (finalAnsMatch) {
+        flushList();
+        elements.push(
+          <div key={`final-ans-${i}`} className="math-final-answer-card">
+            <div className="final-ans-header">
+              <span className="material-symbols-outlined" aria-hidden="true">check_circle</span>
+              <span>{finalAnsMatch[1].replace(/:/, '').trim()}</span>
+            </div>
+            <div className="final-ans-body">
+              {renderInlineWithMath(finalAnsMatch[2], `final-text-${i}`)}
+            </div>
+          </div>
+        );
+        i++;
+        continue;
+      }
+
+      // 3. Formula / Definition / Rule Callout (Purple / Blue Badge)
+      const formulaMatch = trimmed.match(/^(Formula\s*:|Definition\s*:|Theorem\s*:|Given Data\s*:|Rule\s*:)\s*(.*)$/i);
+      if (formulaMatch) {
+        flushList();
+        elements.push(
+          <div key={`formula-badge-${i}`} className="math-formula-callout">
+            <span className="formula-tag-pill">{formulaMatch[1].replace(/:/, '').trim()}</span>
+            <span className="formula-tag-body">{renderInlineWithMath(formulaMatch[2], `formula-text-${i}`)}</span>
+          </div>
+        );
+        i++;
+        continue;
+      }
+
+      // 4. Note / Warning / Important Callout (Amber Alert Card)
+      const noteMatch = trimmed.match(/^(Note\s*:|Important\s*:|Warning\s*:|Caution\s*:|Tip\s*:)\s*(.*)$/i);
+      if (noteMatch) {
+        flushList();
+        elements.push(
+          <div key={`note-card-${i}`} className="math-note-callout">
+            <span className="material-symbols-outlined note-icon" aria-hidden="true">info</span>
+            <div>
+              <strong>{noteMatch[1].trim()} </strong>
+              <span>{renderInlineWithMath(noteMatch[2], `note-text-${i}`)}</span>
+            </div>
+          </div>
+        );
+        i++;
+        continue;
+      }
+
+      // 5. Step or Task Headings (e.g. "Step 1: Compute Means")
       const stepMatch = trimmed.match(/^(Step\s*\d+\s*:|Task\s*\d+\s*:|Question\s*\d+\s*:|###+)\s*(.*)$/i);
       if (stepMatch) {
         flushList();
@@ -238,7 +535,7 @@ export default function MathText({ text, className = '' }) {
         continue;
       }
 
-      // 3. Check for bullet list items: "- ...", "* ...", "• ..."
+      // 6. Bullet lists: "- ...", "* ...", "• ..."
       const bulletMatch = trimmed.match(/^([-*•])\s+(.*)$/);
       if (bulletMatch) {
         if (!listBuffer || listBuffer.type !== 'ul') {
@@ -270,7 +567,7 @@ export default function MathText({ text, className = '' }) {
         continue;
       }
 
-      // 4. Check for numbered list items: "1. ...", "2) ..."
+      // 7. Numbered lists: "1. ...", "2) ..."
       const numMatch = trimmed.match(/^(\d+[\.\)])\s+(.*)$/);
       if (numMatch) {
         if (!listBuffer || listBuffer.type !== 'ol') {
@@ -302,7 +599,7 @@ export default function MathText({ text, className = '' }) {
         continue;
       }
 
-      // 5. Normal paragraph (check if entire line is an auto-math statistical line)
+      // 8. Normal paragraph / Auto-math line
       flushList();
       const autoMath = tryAutoFormatStatsMath(trimmed);
       if (autoMath) {
@@ -326,9 +623,9 @@ export default function MathText({ text, className = '' }) {
     }
 
     flushList();
+    flushTable();
     return elements;
   }, [text]);
 
   return <div className={`math-text-container ${className}`}>{renderedElements}</div>;
 }
-
