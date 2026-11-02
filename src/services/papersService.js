@@ -24,6 +24,10 @@ function setCached(key, data) {
   memoryCache.set(key, { timestamp: Date.now(), data });
 }
 
+export function clearPapersCache() {
+  memoryCache.clear();
+}
+
 /**
  * Sanitizes user/route input before interpolating into PostgREST .or() filters
  * to prevent filter syntax injection.

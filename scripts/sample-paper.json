@@ -1,0 +1,35 @@
+{
+  "subject_code": "CSC211",
+  "subject_name": "Data Structures & Algorithms",
+  "title": "CSC211 — Terminal Examination (Spring 2024)",
+  "term": "Terminal",
+  "year": 2024,
+  "semester": "Spring 2024",
+  "total_marks": 50,
+  "instructor_name": "COMSATS Faculty",
+  "file_url": null,
+  "questions": [
+    {
+      "question_number": 1,
+      "question_text": "Explain the differences between AVL Tree and Red-Black Tree. Under what circumstances is an AVL tree preferred over a Red-Black tree?",
+      "model_answer": "AVL trees are more strictly balanced than Red-Black trees. The balance factor of each node in an AVL tree can only be -1, 0, or +1. Because of this strict balancing, AVL trees provide faster O(log n) lookups. In contrast, Red-Black trees require fewer rotations during insertions and deletions. Therefore, an AVL tree is preferred in lookup-intensive applications like database index search trees.",
+      "marks": 10,
+      "clo": "CLO-2"
+    },
+    {
+      "question_number": 2,
+      "question_text": "Write the algorithm to detect a cycle in a directed graph using Depth First Search (DFS).",
+      "model_answer": "1. Initialize two boolean arrays: visited[] and inStack[] of size V, set all to false.\n2. For each unvisited vertex v:\n   a. Mark v as visited and inStack[v] = true.\n   b. For each adjacent vertex u of v:\n      - If u is not visited, recursively call isCyclic(u).\n      - If inStack[u] is true, a back-edge exists, cycle is detected.\n   c. Pop v from recursion stack (inStack[v] = false).\n3. If no cycle is found, return false.",
+      "marks": 10,
+      "clo": "CLO-3"
+    },
+    {
+      "question_number": 3,
+      "question_text": "What is open addressing in Hash Tables? Differentiate between Linear Probing, Quadratic Probing, and Double Hashing.",
+      "model_answer": "In Open Addressing, all elements are stored directly within the hash table array (no linked lists). When collision occurs, an alternative cell is probed:\n- Linear Probing: Uses h(k, i) = (h'(k) + i) mod m. Suffers from primary clustering.\n- Quadratic Probing: Uses h(k, i) = (h'(k) + c1*i + c2*i^2) mod m. Avoids primary clustering but causes secondary clustering.\n- Double Hashing: Uses h(k, i) = (h1(k) + i*h2(k)) mod m. Best uniform distribution among probing techniques.",
+      "marks": 10,
+      "clo": "CLO-1"
+    }
+  ]
+}
+

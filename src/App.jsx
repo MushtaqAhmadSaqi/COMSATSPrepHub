@@ -394,7 +394,7 @@ export default function App() {
             onOpenAuth={() => setIsAuthOpen(true)}
             onNavigate={handleNavigate}
           >
-            <AdminPaste />
+            <AdminPaste user={user} onNavigate={handleNavigate} onSelectSubject={handleSelectSubject} onSelectPaper={setSelectedPaper} />
           </AdminGuardView>
         );
       case 'gpa':
