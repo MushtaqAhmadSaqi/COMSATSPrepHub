@@ -403,3 +403,44 @@
     padding: 0.5rem 0.75rem;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   7. Lettered & Roman Numeral Sub-part Rows (a., b., i., ii., iii.)
+───────────────────────────────────────────────────────────── */
+.math-subpart-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  margin: 0.625rem 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface-2, #f8fafc);
+  border-left: 3px solid rgba(37, 99, 235, 0.35);
+  line-height: 1.75;
+}
+
+.math-subpart-badge {
+  font-weight: 800;
+  font-size: 0.875rem;
+  color: var(--brand, #1e40af);
+  min-width: 1.5rem;
+  flex-shrink: 0;
+}
+
+.math-subpart-content {
+  flex: 1;
+  min-width: 0;
+  color: var(--text, #0f172a);
+  overflow-x: auto;
+}
+
+.katex-inline-math {
+  padding: 0 0.2rem;
+  line-height: 1.8;
+}
+
+.katex-inline-display {
+  display: block;
+  margin: 0.5rem 0;
+  overflow-x: auto;
+}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   fetchQuestionsForPaperFromSupabase
 } from '../../services/papersService';
@@ -42,30 +42,6 @@ function getPartText(part) {
 }
 
 /* ── Lightweight safe markdown renderer ─────────────────── */
-
-function renderInline(text) {
-  const parts = [];
-  const re = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g;
-  let last = 0;
-  let match;
-
-  while ((match = re.exec(text)) !== null) {
-    if (match.index > last) {
-      parts.push(text.slice(last, match.index));
-    }
-    const token = match[0];
-    if (token.startsWith('`')) {
-      parts.push(<code key={match.index} className="paperview-inline-code">{token.slice(1, -1)}</code>);
-    } else if (token.startsWith('**')) {
-      parts.push(<strong key={match.index}>{token.slice(2, -2)}</strong>);
-    } else {
-      parts.push(<em key={match.index}>{token.slice(1, -1)}</em>);
-    }
-    last = match.index + token.length;
-  }
-  if (last < text.length) parts.push(text.slice(last));
-  return parts.length ? parts : text;
-}
 
 function MarkdownAnswer({ text }) {
   return <MathText text={text} className="paperview-md-body" />;
@@ -116,11 +92,7 @@ export default function PaperView({
     setNoteText(getPaperNote(paperKey));
   }, [paperKey]);
 
-  useEffect(() => {
-    if (!authReady || user) return;
-    setLoading(false);
-    setQuestions([]);
-  }, [authReady, user]);
+
 
   useEffect(() => {
     if (user && (paper?.title || paper?.id)) {
@@ -144,7 +116,7 @@ export default function PaperView({
   }, []);
 
   useEffect(() => {
-    if (!authReady || !user) return undefined;
+    if (!authReady) return undefined;
 
     let cancelled = false;
 
@@ -168,17 +140,11 @@ export default function PaperView({
     return () => {
       cancelled = true;
     };
-  }, [paper, reloadKey, authReady, user]);
+  }, [paper, reloadKey, authReady]);
 
   const toggleAnswer = (id) => {
     setExpandedAnswers((prev) => ({ ...prev, [id]: !prev[id] }));
   };
-
-  useEffect(() => {
-    if (window.MathJax && window.MathJax.typesetPromise) {
-      window.MathJax.typesetPromise().catch(() => {});
-    }
-  }, [questions, expandedAnswers]);
 
   const allExpanded =
     questions.length > 0 && questions.every((q) => Boolean(expandedAnswers[q.id]));
@@ -209,11 +175,6 @@ export default function PaperView({
   const handleSaveNote = () => {
     savePaperNote(paperKey, noteText);
     toast.success('Personal study notes saved!');
-  };
-
-  const handleShareWhatsApp = () => {
-    const shareText = `Study "${paper.title || 'COMSATS Past Paper'}" (${paper.subjectCode || ''}) on COMSATSPrepHub: ${window.location.origin}/#subjects`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
   };
 
   const handleQuizFromPaper = () => {
@@ -276,33 +237,6 @@ export default function PaperView({
     );
   }
 
-  if (requiresAuthentication) {
-    return (
-      <div className="paperview-container">
-        <Breadcrumbs items={breadcrumbItems} />
-        <div
-          className="paperview-exam-sheet"
-          style={{ textAlign: 'center', padding: '4rem 1.5rem' }}
-        >
-          <span
-            className="material-symbols-outlined"
-            style={{ fontSize: '3rem', color: 'var(--brand)' }}
-            aria-hidden="true"
-          >
-            lock
-          </span>
-          <h1 style={{ margin: '1rem 0 0.5rem' }}>Sign in to view this paper</h1>
-          <p style={{ color: 'var(--text-muted)', margin: '0 auto 1.5rem', maxWidth: '30rem' }}>
-            You can browse subjects, paper titles, practice quizzes, and the GPA calculator in guest mode, but sign-in is required to open full exam questions and model answers.
-          </p>
-          <button type="button" className="paperview-btn-secondary" onClick={onRequireAuth}>
-            <span className="material-symbols-outlined" aria-hidden="true">login</span>
-            Sign in to continue
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="paperview-container">
@@ -554,7 +488,7 @@ export default function PaperView({
               <p>No saved questions were found for this paper.</p>
             </div>
           ) : (
-            questions.map((q, index) => {
+            (requiresAuthentication ? questions.slice(0, 2) : questions).map((q, index) => {
               const isExpanded = Boolean(expandedAnswers[q.id]);
               const answerId = `paper-answer-${q.id}`;
               const headingId = `paper-question-${q.id}`;
@@ -659,6 +593,34 @@ export default function PaperView({
             })
           )}
         </div>
+
+        {/* Guest Mode Sign-In Prompt after 2-question preview */}
+        {requiresAuthentication && (
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '2.25rem 1.5rem',
+              margin: '1.5rem 0',
+              borderRadius: '16px',
+              border: '1.5px dashed var(--brand)',
+              background: 'var(--brand-soft)'
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', color: 'var(--brand)' }} aria-hidden="true">
+              lock_open
+            </span>
+            <h3 style={{ margin: '0.5rem 0', fontSize: '1.25rem', fontWeight: 800 }}>
+              Sign in for free to unlock all {questions.length} questions &amp; solutions
+            </h3>
+            <p style={{ color: 'var(--text-muted)', maxWidth: '32rem', margin: '0 auto 1.25rem', fontSize: '0.9rem' }}>
+              You are viewing a 2-question guest preview. Sign in to view the complete exam paper, save personal notes, and bookmark papers across devices.
+            </p>
+            <button type="button" className="btn-download" onClick={onRequireAuth}>
+              <span className="material-symbols-outlined" aria-hidden="true">login</span>
+              Sign In to Unlock Full Paper
+            </button>
+          </div>
+        )}
 
         {/* Download & Report Problem Footer */}
         <div className="paperview-download-footer">

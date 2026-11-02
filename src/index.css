@@ -4,48 +4,53 @@
    DESIGN TOKENS
 ───────────────────────────────────────────────────────────────── */
 :root {
-  --font-display: 'Roboto', 'Inter', sans-serif;
-  --font-body:    'Roboto', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
+  --font-urdu:    'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif;
   --font-family:  var(--font-body);
 
-  /* Academic Navy & Amber Tokens */
-  --brand:        #1e3a8a;
+  /* Academic Navy & Electric Sky Tokens */
+  --brand:        #1e40af;
   --brand-2:      #2563eb;
-  --brand-light:  #3b82f6;
-  --brand-dark:   #1e1b4b;
+  --brand-light:  #38bdf8;
+  --brand-dark:   #1e3a8a;
   --brand-hover:  #1d4ed8;
   --brand-ink:    #1e3a8a;
   --brand-deep:   #172554;
-  --brand-soft:   rgba(30, 58, 138, 0.08);
-  --brand-soft-2: rgba(30, 58, 138, 0.14);
+  --brand-soft:   rgba(37, 99, 235, 0.08);
+  --brand-soft-2: rgba(37, 99, 235, 0.15);
 
-  /* Amber Accent */
+  /* Scholar Amber Accent */
   --accent:        #d97706;
   --accent-hover:  #b45309;
   --accent-bright: #fbbf24;
   --accent-soft:   rgba(217, 119, 6, 0.12);
 
   /* Surfaces (light mode) */
-  --bg:            #f7f6f2;
+  --bg:            #f8fafc;
   --surface:       #ffffff;
-  --surface-2:     #f8fafc;
-  --surface-3:     #f1f5f9;
+  --surface-2:     #f1f5f9;
+  --surface-3:     #e2e8f0;
   --border:        #e2e8f0;
   --border-strong: #cbd5e1;
 
-  /* Text (light mode) */
-  --text:        #1c1917;
-  --text-muted:  #374151;
+  /* Text (light mode - WCAG 2.2 AA verified) */
+  --text:        #0f172a;
+  --text-muted:  #334155;
   --text-subtle: #475569;
 
   /* Semantic Colors */
-  --success: #059669;
-  --warning: #d97706;
-  --danger:  #dc2626;
-  --info:    #2563eb;
+  --success:      #059669;
+  --success-soft: rgba(5, 150, 105, 0.12);
+  --warning:      #d97706;
+  --warning-soft: rgba(217, 119, 6, 0.12);
+  --danger:       #dc2626;
+  --danger-soft:  rgba(220, 38, 38, 0.12);
+  --info:         #2563eb;
 
   /* Focus ring */
-  --ring: rgba(30, 58, 138, 0.25);
+  --ring: rgba(37, 99, 235, 0.28);
 
   /* Spacing Scale */
   --space-1:  0.25rem;
@@ -68,10 +73,10 @@
   --radius-pill: 9999px;
 
   /* Elevation Shadows */
-  --shadow-1: 0 2px 8px rgba(30, 58, 138, 0.04);
-  --shadow-2: 0 6px 20px rgba(30, 58, 138, 0.07), 0 2px 6px rgba(30, 58, 138, 0.04);
-  --shadow-3: 0 14px 40px rgba(30, 58, 138, 0.12), 0 4px 12px rgba(30, 58, 138, 0.05);
-  --shadow-brand: 0 6px 20px rgba(30, 58, 138, 0.25);
+  --shadow-1: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
+  --shadow-2: 0 6px 20px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  --shadow-3: 0 14px 36px -4px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.05);
+  --shadow-brand: 0 6px 20px -2px rgba(37, 99, 235, 0.3);
 
   /* Typography Scale */
   --text-xs:   0.75rem;
@@ -98,38 +103,38 @@
 
 /* Dark Mode Tokens */
 html.dark {
-  --bg:            #0a0f1e;
+  --bg:            #090d16;
   --surface:       #111827;
-  --surface-2:     #1f2937;
-  --surface-3:     #374151;
-  --border:        #1f2937;
-  --border-strong: #374151;
+  --surface-2:     #1e293b;
+  --surface-3:     #334155;
+  --border:        rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
 
-  --text:        #f9fafb;
-  --text-muted:  #d1d5db;
-  --text-subtle: #9ca3af;
+  --text:        #f8fafc;
+  --text-muted:  #cbd5e1;
+  --text-subtle: #94a3b8;
 
-  --brand:        #6d8dff;
+  --brand:        #60a5fa;
   --brand-2:      #3b82f6;
   --brand-light:  #93c5fd;
   --brand-dark:   #1e3a8a;
-  --brand-hover:  #60a5fa;
-  --brand-ink:    #6d8dff;
-  --brand-deep:   #93c5fd;
-  --brand-soft:   rgba(109, 141, 255, 0.12);
-  --brand-soft-2: rgba(109, 141, 255, 0.22);
+  --brand-hover:  #93c5fd;
+  --brand-ink:    #93c5fd;
+  --brand-deep:   #bfdbfe;
+  --brand-soft:   rgba(96, 165, 250, 0.12);
+  --brand-soft-2: rgba(96, 165, 250, 0.22);
 
   --accent:        #fbbf24;
   --accent-hover:  #f59e0b;
   --accent-bright: #fcd34d;
   --accent-soft:   rgba(251, 191, 36, 0.15);
 
-  --ring: rgba(109, 141, 255, 0.3);
+  --ring: rgba(96, 165, 250, 0.35);
 
   --shadow-1: 0 2px 10px rgba(0, 0, 0, 0.35);
-  --shadow-2: 0 6px 24px rgba(0, 0, 0, 0.40), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --shadow-2: 0 6px 24px rgba(0, 0, 0, 0.42), 0 2px 6px rgba(0, 0, 0, 0.25);
   --shadow-3: 0 14px 40px rgba(0, 0, 0, 0.55), 0 4px 14px rgba(0, 0, 0, 0.30);
-  --shadow-brand: 0 6px 20px rgba(109, 141, 255, 0.3);
+  --shadow-brand: 0 6px 20px rgba(96, 165, 250, 0.3);
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -566,4 +571,13 @@ html.dark .section-badge {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+
+/* Bilingual Urdu Nastaliq RTL Typography */
+[dir="rtl"],
+.urdu-text {
+  font-family: var(--font-urdu);
+  line-height: 2.15;
+  letter-spacing: 0;
 }

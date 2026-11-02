@@ -1,14 +1,14 @@
 /* GPA Calculator — structured editor with a quiet results panel */
 
 .grade-workspace {
-  --gw-surface: #ffffff;
-  --gw-text: #172238;
-  --gw-muted: #667085;
-  --gw-line: #e5e9f0;
-  --gw-subtle: #f7f8fa;
-  --gw-brand: #2859ce;
-  --gw-soft: #eef3ff;
-  --gw-error: #b42318;
+  --gw-surface: var(--surface);
+  --gw-text: var(--text);
+  --gw-muted: var(--text-subtle);
+  --gw-line: var(--border);
+  --gw-subtle: var(--surface-2);
+  --gw-brand: var(--brand);
+  --gw-soft: var(--brand-soft);
+  --gw-error: var(--danger);
 
   width: 100%;
   max-width: 1200px;
@@ -857,5 +857,40 @@ html.dark .grade-workspace {
   .grade-workspace *::after {
     transition: none !important;
     animation: none !important;
+  }
+}
+
+
+/* Print Transcript Stylesheet */
+@media print {
+  .header-sticky,
+  .mobile-bottom-nav,
+  .app-footer,
+  .grade-workspace__add,
+  .grade-workspace__remove,
+  .grade-workspace__reset,
+  .grade-workspace__header-tag,
+  .grade-workspace__reference,
+  .scroll-top-btn,
+  .cookie-notice {
+    display: none !important;
+  }
+
+  .grade-workspace {
+    max-width: 100% !important;
+    padding: 0 !important;
+    color: #000000 !important;
+  }
+
+  .grade-workspace__layout {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .grade-workspace__panel,
+  .grade-workspace__result-card {
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+    break-inside: avoid;
   }
 }

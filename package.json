@@ -10,9 +10,7 @@
     "upload:paper": "node scripts/upload-paper.mjs",
     "lint": "node scripts/lint.cjs",
     "test": "node tests/app.test.mjs",
-    "analyze": "vite build --mode analyze",
-    "build:css": "tailwindcss -c tailwind.config.cjs -i ./legacy/web/styles/tailwind-input.css -o ./legacy/web/styles/tailwind-built.css --minify",
-    "watch:css": "tailwindcss -c tailwind.config.cjs -i ./legacy/web/styles/tailwind-input.css -o ./legacy/web/styles/tailwind-built.css --watch"
+    "analyze": "vite build --mode analyze"
   },
   "devDependencies": {
     "@tailwindcss/aspect-ratio": "^0.4.2",

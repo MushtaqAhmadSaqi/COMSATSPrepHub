@@ -5,12 +5,10 @@
  * offline question bank fallback.
  */
 
-const SERVER_QUIZ_API_URL = '/api/generate-quiz';
-
 /**
  * Subject-specific question banks for COMSATS University courses.
  */
-export const SUBJECT_QUESTION_BANKS = {
+const SUBJECT_QUESTION_BANKS = {
   // CSC101: Introduction to ICT
   csc101: [
     {
@@ -238,79 +236,6 @@ export const SUBJECT_QUESTION_BANKS = {
     }
   ]
 };
-
-async function callServerQuizApi({ subject, subjectCode, numQuestions, difficulty, signal }) {
-  try {
-    const response = await fetch(SERVER_QUIZ_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal,
-      body: JSON.stringify({
-        subject,
-        subjectCode,
-        difficulty,
-        questionCount: numQuestions
-      })
-    });
-
-    if (!response.ok) return null;
-
-    const payload = await response.json();
-    const sourceQuestions = Array.isArray(payload) ? payload : payload.questions;
-    if (!Array.isArray(sourceQuestions) || sourceQuestions.length === 0) return null;
-
-    return sourceQuestions
-      .map((item) => {
-        if (!item.question || !Array.isArray(item.options) || item.options.length !== 4) return null;
-        const correct = Number.isInteger(item.correctAnswer)
-          ? item.correctAnswer
-          : Number.isInteger(item.correct)
-            ? item.correct
-            : 0;
-
-        return {
-          question: String(item.question).trim(),
-          options: item.options.map((option) => String(option).trim()),
-          correct: Math.max(0, Math.min(3, correct)),
-          hint: String(item.explanation || item.hint || 'Review the core concept behind this answer.').trim(),
-          source: 'api'
-        };
-      })
-      .filter(Boolean)
-      .slice(0, numQuestions);
-  } catch {
-    return null;
-  }
-}
-
-export async function generateQuizWithGemini({
-  subject,
-  subjectCode,
-  numQuestions = 10,
-  difficulty = 'Medium',
-  signal
-}) {
-  const serverQuestions = await callServerQuizApi({
-    subject,
-    subjectCode,
-    numQuestions,
-    difficulty,
-    signal
-  });
-  if (serverQuestions && serverQuestions.length > 0) return serverQuestions;
-
-  return getOfflineQuestions(subject, subjectCode, numQuestions, difficulty);
-}
-
-export async function generateExamPaperQuestions({
-  subjectName = '',
-  subjectCode = '',
-  paperTitle = '',
-  term = 'Terminal',
-  year = '2023'
-}) {
-  return getOfflineExamQuestions(subjectName, subjectCode, paperTitle, term, year);
-}
 
 export function getOfflineExamQuestions(
   subjectName = '',

@@ -1,5 +1,5 @@
 import React, { useId, useRef, useState } from 'react';
-import { GRADING_SCALE } from '../../services/gpaEngine';
+import { GRADING_SCALE, calcSessionalCourseResult } from '../../services/gpaEngine';
 import { getSemesterGpaHistory, saveSemesterGpaEntry } from '../../utils/studyTracker';
 import { useToast } from '../../utils/toast';
 import './GpaCalculator.css';
@@ -50,6 +50,22 @@ export default function GpaCalculator() {
   // Semester history chart state
   const [semesterHistory, setSemesterHistory] = useState(() => getSemesterGpaHistory());
   const [semesterLabel, setSemesterLabel] = useState('Current Sem');
+
+  // Internal Sessional Marks Estimator state (Quizzes 15%, Assignments 10%, Midterm 25%, Final 50% + optional Lab)
+  const [sessionalInputs, setSessionalInputs] = useState({
+    quizObtained: '12',
+    quizTotal: '15',
+    assignObtained: '8.5',
+    assignTotal: '10',
+    midObtained: '20',
+    midTotal: '25',
+    finalObtained: '40',
+    finalTotal: '50',
+    hasLab: false,
+    labPercentage: '82',
+    creditHours: '3'
+  });
+  const sessionalResult = calcSessionalCourseResult(sessionalInputs);
 
   const evaluatedCourses = courses.map((course) => {
     const credits = parseNumber(course.credits);
@@ -681,6 +697,108 @@ export default function GpaCalculator() {
               {semesterHistory.map((item) => (
                 <span key={item.id}>{item.label}</span>
               ))}
+            </div>
+          </section>
+
+          {/* Internal Course Sessional Marks Estimator (Quiz 15% + Assign 10% + Mid 25% + Final 50%) */}
+          <section
+            className="grade-workspace__panel"
+            style={{ marginTop: '1.25rem' }}
+            aria-label="Course sessional marks to grade estimator"
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div>
+                <p className="grade-workspace__section-label">04 / INTERNAL MARKS ESTIMATOR</p>
+                <h2 style={{ fontSize: '1.125rem', fontWeight: 800, margin: '0.2rem 0' }}>
+                  Sessional, Midterm &amp; Final Marks → Grade
+                </h2>
+              </div>
+              <span className="grade-workspace__count" style={{ fontSize: '0.85rem', color: 'var(--gw-brand)' }}>
+                {sessionalResult.combinedPct}% → Grade {sessionalResult.letter} ({sessionalResult.point.toFixed(2)})
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))', gap: '0.75rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--gw-muted)', marginBottom: '4px' }}>
+                  Quizzes (out of 15)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="15"
+                  step="0.5"
+                  value={sessionalInputs.quizObtained}
+                  onChange={(e) => setSessionalInputs((s) => ({ ...s, quizObtained: e.target.value }))}
+                  aria-label="Quizzes obtained out of 15"
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--gw-muted)', marginBottom: '4px' }}>
+                  Assignments (out of 10)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="10"
+                  step="0.5"
+                  value={sessionalInputs.assignObtained}
+                  onChange={(e) => setSessionalInputs((s) => ({ ...s, assignObtained: e.target.value }))}
+                  aria-label="Assignments obtained out of 10"
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--gw-muted)', marginBottom: '4px' }}>
+                  Midterm (out of 25)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="25"
+                  step="0.5"
+                  value={sessionalInputs.midObtained}
+                  onChange={(e) => setSessionalInputs((s) => ({ ...s, midObtained: e.target.value }))}
+                  aria-label="Midterm obtained out of 25"
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--gw-muted)', marginBottom: '4px' }}>
+                  Terminal / Final (out of 50)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="50"
+                  step="0.5"
+                  value={sessionalInputs.finalObtained}
+                  onChange={(e) => setSessionalInputs((s) => ({ ...s, finalObtained: e.target.value }))}
+                  aria-label="Final exam obtained out of 50"
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', marginTop: '0.85rem', fontSize: '0.8125rem' }}>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', color: 'var(--gw-muted)' }}>
+                <input
+                  type="checkbox"
+                  checked={sessionalInputs.hasLab}
+                  onChange={(e) => setSessionalInputs((s) => ({ ...s, hasLab: e.target.checked }))}
+                />
+                Include 1-Credit Lab?
+              </label>
+              {sessionalInputs.hasLab && (
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--gw-muted)' }}>
+                  Lab Total (%):
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={sessionalInputs.labPercentage}
+                    onChange={(e) => setSessionalInputs((s) => ({ ...s, labPercentage: e.target.value }))}
+                    style={{ width: '76px', height: '34px' }}
+                  />
+                </label>
+              )}
             </div>
           </section>
 

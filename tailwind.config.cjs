@@ -2,14 +2,14 @@ module.exports = {
   darkMode: 'class',
   content: [
     './index.html',
-    './src/**/*.{js,jsx}',
-    './legacy/web/**/*.html',
-    './legacy/web/**/*.js'
+    './src/**/*.{js,jsx}'
   ],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif']
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Space Grotesk', 'Inter', 'sans-serif'],
+        urdu: ['"Noto Nastaliq Urdu"', '"Jameel Noori Nastaleeq"', 'serif']
       },
       colors: {
         primary: '#0ea5e9',
@@ -22,7 +22,10 @@ module.exports = {
           100: '#e0f2fe',
           400: '#38bdf8',
           500: '#0ea5e9',
-          600: '#0284c7'
+          600: '#0284c7',
+          700: '#1d4ed8',
+          800: '#1e3a8a',
+          900: '#172554'
         }
       }
     }
@@ -30,6 +33,6 @@ module.exports = {
   plugins: [
     require('@tailwindcss/typography'),
     require('@tailwindcss/forms'),
-    require('@tailwindcss/aspect-ratio'),
+    require('@tailwindcss/aspect-ratio')
   ]
 };

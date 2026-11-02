@@ -7,32 +7,44 @@ import { DEFAULT_SUBJECTS } from '../../constants/subjects';
 import { useToast } from '../../utils/toast';
 import './AdminPaste.css';
 
-export const RLS_FIX_SQL = `-- 1. Ensure Row-Level Security is enabled
+const RLS_FIX_SQL = `-- 1. Ensure Row-Level Security is enabled
 ALTER TABLE past_papers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE questions ENABLE ROW LEVEL SECURITY;
 
--- 2. Allow everyone to view (read) past papers and questions
+-- 2. Admin helper function (checks server-controlled app_metadata.role = 'admin')
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false);
+$$;
+
+-- 3. Public read access for students
 DROP POLICY IF EXISTS "Allow public read on past_papers" ON past_papers;
 CREATE POLICY "Allow public read on past_papers" ON past_papers FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Allow public read on questions" ON questions;
 CREATE POLICY "Allow public read on questions" ON questions FOR SELECT USING (true);
 
--- 3. Allow inserting, updating, and deleting past papers
+-- 4. Admin-only write access (prevents unauthorized modification/deletion)
 DROP POLICY IF EXISTS "Allow write access on past_papers" ON past_papers;
-CREATE POLICY "Allow write access on past_papers" 
-ON past_papers FOR ALL 
-USING (true) 
-WITH CHECK (true);
+CREATE POLICY "Allow admin write access on past_papers"
+ON past_papers FOR ALL
+TO authenticated
+USING (public.is_admin())
+WITH CHECK (public.is_admin());
 
--- 4. Allow inserting, updating, and deleting questions
 DROP POLICY IF EXISTS "Allow write access on questions" ON questions;
-CREATE POLICY "Allow write access on questions" 
-ON questions FOR ALL 
-USING (true) 
-WITH CHECK (true);`;
+CREATE POLICY "Allow admin write access on questions"
+ON questions FOR ALL
+TO authenticated
+USING (public.is_admin())
+WITH CHECK (public.is_admin());`;
 
-export const AI_MASTER_PROMPT = `You are a Senior Academic Examiner and Solutions Specialist for COMSATS University Islamabad.
+const AI_MASTER_PROMPT = `You are a Senior Academic Examiner and Solutions Specialist for COMSATS University Islamabad.
 I will attach or provide raw content(photos, scans, PDF, or text) of an official COMSATS examination paper.
 
 Your mission is to transcribe, structure, and provide complete, high - scoring model answers in the EXACT JSON format below so it directly renders with rich LaTeX math, interactive tables, and diagrams in COMSATSPrepHub.
@@ -135,25 +147,35 @@ const SAMPLE_PAYLOAD = {
  * Fault-tolerant JSON parser for AI outputs.
  * Repairs unescaped LaTeX backslashes (\approx, \times, \frac), trailing commas, and code blocks.
  */
-function extractAndRepairJson(input) {
-  let cleaned = String(input || '').trim();
+const LATEX_CONTROL_ESCAPE_PREFIXES = /^(?:frac|forall|flat|fbox|frame|text|textbf|textit|textrm|texttt|times|theta|vartheta|tau|tilde|to|top|triangle|tan|tanh|therefore|tiny|tfrac|begin|bar|beta|binom|big|Big|bigg|Bigg|backslash|bot|bowtie|bullet|boxed|bm|bf|bmod|breve|right|rightarrow|Rightarrow|leftrightarrow|Leftrightarrow|rho|varrho|rangle|rceil|rfloor|rm|rule|neq|ne|nabla|nu|natural|neg|ni|not|notin|newline|normalsize|nolimits|nonumber)\b/;
+
+/**
+ * State-machine JSON repair for AI-generated past paper payloads.
+ * Safely handles:
+ * - Already double-escaped LaTeX (\\frac, \\sqrt) without triple-escaping
+ * - Single-escaped LaTeX (\frac, \text, \textbf, \rightarrow, \sqrt, \approx)
+ * - Mixed single- and double-escaped backslashes in the same string
+ * - Raw literal newlines/tabs inside JSON string values
+ * - Trailing commas and markdown code fences
+ */
+export function extractAndRepairJson(input) {
+  let cleaned = String(input || "").trim();
 
   // Strip code fences if present (```json ... ```)
-  const codeBlockMatch = cleaned.match(/```(?: json) ?\s * ([\s\S] *?) \s * ```/i);
+  const codeBlockMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
   if (codeBlockMatch && codeBlockMatch[1]) {
     cleaned = codeBlockMatch[1].trim();
   } else {
-    // Find outermost JSON brackets
-    const firstBrace = cleaned.indexOf('{');
-    const firstBracket = cleaned.indexOf('[');
+    const firstBrace = cleaned.indexOf("{");
+    const firstBracket = cleaned.indexOf("[");
 
     if (firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
-      const lastBrace = cleaned.lastIndexOf('}');
+      const lastBrace = cleaned.lastIndexOf("}");
       if (lastBrace !== -1) {
         cleaned = cleaned.substring(firstBrace, lastBrace + 1);
       }
     } else if (firstBracket !== -1) {
-      const lastBracket = cleaned.lastIndexOf(']');
+      const lastBracket = cleaned.lastIndexOf("]");
       if (lastBracket !== -1) {
         cleaned = cleaned.substring(firstBracket, lastBracket + 1);
       }
@@ -161,23 +183,103 @@ function extractAndRepairJson(input) {
   }
 
   // Remove trailing commas before } or ]
-  cleaned = cleaned.replace(/,\s*([}\]])/g, '$1');
+  cleaned = cleaned.replace(/,\s*([}\]])/g, "$1");
 
-  // Try direct parse first
-  try {
-    return JSON.parse(cleaned);
-  } catch (initialErr) {
-    // Attempt escape repair for LaTeX commands and unescaped backslashes
-    const repaired = cleaned.replace(/\\(?!["\\/bfnrt]|u[0-9a-fA-F]{4})/g, () => '\\\\');
+  // Walk character-by-character to repair string literals safely
+  let out = "";
+  let inString = false;
+  let i = 0;
 
-    try {
-      return JSON.parse(repaired);
-    } catch (secondErr) {
-      // Also repair LaTeX words starting with \t or \f (\times, \theta, \frac, \text)
-      const repairedLatex = repaired.replace(/\\(times|theta|text|to|top|tau|tilde|frac|forall)\b/g, '\\\\$1');
-      return JSON.parse(repairedLatex);
+  while (i < cleaned.length) {
+    const ch = cleaned[i];
+
+    if (!inString) {
+      if (ch === "\"") {
+        inString = true;
+      }
+      out += ch;
+      i++;
+      continue;
     }
+
+    // Inside a JSON string literal
+    if (ch === "\"") {
+      inString = false;
+      out += ch;
+      i++;
+      continue;
+    }
+
+    if (ch === "\n") {
+      out += "\\n";
+      i++;
+      continue;
+    }
+    if (ch === "\r") {
+      i++;
+      continue;
+    }
+    if (ch === "\t") {
+      out += "\\t";
+      i++;
+      continue;
+    }
+
+    if (ch === "\\") {
+      const next = cleaned[i + 1];
+      if (next === undefined) {
+        out += "\\\\";
+        i++;
+        continue;
+      }
+
+      // Already double-escaped backslash (\\): consume both atomically!
+      if (next === "\\") {
+        out += "\\\\";
+        i += 2;
+        continue;
+      }
+
+      // Valid JSON quote or slash escape
+      if (next === "\"" || next === "/") {
+        out += "\\" + next;
+        i += 2;
+        continue;
+      }
+
+      // Valid Unicode escape \uXXXX
+      if (next === "u" && /^[0-9a-fA-F]{4}/.test(cleaned.slice(i + 2, i + 6))) {
+        out += cleaned.slice(i, i + 6);
+        i += 6;
+        continue;
+      }
+
+      // Ambiguous control escapes (\b, \f, \n, \r, \t): check if followed by a LaTeX command name
+      if (next === "b" || next === "f" || next === "n" || next === "r" || next === "t") {
+        const restWord = cleaned.slice(i + 1);
+        if (LATEX_CONTROL_ESCAPE_PREFIXES.test(restWord)) {
+          // It is a single-escaped LaTeX command like \frac, \text, \textbf, \rightarrow, \neq!
+          out += "\\\\";
+          i++;
+          continue;
+        }
+        // Genuine \n, \r, \t, \b, \f escape
+        out += "\\" + next;
+        i += 2;
+        continue;
+      }
+
+      // Any other single-escaped LaTeX command (\sqrt, \cdot, \approx, \le, etc.): double the backslash
+      out += "\\\\";
+      i++;
+      continue;
+    }
+
+    out += ch;
+    i++;
   }
+
+  return JSON.parse(out);
 }
 
 /**
@@ -631,7 +733,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
           <div className="ai-prompt-helper-actions">
             <button
               type="button"
-              className={`btn - copy - prompt ${ hasCopiedPrompt ? 'copied' : '' } `}
+              className={`btn-copy-prompt ${hasCopiedPrompt ? 'copied' : ''}`}
               onClick={handleCopyPrompt}
               title="Copy universal prompt for ChatGPT, Claude, or Gemini"
             >
@@ -741,7 +843,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
               {uploadResults.map((r, i) => (
                 <div key={i} className="admin-result-item">
                   <div className="result-badge-wrap">
-                    <span className={`result - tag ${ r.action === 'replaced' ? 'tag-replaced' : 'tag-created' } `}>
+                    <span className={`result-tag ${r.action === 'replaced' ? 'tag-replaced' : 'tag-created'}`}>
                       <span className="material-symbols-outlined" aria-hidden="true">
                         {r.action === 'replaced' ? 'sync' : 'add_circle'}
                       </span>
@@ -827,7 +929,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
               <div className="rls-action-buttons">
                 <button
                   type="button"
-                  className={`btn - copy - prompt ${ hasCopiedSql ? 'copied' : '' } `}
+                  className={`btn-copy-prompt ${hasCopiedSql ? 'copied' : ''}`}
                   onClick={handleCopySql}
                 >
                   <span className="material-symbols-outlined" aria-hidden="true">

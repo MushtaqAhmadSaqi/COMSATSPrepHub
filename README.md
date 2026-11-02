@@ -32,11 +32,11 @@
   <img src="./public/readme-study-loop.svg" alt="Animated COMSATSPrepHub study loop" width="900" />
 </p>
 
-## 📸 Screenshots & Preview Placeholders
+## 🧭 Core Study Modules
 
-| Home & Global Course Search | Past Paper Viewer & Topic Insights | Timed Quiz & Bilingual Helper | COMSATS GPA & Target Planner |
+| Home & Global Course Search | Past Paper Library & LaTeX Viewer | Timed Quiz & Bilingual (`EN / اردو`) Helper | COMSATS GPA, Sessional & Target Planner |
 |:---:|:---:|:---:|:---:|
-| `docs/screenshots/home-preview.png` | `docs/screenshots/paper-viewer.png` | `docs/screenshots/quiz-mode.png` | `docs/screenshots/gpa-calculator.png` |
+| Instant course & paper search (`Ctrl+K`) | Verified Midterm & Terminal solutions (`/#subjects`) | 45s/Q exam timer & weak-topic drills (`/#quiz`) | 4.00 SGPA, Retakes, Sessional & Trend Chart (`/#gpa`) |
 
 ## ✨ Features
 

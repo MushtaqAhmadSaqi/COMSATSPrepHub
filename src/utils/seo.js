@@ -19,6 +19,8 @@ const PAGE_TITLES = {
   'admin-paste': 'Admin Paper Parser — COMSATSPrepHub',
   gpa: 'COMSATS GPA & CGPA Calculator — COMSATSPrepHub',
   'study-hub': 'Study Hub & Flashcards — COMSATSPrepHub',
+  faq: 'FAQ & Support — COMSATSPrepHub',
+  contact: 'Contact Us — COMSATSPrepHub',
   'faq-contact': 'FAQ & Support — COMSATSPrepHub',
   account: 'Account Settings — COMSATSPrepHub'
 };

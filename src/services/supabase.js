@@ -2,8 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 import { logger } from '../utils/logger';
 
 // Read exclusively from environment variables — never hardcode project credentials in source code
-export const SUPABASE_URL = String(import.meta.env?.VITE_SUPABASE_URL || '').trim();
-export const SUPABASE_KEY = String(import.meta.env?.VITE_SUPABASE_ANON_KEY || '').trim();
+const SUPABASE_URL = String(import.meta.env?.VITE_SUPABASE_URL || '').trim();
+const SUPABASE_KEY = String(import.meta.env?.VITE_SUPABASE_ANON_KEY || '').trim();
 export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_KEY);
 
 function createFallbackSupabaseClient() {

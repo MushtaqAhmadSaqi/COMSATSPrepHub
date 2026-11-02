@@ -1,9 +1,4 @@
-import { isSafeRedirectUrl } from './sanitize.js';
-
-const DEFAULT_ADMIN_EMAILS = [
-  'mushtaqsaqi00@gmail.com',
-  'saqijanitormiki@gmail.com'
-];
+import { isSafeRedirectUrl, isSafePdfUrl } from './sanitize.js';
 
 function getConfiguredAdminEmails() {
   const envList =
@@ -13,14 +8,14 @@ function getConfiguredAdminEmails() {
           .map((e) => e.trim().toLowerCase())
           .filter(Boolean)
       : [];
-  return new Set([...DEFAULT_ADMIN_EMAILS, ...envList]);
+  return new Set(envList);
 }
 
 /**
  * Checks if a user has administrator privileges.
- * Checks Supabase app_metadata.role first (server-controlled), then falls back
- * to configured admin email allowlist.
- * Note: All write operations are independently enforced by Supabase RLS (`public.is_admin()`).
+ * Prioritizes Supabase server-controlled app_metadata.role === 'admin',
+ * then falls back to VITE_ADMIN_EMAILS env allowlist for UI routing.
+ * All database writes are independently enforced by Supabase RLS (`public.is_admin()`).
  */
 export function isAdminUser(user) {
   if (!user) return false;
@@ -31,12 +26,7 @@ export function isAdminUser(user) {
 }
 
 export function isSafeHttpUrl(value) {
-  try {
-    const url = new URL(String(value || '').trim());
-    return url.protocol === 'http:' || url.protocol === 'https:';
-  } catch {
-    return false;
-  }
+  return isSafePdfUrl(value);
 }
 
-export { isSafeRedirectUrl };
+export { isSafeRedirectUrl, isSafePdfUrl };

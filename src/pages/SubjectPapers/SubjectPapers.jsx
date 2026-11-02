@@ -380,19 +380,10 @@ export default function SubjectPapers({
             {visiblePapers.map((paper) => {
               const bookmarked = isPaperBookmarked(paper.id);
               return (
-                <div
+                <article
                   key={paper.id}
                   className="paper-item-card"
                   onClick={() => onViewPaper(paper)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      onViewPaper(paper);
-                    }
-                  }}
-                  aria-label={`View ${paper.title}`}
                 >
                   <div className="paper-item-icon" aria-hidden="true">
                     <span className="material-symbols-outlined">description</span>
@@ -459,7 +450,7 @@ export default function SubjectPapers({
                       {bookmarked ? 'bookmark_added' : 'bookmark_add'}
                     </span>
                   </button>
-                </div>
+                </article>
               );
             })}
           </div>

@@ -1,3 +1,4 @@
+import { supabase, isSupabaseConfigured } from '../services/supabase';
 const STORAGE_KEY = 'pph_study_history';
 const BOOKMARKS_KEY = 'pph_bookmarks';
 const NOTES_KEY = 'pph_paper_notes';
@@ -148,7 +149,7 @@ export function getWeakTopicsSummary() {
     .sort((a, b) => a.averageAccuracy - b.averageAccuracy);
 }
 
-export function getStudyStreak() {
+function getStudyStreak() {
   const history = readHistory();
   if (history.length === 0) return 0;
 
@@ -325,7 +326,7 @@ export function recordDailyChallengeCompletion(score, total = 5) {
 }
 
 /* ── Spaced Repetition Flashcards ── */
-export const DEFAULT_FLASHCARDS = [
+const DEFAULT_FLASHCARDS = [
   { id: 'fc-1', subjectCode: 'CSC211', front: 'What is the time complexity of searching in a balanced AVL Tree?', back: 'O(log n) in both average and worst cases because height is strictly balanced within ±1.' },
   { id: 'fc-2', subjectCode: 'CSC211', front: 'When does a Deadlock occur in Operating Systems (Coffman conditions)?', back: '1. Mutual Exclusion, 2. Hold and Wait, 3. No Preemption, 4. Circular Wait.' },
   { id: 'fc-3', subjectCode: 'CSC241', front: 'Difference between Compile-Time and Run-Time Polymorphism in C++?', back: 'Compile-time uses function/operator overloading; Run-time uses virtual functions and vtable dynamic dispatch.' },
@@ -348,12 +349,13 @@ export function reviewFlashcard(cardId, rating = 'good') {
   const list = getFlashcardsQueue();
   const intervalsMs = {
     again: 60 * 1000,
+    hard: 10 * 60 * 1000,
     good: 24 * 3600 * 1000,
     easy: 3 * 24 * 3600 * 1000
   };
   const updated = list.map((card) => {
     if (card.id !== cardId) return card;
-    const nextBox = rating === 'again' ? 1 : Math.min(5, (card.box || 1) + 1);
+    const nextBox = rating === 'again' || rating === 'hard' ? 1 : Math.min(5, (card.box || 1) + 1);
     return {
       ...card,
       box: nextBox,
@@ -364,6 +366,7 @@ export function reviewFlashcard(cardId, rating = 'good') {
   safeWriteJson(FLASHCARDS_KEY, updated);
   return updated;
 }
+
 
 export function addCustomFlashcard({ subjectCode, front, back }) {
   const list = getFlashcardsQueue();
@@ -476,6 +479,22 @@ export function addModerationSubmission(entry) {
   };
   const next = [item, ...current].slice(0, 50);
   safeWriteJson(SUBMISSIONS_KEY, next);
+
+  if (isSupabaseConfigured) {
+    supabase
+      .from('paper_submissions')
+      .insert({
+        type: item.type,
+        subject_code: item.subjectCode,
+        title: item.title,
+        contributor: item.contributor,
+        details: item.details,
+        status: 'pending'
+      })
+      .then(() => {})
+      .catch(() => {});
+  }
+
   return item;
 }
 

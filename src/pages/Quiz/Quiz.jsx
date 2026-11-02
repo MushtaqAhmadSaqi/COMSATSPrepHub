@@ -560,9 +560,8 @@ export default function Quiz() {
               <span
                 role="timer"
                 aria-label="Time remaining"
-                className="quiz-counter"
+                className={`quiz-counter ${timeLeftSec < 30 ? "quiz-timer--urgent" : ""}`}
                 style={{
-                  color: timeLeftSec < 30 ? 'var(--danger)' : 'var(--brand)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.25rem'
@@ -789,6 +788,7 @@ export default function Quiz() {
                     fontSize: '0.8125rem',
                     lineHeight: 1.55
                   }}
+                  className={explainLang === 'ur' ? 'urdu-explanation' : ''}
                   dir={explainLang === 'ur' ? 'rtl' : 'ltr'}
                 >
                   {buildStepByStepExplanation(q, explainLang)}

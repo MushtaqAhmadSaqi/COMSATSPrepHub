@@ -7,9 +7,12 @@
     <meta name="description" content="Access verified COMSATS University past papers, practice quizzes, AI quiz generation, flashcards, and SGPA/CGPA calculation. Built by students, for students." />
     <meta name="keywords" content="COMSATS past papers, COMSATS exam prep, COMSATS quiz, GPA calculator, CSC211, CSC101, MTH104, university exam preparation" />
     <meta name="author" content="Mushtaq Ahmad Saqi" />
-    <meta name="theme-color" content="#1e3a8a" />
+    <meta name="theme-color" content="#1e40af" />
     <meta name="color-scheme" content="light dark" />
     <link rel="canonical" href="https://comsatsprephub.vercel.app/" />
+
+    <!-- Synchronous Dark Mode Initializer (No FOUC, CSP-safe) -->
+    <script src="/theme-init.js"></script>
 
     <!-- Open Graph / WhatsApp / Social Sharing -->
     <meta property="og:type" content="website" />
@@ -36,41 +39,64 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
-    <!-- Fonts -->
+    <!-- Fonts (Inter + Space Grotesk + Noto Nastaliq Urdu + Material Symbols) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@600;700&family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
 
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data (JSON-LD: WebSite + EducationalOrganization + FAQPage) -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "COMSATSPrepHub",
-        "url": "https://comsatsprephub.vercel.app/",
-        "description": "Exam-preparation platform for COMSATS University students with verified past papers, practice quizzes, AI quiz generation, flashcards, and SGPA/CGPA calculator.",
-        "publisher": {
-          "@type": "Organization",
-          "name": "COMSATSPrepHub Student Team",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "https://comsatsprephub.vercel.app/logo.png"
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "name": "COMSATSPrepHub",
+            "url": "https://comsatsprephub.vercel.app/",
+            "description": "Exam-preparation platform for COMSATS University students with verified past papers, practice quizzes, AI quiz generation, flashcards, and SGPA/CGPA calculator.",
+            "publisher": {
+              "@type": "EducationalOrganization",
+              "name": "COMSATSPrepHub Student Team",
+              "url": "https://comsatsprephub.vercel.app/",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://comsatsprephub.vercel.app/logo.png"
+              }
+            }
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Are the past papers on COMSATSPrepHub verified?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes, all past examination papers and model answer keys are contributed by university high-scorers and verified before publishing."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How does the COMSATS SGPA/CGPA calculator work?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Our GPA calculator adheres strictly to the official COMSATS University 4.00 grading scale and credit-hour weightages, including course retakes and sessional marks."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I use COMSATSPrepHub without creating an account?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes! Guest students can browse past papers, practice quizzes, flashcards, and use the GPA calculator immediately."
+                }
+              }
+            ]
           }
-        }
+        ]
       }
     </script>
-
-    <!-- MathJax for rendering LaTeX -->
-    <script>
-      window.MathJax = {
-        tex: {
-          inlineMath: [['\\(', '\\)'], ['$', '$']],
-          displayMath: [['\\[', '\\]'], ['$$', '$$']]
-        }
-      };
-    </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
   </head>
   <body>
     <div id="root"></div>

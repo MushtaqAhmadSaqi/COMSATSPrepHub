@@ -1,36 +1,57 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import katex from 'katex';
-import mermaid from 'mermaid';
 import 'katex/dist/katex.min.css';
 import './MathText.css';
 
-// Initialize mermaid once safely on client
-if (typeof window !== 'undefined') {
-  try {
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: 'neutral',
-      securityLevel: 'loose',
-      fontFamily: 'Inter, system-ui, sans-serif'
+// Lazy-load and initialize mermaid with strict security only when a diagram is rendered
+let mermaidPromise = null;
+async function getMermaid() {
+  if (!mermaidPromise) {
+    mermaidPromise = import('mermaid').then((m) => {
+      const instance = m.default || m;
+      instance.initialize({
+        startOnLoad: false,
+        theme: 'neutral',
+        securityLevel: 'strict',
+        fontFamily: 'Inter, system-ui, sans-serif'
+      });
+      return instance;
     });
-  } catch {
-    // Ignore init errors
   }
+  return mermaidPromise;
+}
+
+/**
+ * Recovers LaTeX commands that were accidentally turned into ASCII control characters
+ * (\b -> \x08, \t -> \x09, \f -> \x0C, \r -> \x0D) by unescaped JSON.parse.
+ */
+export function recoverControlCharLatex(input) {
+  if (!input || typeof input !== 'string') return '';
+  return input
+    .replace(/\x0C(rac|orall|lat|box)\b/g, '\\f$1')
+    .replace(/\x09(extbf|extit|extrm|exttt|ext|imes|heta|au|ilde|o|op|riangle)\b/g, '\\t$1')
+    .replace(/\x08(egin|ar|eta|inom|ig|igg|ackslash|ot|owtie|ullet)\b/g, '\\b$1')
+    .replace(/\x0D(ightarrow|ight|ho|angle|ceil|floor)\b/g, '\\r$1');
 }
 
 /**
  * Safely renders a LaTeX math formula using KaTeX into an HTML string.
  */
-function renderKaTeX(formula, isDisplay = false) {
+export function renderKaTeX(formula, isDisplay = false) {
   try {
-    const normalizedFormula = formula
+    const recovered = recoverControlCharLatex(String(formula || ''));
+    const normalizedFormula = recovered
       .trim()
-      // Some AI responses contain JSON-style double escaping in stored text.
+      // Strip accidental outer $ delimiters if passed inside
+      .replace(/^\$+|\$+$/g, '')
+      // Escape unescaped % signs inside math mode (e.g. 10.2% -> 10.2\%)
+      .replace(/(?<!\\)%/g, '\\%')
+      // Normalize double-escaped LaTeX commands (e.g. \\frac -> \frac) while keeping row breaks \\
       .replace(/\\\\(?=[A-Za-z])/g, '\\');
 
     return katex.renderToString(normalizedFormula, {
       displayMode: isDisplay,
-      throwOnError: false,
+      throwOnError: true,
       strict: false
     });
   } catch {
@@ -39,53 +60,66 @@ function renderKaTeX(formula, isDisplay = false) {
 }
 
 /**
- * Auto-detects and converts common statistical and algebra expressions
- * (e.g., "- x̄ = (∑X) / n = 13.7 / 10 = 1.37" or "Sxx = ∑X^2 - (∑X)^2 / n")
- * into formatted KaTeX math so that plain text pasted from exams is rendered
- * with mathematical fractions, bars, summations, and exponents.
+ * Auto-detects and converts plain-text statistical expressions that do NOT already use $...$
+ * (e.g., "x̄ = (∑X) / n = 13.7 / 10 = 1.37" or "Sxx = ∑X^2 - (∑X)^2 / n")
+ * into formatted KaTeX math.
+ *
+ * CRITICAL FIX: Never use /[x̄ȳ∑]/i (character class with combining macron matches every ASCII 'x' and 'y'!).
+ * Never run on lines that already contain '$' or '\' LaTeX commands or long English prose sentences.
  */
-function tryAutoFormatStatsMath(line) {
+export function tryAutoFormatStatsMath(line) {
   if (!line || typeof line !== 'string') return null;
 
-  if (/[x̄ȳ∑]|S[xy]{2}\s*=/i.test(line)) {
-    const bulletMatch = line.match(/^(\s*[-*•]\s*)(.*)$/);
-    const prefix = bulletMatch ? bulletMatch[1] : '';
-    const content = bulletMatch ? bulletMatch[2] : line;
+  // Never hijack lines that already contain LaTeX delimiters or backslash commands
+  if (line.includes('$') || line.includes('\\')) return null;
 
-    let latex = content
-      .replace(/x̄/g, '\\bar{x}')
-      .replace(/ȳ/g, '\\bar{y}')
-      .replace(/∑/g, '\\sum ')
-      .replace(/Sxx/g, 'S_{xx}')
-      .replace(/Syy/g, 'S_{yy}')
-      .replace(/Sxy/g, 'S_{xy}')
-      .replace(/\s*\*\s*/g, ' \\times ')
-      .replace(/≈/g, '\\approx ')
-      .replace(/≠/g, '\\neq ')
-      .replace(/≤/g, '\\le ')
-      .replace(/≥/g, '\\ge ')
-      .replace(/±/g, '\\pm ');
+  // Never hijack normal English sentences (4+ consecutive words of 3+ letters)
+  if (/\b[A-Za-z]{3,}\s+[A-Za-z]{3,}\s+[A-Za-z]{3,}\s+[A-Za-z]{3,}\b/.test(line)) {
+    return null;
+  }
 
-    latex = latex.replace(/\(([^()]+)\)\s*\/\s*([a-zA-Z0-9]+)/g, '\\frac{$1}{$2}');
-    latex = latex.replace(/([0-9.]+)\s*\/\s*([0-9.]+)/g, '\\frac{$1}{$2}');
+  // Match explicit Unicode x-bar (x + U+0304), y-bar (y + U+0304 or U+0233), summation (\u2211), or Sxx/Syy/Sxy =
+  const hasStatsToken = /(?:x\u0304|y\u0304|\u0233|\u2211|\bS(?:xx|yy|xy)\s*=)/i.test(line);
+  if (!hasStatsToken) return null;
 
-    const html = renderKaTeX(latex, false);
-    if (html) {
-      return { prefix, html };
-    }
+  const bulletMatch = line.match(/^(\s*[-*•]\s*)(.*)$/);
+  const prefix = bulletMatch ? bulletMatch[1] : '';
+  const content = bulletMatch ? bulletMatch[2] : line;
+
+  let latex = content
+    .replace(/x\u0304/g, '\\bar{x}')
+    .replace(/y\u0304|\u0233/g, '\\bar{y}')
+    .replace(/\u2211/g, '\\sum ')
+    .replace(/\bSxx\b/g, 'S_{xx}')
+    .replace(/\bSyy\b/g, 'S_{yy}')
+    .replace(/\bSxy\b/g, 'S_{xy}')
+    .replace(/\s*\*\s*/g, ' \\times ')
+    .replace(/≈/g, '\\approx ')
+    .replace(/≠/g, '\\neq ')
+    .replace(/≤/g, '\\le ')
+    .replace(/≥/g, '\\ge ')
+    .replace(/±/g, '\\pm ');
+
+  latex = latex.replace(/\(([^()]+)\)\s*\/\s*([a-zA-Z0-9]+)/g, '\\frac{$1}{$2}');
+  latex = latex.replace(/([0-9.]+)\s*\/\s*([0-9.]+)/g, '\\frac{$1}{$2}');
+
+  const html = renderKaTeX(latex, false);
+  if (html && !html.includes('katex-error')) {
+    return { prefix, html };
   }
 
   return null;
 }
 
 /**
- * Parses inline string that may contain $...$ or \(...\) math tokens
- * as well as markdown bold (**...**) and inline code (`...`).
+ * Parses inline string that may contain $$...$$, $...$, \[...\], or \(...\) math tokens
+ * as well as markdown bold (**...**), \textbf{...}, and inline code (`...`).
  */
-function renderInlineWithMath(text, keyPrefix = '') {
-  if (!text) return null;
+function renderInlineWithMath(rawText, keyPrefix = '') {
+  if (!rawText) return null;
+  const text = recoverControlCharLatex(String(rawText));
 
-  const mathRegex = /(\$[^\$\n]+?\$|\\\([\s\S]*?\\\))/g;
+  const mathRegex = /(\$\$[^\$\n]+?\$\$|\\\[[\s\S]*?\\\]|\$[^\$\n]+?\$|\\\([\s\S]*?\\\))/g;
   const segments = [];
   let lastIdx = 0;
   let match;
@@ -99,11 +133,14 @@ function renderInlineWithMath(text, keyPrefix = '') {
     }
 
     const raw = match[0];
-    const formula = raw.startsWith('$') ? raw.slice(1, -1) : raw.slice(2, -2);
-    const html = renderKaTeX(formula, false);
+    const isDisplay = raw.startsWith('$$') || raw.startsWith('\\[');
+    const formula = raw.startsWith('$$') || raw.startsWith('\\(') || raw.startsWith('\\[')
+      ? raw.slice(2, -2)
+      : raw.slice(1, -1);
+    const html = renderKaTeX(formula, isDisplay);
 
     if (html) {
-      segments.push({ type: 'math', html });
+      segments.push({ type: 'math', html, isDisplay });
     } else {
       segments.push({ type: 'text', content: raw });
     }
@@ -121,23 +158,36 @@ function renderInlineWithMath(text, keyPrefix = '') {
       return (
         <span
           key={k}
-          className="katex-inline-math"
+          className={seg.isDisplay ? 'katex-inline-display' : 'katex-inline-math'}
           dangerouslySetInnerHTML={{ __html: seg.html }}
         />
       );
     }
 
     const inlineParts = [];
-    const inlineRegex = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|\\textbf\{[^{}]*\}|\\textit\{[^{}]*\}|\\text\{[^{}]*\})/g;
+    const inlineRegex = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*\n]+\*|\\textbf\{[^{}]*\}|\\textit\{[^{}]*\}|\\text\{[^{}]*\}|\\rightarrow\b|\\leftarrow\b|\\Rightarrow\b|\\approx\b|\\neq\b|\\le\b|\\ge\b|\\times\b)/g;
     let textLast = 0;
     let tMatch;
+
+    const symbolMap = {
+      '\\rightarrow': '→',
+      '\\leftarrow': '←',
+      '\\Rightarrow': '⇒',
+      '\\approx': '≈',
+      '\\neq': '≠',
+      '\\le': '≤',
+      '\\ge': '≥',
+      '\\times': '×'
+    };
 
     while ((tMatch = inlineRegex.exec(seg.content)) !== null) {
       if (tMatch.index > textLast) {
         inlineParts.push(seg.content.slice(textLast, tMatch.index));
       }
       const tok = tMatch[0];
-      if (tok.startsWith('`')) {
+      if (symbolMap[tok]) {
+        inlineParts.push(symbolMap[tok]);
+      } else if (tok.startsWith('`')) {
         inlineParts.push(
           <code key={`${k}-code-${tMatch.index}`} className="math-inline-code">
             {tok.slice(1, -1)}
@@ -189,8 +239,8 @@ function MermaidDiagram({ chart }) {
     let isMounted = true;
     const uniqueId = `mermaid-svg-${Math.random().toString(36).slice(2, 9)}`;
 
-    mermaid
-      .render(uniqueId, chart.trim())
+    getMermaid()
+      .then((mermaid) => mermaid.render(uniqueId, chart.trim()))
       .then(({ svg }) => {
         if (isMounted) {
           setSvgContent(svg);
@@ -346,21 +396,12 @@ function MarkdownTable({ lines }) {
 
 /**
  * Universal Math, Table, Diagram, and Markdown text renderer for university exam papers.
- * Renders:
- * - Piecewise functions: $$f(x) = \begin{cases} ... \end{cases}$$
- * - Display equations: $$ ... $$ and \[ ... \]
- * - Inline math: $ ... $ and \( ... \)
- * - Markdown tables with KaTeX math cells: | Col 1 | Col 2 |
- * - Mermaid diagrams: ```mermaid ... ```
- * - Code and ASCII diagrams: ```cpp ... ``` or ```text ... ```
- * - Auto-detected statistical formulas: x̄, ȳ, ∑, Sxx, Syy, Sxy
- * - Colorful callouts: Final Answer (green), Step (indigo), Formula (purple), Note/Alert (amber)
  */
 export default function MathText({ text, className = '' }) {
   const renderedElements = useMemo(() => {
     if (!text || typeof text !== 'string') return null;
 
-    const raw = text.replace(/\\n/g, '\n');
+    const raw = recoverControlCharLatex(text).replace(/\\n/g, '\n');
     const lines = raw.split(/\r?\n/);
 
     const elements = [];
@@ -372,7 +413,7 @@ export default function MathText({ text, className = '' }) {
       if (!listBuffer) return;
       const Tag = listBuffer.type;
       elements.push(
-        <Tag key={`list-${elements.length}`} className="math-list-wrap">
+        <Tag key={`list-${elements.length}`} className={`math-list-wrap ${listBuffer.className || ''}`}>
           {listBuffer.items}
         </Tag>
       );
@@ -395,13 +436,18 @@ export default function MathText({ text, className = '' }) {
       const line = lines[i];
       const trimmed = line.trim();
 
+      // Skip redundant leading CLO / Marks line if it just repeats card metadata (e.g. "CLO 1 (5 Marks)" on line 0)
+      if (i === 0 && /^\[?\s*CLO[-\s]*\d+\s*(?:[\(\[,-]\s*\d+\s*Marks\s*[\)\]]?)?\s*$/i.test(trimmed)) {
+        i++;
+        continue;
+      }
+
       // Check code block fence ```lang
       if (trimmed.startsWith('```')) {
         flushList();
         flushTable();
 
         if (codeBuffer) {
-          // Closing code block
           const { lang, codeLines } = codeBuffer;
           const fullCode = codeLines.join('\n');
 
@@ -423,7 +469,6 @@ export default function MathText({ text, className = '' }) {
           }
           codeBuffer = null;
         } else {
-          // Opening code block
           const lang = trimmed.slice(3).trim();
           codeBuffer = { lang, codeLines: [] };
         }
@@ -437,12 +482,13 @@ export default function MathText({ text, className = '' }) {
         continue;
       }
 
-      // Collect multi-line display equations, especially piecewise functions.
-      if (trimmed.startsWith('$$') || trimmed.startsWith('\\[')) {
+      // Collect multi-line display equations ($$ ... $$ or \[ ... \])
+      if ((trimmed.startsWith('$$') || trimmed.startsWith('\\[')) && !(trimmed.startsWith('$$') && trimmed.slice(2).includes('$$') && trimmed.slice(2).indexOf('$$') < trimmed.slice(2).length - 2)) {
         const delimiter = trimmed.startsWith('$$') ? '$$' : '\\[';
         const closingDelimiter = delimiter === '$$' ? '$$' : '\\]';
-        const formulaLines = [trimmed.slice(delimiter.length)];
-        let foundClosingDelimiter = trimmed.slice(delimiter.length).includes(closingDelimiter);
+        const afterOpen = trimmed.slice(delimiter.length);
+        const formulaLines = [afterOpen];
+        let foundClosingDelimiter = afterOpen.includes(closingDelimiter);
 
         while (!foundClosingDelimiter && i + 1 < lines.length) {
           i++;
@@ -510,7 +556,7 @@ export default function MathText({ text, className = '' }) {
       }
 
       // 1b. Raw LaTeX piecewise environment like \begin{cases} ... \end{cases}
-      if (/^f\(x\)\s*=\s*\\begin\{cases\}|\\begin\{(cases|matrix|aligned|array)\}/.test(trimmed)) {
+      if (/^f\(x\)\s*=\s*\\begin\{cases\}|^\\begin\{(cases|matrix|pmatrix|bmatrix|aligned|array)\}/.test(trimmed)) {
         flushList();
         const html = renderKaTeX(trimmed, true);
         elements.push(
@@ -524,15 +570,15 @@ export default function MathText({ text, className = '' }) {
         continue;
       }
 
-      // 2. Final Answer / Conclusion Callout (Green Highlight Card)
-      const finalAnsMatch = trimmed.match(/^(Final Answer\s*:|Conclusion\s*:|Result\s*:)\s*(.*)$/i);
+      // 2. Final Answer / Conclusion Callout (Green Highlight Card) — supports "Final Answer (Part 1):"
+      const finalAnsMatch = trimmed.match(/^\**(Final Answer(?:\s*\([^)]*\))?\s*:|Conclusion(?:\s*\([^)]*\))?\s*:|Result(?:\s*\([^)]*\))?\s*:)\**\s*(.*)$/i);
       if (finalAnsMatch) {
         flushList();
         elements.push(
           <div key={`final-ans-${i}`} className="math-final-answer-card">
             <div className="final-ans-header">
               <span className="material-symbols-outlined" aria-hidden="true">check_circle</span>
-              <span>{finalAnsMatch[1].replace(/:/, '').trim()}</span>
+              <span>{finalAnsMatch[1].replace(/[:*]/g, '').trim()}</span>
             </div>
             <div className="final-ans-body">
               {renderInlineWithMath(finalAnsMatch[2], `final-text-${i}`)}
@@ -543,13 +589,13 @@ export default function MathText({ text, className = '' }) {
         continue;
       }
 
-      // 3. Formula / Definition / Rule Callout (Purple / Blue Badge)
-      const formulaMatch = trimmed.match(/^(Formula\s*:|Definition\s*:|Theorem\s*:|Given Data\s*:|Rule\s*:)\s*(.*)$/i);
+      // 3. Formula / Definition / Rule Callout (Purple / Indigo Badge)
+      const formulaMatch = trimmed.match(/^\**(Formula(?:\s*\([^)]*\))?\s*:|Definition\s*:|Theorem\s*:|Given Data\s*:|Rule\s*:)\**\s*(.*)$/i);
       if (formulaMatch) {
         flushList();
         elements.push(
           <div key={`formula-badge-${i}`} className="math-formula-callout">
-            <span className="formula-tag-pill">{formulaMatch[1].replace(/:/, '').trim()}</span>
+            <span className="formula-tag-pill">{formulaMatch[1].replace(/[:*]/g, '').trim()}</span>
             <span className="formula-tag-body">{renderInlineWithMath(formulaMatch[2], `formula-text-${i}`)}</span>
           </div>
         );
@@ -558,14 +604,14 @@ export default function MathText({ text, className = '' }) {
       }
 
       // 4. Note / Warning / Important Callout (Amber Alert Card)
-      const noteMatch = trimmed.match(/^(Note\s*:|Important\s*:|Warning\s*:|Caution\s*:|Tip\s*:)\s*(.*)$/i);
+      const noteMatch = trimmed.match(/^\**(Note\s*:|Important\s*:|Warning\s*:|Caution\s*:|Tip\s*:)\**\s*(.*)$/i);
       if (noteMatch) {
         flushList();
         elements.push(
           <div key={`note-card-${i}`} className="math-note-callout">
             <span className="material-symbols-outlined note-icon" aria-hidden="true">info</span>
             <div>
-              <strong>{noteMatch[1].trim()} </strong>
+              <strong>{noteMatch[1].replace(/\*/g, '').trim()} </strong>
               <span>{renderInlineWithMath(noteMatch[2], `note-text-${i}`)}</span>
             </div>
           </div>
@@ -574,13 +620,13 @@ export default function MathText({ text, className = '' }) {
         continue;
       }
 
-      // 5. Step or Task Headings (e.g. "Step 1: Compute Means")
-      const stepMatch = trimmed.match(/^(Step\s*\d+\s*:|Task\s*\d+\s*:|Question\s*\d+\s*:|###+)\s*(.*)$/i);
+      // 5. Step or Task Headings (e.g. "Step 1: Compute Means", "Part (a):", "### Heading")
+      const stepMatch = trimmed.match(/^\**(Step\s*\d+(?:\s*\([^)]*\))?\s*:|Task\s*\d+(?:\s*\([^)]*\))?\s*:|Question\s*\d+\s*:|###+)\**\s*(.*)$/i);
       if (stepMatch) {
         flushList();
         elements.push(
           <div key={`step-heading-${i}`} className="math-step-heading">
-            <span className="step-tag-pill">{stepMatch[1].replace(/#+/g, '').trim()}</span>
+            <span className="step-tag-pill">{stepMatch[1].replace(/[#*]/g, '').trim()}</span>
             <span className="step-tag-title">{renderInlineWithMath(stepMatch[2], `step-text-${i}`)}</span>
           </div>
         );
@@ -620,31 +666,32 @@ export default function MathText({ text, className = '' }) {
         continue;
       }
 
-      // 7. Numbered lists: "1. ...", "2) ..."
-      const numMatch = trimmed.match(/^(\d+[\.\)])\s+(.*)$/);
-      if (numMatch) {
-        if (!listBuffer || listBuffer.type !== 'ol') {
-          flushList();
-          listBuffer = { type: 'ol', items: [] };
-        }
+      // 7. Numbered, Lettered (a., b., c.), or Roman Numeral (i., ii., iii., iv.) sub-lists
+      const subItemMatch = trimmed.match(/^(\d+[\.\)]|[a-z][\.\)]|\([a-z0-9]+\)|(?:i|ii|iii|iv|v|vi|vii|viii|ix|x)[\.\)])\s+(.*)$/i);
+      if (subItemMatch) {
+        const marker = subItemMatch[1];
+        const subContent = subItemMatch[2];
+        const isNumeric = /^\d/.test(marker);
 
-        const numContent = numMatch[2];
-        const autoMath = tryAutoFormatStatsMath(numContent);
-
-        if (autoMath) {
+        if (isNumeric) {
+          if (!listBuffer || listBuffer.type !== 'ol') {
+            flushList();
+            listBuffer = { type: 'ol', items: [] };
+          }
           listBuffer.items.push(
             <li key={`oli-${i}`} className="math-list-item">
-              <span
-                className="katex-auto-math"
-                dangerouslySetInnerHTML={{ __html: autoMath.html }}
-              />
+              {renderInlineWithMath(subContent, `oli-math-${i}`)}
             </li>
           );
         } else {
-          listBuffer.items.push(
-            <li key={`oli-${i}`} className="math-list-item">
-              {renderInlineWithMath(numContent, `oli-math-${i}`)}
-            </li>
+          flushList();
+          elements.push(
+            <div key={`subpart-${i}`} className="math-subpart-row">
+              <span className="math-subpart-badge">{marker}</span>
+              <div className="math-subpart-content">
+                {renderInlineWithMath(subContent, `subpart-math-${i}`)}
+              </div>
+            </div>
           );
         }
 

@@ -7,7 +7,7 @@ import { DEFAULT_SUBJECTS } from '../constants/subjects.js';
  * @param {string} text
  * @returns {number} score 0..100
  */
-export function calculateScore(query, text) {
+function calculateScore(query, text) {
   if (!query || !text) return 0;
   const q = query.toLowerCase().trim();
   const t = text.toLowerCase().trim();

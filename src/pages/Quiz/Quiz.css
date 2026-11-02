@@ -679,3 +679,25 @@ html.dark .quiz-chip.selected {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+
+
+/* Bilingual Urdu Nastaliq RTL Explanation Box */
+.urdu-explanation[dir="rtl"] {
+  font-family: var(--font-urdu);
+  font-size: 1.05rem;
+  line-height: 2.15;
+  text-align: right;
+  padding: 0.875rem 1.125rem !important;
+}
+
+.quiz-timer--urgent {
+  color: var(--danger) !important;
+  border-color: rgba(220, 38, 38, 0.4) !important;
+  background: var(--danger-soft) !important;
+  animation: pulse-urgent 1s ease-in-out infinite;
+}
+
+@keyframes pulse-urgent {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}

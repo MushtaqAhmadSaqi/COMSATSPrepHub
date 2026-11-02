@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { addModerationSubmission } from '../../utils/studyTracker';
 import { toast } from '../../utils/toast';
 
 const FAQS = [
@@ -33,6 +34,13 @@ export default function FaqContact() {
       toast.error('Please fill in all fields.');
       return;
     }
+    addModerationSubmission({
+      type: 'contact',
+      subjectCode: 'SUPPORT',
+      title: `Support Inquiry from ${name.trim()}`,
+      contributor: `${name.trim()} (${email.trim()})`,
+      details: message.trim()
+    });
     setSent(true);
     toast.success('Your message has been sent to the student team!');
   };

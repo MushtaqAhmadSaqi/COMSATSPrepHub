@@ -15,6 +15,7 @@ import { ToastProvider } from './utils/toast';
 import { isAdminUser } from './utils/adminGuard';
 import { updatePageSeo } from './utils/seo';
 import { getStudentPrefs, saveStudentPrefs } from './utils/studyTracker';
+import { DEFAULT_SUBJECTS } from './constants/subjects';
 import { supabase } from './services/supabase';
 
 import Home from './pages/Home/Home';
@@ -48,8 +49,20 @@ const ROUTE_ALIASES = {
 };
 
 function normalizeRoute(path = 'home') {
-  const clean = String(path || 'home').replace(/^#/, '').trim();
-  return ROUTE_ALIASES[clean] || clean || 'home';
+  const withoutHash = String(path || 'home').replace(/^[#/]+/, '').split('?')[0].trim();
+  return ROUTE_ALIASES[withoutHash] || withoutHash || 'home';
+}
+
+function getCourseCodeFromLocation() {
+  if (typeof window === 'undefined') return null;
+  const searchParams = new URLSearchParams(window.location.search);
+  if (searchParams.get('code')) return searchParams.get('code').toUpperCase();
+  const hashQuery = window.location.hash.split('?')[1];
+  if (hashQuery) {
+    const hashParams = new URLSearchParams(hashQuery);
+    if (hashParams.get('code')) return hashParams.get('code').toUpperCase();
+  }
+  return null;
 }
 
 function RouteLoadingFallback() {
@@ -124,8 +137,14 @@ export default function App() {
 
   const [selectedSubject, setSelectedSubject] = useState(() => {
     try {
+      const urlCode = getCourseCodeFromLocation();
+      if (urlCode) {
+        const match = DEFAULT_SUBJECTS.find((s) => s.code.toUpperCase() === urlCode);
+        if (match) return match;
+      }
       const raw = sessionStorage.getItem('pph_selectedSubject');
-      return raw ? JSON.parse(raw) : null;
+      const parsed = raw ? JSON.parse(raw) : null;
+      return parsed && typeof parsed === 'object' && parsed.code ? parsed : null;
     } catch { return null; }
   });
   const [selectedPaper, setSelectedPaper] = useState(() => {
@@ -231,9 +250,17 @@ export default function App() {
       setActivePath(normalizeRoute(targetPath));
     };
 
+    const urlCode = getCourseCodeFromLocation();
+    if (urlCode) {
+      const matched = DEFAULT_SUBJECTS.find((s) => s.code.toUpperCase() === urlCode);
+      if (matched) setSelectedSubject(matched);
+    }
     const initialHash = window.location.hash.replace(/^#/, '');
+    const initialPathname = window.location.pathname.replace(/^\/+|\/+$/g, '');
     if (initialHash) {
       setActivePath(normalizeRoute(initialHash));
+    } else if (initialPathname) {
+      setActivePath(normalizeRoute(initialPathname));
     } else {
       window.history.replaceState({ path: 'home' }, '', '/');
     }
@@ -256,7 +283,10 @@ export default function App() {
 
   const handleSelectSubject = (subj) => {
     setSelectedSubject(subj);
-    handleNavigate('subject-papers');
+    setActivePath('subject-papers');
+    const codeParam = subj?.code ? `?code=${encodeURIComponent(subj.code)}` : '';
+    window.history.pushState({ path: 'subject-papers', code: subj?.code }, '', `#subject-papers${codeParam}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleToggleLanguage = () => {
@@ -288,13 +318,7 @@ export default function App() {
             onNavigate={handleNavigate}
             onViewPaper={(paper) => {
               setSelectedPaper(paper);
-              if (user) {
-                handleNavigate('paper-view');
-              } else {
-                setPendingPaper(paper);
-                sessionStorage.setItem('pph_pendingPaper', 'true');
-                setIsAuthOpen(true);
-              }
+              handleNavigate('paper-view');
             }}
           />
         );

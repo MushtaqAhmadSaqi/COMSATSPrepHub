@@ -1,32 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getAnalyticsConsent, setAnalyticsConsent, initConsentGatedAnalytics } from '../../utils/analytics';
 import './CookieNotice.css';
 
-const CONSENT_KEY = 'pph_analytics_consent';
-
-function readConsent() {
-  try {
-    return localStorage.getItem(CONSENT_KEY);
-  } catch {
-    return null;
-  }
-}
-
 export default function CookieNotice({ onNavigate }) {
-  const [consent, setConsent] = useState(readConsent);
+  const [consent, setConsent] = useState(getAnalyticsConsent);
 
   useEffect(() => {
     if (consent === null && navigator.doNotTrack === '1') {
       setConsent('declined');
+    } else if (consent === 'accepted') {
+      initConsentGatedAnalytics();
     }
   }, [consent]);
 
   const saveConsent = (value) => {
-    try {
-      localStorage.setItem(CONSENT_KEY, value);
-    } catch {
-      // The notice can still be dismissed when browser storage is unavailable.
-    }
+    setAnalyticsConsent(value);
     setConsent(value);
   };
 
@@ -56,7 +45,7 @@ export default function CookieNotice({ onNavigate }) {
               <button
                 type="button"
                 className="cookie-notice__link"
-                onClick={() => onNavigate('terms')}
+                onClick={() => onNavigate('privacy')}
               >
                 Read our privacy policy
               </button>

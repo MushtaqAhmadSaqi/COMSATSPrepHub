@@ -3,20 +3,21 @@ import './Navbar.css';
 
 // Desktop navigation items
 const desktopNavItems = [
-  { id: 'home',      label: 'Home',      icon: 'home' },
-  { id: 'subjects',  label: 'Papers',    icon: 'menu_book' },
-  { id: 'ai-quiz-generator', label: 'AI Quiz', icon: 'auto_awesome' },
-  { id: 'gpa',       label: 'GPA Calc',  icon: 'calculate' },
-  { id: 'about',     label: 'Team',      icon: 'groups' }
+  { id: 'home',              label: 'Home',      icon: 'home' },
+  { id: 'subjects',          label: 'Papers',    icon: 'menu_book' },
+  { id: 'quiz',              label: 'Quizzes',   icon: 'quiz' },
+  { id: 'ai-quiz-generator', label: 'AI Quiz',   icon: 'auto_awesome' },
+  { id: 'study-hub',         label: 'Study Hub', icon: 'psychology' },
+  { id: 'gpa',               label: 'GPA Calc',  icon: 'calculate' }
 ];
 
-// Mobile bottom navigation bar — exact 5 student tabs requested: Papers, Quizzes, AI Quiz, GPA, Profile
+// Mobile bottom navigation bar — 5 core student study tabs: Papers, Quizzes, AI Quiz, Study Hub, GPA
 const mobileNavItems = [
-  { id: 'subjects',          label: 'Papers',   icon: 'menu_book' },
-  { id: 'ai-quiz-generator', label: 'AI Quiz',  icon: 'auto_awesome' },
-  { id: 'gpa',               label: 'GPA',      icon: 'calculate' },
-  { id: 'about',             label: 'Team',     icon: 'groups' },
-  { id: 'dashboard',         label: 'Profile',  icon: 'person' }
+  { id: 'subjects',          label: 'Papers',    icon: 'menu_book' },
+  { id: 'quiz',              label: 'Quizzes',   icon: 'quiz' },
+  { id: 'ai-quiz-generator', label: 'AI Quiz',   icon: 'auto_awesome' },
+  { id: 'study-hub',         label: 'Study Hub', icon: 'psychology' },
+  { id: 'gpa',               label: 'GPA',       icon: 'calculate' }
 ];
 
 export default function Navbar({

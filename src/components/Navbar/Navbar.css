@@ -447,3 +447,15 @@ html.dark .cmd-trigger-btn {
 .mobile-nav-item.active .material-symbols-outlined {
   transform: scale(1.2);
 }
+
+
+/* WCAG 2.2 AA 44x44px minimum touch area expansion on mobile devices */
+@media (max-width: 640px) {
+  .icon-circle-btn,
+  .cmd-trigger-btn,
+  .signin-gradient-btn {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    position: relative;
+  }
+}

@@ -27,7 +27,7 @@ export function validatePasswordStrength(password = '') {
 /**
  * Normalizes auth error messages without enabling account enumeration.
  */
-export function getReadableAuthError(error, mode = 'login') {
+function getReadableAuthError(error, mode = 'login') {
   if (!error) return 'An error occurred. Please try again.';
   const raw = String(error.message || error).toLowerCase();
 
@@ -150,23 +150,3 @@ export async function requestPasswordReset(email) {
   }
 }
 
-export async function updateUserPassword(newPassword) {
-  const check = validatePasswordStrength(newPassword);
-  if (!check.valid) return { ok: false, error: check.error };
-
-  try {
-    if (typeof supabase.auth.updateUser !== 'function') {
-      return { ok: false, error: 'Password update requires an active Supabase connection.' };
-    }
-    const { data, error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) return { ok: false, error: getReadableAuthError(error, 'update') };
-    return { ok: true, user: data?.user };
-  } catch (err) {
-    logger.error('auth.updateUserPassword', err);
-    return { ok: false, error: 'Could not update password. Please try again.' };
-  }
-}
-
-export async function signOutUser() {
-  await supabase.auth.signOut();
-}

@@ -1,14 +1,14 @@
 /* Dashboard — quiet, editorial study workspace */
 
 .study-dashboard {
-  --sd-bg: #f7f8fa;
-  --sd-surface: #ffffff;
-  --sd-text: #172238;
-  --sd-muted: #667085;
-  --sd-line: #e5e9f0;
-  --sd-brand: #2859ce;
-  --sd-soft: #eef3ff;
-  --sd-note: #faf7ef;
+  --sd-bg: var(--surface-2);
+  --sd-surface: var(--surface);
+  --sd-text: var(--text);
+  --sd-muted: var(--text-subtle);
+  --sd-line: var(--border);
+  --sd-brand: var(--brand);
+  --sd-soft: var(--brand-soft);
+  --sd-note: var(--surface-2);
 
   width: 100%;
   max-width: 1200px;

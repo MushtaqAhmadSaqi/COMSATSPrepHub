@@ -1,6 +1,5 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { useScrollRevealList } from '../../utils/useScrollReveal';
 import { useCounter } from '../../utils/useCounter';
 import { DEFAULT_SUBJECTS } from '../../constants/subjects';
 import {
@@ -167,9 +166,6 @@ export default function Home({
   const recentActivity = useMemo(() => getRecentActivity(3), []);
   const recentPapers = useMemo(() => getRecentlyViewedPapers(3), []);
   const dailyChallenge = useMemo(() => getDailyChallengeStatus(), []);
-
-  /* Scroll-reveal for feature cards */
-  const { containerRef: featuresRef } = useScrollRevealList(features.length, { threshold: 0.12 });
 
   const handleHeroSearchSubmit = (e) => {
     e.preventDefault();
@@ -376,7 +372,7 @@ export default function Home({
         </motion.div>
 
         {/* Feature Cards — Interactive navigation cards with spotlight effect */}
-        <div className="home-features-grid" ref={featuresRef}>
+        <div className="home-features-grid">
           {features.map((f, i) => (
             <SpotlightCard
               key={f.title}
