@@ -5,16 +5,14 @@ import './Navbar.css';
 const desktopNavItems = [
   { id: 'home',              label: 'Home',      icon: 'home' },
   { id: 'subjects',          label: 'Papers',    icon: 'menu_book' },
-  { id: 'quiz',              label: 'Quizzes',   icon: 'quiz' },
   { id: 'ai-quiz-generator', label: 'AI Quiz',   icon: 'auto_awesome' },
   { id: 'study-hub',         label: 'Study Hub', icon: 'psychology' },
   { id: 'gpa',               label: 'GPA Calc',  icon: 'calculate' }
 ];
 
-// Mobile bottom navigation bar — 5 core student study tabs: Papers, Quizzes, AI Quiz, Study Hub, GPA
+// Mobile bottom navigation bar — core student study tabs: Papers, AI Quiz, Study Hub, GPA
 const mobileNavItems = [
   { id: 'subjects',          label: 'Papers',    icon: 'menu_book' },
-  { id: 'quiz',              label: 'Quizzes',   icon: 'quiz' },
   { id: 'ai-quiz-generator', label: 'AI Quiz',   icon: 'auto_awesome' },
   { id: 'study-hub',         label: 'Study Hub', icon: 'psychology' },
   { id: 'gpa',               label: 'GPA',       icon: 'calculate' }
@@ -177,7 +175,7 @@ export default function Navbar({
         </div>
       </header>
 
-      {/* Mobile Bottom Navigation Bar — Papers, Quizzes, AI Quiz, GPA, Profile */}
+      {/* Mobile Bottom Navigation Bar — Papers, AI Quiz, GPA, Profile */}
       <nav className="mobile-bottom-nav" aria-label="Mobile primary navigation">
         <div className="mobile-grid">
           {mobileNavItems.map((item) => (
