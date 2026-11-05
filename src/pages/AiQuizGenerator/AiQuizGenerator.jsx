@@ -320,7 +320,7 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
   const [numQuestions, setNumQuestions] = useState(10);
   const [questionType, setQuestionType] = useState('mcq');
   const [activePreset, setActivePreset] = useState('exam');
-  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [honeypot, setHoneypot] = useState('');
   const [topicError, setTopicError] = useState('');
 
@@ -397,9 +397,9 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
   return (
     <div className="ai-gen-container">
       <PageHeader
-        badge="AI Exam Studio"
-        title="Custom AI Practice Quiz"
-        subtitle="Generate personalized practice tests tailored to your COMSATS courses with instant smart feedback."
+        badge="AI quiz"
+        title="Build a practice quiz"
+        subtitle="Choose a course, pick a topic, and start practising in a few clicks."
       />
 
       {/* ── Quick Presets Bar (1-Click Start) ── */}
@@ -408,7 +408,7 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
           <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--brand)' }}>
             flash_on
           </span>
-          <span className="ai-presets-title">Quick 1-Tap Presets</span>
+          <span className="ai-presets-title">Start with a preset</span>
         </div>
         <div className="ai-presets-grid">
           {PRESETS.map((p) => {
