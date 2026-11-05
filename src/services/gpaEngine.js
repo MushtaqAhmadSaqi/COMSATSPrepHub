@@ -65,7 +65,13 @@ export function calcSessionalCourseResult({
   finalObtained = 40,
   finalTotal = 50,
   hasLab = false,
-  labPercentage = 80,
+  labAssignObtained = 20,
+  labAssignTotal = 25,
+  labMidObtained = 20,
+  labMidTotal = 25,
+  labFinalObtained = 40,
+  labFinalTotal = 50,
+  labPercentage,
   creditHours = 3
 } = {}) {
   const theoryScore =
@@ -87,11 +93,20 @@ export function calcSessionalCourseResult({
 
   const labCr = 1;
   const theoryCr = Math.max(totalCr - labCr, 1);
-  const safeLabPct = clamp(toNum(labPercentage, 0), 0, 100);
+  const calculatedLabPct =
+    weightedPart(labAssignObtained, labAssignTotal, DEFAULT_SCHEME.lab.assignmentWeight) +
+    weightedPart(labMidObtained, labMidTotal, DEFAULT_SCHEME.lab.midWeight) +
+    weightedPart(labFinalObtained, labFinalTotal, DEFAULT_SCHEME.lab.finalWeight);
+  const safeLabPct = clamp(
+    labPercentage == null ? calculatedLabPct : toNum(labPercentage, 0),
+    0,
+    100
+  );
   const combinedPct = round2((theoryPct * theoryCr + safeLabPct * labCr) / (theoryCr + labCr));
 
   return {
     theoryPct,
+    labPct: round2(safeLabPct),
     combinedPct,
     ...getGradeInfo(combinedPct)
   };

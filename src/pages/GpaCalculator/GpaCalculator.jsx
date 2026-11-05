@@ -62,7 +62,12 @@ export default function GpaCalculator() {
     finalObtained: '40',
     finalTotal: '50',
     hasLab: false,
-    labPercentage: '82',
+    labAssignObtained: '20',
+    labAssignTotal: '25',
+    labMidObtained: '20',
+    labMidTotal: '25',
+    labFinalObtained: '40',
+    labFinalTotal: '50',
     creditHours: '3'
   });
   const sessionalResult = calcSessionalCourseResult(sessionalInputs);
@@ -700,7 +705,7 @@ export default function GpaCalculator() {
             </div>
           </section>
 
-          {/* Internal Course Sessional Marks Estimator (Quiz 15% + Assign 10% + Mid 25% + Final 50%) */}
+          {/* Internal Course Sessional Marks Estimator */}
           <section
             className="grade-workspace__panel"
             style={{ marginTop: '1.25rem' }}
@@ -710,13 +715,22 @@ export default function GpaCalculator() {
               <div>
                 <p className="grade-workspace__section-label">04 / INTERNAL MARKS ESTIMATOR</p>
                 <h2 style={{ fontSize: '1.125rem', fontWeight: 800, margin: '0.2rem 0' }}>
-                  Sessional, Midterm &amp; Final Marks → Grade
+                  Calculate subject GPA from marks
                 </h2>
+                <p style={{ margin: '0.35rem 0 0', color: 'var(--gw-muted)', fontSize: '0.78rem' }}>
+                  Theory: quizzes 15%, assignments 10%, midterm 25%, final 50%.
+                </p>
               </div>
               <span className="grade-workspace__count" style={{ fontSize: '0.85rem', color: 'var(--gw-brand)' }}>
                 {sessionalResult.combinedPct}% → Grade {sessionalResult.letter} ({sessionalResult.point.toFixed(2)})
               </span>
             </div>
+
+            <p style={{ margin: '0.75rem 0 0', color: 'var(--gw-muted)', fontSize: '0.75rem' }}>
+              {sessionalInputs.hasLab
+                ? `Theory ${sessionalResult.theoryPct}% + lab ${sessionalResult.labPct}% combined by credit hours.`
+                : `Your subject GPA is ${sessionalResult.point.toFixed(2)} on the COMSATS 4.00 scale.`}
+            </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))', gap: '0.75rem' }}>
               <div>
@@ -786,20 +800,48 @@ export default function GpaCalculator() {
                 />
                 Include 1-Credit Lab?
               </label>
-              {sessionalInputs.hasLab && (
-                <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--gw-muted)' }}>
-                  Lab Total (%):
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={sessionalInputs.labPercentage}
-                    onChange={(e) => setSessionalInputs((s) => ({ ...s, labPercentage: e.target.value }))}
-                    style={{ width: '76px', height: '34px' }}
-                  />
-                </label>
-              )}
             </div>
+
+            {sessionalInputs.hasLab && (
+              <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--gw-line)' }}>
+                <p style={{ margin: '0 0 0.65rem', color: 'var(--gw-text)', fontSize: '0.82rem', fontWeight: 750 }}>
+                  Lab marks <span style={{ color: 'var(--gw-muted)', fontWeight: 500 }}>· assignment 25%, midterm 25%, final 50%</span>
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))', gap: '0.75rem' }}>
+                  {[
+                    ['labAssignObtained', 'Lab assignment', 'labAssignTotal'],
+                    ['labMidObtained', 'Lab midterm', 'labMidTotal'],
+                    ['labFinalObtained', 'Lab final', 'labFinalTotal']
+                  ].map(([obtainedKey, label, totalKey]) => (
+                    <div key={obtainedKey}>
+                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--gw-muted)', marginBottom: '4px' }}>
+                        {label}
+                      </label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
+                        <input
+                          type="number"
+                          min="0"
+                          max={sessionalInputs[totalKey]}
+                          step="0.5"
+                          value={sessionalInputs[obtainedKey]}
+                          onChange={(e) => setSessionalInputs((s) => ({ ...s, [obtainedKey]: e.target.value }))}
+                          aria-label={`${label} obtained marks`}
+                        />
+                        <input
+                          type="number"
+                          min="0.5"
+                          max="100"
+                          step="0.5"
+                          value={sessionalInputs[totalKey]}
+                          onChange={(e) => setSessionalInputs((s) => ({ ...s, [totalKey]: e.target.value }))}
+                          aria-label={`${label} total marks`}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
 
           <details className="grade-workspace__reference">
