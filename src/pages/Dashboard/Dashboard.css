@@ -317,6 +317,29 @@ html.dark .study-dashboard__error {
   font-size: 10px;
 }
 
+.study-dashboard__live-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #16803c;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.study-dashboard__live-label > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #20a653;
+  box-shadow: 0 0 0 4px rgba(32, 166, 83, 0.14);
+}
+
+html.dark .study-dashboard__live-label {
+  color: #77d99a;
+}
+
 .study-dashboard__activity-list {
   list-style: none;
   padding: 0;

@@ -131,7 +131,7 @@ cp .env.example .env
 
 ### 3. Apply the database migration
 
-Run [`supabase/migrations/20261027000000_rls_security_schema.sql`](./supabase/migrations/20261027000000_rls_security_schema.sql) in the Supabase SQL Editor if you are enabling cloud features.
+Run the migrations in [`supabase/migrations/`](./supabase/migrations/) in timestamp order in the Supabase SQL Editor if you are enabling cloud features. The latest migration adds the live dashboard activity feed.
 
 ### 4. Start the app
 

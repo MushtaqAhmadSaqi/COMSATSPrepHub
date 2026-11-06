@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { supabase } from '../../services/supabase';
+import React, { useEffect, useState, useMemo } from 'react';
+import { isSupabaseConfigured, supabase } from '../../services/supabase';
 import {
   getStudyStats,
   getRecentActivity,
@@ -8,7 +8,9 @@ import {
   getQuizHistory,
   getExamCountdowns,
   saveExamCountdowns,
-  getStudentPrefs
+  getStudentPrefs,
+  mapRemoteActivity,
+  mergeRemoteActivity
 } from '../../utils/studyTracker';
 import './Dashboard.css';
 
@@ -63,6 +65,9 @@ export default function Dashboard({
   const [exams, setExams] = useState(() => getExamCountdowns());
   const [newExamCourse, setNewExamCourse] = useState('');
   const [newExamDate, setNewExamDate] = useState('');
+  const [liveActivity, setLiveActivity] = useState(() => (
+    activity.length > 0 ? activity : getRecentActivity()
+  ));
 
   const prefs = useMemo(() => getStudentPrefs(), []);
   const fullName = user?.user_metadata?.full_name?.trim();
@@ -72,7 +77,7 @@ export default function Dashboard({
     'Student';
 
   const localStats = stats || getStudyStats();
-  const localActivity = activity && activity.length > 0 ? activity : getRecentActivity();
+  const localActivity = liveActivity;
   const bookmarkedPapers = useMemo(() => getBookmarkedPapers(), []);
   const weakTopics = useMemo(() => getWeakTopicsSummary(), []);
   const quizHistory = useMemo(() => getQuizHistory(6), []);
@@ -83,6 +88,78 @@ export default function Dashboard({
     bookmarkedPapers.length > 0;
   const isDemo = !hasRealHistory && stats == null;
   const destinations = { ...DEFAULT_ROUTES, ...routes };
+
+  useEffect(() => {
+    const handleLocalActivity = (event) => {
+      if (event.detail) {
+        setLiveActivity((current) => [
+          { ...event.detail, time: new Date(event.detail.timestamp).toLocaleDateString() },
+          ...current.filter((item) => item.id !== event.detail.id)
+        ].slice(0, 12));
+      }
+    };
+
+    window.addEventListener('pph:study-activity', handleLocalActivity);
+    return () => window.removeEventListener('pph:study-activity', handleLocalActivity);
+  }, []);
+
+  useEffect(() => {
+    if (!user?.id || !isSupabaseConfigured) return undefined;
+
+    let channel;
+    let cancelled = false;
+
+    async function loadActivity() {
+      const { data, error } = await supabase
+        .from('user_activity')
+        .select('id, client_id, type, title, description, metadata, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(12);
+
+      if (error) {
+        console.warn('Dashboard activity sync failed:', error.message);
+        return;
+      }
+
+      if (!cancelled) {
+        const remoteItems = (data || []).map(mapRemoteActivity);
+        mergeRemoteActivity(remoteItems);
+        setLiveActivity(remoteItems);
+      }
+    }
+
+    loadActivity();
+
+    if (typeof supabase.channel === 'function') {
+      channel = supabase
+        .channel(`dashboard-activity-${user.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'user_activity',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            const item = mapRemoteActivity(payload.new);
+            setLiveActivity((current) => [
+              item,
+              ...current.filter((existing) => existing.id !== item.id)
+            ].slice(0, 12));
+          }
+        )
+        .subscribe();
+    }
+
+    return () => {
+      cancelled = true;
+      if (channel && typeof supabase.removeChannel === 'function') {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [user?.id]);
 
   const metrics = [
     {
@@ -493,11 +570,16 @@ export default function Dashboard({
                 <h2 id="study-activity-title">Recent activity</h2>
               </div>
 
-              {isDemo && (
+              {user ? (
+                <span className="study-dashboard__live-label">
+                  <span aria-hidden="true" />
+                  Live sync
+                </span>
+              ) : isDemo ? (
                 <span className="study-dashboard__sample-label">
                   Sample
                 </span>
-              )}
+              ) : null}
             </div>
 
             {recentActivity.length > 0 ? (

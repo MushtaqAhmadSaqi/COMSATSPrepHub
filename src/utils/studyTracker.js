@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../services/supabase';
+import { logger } from './logger';
 const STORAGE_KEY = 'pph_study_history';
 const BOOKMARKS_KEY = 'pph_bookmarks';
 const NOTES_KEY = 'pph_paper_notes';
@@ -39,14 +40,71 @@ function writeHistory(history) {
 }
 
 function addActivity(activity) {
-  writeHistory([
-    {
-      ...activity,
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      timestamp: Date.now()
-    },
-    ...readHistory()
-  ]);
+  const item = {
+    ...activity,
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    timestamp: Date.now()
+  };
+  writeHistory([item, ...readHistory()]);
+  window.dispatchEvent(new CustomEvent('pph:study-activity', { detail: item }));
+  syncActivityToSupabase(item);
+}
+
+async function syncActivityToSupabase(item) {
+  if (!isSupabaseConfigured || typeof window === 'undefined') return;
+
+  try {
+    const { data } = await supabase.auth.getSession();
+    const userId = data?.session?.user?.id;
+    if (!userId) return;
+
+    const { error } = await supabase.from('user_activity').insert({
+      user_id: userId,
+      client_id: item.id,
+      type: item.type || 'study',
+      title: item.title || 'Study activity',
+      description: item.description || '',
+      metadata: {
+        subjectCode: item.subjectCode || '',
+        paperId: item.paperId || null,
+        score: item.score ?? null,
+        totalQuestions: item.totalQuestions ?? null,
+        difficulty: item.difficulty || null,
+        wrongTopics: Array.isArray(item.wrongTopics) ? item.wrongTopics : []
+      },
+      created_at: new Date(item.timestamp).toISOString()
+    });
+
+    if (error) logger.warn('studyTracker.syncActivity', error.message);
+  } catch (error) {
+    logger.warn('studyTracker.syncActivity', error);
+  }
+}
+
+export function mapRemoteActivity(item) {
+  return {
+    id: item.client_id || item.id,
+    type: item.type,
+    title: item.title,
+    description: item.description,
+    subjectCode: item.metadata?.subjectCode || '',
+    paperId: item.metadata?.paperId || null,
+    score: item.metadata?.score ?? null,
+    totalQuestions: item.metadata?.totalQuestions ?? null,
+    difficulty: item.metadata?.difficulty || null,
+    wrongTopics: Array.isArray(item.metadata?.wrongTopics) ? item.metadata.wrongTopics : [],
+    icon: item.type === 'quiz' ? 'quiz' : item.type === 'paper' ? 'description' : 'bolt',
+    timestamp: new Date(item.created_at).getTime(),
+    time: new Date(item.created_at).toLocaleDateString()
+  };
+}
+
+export function mergeRemoteActivity(items) {
+  const remoteItems = Array.isArray(items) ? items : [];
+  const knownIds = new Set(readHistory().map((item) => item.id));
+  const additions = remoteItems.filter((item) => item?.id && !knownIds.has(item.id));
+  if (additions.length > 0) writeHistory([...additions, ...readHistory()]);
+  return getRecentActivity();
 }
 
 export function recordQuizAttempt({
@@ -75,22 +133,22 @@ export function recordPaperView(paper) {
   const existing = readHistory().filter(
     (item) => !(item.type === 'paper' && item.paperId && item.paperId === paper.id)
   );
-  writeHistory([
-    {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      timestamp: Date.now(),
-      type: 'paper',
-      paperId: paper.id || paper.title,
-      title: paper.title || 'Past paper',
-      subjectCode: paper.subjectCode || '',
-      subjectName: paper.subjectName || '',
-      term: paper.term || 'Exam',
-      year: paper.year || '',
-      description: `${paper.subjectCode ? `${paper.subjectCode} · ` : ''}Past paper`,
-      icon: 'description'
-    },
-    ...existing
-  ]);
+  const item = {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    timestamp: Date.now(),
+    type: 'paper',
+    paperId: paper.id || paper.title,
+    title: paper.title || 'Past paper',
+    subjectCode: paper.subjectCode || '',
+    subjectName: paper.subjectName || '',
+    term: paper.term || 'Exam',
+    year: paper.year || '',
+    description: `${paper.subjectCode ? `${paper.subjectCode} · ` : ''}Past paper`,
+    icon: 'description'
+  };
+  writeHistory([item, ...existing]);
+  window.dispatchEvent(new CustomEvent('pph:study-activity', { detail: item }));
+  syncActivityToSupabase(item);
 }
 
 export function getRecentlyViewedPapers(limit = 4) {
@@ -269,7 +327,17 @@ export function togglePaperBookmark(paper) {
         ...current
       ];
   safeWriteJson(BOOKMARKS_KEY, next);
-  return { bookmarked: !exists, list: next };
+      if (!exists) {
+        addActivity({
+          type: 'bookmark',
+          title: paper.title || 'Past paper',
+          subjectCode: paper.subjectCode || '',
+          paperId: paper.id,
+          description: 'Past paper bookmarked',
+          icon: 'bookmark'
+        });
+      }
+      return { bookmarked: !exists, list: next };
 }
 
 export function getPaperNote(paperId) {
