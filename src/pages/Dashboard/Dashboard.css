@@ -629,3 +629,151 @@ html.dark .study-dashboard__live-label {
     animation: none !important;
   }
 }
+/* Visual refresh: match the rounded, calm study surfaces used across the app. */
+.study-dashboard {
+  max-width: 1280px;
+  padding: 48px 32px 42px;
+  background:
+    radial-gradient(circle at 88% 4%, rgba(86, 173, 255, 0.13), transparent 28rem),
+    radial-gradient(circle at 8% 32%, rgba(112, 218, 210, 0.1), transparent 25rem);
+}
+
+.study-dashboard__header {
+  align-items: flex-end;
+  margin-bottom: 30px;
+}
+
+.study-dashboard__eyebrow,
+.study-dashboard__section-label {
+  color: #2859ce;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+}
+
+.study-dashboard__header h1 {
+  font-size: clamp(32px, 4vw, 48px);
+  letter-spacing: -0.06em;
+}
+
+.study-dashboard__intro {
+  max-width: 600px;
+  font-size: 15px;
+}
+
+.study-dashboard__preview {
+  border: 1px solid #bfdbfe;
+  border-radius: 18px;
+  background: linear-gradient(110deg, #eff6ff, #f0fdfa);
+}
+
+.study-dashboard__metrics {
+  gap: 14px;
+  margin-bottom: 32px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.study-dashboard__metric {
+  padding: 22px 22px 20px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 12px 30px rgba(31, 70, 120, 0.08);
+}
+
+.study-dashboard__metric + .study-dashboard__metric {
+  border-left: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.study-dashboard__metric-top .material-symbols-outlined {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #e8f0ff;
+}
+
+.study-dashboard__metric-value {
+  margin-top: 20px;
+  font-size: 38px;
+}
+
+.study-dashboard__feature {
+  min-height: 330px;
+  padding: 34px;
+  border: 0;
+  border-radius: 26px;
+  background: linear-gradient(135deg, rgba(226, 239, 255, 0.98), rgba(235, 250, 249, 0.95));
+  box-shadow: 0 18px 42px rgba(44, 91, 150, 0.11);
+}
+
+.study-dashboard__feature h2 {
+  max-width: 590px;
+  margin-top: 32px;
+  font-size: clamp(30px, 4vw, 48px);
+}
+
+.study-dashboard__feature > p {
+  max-width: 570px;
+  font-size: 14px;
+}
+
+.study-dashboard__primary {
+  min-height: 48px;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(40, 89, 206, 0.2);
+}
+
+.study-dashboard__activity,
+.study-dashboard__tools {
+  padding: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 12px 30px rgba(31, 70, 120, 0.06);
+}
+
+.study-dashboard__activity-icon {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 13px;
+  background: #edf3ff;
+  color: #2859ce;
+}
+
+html.dark .study-dashboard {
+  background: radial-gradient(circle at 88% 4%, rgba(52, 112, 197, 0.2), transparent 28rem), var(--sd-bg);
+}
+
+html.dark .study-dashboard__metric,
+html.dark .study-dashboard__activity,
+html.dark .study-dashboard__tools {
+  background: rgba(21, 31, 46, 0.88);
+  border-color: var(--sd-line);
+}
+
+html.dark .study-dashboard__feature {
+  background: linear-gradient(135deg, #1d3556, #173c43);
+}
+
+@media (max-width: 720px) {
+  .study-dashboard {
+    padding: 30px 16px 28px;
+  }
+
+  .study-dashboard__header {
+    align-items: flex-start;
+  }
+
+  .study-dashboard__feature,
+  .study-dashboard__activity,
+  .study-dashboard__tools {
+    padding: 20px;
+    border-radius: 18px;
+  }
+}

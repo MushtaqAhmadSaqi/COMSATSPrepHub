@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateQuizWithGemini } from '../../services/aiQuizService';
-import { recordQuizAttempt } from '../../utils/studyTracker';
+import { recordAiQuizGeneration, recordQuizAttempt } from '../../utils/studyTracker';
 import { fireConfetti } from '../../utils/confetti';
 import { useToast } from '../../utils/toast';
 import './TakeAiQuiz.css';
@@ -74,6 +74,12 @@ export default function TakeAiQuiz({
 
         if (!cancelled) {
           setQuestions(generated);
+          recordAiQuizGeneration({
+            subject: quizParams.topic || 'AI Practice Quiz',
+            subjectCode: quizParams.subjectCode || '',
+            questionCount: generated.length,
+            provider: generated[0]?.provider || 'Gemini'
+          });
         }
       } catch (err) {
         if (!cancelled && err?.name !== 'AbortError') {

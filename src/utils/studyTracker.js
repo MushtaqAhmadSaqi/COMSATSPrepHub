@@ -70,6 +70,7 @@ async function syncActivityToSupabase(item) {
         score: item.score ?? null,
         totalQuestions: item.totalQuestions ?? null,
         difficulty: item.difficulty || null,
+        provider: item.provider || null,
         wrongTopics: Array.isArray(item.wrongTopics) ? item.wrongTopics : []
       },
       created_at: new Date(item.timestamp).toISOString()
@@ -93,7 +94,13 @@ export function mapRemoteActivity(item) {
     totalQuestions: item.metadata?.totalQuestions ?? null,
     difficulty: item.metadata?.difficulty || null,
     wrongTopics: Array.isArray(item.metadata?.wrongTopics) ? item.metadata.wrongTopics : [],
-    icon: item.type === 'quiz' ? 'quiz' : item.type === 'paper' ? 'description' : 'bolt',
+    icon: item.type === 'quiz'
+      ? 'quiz'
+      : item.type === 'paper'
+        ? 'description'
+        : item.type === 'ai_generation'
+          ? 'auto_awesome'
+          : 'bolt',
     timestamp: new Date(item.created_at).getTime(),
     time: new Date(item.created_at).toLocaleDateString()
   };
@@ -125,6 +132,22 @@ export function recordQuizAttempt({
     difficulty: difficulty || 'Medium',
     wrongTopics: Array.isArray(wrongTopics) ? wrongTopics.slice(0, 10) : [],
     icon: 'quiz'
+  });
+}
+
+export function recordAiQuizGeneration({
+  subject,
+  subjectCode = '',
+  questionCount,
+  provider = 'Gemini'
+}) {
+  addActivity({
+    type: 'ai_generation',
+    title: subject || 'AI study quiz',
+    subjectCode,
+    description: `${provider} generated ${Number(questionCount) || 0} questions`,
+    provider,
+    icon: 'auto_awesome'
   });
 }
 

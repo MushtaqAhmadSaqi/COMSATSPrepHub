@@ -85,7 +85,8 @@ export default function Dashboard({
   const hasRealHistory =
     (localStats?.quizzesAttempted || 0) > 0 ||
     (localStats?.savedPapers || 0) > 0 ||
-    bookmarkedPapers.length > 0;
+    bookmarkedPapers.length > 0 ||
+    localActivity.length > 0;
   const isDemo = !hasRealHistory && stats == null;
   const destinations = { ...DEFAULT_ROUTES, ...routes };
 
