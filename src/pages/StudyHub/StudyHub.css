@@ -37,7 +37,7 @@
 .study-hub-tab.active {
   background: var(--brand);
   border-color: var(--brand);
-  color: #ffffff;
+  color: var(--on-brand);
   box-shadow: var(--shadow-brand);
 }
 

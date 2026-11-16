@@ -398,6 +398,7 @@ export default function PaperView({
             <span style={{ fontSize: '0.75rem', color: 'var(--text-subtle)' }}>Saved privately on your device</span>
           </div>
           <textarea
+            aria-label={`Personal study notes for ${paper.title}`}
             value={noteText}
             onChange={(e) => setNoteText(e.target.value)}
             placeholder="Jot down key formulas, tricky concepts, or questions to revise from this paper…"
@@ -727,6 +728,7 @@ export default function PaperView({
             Let us know if a question is unclear, a model answer has an error, or a PDF link is broken for <strong>{paper.title}</strong>.
           </p>
           <textarea
+            aria-label="Describe the problem with this paper"
             value={reportText}
             onChange={(e) => setReportText(e.target.value)}
             placeholder="Describe the issue (e.g., Question 2 option B formula typo)…"

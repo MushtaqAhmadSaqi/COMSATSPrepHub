@@ -87,7 +87,7 @@
   align-items: center;
   gap: 0.5rem;
   background: var(--brand);
-  color: #fff;
+  color: var(--on-brand);
   border: none;
   font-weight: 600;
   font-size: 0.875rem;
@@ -100,11 +100,13 @@
 
 .btn-copy-prompt:hover {
   background: var(--brand-dark, #1d4ed8);
+  color: #ffffff;
   transform: translateY(-1px);
 }
 
 .btn-copy-prompt.copied {
   background: #10b981;
+  color: #0f172a;
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
@@ -248,7 +250,7 @@
   align-items: center;
   gap: 0.5rem;
   background: var(--brand);
-  color: #fff;
+  color: var(--on-brand);
   border: none;
   font-weight: 600;
   font-size: 0.9375rem;
@@ -261,6 +263,7 @@
 
 .btn-parse:hover {
   background: var(--brand-dark, #1d4ed8);
+  color: #ffffff;
   transform: translateY(-1px);
 }
 
@@ -559,12 +562,13 @@
 
 .btn-result-action.primary {
   background: var(--brand);
-  color: #fff;
+  color: var(--on-brand);
   border: none;
 }
 
 .btn-result-action.primary:hover {
   background: var(--brand-dark, #1d4ed8);
+  color: #ffffff;
 }
 
 .btn-result-action.secondary {

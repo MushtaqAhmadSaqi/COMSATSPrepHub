@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getCommandPaletteResults } from '../../utils/fuzzySearch';
 import { usePrefersReducedMotion } from '../../utils/usePrefersReducedMotion';
@@ -21,6 +21,7 @@ export default function CommandPalette({
   const inputRef = useRef(null);
   const previousFocusRef = useRef(null);
   const listRef = useRef(null);
+  const listId = useId();
 
   const panelVariants = prefersReduced
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
@@ -56,9 +57,9 @@ export default function CommandPalette({
     if (!listRef.current) return;
     const selectedEl = listRef.current.querySelector('.cmd-palette__item--selected');
     if (selectedEl) {
-      selectedEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      selectedEl.scrollIntoView({ block: 'nearest', behavior: prefersReduced ? 'instant' : 'smooth' });
     }
-  }, [selectedIndex]);
+  }, [selectedIndex, prefersReduced]);
 
   const handleSelect = (item) => {
     onClose();
@@ -110,6 +111,9 @@ export default function CommandPalette({
       } else {
         setSelectedIndex((prev) => (prev + 1) % results.length);
       }
+    }
+    if (['ArrowDown', 'ArrowUp', 'Home', 'End', 'Tab'].includes(e.key)) {
+      inputRef.current?.focus();
     }
   };
 
@@ -165,11 +169,16 @@ export default function CommandPalette({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 aria-label="Search pages, subjects, actions"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded={isOpen}
+                aria-controls={`${listId}-results`}
+                aria-activedescendant={results[selectedIndex] ? `${listId}-option-${selectedIndex}` : undefined}
               />
             </div>
 
             {/* Results List */}
-            <div className="cmd-palette__list" ref={listRef}>
+            <div className="cmd-palette__list" ref={listRef} id={`${listId}-results`} role="listbox" aria-label="Search results">
               {results.length === 0 ? (
                 <div className="cmd-palette__empty">
                   <span className="material-symbols-outlined cmd-palette__empty-icon" aria-hidden="true">
@@ -179,7 +188,7 @@ export default function CommandPalette({
                 </div>
               ) : (
                 groupedResults.map((group) => (
-                  <div key={group.name} className="cmd-palette__group">
+                  <div key={group.name} className="cmd-palette__group" role="group" aria-label={group.name}>
                     <div className="cmd-palette__group-title">{group.name}</div>
                     {group.items.map((item) => {
                       const isSelected = item.flatIndex === selectedIndex;
@@ -187,6 +196,10 @@ export default function CommandPalette({
                         <button
                           key={item.id}
                           type="button"
+                          role="option"
+                          id={`${listId}-option-${item.flatIndex}`}
+                          aria-selected={isSelected}
+                          tabIndex={-1}
                           className={`cmd-palette__item ${isSelected ? 'cmd-palette__item--selected' : ''}`}
                           onClick={() => handleSelect(item)}
                           onMouseEnter={() => setSelectedIndex(item.flatIndex)}

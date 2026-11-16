@@ -188,6 +188,17 @@ export default function StudyHub() {
     toast.success('Added custom flashcard to Box 1!');
   };
 
+  const handleTabKeyDown = (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+    e.preventDefault();
+    const tabs = Array.from(e.currentTarget.querySelectorAll('[role="tab"]'));
+    const current = tabs.indexOf(e.target.closest('[role="tab"]'));
+    const direction = e.key === 'ArrowLeft' ? -1 : 1;
+    const next = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (current + direction + tabs.length) % tabs.length;
+    tabs[next].focus();
+    tabs[next].click();
+  };
+
   return (
     <div className="study-hub-container">
       <PageHeader
@@ -197,11 +208,14 @@ export default function StudyHub() {
         align="center"
       />
 
-      <div className="study-hub-tabs" role="tablist" aria-label="Study Hub sections">
+      <div className="study-hub-tabs" role="tablist" aria-label="Study Hub sections" onKeyDown={handleTabKeyDown}>
         <button
           type="button"
           role="tab"
           aria-selected={activeTab === 'daily'}
+          id="study-tab-daily"
+          aria-controls="study-hub-panel"
+          tabIndex={activeTab === 'daily' ? 0 : -1}
           onClick={() => setActiveTab('daily')}
           className={`study-hub-tab ${activeTab === 'daily' ? 'active' : ''}`}
         >
@@ -212,6 +226,9 @@ export default function StudyHub() {
           type="button"
           role="tab"
           aria-selected={activeTab === 'flashcards'}
+          id="study-tab-flashcards"
+          aria-controls="study-hub-panel"
+          tabIndex={activeTab === 'flashcards' ? 0 : -1}
           onClick={() => setActiveTab('flashcards')}
           className={`study-hub-tab ${activeTab === 'flashcards' ? 'active' : ''}`}
         >
@@ -222,6 +239,9 @@ export default function StudyHub() {
           type="button"
           role="tab"
           aria-selected={activeTab === 'cheatsheets'}
+          id="study-tab-cheatsheets"
+          aria-controls="study-hub-panel"
+          tabIndex={activeTab === 'cheatsheets' ? 0 : -1}
           onClick={() => setActiveTab('cheatsheets')}
           className={`study-hub-tab ${activeTab === 'cheatsheets' ? 'active' : ''}`}
         >
@@ -231,7 +251,7 @@ export default function StudyHub() {
       </div>
 
       {activeTab === 'daily' && (
-        <div className="study-hub-card">
+        <div className="study-hub-card" id="study-hub-panel" role="tabpanel" aria-labelledby={`study-tab-${activeTab}`} tabIndex={0}>
           {challengeStatus.completedToday && !isFinished ? (
             <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '3.25rem', color: 'var(--success)' }} aria-hidden="true">check_circle</span>
@@ -310,7 +330,7 @@ export default function StudyHub() {
       )}
 
       {activeTab === 'flashcards' && (
-        <div className="study-hub-card">
+        <div className="study-hub-card" id="study-hub-panel" role="tabpanel" aria-labelledby={`study-tab-${activeTab}`} tabIndex={0}>
           {currentCard ? (
             <div>
               <div className="flashcard-meta-row">
@@ -369,7 +389,7 @@ export default function StudyHub() {
                     type="button"
                     className="flashcard-rate-btn"
                     onClick={() => handleFlashcardRating('good')}
-                    style={{ border: 'none', color: '#ffffff', background: 'var(--brand)' }}
+                    style={{ border: 'none', color: 'var(--on-brand)', background: 'var(--brand)' }}
                   >
                     Good (+1 Box)
                   </button>
@@ -433,7 +453,7 @@ export default function StudyHub() {
                   padding: '0.65rem 1.35rem',
                   borderRadius: 'var(--radius-md)',
                   background: 'var(--brand)',
-                  color: '#ffffff',
+                  color: 'var(--on-brand)',
                   border: 'none',
                   fontWeight: 700,
                   cursor: 'pointer'
@@ -447,7 +467,7 @@ export default function StudyHub() {
       )}
 
       {activeTab === 'cheatsheets' && (
-        <div className="study-hub-card">
+        <div className="study-hub-card" id="study-hub-panel" role="tabpanel" aria-labelledby={`study-tab-${activeTab}`} tabIndex={0}>
           <div className="cheatsheet-grid">
             {HIGH_YIELD_CHEATSHEETS.map((sheet) => (
               <article key={sheet.code} className="cheatsheet-item">

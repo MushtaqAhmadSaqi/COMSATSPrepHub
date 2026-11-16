@@ -106,6 +106,17 @@ export default function Upload() {
     setFieldErrors(errs);
   };
 
+  const handleTabKeyDown = (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+    e.preventDefault();
+    const tabs = Array.from(e.currentTarget.querySelectorAll('[role="tab"]'));
+    const current = tabs.indexOf(e.target.closest('[role="tab"]'));
+    const direction = e.key === 'ArrowLeft' ? -1 : 1;
+    const next = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (current + direction + tabs.length) % tabs.length;
+    tabs[next].focus();
+    tabs[next].click();
+  };
+
   return (
     <div className="upload-container">
       <PageHeader
@@ -115,18 +126,21 @@ export default function Upload() {
       />
 
       {/* Mode Switcher */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }} role="tablist">
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }} role="tablist" aria-label="Paper contribution mode" onKeyDown={handleTabKeyDown}>
         <button
           type="button"
           role="tab"
           aria-selected={activeTab === 'upload'}
+          id="upload-tab-upload"
+          aria-controls="upload-panel"
+          tabIndex={activeTab === 'upload' ? 0 : -1}
           onClick={() => { setActiveTab('upload'); setSubmitted(false); }}
           style={{
             padding: '0.6rem 1.25rem',
             borderRadius: '9999px',
             border: '1.5px solid var(--border)',
             background: activeTab === 'upload' ? 'var(--brand)' : 'var(--surface)',
-            color: activeTab === 'upload' ? '#ffffff' : 'var(--text)',
+            color: activeTab === 'upload' ? 'var(--on-brand)' : 'var(--text)',
             fontWeight: 700,
             fontSize: '0.875rem',
             minHeight: '44px'
@@ -138,13 +152,16 @@ export default function Upload() {
           type="button"
           role="tab"
           aria-selected={activeTab === 'request'}
+          id="upload-tab-request"
+          aria-controls="upload-panel"
+          tabIndex={activeTab === 'request' ? 0 : -1}
           onClick={() => { setActiveTab('request'); setSubmitted(false); }}
           style={{
             padding: '0.6rem 1.25rem',
             borderRadius: '9999px',
             border: '1.5px solid var(--border)',
             background: activeTab === 'request' ? 'var(--brand)' : 'var(--surface)',
-            color: activeTab === 'request' ? '#ffffff' : 'var(--text)',
+            color: activeTab === 'request' ? 'var(--on-brand)' : 'var(--text)',
             fontWeight: 700,
             fontSize: '0.875rem',
             minHeight: '44px'
@@ -154,7 +171,7 @@ export default function Upload() {
         </button>
       </div>
 
-      <div className="upload-card">
+      <div className="upload-card" id="upload-panel" role="tabpanel" aria-labelledby={`upload-tab-${activeTab}`} tabIndex={0}>
         {submitted ? (
           <div className="upload-success">
             <div className="upload-success-icon">
@@ -199,9 +216,11 @@ export default function Upload() {
                     id="paper-file-input"
                     type="file"
                     accept=".pdf,.png,.jpg,.jpeg"
-                    style={{ display: 'none' }}
+                    className="sr-only"
                     onChange={handleFileInputChange}
                     aria-label="Choose past paper file"
+                    aria-invalid={Boolean(fileError)}
+                    aria-describedby={fileError ? 'upload-file-error' : undefined}
                   />
                   <div className="upload-dropzone-icon">
                     <span className="material-symbols-outlined" style={{ fontSize: '2.25rem' }}>
@@ -226,7 +245,7 @@ export default function Upload() {
                 </label>
 
                 {fileError && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--danger)', fontSize: '0.875rem', marginBottom: '1rem', fontWeight: 600 }}>
+                  <div id="upload-file-error" role="alert" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--danger)', fontSize: '0.875rem', marginBottom: '1rem', fontWeight: 600 }}>
                     <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>error</span>
                     {fileError}
                   </div>

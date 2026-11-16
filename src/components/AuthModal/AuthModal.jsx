@@ -48,14 +48,15 @@ export default function AuthModal({
   const isReset = mode === 'reset';
 
   useEffect(() => {
-    if (isOpen) {
-      triggerRef.current = document.activeElement;
-      requestAnimationFrame(() => {
-        firstInputRef.current?.focus();
-      });
-    } else if (triggerRef.current) {
-      triggerRef.current.focus?.();
-    }
+    if (!isOpen) return;
+    triggerRef.current = document.activeElement;
+    return () => triggerRef.current?.focus?.();
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const frame = requestAnimationFrame(() => firstInputRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
   }, [isOpen, mode]);
 
   useEffect(() => {

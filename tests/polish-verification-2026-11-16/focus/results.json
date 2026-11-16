@@ -1,0 +1,210 @@
+{
+  "browser": "Isolated headless Microsoft Edge",
+  "checks": [
+    {
+      "name": "terms polish: layout at 375px in light",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 375px in light",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 375px in light",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 375px in light",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 768px in light",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 768px in light",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 768px in light",
+      "passed": true
+    }
+  ],
+  "screenshots": [
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\focus\\command-focus-light-375-after.png"
+  ],
+  "blockedRequests": [],
+  "consoleErrors": [
+    "The above error occurred in one of your React components:\n\n    at Lazy\n    at div\n    at MotionDOMComponent (http://localhost:3000/node_modules/.vite/deps/framer-motion.js?v=3355943b:9420:40)\n    at PopChildMeasure (http://localhost:3000/node_modules/.vite/deps/framer-motion.js?v=3355943b:8549:23)\n ",
+    "[ErrorBoundary] Failed to fetch dynamically imported module: http://localhost:3000/src/pages/GpaCalculator/GpaCalculator.jsx?t=1794849951044 \n    at Lazy\n    at div\n    at MotionDOMComponent (http://localhost:3000/node_modules/.vite/deps/framer-motion.js?v=3355943b:9420:40)\n    at PopChildMeasure (h"
+  ],
+  "exceptions": [
+    "Uncaught",
+    "Uncaught"
+  ],
+  "stage": "after",
+  "target": "focus",
+  "measurements": [
+    {
+      "area": "terms",
+      "theme": "light",
+      "width": 375,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 287,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "light",
+      "width": 375,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 287,
+      "dropzonePadding": "32px 16px"
+    },
+    {
+      "area": "navbar",
+      "theme": "light",
+      "width": 375,
+      "brandRight": 184.984375,
+      "actionsLeft": 190.984375,
+      "actionsRight": 362.984375,
+      "pillRight": 359,
+      "viewport": 369,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Switch to dark mode",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 40,
+          "height": 40
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "light",
+      "width": 375,
+      "shadow": "rgba(37, 99, 235, 0.28) 0px 0px 0px 3px inset",
+      "outline": "rgb(15, 23, 42) none 3px",
+      "borderBottom": "rgb(30, 64, 175)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "light",
+      "width": 375,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab assignment",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab midterm",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab final",
+          "for": "",
+          "control": null
+        }
+      ]
+    },
+    {
+      "area": "terms",
+      "theme": "light",
+      "width": 768,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 624,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "light",
+      "width": 768,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 624,
+      "dropzonePadding": "48px 32px"
+    },
+    {
+      "area": "navbar",
+      "theme": "light",
+      "width": 768,
+      "brandRight": 229.640625,
+      "actionsLeft": 469.484375,
+      "actionsRight": 721,
+      "pillRight": 742,
+      "viewport": 762,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Switch to dark mode",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 107.515625,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "light",
+      "width": 768,
+      "shadow": "rgba(37, 99, 235, 0.28) 0px 0px 0px 3px inset",
+      "outline": "rgb(15, 23, 42) none 3px",
+      "borderBottom": "rgb(30, 64, 175)",
+      "overflow": "hidden"
+    }
+  ],
+  "blocker": "Error: UI condition timed out: document.querySelector(\".grade-workspace\") && !document.querySelector('.route-loading')\n    at <anonymous>:1:195"
+}

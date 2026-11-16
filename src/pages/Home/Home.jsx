@@ -227,6 +227,10 @@ export default function Home({
 
         {/* Global Course & Paper Search Bar with Instant Suggestions */}
         <div
+          onFocusCapture={() => setSearchFocused(true)}
+          onBlurCapture={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget)) setSearchFocused(false);
+          }}
           style={{
             maxWidth: '38rem',
             margin: '0 auto 1.75rem',
@@ -254,8 +258,6 @@ export default function Home({
               <input
                 type="search"
                 value={heroQuery}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setTimeout(() => setSearchFocused(false), 180)}
                 onChange={(e) => setHeroQuery(e.target.value)}
                 placeholder="Search by course code or subject (e.g. CSC211, OOP, MTH104)…"
                 aria-label="Search by course code or subject name"
@@ -274,7 +276,7 @@ export default function Home({
                 type="submit"
                 style={{
                   background: 'var(--brand)',
-                  color: '#ffffff',
+                  color: 'var(--on-brand)',
                   border: 'none',
                   borderRadius: '9999px',
                   padding: '0.55rem 1.1rem',
@@ -290,7 +292,7 @@ export default function Home({
 
           {(searchFocused || heroQuery.trim().length > 0) && (
             <div
-              role="listbox"
+              role="group"
               aria-label="Course suggestions"
               style={{
                 position: 'absolute',
@@ -314,7 +316,6 @@ export default function Home({
                   <button
                     key={subj.code}
                     type="button"
-                    onMouseDown={() => onSelectSubject(subj)}
                     onClick={() => onSelectSubject(subj)}
                     style={{
                       width: '100%',

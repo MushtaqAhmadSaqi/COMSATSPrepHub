@@ -362,6 +362,17 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
     setTopicError('');
   };
 
+  const handleRadioKeyDown = (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) return;
+    e.preventDefault();
+    const radios = Array.from(e.currentTarget.closest('[role="radiogroup"]').querySelectorAll('[role="radio"]'));
+    const current = radios.indexOf(e.currentTarget);
+    const direction = ['ArrowLeft', 'ArrowUp'].includes(e.key) ? -1 : 1;
+    const next = e.key === 'Home' ? 0 : e.key === 'End' ? radios.length - 1 : (current + direction + radios.length) % radios.length;
+    radios[next].focus();
+    radios[next].click();
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (honeypot) return;
@@ -598,6 +609,8 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
                   type="button"
                   role="radio"
                   aria-checked={isSelected}
+                  tabIndex={isSelected ? 0 : -1}
+                  onKeyDown={handleRadioKeyDown}
                   onClick={() => {
                     setQuestionType(st.id);
                     setActivePreset(null);
@@ -634,6 +647,8 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
                     type="button"
                     role="radio"
                     aria-checked={isSelected}
+                    tabIndex={isSelected ? 0 : -1}
+                    onKeyDown={handleRadioKeyDown}
                     onClick={() => {
                       setDifficulty(d.id);
                       setActivePreset(null);
@@ -664,6 +679,8 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
                     type="button"
                     role="radio"
                     aria-checked={isSelected}
+                    tabIndex={isSelected ? 0 : -1}
+                    onKeyDown={handleRadioKeyDown}
                     onClick={() => {
                       setNumQuestions(qc.count);
                       setActivePreset(null);

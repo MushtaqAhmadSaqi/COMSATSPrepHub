@@ -1,0 +1,1832 @@
+{
+  "browser": "Isolated headless Microsoft Edge",
+  "checks": [
+    {
+      "name": "terms polish: layout at 375px in light",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 375px in light",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 375px in light",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 375px in light",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 414px in light",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 414px in light",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 414px in light",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 414px in light",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 768px in light",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 768px in light",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 768px in light",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 768px in light",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 1024px in light",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 1024px in light",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 1024px in light",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 1024px in light",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 1440px in light",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 1440px in light",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 1440px in light",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 1440px in light",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 375px in dark",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 375px in dark",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 375px in dark",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 375px in dark",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 414px in dark",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 414px in dark",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 414px in dark",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 414px in dark",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 768px in dark",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 768px in dark",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 768px in dark",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 768px in dark",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 1024px in dark",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 1024px in dark",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 1024px in dark",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 1024px in dark",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 1440px in dark",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 1440px in dark",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 1440px in dark",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 1440px in dark",
+      "passed": true
+    }
+  ],
+  "screenshots": [
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\labels\\command-focus-light-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\labels\\terms-dark-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\labels\\upload-dark-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\labels\\navbar-dark-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\labels\\command-focus-dark-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\labels\\gpa-labels-dark-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\labels\\terms-dark-1440-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\labels\\upload-dark-1440-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\labels\\navbar-dark-1440-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\labels\\command-focus-dark-1440-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\labels\\gpa-labels-dark-1440-after.png"
+  ],
+  "blockedRequests": [],
+  "networkErrors": [],
+  "consoleErrors": [],
+  "exceptions": [],
+  "stage": "after",
+  "target": "labels",
+  "measurements": [
+    {
+      "area": "terms",
+      "theme": "light",
+      "width": 375,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 287,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "light",
+      "width": 375,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 287,
+      "dropzonePadding": "32px 16px"
+    },
+    {
+      "area": "navbar",
+      "theme": "light",
+      "width": 375,
+      "brandRight": 178.984375,
+      "actionsLeft": 188,
+      "actionsRight": 354,
+      "pillRight": 361,
+      "viewport": 369,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Switch to dark mode",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 40,
+          "height": 40
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "light",
+      "width": 375,
+      "shadow": "rgba(37, 99, 235, 0.28) 0px 0px 0px 3px inset",
+      "outline": "rgb(15, 23, 42) none 3px",
+      "borderBottom": "rgb(30, 64, 175)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "light",
+      "width": 375,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": ":rr:-sessional-quizObtained",
+          "control": "Quizzes obtained out of 15"
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": ":rr:-sessional-assignObtained",
+          "control": "Assignments obtained out of 10"
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": ":rr:-sessional-midObtained",
+          "control": "Midterm obtained out of 25"
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": ":rr:-sessional-finalObtained",
+          "control": "Final exam obtained out of 50"
+        },
+        {
+          "label": "Lab assignment",
+          "for": ":rr:-sessional-labAssignObtained",
+          "control": "Lab assignment obtained marks"
+        },
+        {
+          "label": "Lab midterm",
+          "for": ":rr:-sessional-labMidObtained",
+          "control": "Lab midterm obtained marks"
+        },
+        {
+          "label": "Lab final",
+          "for": ":rr:-sessional-labFinalObtained",
+          "control": "Lab final obtained marks"
+        }
+      ],
+      "sessional": {
+        "result": "80.33% → Grade A- (3.66)",
+        "values": [
+          {
+            "name": "Quizzes obtained out of 15",
+            "value": "12"
+          },
+          {
+            "name": "Assignments obtained out of 10",
+            "value": "8.5"
+          },
+          {
+            "name": "Midterm obtained out of 25",
+            "value": "20"
+          },
+          {
+            "name": "Final exam obtained out of 50",
+            "value": "40"
+          },
+          {
+            "name": null,
+            "value": true
+          },
+          {
+            "name": "Lab assignment obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab assignment total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab midterm obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab midterm total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab final obtained marks",
+            "value": "40"
+          },
+          {
+            "name": "Lab final total marks",
+            "value": "50"
+          }
+        ]
+      }
+    },
+    {
+      "area": "terms",
+      "theme": "light",
+      "width": 414,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 326,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "light",
+      "width": 414,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 326,
+      "dropzonePadding": "32px 16px"
+    },
+    {
+      "area": "navbar",
+      "theme": "light",
+      "width": 414,
+      "brandRight": 184.984375,
+      "actionsLeft": 199,
+      "actionsRight": 387,
+      "pillRight": 398,
+      "viewport": 408,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch to dark mode",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 44,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "light",
+      "width": 414,
+      "shadow": "rgba(37, 99, 235, 0.28) 0px 0px 0px 3px inset",
+      "outline": "rgb(15, 23, 42) none 3px",
+      "borderBottom": "rgb(30, 64, 175)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "light",
+      "width": 414,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": ":rf:-sessional-quizObtained",
+          "control": "Quizzes obtained out of 15"
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": ":rf:-sessional-assignObtained",
+          "control": "Assignments obtained out of 10"
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": ":rf:-sessional-midObtained",
+          "control": "Midterm obtained out of 25"
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": ":rf:-sessional-finalObtained",
+          "control": "Final exam obtained out of 50"
+        },
+        {
+          "label": "Lab assignment",
+          "for": ":rf:-sessional-labAssignObtained",
+          "control": "Lab assignment obtained marks"
+        },
+        {
+          "label": "Lab midterm",
+          "for": ":rf:-sessional-labMidObtained",
+          "control": "Lab midterm obtained marks"
+        },
+        {
+          "label": "Lab final",
+          "for": ":rf:-sessional-labFinalObtained",
+          "control": "Lab final obtained marks"
+        }
+      ],
+      "sessional": {
+        "result": "80.33% → Grade A- (3.66)",
+        "values": [
+          {
+            "name": "Quizzes obtained out of 15",
+            "value": "12"
+          },
+          {
+            "name": "Assignments obtained out of 10",
+            "value": "8.5"
+          },
+          {
+            "name": "Midterm obtained out of 25",
+            "value": "20"
+          },
+          {
+            "name": "Final exam obtained out of 50",
+            "value": "40"
+          },
+          {
+            "name": null,
+            "value": true
+          },
+          {
+            "name": "Lab assignment obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab assignment total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab midterm obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab midterm total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab final obtained marks",
+            "value": "40"
+          },
+          {
+            "name": "Lab final total marks",
+            "value": "50"
+          }
+        ]
+      }
+    },
+    {
+      "area": "terms",
+      "theme": "light",
+      "width": 768,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 624,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "light",
+      "width": 768,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 624,
+      "dropzonePadding": "48px 32px"
+    },
+    {
+      "area": "navbar",
+      "theme": "light",
+      "width": 768,
+      "brandRight": 229.640625,
+      "actionsLeft": 451.484375,
+      "actionsRight": 721,
+      "pillRight": 742,
+      "viewport": 762,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch to dark mode",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 107.515625,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "light",
+      "width": 768,
+      "shadow": "rgba(37, 99, 235, 0.28) 0px 0px 0px 3px inset",
+      "outline": "rgb(15, 23, 42) none 3px",
+      "borderBottom": "rgb(30, 64, 175)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "light",
+      "width": 768,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": ":rf:-sessional-quizObtained",
+          "control": "Quizzes obtained out of 15"
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": ":rf:-sessional-assignObtained",
+          "control": "Assignments obtained out of 10"
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": ":rf:-sessional-midObtained",
+          "control": "Midterm obtained out of 25"
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": ":rf:-sessional-finalObtained",
+          "control": "Final exam obtained out of 50"
+        },
+        {
+          "label": "Lab assignment",
+          "for": ":rf:-sessional-labAssignObtained",
+          "control": "Lab assignment obtained marks"
+        },
+        {
+          "label": "Lab midterm",
+          "for": ":rf:-sessional-labMidObtained",
+          "control": "Lab midterm obtained marks"
+        },
+        {
+          "label": "Lab final",
+          "for": ":rf:-sessional-labFinalObtained",
+          "control": "Lab final obtained marks"
+        }
+      ],
+      "sessional": {
+        "result": "80.33% → Grade A- (3.66)",
+        "values": [
+          {
+            "name": "Quizzes obtained out of 15",
+            "value": "12"
+          },
+          {
+            "name": "Assignments obtained out of 10",
+            "value": "8.5"
+          },
+          {
+            "name": "Midterm obtained out of 25",
+            "value": "20"
+          },
+          {
+            "name": "Final exam obtained out of 50",
+            "value": "40"
+          },
+          {
+            "name": null,
+            "value": true
+          },
+          {
+            "name": "Lab assignment obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab assignment total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab midterm obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab midterm total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab final obtained marks",
+            "value": "40"
+          },
+          {
+            "name": "Lab final total marks",
+            "value": "50"
+          }
+        ]
+      }
+    },
+    {
+      "area": "terms",
+      "theme": "light",
+      "width": 1024,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "light",
+      "width": 1024,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": "48px 32px"
+    },
+    {
+      "area": "navbar",
+      "theme": "light",
+      "width": 1024,
+      "brandRight": 229.640625,
+      "actionsLeft": 725.484375,
+      "actionsRight": 977,
+      "pillRight": 998,
+      "viewport": 1018,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Switch to dark mode",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 107.515625,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "light",
+      "width": 1024,
+      "shadow": "rgba(37, 99, 235, 0.28) 0px 0px 0px 3px inset",
+      "outline": "rgb(15, 23, 42) none 3px",
+      "borderBottom": "rgb(30, 64, 175)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "light",
+      "width": 1024,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": ":rf:-sessional-quizObtained",
+          "control": "Quizzes obtained out of 15"
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": ":rf:-sessional-assignObtained",
+          "control": "Assignments obtained out of 10"
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": ":rf:-sessional-midObtained",
+          "control": "Midterm obtained out of 25"
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": ":rf:-sessional-finalObtained",
+          "control": "Final exam obtained out of 50"
+        },
+        {
+          "label": "Lab assignment",
+          "for": ":rf:-sessional-labAssignObtained",
+          "control": "Lab assignment obtained marks"
+        },
+        {
+          "label": "Lab midterm",
+          "for": ":rf:-sessional-labMidObtained",
+          "control": "Lab midterm obtained marks"
+        },
+        {
+          "label": "Lab final",
+          "for": ":rf:-sessional-labFinalObtained",
+          "control": "Lab final obtained marks"
+        }
+      ],
+      "sessional": {
+        "result": "80.33% → Grade A- (3.66)",
+        "values": [
+          {
+            "name": "Quizzes obtained out of 15",
+            "value": "12"
+          },
+          {
+            "name": "Assignments obtained out of 10",
+            "value": "8.5"
+          },
+          {
+            "name": "Midterm obtained out of 25",
+            "value": "20"
+          },
+          {
+            "name": "Final exam obtained out of 50",
+            "value": "40"
+          },
+          {
+            "name": null,
+            "value": true
+          },
+          {
+            "name": "Lab assignment obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab assignment total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab midterm obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab midterm total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab final obtained marks",
+            "value": "40"
+          },
+          {
+            "name": "Lab final total marks",
+            "value": "50"
+          }
+        ]
+      }
+    },
+    {
+      "area": "terms",
+      "theme": "light",
+      "width": 1440,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "light",
+      "width": 1440,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": "48px 32px"
+    },
+    {
+      "area": "navbar",
+      "theme": "light",
+      "width": 1440,
+      "brandRight": 306.640625,
+      "actionsLeft": 939.046875,
+      "actionsRight": 1316,
+      "pillRight": 1337,
+      "viewport": 1434,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 163.4375,
+          "height": 38
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Switch to dark mode",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 107.515625,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "light",
+      "width": 1440,
+      "shadow": "rgba(37, 99, 235, 0.28) 0px 0px 0px 3px inset",
+      "outline": "rgb(15, 23, 42) none 3px",
+      "borderBottom": "rgb(30, 64, 175)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "light",
+      "width": 1440,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": ":rf:-sessional-quizObtained",
+          "control": "Quizzes obtained out of 15"
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": ":rf:-sessional-assignObtained",
+          "control": "Assignments obtained out of 10"
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": ":rf:-sessional-midObtained",
+          "control": "Midterm obtained out of 25"
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": ":rf:-sessional-finalObtained",
+          "control": "Final exam obtained out of 50"
+        },
+        {
+          "label": "Lab assignment",
+          "for": ":rf:-sessional-labAssignObtained",
+          "control": "Lab assignment obtained marks"
+        },
+        {
+          "label": "Lab midterm",
+          "for": ":rf:-sessional-labMidObtained",
+          "control": "Lab midterm obtained marks"
+        },
+        {
+          "label": "Lab final",
+          "for": ":rf:-sessional-labFinalObtained",
+          "control": "Lab final obtained marks"
+        }
+      ],
+      "sessional": {
+        "result": "80.33% → Grade A- (3.66)",
+        "values": [
+          {
+            "name": "Quizzes obtained out of 15",
+            "value": "12"
+          },
+          {
+            "name": "Assignments obtained out of 10",
+            "value": "8.5"
+          },
+          {
+            "name": "Midterm obtained out of 25",
+            "value": "20"
+          },
+          {
+            "name": "Final exam obtained out of 50",
+            "value": "40"
+          },
+          {
+            "name": null,
+            "value": true
+          },
+          {
+            "name": "Lab assignment obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab assignment total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab midterm obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab midterm total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab final obtained marks",
+            "value": "40"
+          },
+          {
+            "name": "Lab final total marks",
+            "value": "50"
+          }
+        ]
+      }
+    },
+    {
+      "area": "terms",
+      "theme": "dark",
+      "width": 375,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 287,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "dark",
+      "width": 375,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 287,
+      "dropzonePadding": "32px 16px"
+    },
+    {
+      "area": "navbar",
+      "theme": "dark",
+      "width": 375,
+      "brandRight": 178.984375,
+      "actionsLeft": 188,
+      "actionsRight": 354,
+      "pillRight": 361,
+      "viewport": 369,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Switch to light mode",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 40,
+          "height": 40
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "dark",
+      "width": 375,
+      "shadow": "rgba(96, 165, 250, 0.35) 0px 0px 0px 3px inset",
+      "outline": "rgb(248, 250, 252) none 3px",
+      "borderBottom": "rgb(96, 165, 250)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "dark",
+      "width": 375,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": ":rf:-sessional-quizObtained",
+          "control": "Quizzes obtained out of 15"
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": ":rf:-sessional-assignObtained",
+          "control": "Assignments obtained out of 10"
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": ":rf:-sessional-midObtained",
+          "control": "Midterm obtained out of 25"
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": ":rf:-sessional-finalObtained",
+          "control": "Final exam obtained out of 50"
+        },
+        {
+          "label": "Lab assignment",
+          "for": ":rf:-sessional-labAssignObtained",
+          "control": "Lab assignment obtained marks"
+        },
+        {
+          "label": "Lab midterm",
+          "for": ":rf:-sessional-labMidObtained",
+          "control": "Lab midterm obtained marks"
+        },
+        {
+          "label": "Lab final",
+          "for": ":rf:-sessional-labFinalObtained",
+          "control": "Lab final obtained marks"
+        }
+      ],
+      "sessional": {
+        "result": "80.33% → Grade A- (3.66)",
+        "values": [
+          {
+            "name": "Quizzes obtained out of 15",
+            "value": "12"
+          },
+          {
+            "name": "Assignments obtained out of 10",
+            "value": "8.5"
+          },
+          {
+            "name": "Midterm obtained out of 25",
+            "value": "20"
+          },
+          {
+            "name": "Final exam obtained out of 50",
+            "value": "40"
+          },
+          {
+            "name": null,
+            "value": true
+          },
+          {
+            "name": "Lab assignment obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab assignment total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab midterm obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab midterm total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab final obtained marks",
+            "value": "40"
+          },
+          {
+            "name": "Lab final total marks",
+            "value": "50"
+          }
+        ]
+      }
+    },
+    {
+      "area": "terms",
+      "theme": "dark",
+      "width": 414,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 326,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "dark",
+      "width": 414,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 326,
+      "dropzonePadding": "32px 16px"
+    },
+    {
+      "area": "navbar",
+      "theme": "dark",
+      "width": 414,
+      "brandRight": 184.984375,
+      "actionsLeft": 199,
+      "actionsRight": 387,
+      "pillRight": 398,
+      "viewport": 408,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch to light mode",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 44,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "dark",
+      "width": 414,
+      "shadow": "rgba(96, 165, 250, 0.35) 0px 0px 0px 3px inset",
+      "outline": "rgb(248, 250, 252) none 3px",
+      "borderBottom": "rgb(96, 165, 250)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "dark",
+      "width": 414,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": ":rf:-sessional-quizObtained",
+          "control": "Quizzes obtained out of 15"
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": ":rf:-sessional-assignObtained",
+          "control": "Assignments obtained out of 10"
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": ":rf:-sessional-midObtained",
+          "control": "Midterm obtained out of 25"
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": ":rf:-sessional-finalObtained",
+          "control": "Final exam obtained out of 50"
+        },
+        {
+          "label": "Lab assignment",
+          "for": ":rf:-sessional-labAssignObtained",
+          "control": "Lab assignment obtained marks"
+        },
+        {
+          "label": "Lab midterm",
+          "for": ":rf:-sessional-labMidObtained",
+          "control": "Lab midterm obtained marks"
+        },
+        {
+          "label": "Lab final",
+          "for": ":rf:-sessional-labFinalObtained",
+          "control": "Lab final obtained marks"
+        }
+      ],
+      "sessional": {
+        "result": "80.33% → Grade A- (3.66)",
+        "values": [
+          {
+            "name": "Quizzes obtained out of 15",
+            "value": "12"
+          },
+          {
+            "name": "Assignments obtained out of 10",
+            "value": "8.5"
+          },
+          {
+            "name": "Midterm obtained out of 25",
+            "value": "20"
+          },
+          {
+            "name": "Final exam obtained out of 50",
+            "value": "40"
+          },
+          {
+            "name": null,
+            "value": true
+          },
+          {
+            "name": "Lab assignment obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab assignment total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab midterm obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab midterm total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab final obtained marks",
+            "value": "40"
+          },
+          {
+            "name": "Lab final total marks",
+            "value": "50"
+          }
+        ]
+      }
+    },
+    {
+      "area": "terms",
+      "theme": "dark",
+      "width": 768,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 624,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "dark",
+      "width": 768,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 624,
+      "dropzonePadding": "48px 32px"
+    },
+    {
+      "area": "navbar",
+      "theme": "dark",
+      "width": 768,
+      "brandRight": 229.640625,
+      "actionsLeft": 451.484375,
+      "actionsRight": 721,
+      "pillRight": 742,
+      "viewport": 762,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch to light mode",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 107.515625,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "dark",
+      "width": 768,
+      "shadow": "rgba(96, 165, 250, 0.35) 0px 0px 0px 3px inset",
+      "outline": "rgb(248, 250, 252) none 3px",
+      "borderBottom": "rgb(96, 165, 250)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "dark",
+      "width": 768,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": ":rf:-sessional-quizObtained",
+          "control": "Quizzes obtained out of 15"
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": ":rf:-sessional-assignObtained",
+          "control": "Assignments obtained out of 10"
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": ":rf:-sessional-midObtained",
+          "control": "Midterm obtained out of 25"
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": ":rf:-sessional-finalObtained",
+          "control": "Final exam obtained out of 50"
+        },
+        {
+          "label": "Lab assignment",
+          "for": ":rf:-sessional-labAssignObtained",
+          "control": "Lab assignment obtained marks"
+        },
+        {
+          "label": "Lab midterm",
+          "for": ":rf:-sessional-labMidObtained",
+          "control": "Lab midterm obtained marks"
+        },
+        {
+          "label": "Lab final",
+          "for": ":rf:-sessional-labFinalObtained",
+          "control": "Lab final obtained marks"
+        }
+      ],
+      "sessional": {
+        "result": "80.33% → Grade A- (3.66)",
+        "values": [
+          {
+            "name": "Quizzes obtained out of 15",
+            "value": "12"
+          },
+          {
+            "name": "Assignments obtained out of 10",
+            "value": "8.5"
+          },
+          {
+            "name": "Midterm obtained out of 25",
+            "value": "20"
+          },
+          {
+            "name": "Final exam obtained out of 50",
+            "value": "40"
+          },
+          {
+            "name": null,
+            "value": true
+          },
+          {
+            "name": "Lab assignment obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab assignment total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab midterm obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab midterm total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab final obtained marks",
+            "value": "40"
+          },
+          {
+            "name": "Lab final total marks",
+            "value": "50"
+          }
+        ]
+      }
+    },
+    {
+      "area": "terms",
+      "theme": "dark",
+      "width": 1024,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "dark",
+      "width": 1024,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": "48px 32px"
+    },
+    {
+      "area": "navbar",
+      "theme": "dark",
+      "width": 1024,
+      "brandRight": 229.640625,
+      "actionsLeft": 725.484375,
+      "actionsRight": 977,
+      "pillRight": 998,
+      "viewport": 1018,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Switch to light mode",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 107.515625,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "dark",
+      "width": 1024,
+      "shadow": "rgba(96, 165, 250, 0.35) 0px 0px 0px 3px inset",
+      "outline": "rgb(248, 250, 252) none 3px",
+      "borderBottom": "rgb(96, 165, 250)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "dark",
+      "width": 1024,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": ":rf:-sessional-quizObtained",
+          "control": "Quizzes obtained out of 15"
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": ":rf:-sessional-assignObtained",
+          "control": "Assignments obtained out of 10"
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": ":rf:-sessional-midObtained",
+          "control": "Midterm obtained out of 25"
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": ":rf:-sessional-finalObtained",
+          "control": "Final exam obtained out of 50"
+        },
+        {
+          "label": "Lab assignment",
+          "for": ":rf:-sessional-labAssignObtained",
+          "control": "Lab assignment obtained marks"
+        },
+        {
+          "label": "Lab midterm",
+          "for": ":rf:-sessional-labMidObtained",
+          "control": "Lab midterm obtained marks"
+        },
+        {
+          "label": "Lab final",
+          "for": ":rf:-sessional-labFinalObtained",
+          "control": "Lab final obtained marks"
+        }
+      ],
+      "sessional": {
+        "result": "80.33% → Grade A- (3.66)",
+        "values": [
+          {
+            "name": "Quizzes obtained out of 15",
+            "value": "12"
+          },
+          {
+            "name": "Assignments obtained out of 10",
+            "value": "8.5"
+          },
+          {
+            "name": "Midterm obtained out of 25",
+            "value": "20"
+          },
+          {
+            "name": "Final exam obtained out of 50",
+            "value": "40"
+          },
+          {
+            "name": null,
+            "value": true
+          },
+          {
+            "name": "Lab assignment obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab assignment total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab midterm obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab midterm total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab final obtained marks",
+            "value": "40"
+          },
+          {
+            "name": "Lab final total marks",
+            "value": "50"
+          }
+        ]
+      }
+    },
+    {
+      "area": "terms",
+      "theme": "dark",
+      "width": 1440,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "dark",
+      "width": 1440,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": "48px 32px"
+    },
+    {
+      "area": "navbar",
+      "theme": "dark",
+      "width": 1440,
+      "brandRight": 306.640625,
+      "actionsLeft": 939.046875,
+      "actionsRight": 1316,
+      "pillRight": 1337,
+      "viewport": 1434,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 163.4375,
+          "height": 38
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Switch to light mode",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 107.515625,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "dark",
+      "width": 1440,
+      "shadow": "rgba(96, 165, 250, 0.35) 0px 0px 0px 3px inset",
+      "outline": "rgb(248, 250, 252) none 3px",
+      "borderBottom": "rgb(96, 165, 250)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "dark",
+      "width": 1440,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": ":rj:-sessional-quizObtained",
+          "control": "Quizzes obtained out of 15"
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": ":rj:-sessional-assignObtained",
+          "control": "Assignments obtained out of 10"
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": ":rj:-sessional-midObtained",
+          "control": "Midterm obtained out of 25"
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": ":rj:-sessional-finalObtained",
+          "control": "Final exam obtained out of 50"
+        },
+        {
+          "label": "Lab assignment",
+          "for": ":rj:-sessional-labAssignObtained",
+          "control": "Lab assignment obtained marks"
+        },
+        {
+          "label": "Lab midterm",
+          "for": ":rj:-sessional-labMidObtained",
+          "control": "Lab midterm obtained marks"
+        },
+        {
+          "label": "Lab final",
+          "for": ":rj:-sessional-labFinalObtained",
+          "control": "Lab final obtained marks"
+        }
+      ],
+      "sessional": {
+        "result": "80.33% → Grade A- (3.66)",
+        "values": [
+          {
+            "name": "Quizzes obtained out of 15",
+            "value": "12"
+          },
+          {
+            "name": "Assignments obtained out of 10",
+            "value": "8.5"
+          },
+          {
+            "name": "Midterm obtained out of 25",
+            "value": "20"
+          },
+          {
+            "name": "Final exam obtained out of 50",
+            "value": "40"
+          },
+          {
+            "name": null,
+            "value": true
+          },
+          {
+            "name": "Lab assignment obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab assignment total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab midterm obtained marks",
+            "value": "20"
+          },
+          {
+            "name": "Lab midterm total marks",
+            "value": "25"
+          },
+          {
+            "name": "Lab final obtained marks",
+            "value": "40"
+          },
+          {
+            "name": "Lab final total marks",
+            "value": "50"
+          }
+        ]
+      }
+    },
+    {
+      "area": "navbar-edge",
+      "width": 320,
+      "brandRight": 178.984375,
+      "actionsLeft": 184.984375,
+      "actionsRight": 350.984375,
+      "pillRight": 306,
+      "buttonWidths": [
+        40,
+        40,
+        40,
+        40
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 374,
+      "brandRight": 178.984375,
+      "actionsLeft": 187,
+      "actionsRight": 353,
+      "pillRight": 360,
+      "buttonWidths": [
+        40,
+        40,
+        40,
+        40
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 390,
+      "brandRight": 178.984375,
+      "actionsLeft": 203,
+      "actionsRight": 369,
+      "pillRight": 376,
+      "buttonWidths": [
+        40,
+        40,
+        40,
+        40
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 399,
+      "brandRight": 178.984375,
+      "actionsLeft": 212,
+      "actionsRight": 378,
+      "pillRight": 385,
+      "buttonWidths": [
+        40,
+        40,
+        40,
+        40
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 400,
+      "brandRight": 184.984375,
+      "actionsLeft": 201,
+      "actionsRight": 373,
+      "pillRight": 384,
+      "buttonWidths": [
+        40,
+        40,
+        40,
+        40
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 413,
+      "brandRight": 184.984375,
+      "actionsLeft": 214,
+      "actionsRight": 386,
+      "pillRight": 397,
+      "buttonWidths": [
+        40,
+        40,
+        40,
+        40
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 540,
+      "brandRight": 184.984375,
+      "actionsLeft": 272.734375,
+      "actionsRight": 513,
+      "pillRight": 524,
+      "buttonWidths": [
+        44,
+        44,
+        44,
+        96.265625
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 640,
+      "brandRight": 229.640625,
+      "actionsLeft": 323.484375,
+      "actionsRight": 593,
+      "pillRight": 614,
+      "buttonWidths": [
+        44,
+        44,
+        44,
+        107.515625
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 641,
+      "brandRight": 229.640625,
+      "actionsLeft": 324.484375,
+      "actionsRight": 594,
+      "pillRight": 615,
+      "buttonWidths": [
+        44,
+        44,
+        44,
+        107.515625
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 1023,
+      "brandRight": 229.640625,
+      "actionsLeft": 706.484375,
+      "actionsRight": 976,
+      "pillRight": 997,
+      "buttonWidths": [
+        44,
+        44,
+        44,
+        107.515625
+      ]
+    }
+  ],
+  "fontStatus": {
+    "inter": true,
+    "display": true,
+    "icons": true
+  },
+  "completed": true
+}

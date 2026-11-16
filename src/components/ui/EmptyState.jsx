@@ -57,7 +57,7 @@ export default function EmptyState({ icon = 'inbox', title, description, actionL
             borderRadius: '9999px',
             border: 'none',
             background: 'var(--brand)',
-            color: '#ffffff',
+            color: 'var(--on-brand)',
             fontWeight: 700,
             fontSize: '0.875rem',
             cursor: 'pointer',

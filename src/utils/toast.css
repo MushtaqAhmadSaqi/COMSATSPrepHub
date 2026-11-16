@@ -92,6 +92,12 @@
 }
 
 /* Mobile: center at bottom above nav */
+@media (max-width: 1023px) {
+  .toast-container {
+    bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 @media (max-width: 767px) {
   .toast-container {
     right: 0.75rem;

@@ -290,8 +290,9 @@ export default function Quiz() {
     if (step !== 'playing' || questions.length === 0) return;
 
     const handleKeyDown = (e) => {
-      const activeTag = document.activeElement ? document.activeElement.tagName : '';
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag) || document.activeElement?.isContentEditable) return;
+      if (e.defaultPrevented || e.repeat || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+      const activeElement = document.activeElement;
+      if (activeElement?.isContentEditable || activeElement?.closest('button, a[href], input, textarea, select, [role="button"], [role="dialog"]')) return;
 
       const key = e.key;
       if (['1', '2', '3', '4'].includes(key)) {
@@ -917,7 +918,7 @@ export default function Quiz() {
                     borderRadius: '9999px',
                     border: 'none',
                     background: 'var(--brand)',
-                    color: '#ffffff',
+                    color: 'var(--on-brand)',
                     fontSize: '0.8125rem',
                     fontWeight: 700,
                     minHeight: '40px'

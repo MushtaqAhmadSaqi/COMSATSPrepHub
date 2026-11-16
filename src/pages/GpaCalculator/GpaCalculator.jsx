@@ -739,10 +739,11 @@ export default function GpaCalculator() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))', gap: '0.75rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--gw-muted)', marginBottom: '4px' }}>
+                <label htmlFor={`${componentId}-sessional-quizObtained`} style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--gw-muted)', marginBottom: '4px' }}>
                   Quizzes (out of 15)
                 </label>
                 <input
+                  id={`${componentId}-sessional-quizObtained`}
                   type="number"
                   min="0"
                   max="15"
@@ -753,10 +754,11 @@ export default function GpaCalculator() {
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--gw-muted)', marginBottom: '4px' }}>
+                <label htmlFor={`${componentId}-sessional-assignObtained`} style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--gw-muted)', marginBottom: '4px' }}>
                   Assignments (out of 10)
                 </label>
                 <input
+                  id={`${componentId}-sessional-assignObtained`}
                   type="number"
                   min="0"
                   max="10"
@@ -767,10 +769,11 @@ export default function GpaCalculator() {
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--gw-muted)', marginBottom: '4px' }}>
+                <label htmlFor={`${componentId}-sessional-midObtained`} style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--gw-muted)', marginBottom: '4px' }}>
                   Midterm (out of 25)
                 </label>
                 <input
+                  id={`${componentId}-sessional-midObtained`}
                   type="number"
                   min="0"
                   max="25"
@@ -781,10 +784,11 @@ export default function GpaCalculator() {
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--gw-muted)', marginBottom: '4px' }}>
+                <label htmlFor={`${componentId}-sessional-finalObtained`} style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--gw-muted)', marginBottom: '4px' }}>
                   Terminal / Final (out of 50)
                 </label>
                 <input
+                  id={`${componentId}-sessional-finalObtained`}
                   type="number"
                   min="0"
                   max="50"
@@ -819,11 +823,12 @@ export default function GpaCalculator() {
                     ['labFinalObtained', 'Lab final', 'labFinalTotal']
                   ].map(([obtainedKey, label, totalKey]) => (
                     <div key={obtainedKey}>
-                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--gw-muted)', marginBottom: '4px' }}>
+                      <label htmlFor={`${componentId}-sessional-${obtainedKey}`} style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--gw-muted)', marginBottom: '4px' }}>
                         {label}
                       </label>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
                         <input
+                          id={`${componentId}-sessional-${obtainedKey}`}
                           type="number"
                           min="0"
                           max={sessionalInputs[totalKey]}

@@ -1,0 +1,1414 @@
+{
+  "browser": "Isolated headless Microsoft Edge",
+  "checks": [
+    {
+      "name": "terms polish: layout at 375px in light",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 375px in light",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: controls fit at 375px in light",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 375px in light",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 375px in light",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 414px in light",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 414px in light",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: controls fit at 414px in light",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 414px in light",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 414px in light",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 768px in light",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 768px in light",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: controls fit at 768px in light",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 768px in light",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 768px in light",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 1024px in light",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 1024px in light",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: controls fit at 1024px in light",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 1024px in light",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 1024px in light",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 1440px in light",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 1440px in light",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: controls fit at 1440px in light",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 1440px in light",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 1440px in light",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 375px in dark",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 375px in dark",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: controls fit at 375px in dark",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 375px in dark",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 375px in dark",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 414px in dark",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 414px in dark",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: controls fit at 414px in dark",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 414px in dark",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 414px in dark",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 768px in dark",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 768px in dark",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: controls fit at 768px in dark",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 768px in dark",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 768px in dark",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 1024px in dark",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 1024px in dark",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: controls fit at 1024px in dark",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 1024px in dark",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 1024px in dark",
+      "passed": true
+    },
+    {
+      "name": "terms polish: layout at 1440px in dark",
+      "passed": true
+    },
+    {
+      "name": "upload polish: layout at 1440px in dark",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: controls fit at 1440px in dark",
+      "passed": true
+    },
+    {
+      "name": "Command polish: focus and keyboard at 1440px in dark",
+      "passed": true
+    },
+    {
+      "name": "GPA polish: labels and existing fields at 1440px in dark",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: breakpoint fit at 390px",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: breakpoint fit at 399px",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: breakpoint fit at 400px",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: breakpoint fit at 413px",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: breakpoint fit at 540px",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: breakpoint fit at 640px",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: breakpoint fit at 641px",
+      "passed": true
+    },
+    {
+      "name": "Navbar polish: breakpoint fit at 1023px",
+      "passed": true
+    }
+  ],
+  "screenshots": [
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\navbar\\command-focus-light-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\navbar\\terms-dark-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\navbar\\upload-dark-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\navbar\\navbar-dark-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\navbar\\command-focus-dark-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\navbar\\gpa-labels-dark-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\navbar\\terms-dark-1440-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\navbar\\upload-dark-1440-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\navbar\\navbar-dark-1440-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\navbar\\command-focus-dark-1440-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\polish-verification-2026-11-16\\navbar\\gpa-labels-dark-1440-after.png"
+  ],
+  "blockedRequests": [],
+  "networkErrors": [],
+  "consoleErrors": [],
+  "exceptions": [],
+  "stage": "after",
+  "target": "navbar",
+  "measurements": [
+    {
+      "area": "terms",
+      "theme": "light",
+      "width": 375,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 287,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "light",
+      "width": 375,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 287,
+      "dropzonePadding": "32px 16px"
+    },
+    {
+      "area": "navbar",
+      "theme": "light",
+      "width": 375,
+      "brandRight": 178.984375,
+      "actionsLeft": 188,
+      "actionsRight": 354,
+      "pillRight": 361,
+      "viewport": 369,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Switch to dark mode",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 40,
+          "height": 40
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "light",
+      "width": 375,
+      "shadow": "rgba(37, 99, 235, 0.28) 0px 0px 0px 3px inset",
+      "outline": "rgb(15, 23, 42) none 3px",
+      "borderBottom": "rgb(30, 64, 175)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "light",
+      "width": 375,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab assignment",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab midterm",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab final",
+          "for": "",
+          "control": null
+        }
+      ]
+    },
+    {
+      "area": "terms",
+      "theme": "light",
+      "width": 414,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 326,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "light",
+      "width": 414,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 326,
+      "dropzonePadding": "32px 16px"
+    },
+    {
+      "area": "navbar",
+      "theme": "light",
+      "width": 414,
+      "brandRight": 184.984375,
+      "actionsLeft": 199,
+      "actionsRight": 387,
+      "pillRight": 398,
+      "viewport": 408,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch to dark mode",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 44,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "light",
+      "width": 414,
+      "shadow": "rgba(37, 99, 235, 0.28) 0px 0px 0px 3px inset",
+      "outline": "rgb(15, 23, 42) none 3px",
+      "borderBottom": "rgb(30, 64, 175)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "light",
+      "width": 414,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab assignment",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab midterm",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab final",
+          "for": "",
+          "control": null
+        }
+      ]
+    },
+    {
+      "area": "terms",
+      "theme": "light",
+      "width": 768,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 624,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "light",
+      "width": 768,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 624,
+      "dropzonePadding": "48px 32px"
+    },
+    {
+      "area": "navbar",
+      "theme": "light",
+      "width": 768,
+      "brandRight": 229.640625,
+      "actionsLeft": 451.484375,
+      "actionsRight": 721,
+      "pillRight": 742,
+      "viewport": 762,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch to dark mode",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 107.515625,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "light",
+      "width": 768,
+      "shadow": "rgba(37, 99, 235, 0.28) 0px 0px 0px 3px inset",
+      "outline": "rgb(15, 23, 42) none 3px",
+      "borderBottom": "rgb(30, 64, 175)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "light",
+      "width": 768,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab assignment",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab midterm",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab final",
+          "for": "",
+          "control": null
+        }
+      ]
+    },
+    {
+      "area": "terms",
+      "theme": "light",
+      "width": 1024,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "light",
+      "width": 1024,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": "48px 32px"
+    },
+    {
+      "area": "navbar",
+      "theme": "light",
+      "width": 1024,
+      "brandRight": 229.640625,
+      "actionsLeft": 725.484375,
+      "actionsRight": 977,
+      "pillRight": 998,
+      "viewport": 1018,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Switch to dark mode",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 107.515625,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "light",
+      "width": 1024,
+      "shadow": "rgba(37, 99, 235, 0.28) 0px 0px 0px 3px inset",
+      "outline": "rgb(15, 23, 42) none 3px",
+      "borderBottom": "rgb(30, 64, 175)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "light",
+      "width": 1024,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab assignment",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab midterm",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab final",
+          "for": "",
+          "control": null
+        }
+      ]
+    },
+    {
+      "area": "terms",
+      "theme": "light",
+      "width": 1440,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "light",
+      "width": 1440,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": "48px 32px"
+    },
+    {
+      "area": "navbar",
+      "theme": "light",
+      "width": 1440,
+      "brandRight": 306.640625,
+      "actionsLeft": 939.046875,
+      "actionsRight": 1316,
+      "pillRight": 1337,
+      "viewport": 1434,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 163.4375,
+          "height": 38
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Switch to dark mode",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 107.515625,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "light",
+      "width": 1440,
+      "shadow": "rgba(37, 99, 235, 0.28) 0px 0px 0px 3px inset",
+      "outline": "rgb(15, 23, 42) none 3px",
+      "borderBottom": "rgb(30, 64, 175)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "light",
+      "width": 1440,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab assignment",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab midterm",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab final",
+          "for": "",
+          "control": null
+        }
+      ]
+    },
+    {
+      "area": "terms",
+      "theme": "dark",
+      "width": 375,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 287,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "dark",
+      "width": 375,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 287,
+      "dropzonePadding": "32px 16px"
+    },
+    {
+      "area": "navbar",
+      "theme": "dark",
+      "width": 375,
+      "brandRight": 178.984375,
+      "actionsLeft": 188,
+      "actionsRight": 354,
+      "pillRight": 361,
+      "viewport": 369,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Switch to light mode",
+          "width": 40,
+          "height": 40
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 40,
+          "height": 40
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "dark",
+      "width": 375,
+      "shadow": "rgba(96, 165, 250, 0.35) 0px 0px 0px 3px inset",
+      "outline": "rgb(248, 250, 252) none 3px",
+      "borderBottom": "rgb(96, 165, 250)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "dark",
+      "width": 375,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab assignment",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab midterm",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab final",
+          "for": "",
+          "control": null
+        }
+      ]
+    },
+    {
+      "area": "terms",
+      "theme": "dark",
+      "width": 414,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 326,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "dark",
+      "width": 414,
+      "containerPadding": "32px 16px",
+      "cardPadding": "24px",
+      "contentWidth": 326,
+      "dropzonePadding": "32px 16px"
+    },
+    {
+      "area": "navbar",
+      "theme": "dark",
+      "width": 414,
+      "brandRight": 184.984375,
+      "actionsLeft": 199,
+      "actionsRight": 387,
+      "pillRight": 398,
+      "viewport": 408,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch to light mode",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 44,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "dark",
+      "width": 414,
+      "shadow": "rgba(96, 165, 250, 0.35) 0px 0px 0px 3px inset",
+      "outline": "rgb(248, 250, 252) none 3px",
+      "borderBottom": "rgb(96, 165, 250)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "dark",
+      "width": 414,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab assignment",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab midterm",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab final",
+          "for": "",
+          "control": null
+        }
+      ]
+    },
+    {
+      "area": "terms",
+      "theme": "dark",
+      "width": 768,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 624,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "dark",
+      "width": 768,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 624,
+      "dropzonePadding": "48px 32px"
+    },
+    {
+      "area": "navbar",
+      "theme": "dark",
+      "width": 768,
+      "brandRight": 229.640625,
+      "actionsLeft": 451.484375,
+      "actionsRight": 721,
+      "pillRight": 742,
+      "viewport": 762,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Switch to light mode",
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 107.515625,
+          "height": 44
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "dark",
+      "width": 768,
+      "shadow": "rgba(96, 165, 250, 0.35) 0px 0px 0px 3px inset",
+      "outline": "rgb(248, 250, 252) none 3px",
+      "borderBottom": "rgb(96, 165, 250)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "dark",
+      "width": 768,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab assignment",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab midterm",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab final",
+          "for": "",
+          "control": null
+        }
+      ]
+    },
+    {
+      "area": "terms",
+      "theme": "dark",
+      "width": 1024,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "dark",
+      "width": 1024,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": "48px 32px"
+    },
+    {
+      "area": "navbar",
+      "theme": "dark",
+      "width": 1024,
+      "brandRight": 229.640625,
+      "actionsLeft": 725.484375,
+      "actionsRight": 977,
+      "pillRight": 998,
+      "viewport": 1018,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Switch to light mode",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 107.515625,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "dark",
+      "width": 1024,
+      "shadow": "rgba(96, 165, 250, 0.35) 0px 0px 0px 3px inset",
+      "outline": "rgb(248, 250, 252) none 3px",
+      "borderBottom": "rgb(96, 165, 250)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "dark",
+      "width": 1024,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab assignment",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab midterm",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab final",
+          "for": "",
+          "control": null
+        }
+      ]
+    },
+    {
+      "area": "terms",
+      "theme": "dark",
+      "width": 1440,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": null
+    },
+    {
+      "area": "upload",
+      "theme": "dark",
+      "width": 1440,
+      "containerPadding": "48px 24px",
+      "cardPadding": "44px",
+      "contentWidth": 758,
+      "dropzonePadding": "48px 32px"
+    },
+    {
+      "area": "navbar",
+      "theme": "dark",
+      "width": 1440,
+      "brandRight": 306.640625,
+      "actionsLeft": 939.046875,
+      "actionsRight": 1316,
+      "pillRight": 1337,
+      "viewport": 1434,
+      "buttons": [
+        {
+          "label": "Search papers, subjects, pages (Ctrl+K or Cmd+K)",
+          "width": 163.4375,
+          "height": 38
+        },
+        {
+          "label": "Switch explanations to Urdu",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Switch to light mode",
+          "width": 38,
+          "height": 38
+        },
+        {
+          "label": "Sign in to your account",
+          "width": 107.515625,
+          "height": 36
+        }
+      ]
+    },
+    {
+      "area": "command-focus",
+      "theme": "dark",
+      "width": 1440,
+      "shadow": "rgba(96, 165, 250, 0.35) 0px 0px 0px 3px inset",
+      "outline": "rgb(248, 250, 252) none 3px",
+      "borderBottom": "rgb(96, 165, 250)",
+      "overflow": "hidden"
+    },
+    {
+      "area": "gpa-labels",
+      "theme": "dark",
+      "width": 1440,
+      "labels": [
+        {
+          "label": "Quizzes (out of 15)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Assignments (out of 10)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Midterm (out of 25)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Terminal / Final (out of 50)",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab assignment",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab midterm",
+          "for": "",
+          "control": null
+        },
+        {
+          "label": "Lab final",
+          "for": "",
+          "control": null
+        }
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 320,
+      "brandRight": 178.984375,
+      "actionsLeft": 184.984375,
+      "actionsRight": 350.984375,
+      "pillRight": 306,
+      "buttonWidths": [
+        40,
+        40,
+        40,
+        40
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 374,
+      "brandRight": 178.984375,
+      "actionsLeft": 187,
+      "actionsRight": 353,
+      "pillRight": 360,
+      "buttonWidths": [
+        40,
+        40,
+        40,
+        40
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 390,
+      "brandRight": 178.984375,
+      "actionsLeft": 203,
+      "actionsRight": 369,
+      "pillRight": 376,
+      "buttonWidths": [
+        40,
+        40,
+        40,
+        40
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 399,
+      "brandRight": 178.984375,
+      "actionsLeft": 212,
+      "actionsRight": 378,
+      "pillRight": 385,
+      "buttonWidths": [
+        40,
+        40,
+        40,
+        40
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 400,
+      "brandRight": 184.984375,
+      "actionsLeft": 201,
+      "actionsRight": 373,
+      "pillRight": 384,
+      "buttonWidths": [
+        40,
+        40,
+        40,
+        40
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 413,
+      "brandRight": 184.984375,
+      "actionsLeft": 214,
+      "actionsRight": 386,
+      "pillRight": 397,
+      "buttonWidths": [
+        40,
+        40,
+        40,
+        40
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 540,
+      "brandRight": 184.984375,
+      "actionsLeft": 272.734375,
+      "actionsRight": 513,
+      "pillRight": 524,
+      "buttonWidths": [
+        44,
+        44,
+        44,
+        96.265625
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 640,
+      "brandRight": 229.640625,
+      "actionsLeft": 323.484375,
+      "actionsRight": 593,
+      "pillRight": 614,
+      "buttonWidths": [
+        44,
+        44,
+        44,
+        107.515625
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 641,
+      "brandRight": 229.640625,
+      "actionsLeft": 324.484375,
+      "actionsRight": 594,
+      "pillRight": 615,
+      "buttonWidths": [
+        44,
+        44,
+        44,
+        107.515625
+      ]
+    },
+    {
+      "area": "navbar-edge",
+      "width": 1023,
+      "brandRight": 229.640625,
+      "actionsLeft": 706.484375,
+      "actionsRight": 976,
+      "pillRight": 997,
+      "buttonWidths": [
+        44,
+        44,
+        44,
+        107.515625
+      ]
+    }
+  ],
+  "fontStatus": {
+    "inter": true,
+    "display": true,
+    "icons": true
+  },
+  "completed": true
+}

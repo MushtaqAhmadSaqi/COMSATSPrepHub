@@ -192,8 +192,9 @@ export default function TakeAiQuiz({
     if (loading || error || isFinished || questions.length === 0) return;
 
     const handleKeyDown = (e) => {
-      const activeTag = document.activeElement ? document.activeElement.tagName : '';
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(activeTag) || document.activeElement?.isContentEditable) return;
+      if (e.defaultPrevented || e.repeat || e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+      const activeElement = document.activeElement;
+      if (activeElement?.isContentEditable || activeElement?.closest('button, a[href], input, textarea, select, [role="button"], [role="dialog"]')) return;
 
       const key = e.key;
       if (['1', '2', '3', '4'].includes(key)) {
@@ -406,7 +407,7 @@ export default function TakeAiQuiz({
             title="Save / Export Quiz JSON"
             style={{
               background: 'rgba(255,255,255,0.18)',
-              color: '#ffffff',
+              color: 'var(--on-brand)',
               border: 'none',
               borderRadius: '9999px',
               padding: '0.35rem 0.75rem',
@@ -417,7 +418,7 @@ export default function TakeAiQuiz({
             Export
           </button>
           {streak >= 2 && (
-            <span className="ai-quiz-counter" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
+            <span className="ai-quiz-counter" style={{ background: 'rgba(255,255,255,0.2)', color: 'var(--on-brand)' }}>
               🔥 {streak} Streak!
             </span>
           )}
@@ -427,7 +428,7 @@ export default function TakeAiQuiz({
         </div>
       </div>
 
-      <div className="quiz-progress-bar" role="progressbar" aria-valuenow={currentIdx + 1} aria-valuemin={1} aria-valuemax={questions.length}>
+      <div className="quiz-progress-bar" role="progressbar" aria-label="Quiz progress" aria-valuenow={currentIdx + 1} aria-valuemin={1} aria-valuemax={questions.length}>
         <motion.div
           className="quiz-progress-fill"
           style={{ background: 'var(--brand)' }}
@@ -545,7 +546,7 @@ export default function TakeAiQuiz({
               type="button"
               className="btn-quiz-next"
               onClick={handleNextQuestion}
-              style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}
+              style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#0f172a' }}
             >
               {currentIdx + 1 === questions.length ? 'View Final Score' : 'Next Question'}
               <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>

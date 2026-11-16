@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { addModerationSubmission } from '../../utils/studyTracker';
 import { toast } from '../../utils/toast';
 
@@ -27,28 +27,38 @@ export default function FaqContact() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submittingRef.current) return;
     if (!name || !email || !message) {
       toast.error('Please fill in all fields.');
       return;
     }
-    const { sync } = addModerationSubmission({
-      type: 'contact',
-      subjectCode: 'SUPPORT',
-      title: `Support Inquiry from ${name.trim()}`,
-      contributor: `${name.trim()} (${email.trim()})`,
-      details: message.trim()
-    });
-    const result = await sync;
-    if (result.ok) {
-      setSent(true);
-      toast.success('Your message was submitted to the student team queue.');
-    } else {
-      toast.error(
-        'We could not reach the server, so your message is only saved in this browser. Please retry or email us directly.'
-      );
+    submittingRef.current = true;
+    setSubmitting(true);
+    try {
+      const { sync } = addModerationSubmission({
+        type: 'contact',
+        subjectCode: 'SUPPORT',
+        title: `Support Inquiry from ${name.trim()}`,
+        contributor: `${name.trim()} (${email.trim()})`,
+        details: message.trim()
+      });
+      const result = await sync;
+      if (result.ok) {
+        setSent(true);
+        toast.success('Your message was submitted to the student team queue.');
+      } else {
+        toast.error(
+          'We could not reach the server, so your message is only saved in this browser. Please retry or email us directly.'
+        );
+      }
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
     }
   };
 
@@ -123,7 +133,7 @@ export default function FaqContact() {
             <p style={{ color: 'var(--text-subtle)' }}>Your message is in the support queue. You can also email us using the links in the footer.</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <form onSubmit={handleSubmit} aria-busy={submitting} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
               <label htmlFor="contact-name" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Name</label>
               <input
@@ -162,18 +172,19 @@ export default function FaqContact() {
             </div>
             <button
               type="submit"
+              disabled={submitting}
               style={{
                 alignSelf: 'flex-start',
                 padding: '0.625rem 1.5rem',
                 borderRadius: '9999px',
                 background: 'var(--brand)',
-                color: '#fff',
+                color: 'var(--on-brand)',
                 border: 'none',
                 fontWeight: 600,
                 cursor: 'pointer'
               }}
             >
-              Send Message
+              {submitting ? 'Sending…' : 'Send Message'}
             </button>
           </form>
         )}

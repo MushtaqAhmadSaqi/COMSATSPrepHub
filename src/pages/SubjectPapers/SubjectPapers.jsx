@@ -114,7 +114,7 @@ export default function SubjectPapers({
       if (teacherFilter !== 'All' && teacher !== teacherFilter.toLowerCase()) {
         return false;
       }
-      if (q && !title.includes(q) && !term.includes(q) && !sem.includes(q) && !teacher.includes(q)) {
+      if (q && !title.includes(q) && !term.includes(q) && !sem.includes(q) && !teacher.includes(q) && !yr.includes(q)) {
         return false;
       }
       return true;

@@ -72,7 +72,7 @@
 .paperview-container .btn-download {
   border-color: transparent;
   background: var(--brand, #2543a1);
-  color: #ffffff;
+  color: var(--on-brand);
 }
 
 .paperview-container button:focus-visible {

@@ -32,10 +32,8 @@ export default function InstallPrompt() {
   const handleInstall = async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setShow(false);
-    }
+    setShow(false);
+    await deferredPrompt.userChoice;
     setDeferredPrompt(null);
   };
 
@@ -49,6 +47,7 @@ export default function InstallPrompt() {
       {show && (
         <motion.div
           className="install-prompt"
+          style={{ x: '-50%' }}
           initial={{ opacity: 0, y: 60 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 60 }}

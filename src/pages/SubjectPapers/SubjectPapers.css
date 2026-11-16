@@ -195,7 +195,7 @@
   border: none;
   border-radius: 11px;
   background: var(--brand, #2543a1);
-  color: #ffffff;
+  color: var(--on-brand);
   font-size: 0.8125rem;
   font-weight: 700;
   white-space: nowrap;

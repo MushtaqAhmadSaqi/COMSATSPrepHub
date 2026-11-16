@@ -917,6 +917,444 @@ await runTest('Subjects: concurrent fetches share one request and failures recov
   assert.equal(requests, 5, 'Unconfigured installations must not attempt a network request');
 });
 
+await runTest('UI: quiz shortcuts preserve native controls and browser shortcuts', () => {
+  for (const page of ['Quiz/Quiz.jsx', 'TakeAiQuiz/TakeAiQuiz.jsx']) {
+    const source = readFileSync(new URL(`../src/pages/${page}`, import.meta.url), 'utf8');
+    const handlerSource = source.match(/const handleKeyDown = (\(e\) => \{[\s\S]*?\n    \});/)[1];
+    let next = 0;
+    let submitted = 0;
+    let selected = null;
+    let prevented = 0;
+    const context = {
+      document: { activeElement: { closest: () => null } },
+      questions: [{ options: ['A', 'B', 'C', 'D'] }],
+      currentIdx: 0,
+      revealed: true,
+      selectedOption: 0,
+      handleNextQuestion: () => next++,
+      handleSubmitAnswer: () => submitted++,
+      setSelectedOption: (value) => { selected = value; }
+    };
+    const handler = runInNewContext(`(${handlerSource})`, context);
+    const event = (key, extra = {}) => ({ key, preventDefault: () => prevented++, ...extra });
+    for (const selector of ['button', 'a[href]', 'input', 'textarea', 'select', '[role="button"]', '[role="dialog"]']) {
+      context.document.activeElement.closest = (selectors) => selectors.includes(selector) ? {} : null;
+      handler(event('Enter'));
+      handler(event('1'));
+    }
+    assert.equal(next, 0, `${page}: native controls must not advance the quiz`);
+    assert.equal(selected, null);
+    assert.equal(prevented, 0);
+    context.document.activeElement.closest = () => null;
+    for (const flag of ['defaultPrevented', 'repeat', 'ctrlKey', 'metaKey', 'altKey', 'shiftKey']) {
+      handler(event('Enter', { [flag]: true }));
+      handler(event('1', { [flag]: true }));
+    }
+    assert.equal(next, 0);
+    assert.equal(selected, null);
+    context.document.activeElement.isContentEditable = true;
+    handler(event('Enter'));
+    assert.equal(next, 0);
+    context.document.activeElement.isContentEditable = false;
+    handler(event('Enter'));
+    assert.equal(next, 1, 'Unmodified Enter on the page must still advance');
+    context.revealed = false;
+    handler(event('2'));
+    assert.equal(selected, 1, 'Number shortcuts must still select an answer');
+    handler(event('Enter'));
+    assert.equal(submitted, 1);
+  }
+});
+
+await runTest('UI: installation banner closes for accepted and dismissed native choices', async () => {
+  const source = readFileSync(new URL('../src/components/InstallPrompt/InstallPrompt.jsx', import.meta.url), 'utf8');
+  const handlerSource = source.match(/const handleInstall = (async \(\) => \{[\s\S]*?\n  \});/)[1];
+  for (const outcome of ['accepted', 'dismissed']) {
+    let shown = true;
+    let prompt = { prompt() {}, userChoice: Promise.resolve({ outcome }) };
+    const handler = runInNewContext(`(${handlerSource})`, {
+      deferredPrompt: prompt,
+      setShow: (value) => { shown = value; },
+      setDeferredPrompt: (value) => { prompt = value; }
+    });
+    const pending = handler();
+    assert.equal(shown, false, 'The banner must stop offering a consumed prompt immediately');
+    await pending;
+    assert.equal(prompt, null);
+  }
+});
+
+await runTest('UI: install banner centering survives its motion transform', () => {
+  const source = readFileSync(new URL('../src/components/InstallPrompt/InstallPrompt.jsx', import.meta.url), 'utf8');
+  assert.match(source, /className="install-prompt"\s+style=\{\{ x: '-50%' \}\}/);
+  const css = readFileSync(new URL('../src/components/InstallPrompt/InstallPrompt.css', import.meta.url), 'utf8');
+  assert.match(css, /left: 50%;/);
+  assert.match(css, /max-width: 420px;\s+width: calc\(100% - 2rem\);/);
+});
+
+await runTest('UI: hidden scroll controls and upload picker remain keyboard-safe', () => {
+  const scroll = readFileSync(new URL('../src/components/ScrollTop/ScrollTop.jsx', import.meta.url), 'utf8');
+  assert.ok(scroll.includes('tabIndex={visible ? 0 : -1}'));
+  assert.ok(scroll.includes('aria-hidden={!visible}'));
+  assert.ok(scroll.includes('handleScroll();'));
+  const upload = readFileSync(new URL('../src/pages/Upload/Upload.jsx', import.meta.url), 'utf8');
+  const fileInput = upload.match(/<input\s+id="paper-file-input"[\s\S]*?\/>/)[0];
+  assert.ok(fileInput.includes('className="sr-only"'));
+  assert.equal(fileInput.includes("display: 'none'"), false);
+  assert.ok(fileInput.includes("aria-describedby={fileError ? 'upload-file-error' : undefined}"));
+  assert.ok(upload.includes('id="upload-file-error" role="alert"'));
+  const css = readFileSync(new URL('../src/pages/Upload/Upload.css', import.meta.url), 'utf8');
+  assert.ok(css.includes('.upload-dropzone:focus-within'));
+});
+
+await runTest('UI: auth mode changes preserve the original dialog opener', () => {
+  const source = readFileSync(new URL('../src/components/AuthModal/AuthModal.jsx', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
+  const effect = source.match(/useEffect\(\(\) => \{\n    if \(!isOpen\) return;\n    triggerRef.current = document.activeElement;([\s\S]*?)\n  \}, \[isOpen\]\);/);
+  assert.ok(effect, 'Opener capture must depend only on whether the dialog is open');
+  let restored = 0;
+  const opener = { focus: () => restored++ };
+  const context = { isOpen: true, triggerRef: { current: null }, document: { activeElement: opener } };
+  const capture = runInNewContext(`(() => { if (!isOpen) return; triggerRef.current = document.activeElement; ${effect[1]} })`, context);
+  const cleanup = capture();
+  context.document.activeElement = { focus: () => assert.fail('Must not restore to a mode-switch control') };
+  cleanup();
+  assert.equal(restored, 1);
+  assert.ok(source.includes('cancelAnimationFrame(frame)'));
+});
+
+await runTest('UI: command palette exposes active keyboard selection', () => {
+  const source = readFileSync(new URL('../src/components/CommandPalette/CommandPalette.jsx', import.meta.url), 'utf8');
+  for (const attribute of ['role="combobox"', 'aria-autocomplete="list"', 'aria-activedescendant=', 'role="listbox"', 'role="option"', 'aria-selected={isSelected}', 'tabIndex={-1}']) {
+    assert.ok(source.includes(attribute), `Command palette must include ${attribute}`);
+  }
+  const handlerSource = source.match(/const handleKeyDown = (\(e\) => \{[\s\S]*?\n  \});/)[1];
+  let selected = 0;
+  let focused = 0;
+  const handler = runInNewContext(`(${handlerSource})`, {
+    results: [{}, {}, {}],
+    inputRef: { current: { focus: () => focused++ } },
+    setSelectedIndex: (value) => { selected = typeof value === 'function' ? value(selected) : value; },
+    onClose() {},
+    handleSelect() {}
+  });
+  const key = (value, extra = {}) => handler({ key: value, preventDefault() {}, ...extra });
+  key('ArrowUp');
+  assert.equal(selected, 2);
+  key('ArrowDown');
+  assert.equal(selected, 0);
+  key('Tab', { shiftKey: true });
+  assert.equal(selected, 2);
+  key('Home');
+  assert.equal(selected, 0);
+  key('End');
+  assert.equal(selected, 2);
+  assert.equal(focused, 5);
+});
+
+await runTest('UI: AI radio groups support wrapping arrows and boundary keys', () => {
+  const source = readFileSync(new URL('../src/pages/AiQuizGenerator/AiQuizGenerator.jsx', import.meta.url), 'utf8');
+  assert.equal((source.match(/tabIndex=\{isSelected \? 0 : -1\}/g) || []).length, 3);
+  assert.equal((source.match(/onKeyDown=\{handleRadioKeyDown\}/g) || []).length, 3);
+  const handlerSource = source.match(/const handleRadioKeyDown = (\(e\) => \{[\s\S]*?\n  \});/)[1];
+  let focused = -1;
+  let clicked = -1;
+  const radios = Array.from({ length: 3 }, (_, index) => ({
+    focus: () => { focused = index; },
+    click: () => { clicked = index; },
+    closest: () => ({ querySelectorAll: () => radios })
+  }));
+  const handler = runInNewContext(`(${handlerSource})`);
+  const press = (key, index, extra = {}) => handler({ key, currentTarget: radios[index], preventDefault() {}, ...extra });
+  press('ArrowLeft', 0);
+  assert.equal(clicked, 2);
+  assert.equal(focused, 2);
+  press('ArrowRight', 2);
+  assert.equal(clicked, 0);
+  press('End', 0);
+  assert.equal(clicked, 2);
+  press('Home', 2);
+  assert.equal(clicked, 0);
+  press('ArrowDown', 0, { ctrlKey: true });
+  assert.equal(clicked, 0, 'Modified keys must retain browser behavior');
+});
+
+await runTest('UI: study and upload tabs link panels and wrap keyboard navigation', () => {
+  for (const page of ['StudyHub/StudyHub.jsx', 'Upload/Upload.jsx']) {
+    const source = readFileSync(new URL(`../src/pages/${page}`, import.meta.url), 'utf8');
+    assert.ok(source.includes('role="tabpanel"'));
+    assert.ok(source.includes('aria-labelledby={`'));
+    assert.ok(source.includes('aria-controls="'));
+    assert.ok(source.includes('onKeyDown={handleTabKeyDown}'));
+    const handlerSource = source.match(/const handleTabKeyDown = (\(e\) => \{[\s\S]*?\n  \});/)[1];
+    let selected = -1;
+    let focused = -1;
+    const tabs = Array.from({ length: page.startsWith('StudyHub') ? 3 : 2 }, (_, index) => ({
+      focus: () => { focused = index; },
+      click: () => { selected = index; }
+    }));
+    const handler = runInNewContext(`(${handlerSource})`);
+    const key = (value, index) => handler({ key: value, preventDefault() {}, currentTarget: { querySelectorAll: () => tabs }, target: { closest: () => tabs[index] } });
+    key('ArrowLeft', 0);
+    assert.equal(selected, tabs.length - 1);
+    assert.equal(focused, selected);
+    key('ArrowRight', tabs.length - 1);
+    assert.equal(selected, 0);
+    key('End', 0);
+    assert.equal(selected, tabs.length - 1);
+    key('Home', tabs.length - 1);
+    assert.equal(selected, 0);
+  }
+});
+
+await runTest('UI: notes, report and admin textareas have explicit accessible names', () => {
+  for (const page of ['PaperView/PaperView.jsx', 'AdminPaste/AdminPaste.jsx']) {
+    const source = readFileSync(new URL(`../src/pages/${page}`, import.meta.url), 'utf8');
+    const fields = source.match(/<textarea\b[\s\S]*?\/>/g);
+    assert.ok(fields.length > 0);
+    for (const field of fields) assert.ok(field.includes('aria-label='), `${page}: textareas must not rely on placeholders`);
+  }
+});
+
+await runTest('UI: course suggestions stay available when focus moves inside search', () => {
+  const source = readFileSync(new URL('../src/pages/Home/Home.jsx', import.meta.url), 'utf8');
+  assert.ok(source.includes('onFocusCapture={() => setSearchFocused(true)}'));
+  assert.ok(source.includes('role="group"'));
+  assert.equal(source.includes('role="listbox"'), false);
+  assert.equal(source.includes('onMouseDown={() => onSelectSubject(subj)}'), false);
+  const blurBody = source.match(/onBlurCapture=\{\(e\) => \{([\s\S]*?)\}\}/)[1];
+  let focused = true;
+  const handler = runInNewContext(`((e) => {${blurBody}})`, { setSearchFocused: (value) => { focused = value; } });
+  const inside = {};
+  const container = { contains: (target) => target === inside };
+  handler({ currentTarget: container, relatedTarget: inside });
+  assert.equal(focused, true);
+  handler({ currentTarget: container, relatedTarget: null });
+  assert.equal(focused, false);
+});
+
+await runTest('UI: contact submission prevents duplicate pending requests and permits retry', async () => {
+  const source = readFileSync(new URL('../src/pages/FaqContact/FaqContact.jsx', import.meta.url), 'utf8');
+  const handlerSource = source.match(/const handleSubmit = (async \(e\) => \{[\s\S]*?\n  \});/)[1];
+  let queued = 0;
+  let finish;
+  let busy = false;
+  let sent = false;
+  const context = {
+    name: 'Test Student', email: 'test@example.invalid', message: 'Local test only',
+    submittingRef: { current: false },
+    setSubmitting: (value) => { busy = value; },
+    setSent: (value) => { sent = value; },
+    toast: { error() {}, success() {} },
+    addModerationSubmission: () => { queued++; return { sync: new Promise((resolve) => { finish = resolve; }) }; }
+  };
+  const handler = runInNewContext(`(${handlerSource})`, context);
+  const event = { preventDefault() {} };
+  const pending = handler(event);
+  await handler(event);
+  assert.equal(queued, 1);
+  assert.equal(busy, true);
+  finish({ ok: false });
+  await pending;
+  assert.equal(busy, false);
+  assert.equal(context.submittingRef.current, false);
+  const retry = handler(event);
+  assert.equal(queued, 2);
+  finish({ ok: true });
+  await retry;
+  assert.equal(sent, true);
+  assert.equal(busy, false);
+  assert.ok(source.includes('disabled={submitting}'));
+  assert.ok(source.includes('aria-busy={submitting}'));
+});
+
+await runTest('UI: paper search matches the advertised year field', () => {
+  const source = readFileSync(new URL('../src/pages/SubjectPapers/SubjectPapers.jsx', import.meta.url), 'utf8');
+  const predicate = source.match(/papers\.filter\((\(paper\) => \{[\s\S]*?\n    \})\);/)[1];
+  const context = { q: '2024', examFilter: 'All', semesterFilter: 'All', yearFilter: 'All', teacherFilter: 'All' };
+  const matches = runInNewContext(`(${predicate})`, context);
+  const paper = { year: 2024, title: 'Exam', term: 'Terminal', semester: 'Fall' };
+  assert.equal(matches(paper), true);
+  assert.equal(matches({ ...paper, year: 2023 }), false);
+  context.q = 'terminal';
+  assert.equal(matches(paper), true);
+  context.q = '';
+  context.yearFilter = '2023';
+  assert.equal(matches(paper), false);
+});
+
+await runTest('UI: shared generation button styling is independent of route history', () => {
+  const globalCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+  const pageCss = readFileSync(new URL('../src/pages/AiQuizGenerator/AiQuizGenerator.css', import.meta.url), 'utf8');
+  assert.ok(globalCss.includes('.btn-generate-ai {'));
+  assert.ok(globalCss.includes('.btn-generate-ai:hover'));
+  assert.equal(pageCss.includes('.btn-generate-ai'), false);
+});
+
+await runTest('UI: application motion honors the system preference without a DOM wrapper', () => {
+  const source = readFileSync(new URL('../src/main.jsx', import.meta.url), 'utf8');
+  assert.ok(source.includes('<MotionConfig reducedMotion="user">'));
+  assert.ok(source.includes('</MotionConfig>'));
+});
+
+await runTest('UI: programmatic scrolling respects reduced motion', () => {
+  for (const file of ['App.jsx', 'components/ScrollTop/ScrollTop.jsx', 'components/CommandPalette/CommandPalette.jsx']) {
+    const source = readFileSync(new URL(`../src/${file}`, import.meta.url), 'utf8');
+    assert.equal(source.includes("behavior: 'smooth'"), false, `${file}: smooth scrolling must be conditional`);
+    assert.ok(source.includes("? 'instant' : 'smooth'"));
+  }
+  const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)\s*\{\s*html\s*\{\s*scroll-behavior: auto;/);
+});
+
+await runTest('UI: report dialogs raise their existing main stacking context above navigation', () => {
+  const css = readFileSync(new URL('../src/App.css', import.meta.url), 'utf8');
+  assert.match(css, /\.main-content:has\(\[aria-modal="true"\]\)\s*\{\s*z-index: 1000;/);
+});
+
+await runTest('UI: floating notices clear bottom navigation through tablet widths', () => {
+  for (const file of ['components/CookieNotice/CookieNotice.css', 'components/InstallPrompt/InstallPrompt.css', 'utils/toast.css']) {
+    const css = readFileSync(new URL(`../src/${file}`, import.meta.url), 'utf8');
+    assert.match(css, /@media \(max-width: 1023px\)\s*\{\s*\.[\w-]+\s*\{\s*bottom: calc\(5\.5rem \+ env\(safe-area-inset-bottom, 0px\)\);/, file);
+  }
+});
+
+function contrastRatio(foreground, background) {
+  const luminance = (hex) => {
+    const channels = hex.slice(1).match(/.{2}/g).map((channel) => parseInt(channel, 16) / 255);
+    const linear = channels.map((channel) => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
+    return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
+  };
+  const values = [luminance(foreground), luminance(background)];
+  return (Math.max(...values) + 0.05) / (Math.min(...values) + 0.05);
+}
+
+await runTest('UI: brand control text preserves light colors and passes dark contrast', () => {
+  const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+  const light = css.match(/:root\s*\{([\s\S]*?)\n\}/)[1];
+  const dark = css.match(/html\.dark\s*\{([\s\S]*?)\n\}/)[1];
+  assert.match(light, /--on-brand:\s*#ffffff;/);
+  assert.match(dark, /--on-brand:\s*#0f172a;/);
+  for (const [tokens, backgrounds] of [[light, ['brand', 'brand-2', 'brand-hover']], [dark, ['brand', 'brand-2', 'brand-hover']]]) {
+    const foreground = tokens.match(/--on-brand:\s*(#[\da-f]{6});/)[1];
+    for (const name of backgrounds) {
+      const background = tokens.match(new RegExp(`--${name}:\\s*(#[\\da-f]{6});`))[1];
+      assert.ok(contrastRatio(foreground, background) >= 4.5, `${foreground} on ${background}`);
+    }
+  }
+  for (const file of ['components/AuthModal/AuthModal.css', 'components/CookieNotice/CookieNotice.css', 'components/ScrollTop/ScrollTop.css', 'components/ui/EmptyState.jsx', 'pages/Home/Home.jsx', 'pages/Account/Account.jsx', 'pages/Subjects/Subjects.jsx', 'pages/Upload/Upload.jsx', 'pages/FaqContact/FaqContact.jsx', 'pages/StudyHub/StudyHub.jsx', 'pages/StudyHub/StudyHub.css', 'pages/Quiz/Quiz.css', 'pages/Quiz/Quiz.jsx', 'pages/TakeAiQuiz/TakeAiQuiz.css', 'pages/TakeAiQuiz/TakeAiQuiz.jsx', 'pages/PaperView/PaperView.css', 'pages/SubjectPapers/SubjectPapers.css', 'components/ErrorBoundary/ErrorBoundary.css', 'components/InstallPrompt/InstallPrompt.css', 'pages/AdminPaste/AdminPaste.css']) {
+    const source = readFileSync(new URL(`../src/${file}`, import.meta.url), 'utf8');
+    assert.ok(source.includes('var(--on-brand)'), file);
+  }
+  const admin = readFileSync(new URL('../src/pages/AdminPaste/AdminPaste.css', import.meta.url), 'utf8');
+  for (const selector of ['.btn-copy-prompt:hover', '.btn-parse:hover', '.btn-result-action.primary:hover']) {
+    const rule = admin.slice(admin.indexOf(`${selector} {`)).split('}')[0];
+    assert.ok(rule.includes('color: #ffffff;'), selector);
+  }
+});
+
+await runTest('UI: AI generation and selected topic use contrast-safe brand text', () => {
+  const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+  const button = css.slice(css.indexOf('.btn-generate-ai {')).split('}')[0];
+  assert.ok(button.includes('color: var(--on-brand);'));
+  const hover = css.slice(css.indexOf('.btn-generate-ai:hover {')).split('}')[0];
+  assert.ok(hover.includes('background: var(--brand-hover);'));
+  const page = readFileSync(new URL('../src/pages/AiQuizGenerator/AiQuizGenerator.css', import.meta.url), 'utf8');
+  const chip = page.slice(page.indexOf('.ai-topic-chip.active {')).split('}')[0];
+  assert.ok(chip.includes('color: var(--on-brand);'));
+});
+
+await runTest('UI: active mobile labels retain their gradient with readable text', () => {
+  const css = readFileSync(new URL('../src/components/Navbar/Navbar.css', import.meta.url), 'utf8');
+  const rule = css.slice(css.indexOf('.mobile-nav-item.active {')).split('}')[0];
+  assert.ok(rule.includes('background: linear-gradient(135deg, #0ea5e9, #0d9488);'));
+  assert.ok(rule.includes('color: #0f172a;'));
+  for (const background of ['#0ea5e9', '#0d9488']) {
+    assert.ok(contrastRatio('#0f172a', background) >= 4.5);
+  }
+});
+
+await runTest('UI: offline and reconnected banners retain their colors with readable text', () => {
+  const source = readFileSync(new URL('../src/components/ui/OfflineBanner.jsx', import.meta.url), 'utf8');
+  assert.ok(source.includes("background: isOffline ? '#ef4444' : '#10b981'"));
+  assert.ok(source.includes("color: '#0f172a'"));
+  for (const background of ['#ef4444', '#10b981']) {
+    assert.ok(contrastRatio('#0f172a', background) >= 4.5);
+  }
+});
+
+await runTest('UI: enabled AI Next button retains its gradient with readable text', () => {
+  const source = readFileSync(new URL('../src/pages/TakeAiQuiz/TakeAiQuiz.jsx', import.meta.url), 'utf8');
+  assert.ok(source.includes("style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#0f172a' }}"));
+  assert.ok(source.includes('aria-label="Quiz progress"'));
+  for (const background of ['#10b981', '#059669']) {
+    assert.ok(contrastRatio('#0f172a', background) >= 4.5);
+  }
+});
+
+await runTest('UI: dashboard guest preview reuses its dark surfaces', () => {
+  const css = readFileSync(new URL('../src/pages/Dashboard/Dashboard.css', import.meta.url), 'utf8');
+  assert.match(css, /html\.dark \.study-dashboard__preview\s*\{\s*background: linear-gradient\(110deg, var\(--sd-bg\), var\(--sd-surface\)\);\s*border-color: var\(--sd-line\);/);
+  assert.ok(css.includes('background: linear-gradient(110deg, #eff6ff, #f0fdfa);'));
+  const tokens = css.match(/html\.dark \.study-dashboard\s*\{([\s\S]*?)\n\}/)[1];
+  const foreground = tokens.match(/--sd-muted:\s*(#[\da-f]{6});/)[1];
+  for (const name of ['bg', 'surface']) {
+    const background = tokens.match(new RegExp(`--sd-${name}:\\s*(#[\\da-f]{6});`))[1];
+    assert.ok(contrastRatio(foreground, background) >= 4.5);
+  }
+});
+
+await runTest('UI: account clear-data text reuses brighter danger color only in dark mode', () => {
+  const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+  assert.match(css, /\.account-clear-data\s*\{\s*color: var\(--danger\);/);
+  assert.match(css, /html\.dark \.account-clear-data\s*\{\s*color: #ef4444;/);
+  const source = readFileSync(new URL('../src/pages/Account/Account.jsx', import.meta.url), 'utf8');
+  const button = source.slice(source.indexOf('onClick={handleClear}')).split('</button>')[0];
+  assert.ok(button.includes('className="account-clear-data"'));
+  assert.equal(button.includes("color: 'var(--danger)'"), false);
+  assert.ok(contrastRatio('#ef4444', '#111827') >= 4.5);
+  assert.ok(contrastRatio('#dc2626', '#ffffff') >= 4.5);
+});
+
+await runTest('UI polish: legal and upload phone padding reuses existing spacing', () => {
+  for (const page of ['Terms', 'Upload']) {
+    const css = readFileSync(new URL(`../src/pages/${page}/${page}.css`, import.meta.url), 'utf8');
+    const selector = page.toLowerCase();
+    assert.match(css, /padding: 3rem 1\.5rem;/);
+    assert.match(css, /padding: 2\.75rem;/);
+    assert.match(css, new RegExp(`@media \\(max-width: 639px\\)\\s*\\{\\s*\\.${selector}-container\\s*\\{\\s*padding: var\\(--space-8\\) var\\(--space-4\\);\\s*\\}\\s*\\.${selector}-card\\s*\\{\\s*padding: var\\(--space-6\\);`));
+    if (page === 'Upload') assert.match(css, /\.upload-dropzone\s*\{\s*padding: var\(--space-8\) var\(--space-4\);/);
+  }
+});
+
+await runTest('UI polish: command search keeps its existing focus ring inside the clipped panel', () => {
+  const css = readFileSync(new URL('../src/components/CommandPalette/CommandPalette.css', import.meta.url), 'utf8');
+  assert.match(css, /\.cmd-palette__input:focus\s*\{\s*outline: none;\s*box-shadow: inset 0 0 0 3px var\(--ring\);\s*border-bottom-color: var\(--brand\);/);
+  assert.match(css, /\.cmd-palette-panel\s*\{[^}]*overflow: hidden;/);
+});
+
+await runTest('UI polish: header targets grow only within the compact navigation breakpoint', () => {
+  const css = readFileSync(new URL('../src/components/Navbar/Navbar.css', import.meta.url), 'utf8');
+  assert.match(css, /@media \(max-width: 399px\)\s*\{\s*\.nav-container\s*\{\s*padding-inline: 0\.5rem;/);
+  assert.match(css, /@media \(min-width: 414px\) and \(max-width: 1023px\)\s*\{\s*\.icon-circle-btn,\s*\.cmd-trigger-btn,\s*\.signin-gradient-btn\s*\{\s*min-width: 2\.75rem;\s*min-height: 2\.75rem;/);
+  assert.equal(css.includes('WCAG 2.2 AA 44x44px'), false);
+});
+
+await runTest('UI polish: internal marks labels target their existing obtained inputs', () => {
+  const source = readFileSync(new URL('../src/pages/GpaCalculator/GpaCalculator.jsx', import.meta.url), 'utf8');
+  for (const key of ['quizObtained', 'assignObtained', 'midObtained', 'finalObtained']) {
+    assert.ok(source.includes('htmlFor={`${componentId}-sessional-' + key + '`}'));
+    assert.ok(source.includes('id={`${componentId}-sessional-' + key + '`}'));
+  }
+  assert.ok(source.includes('htmlFor={`${componentId}-sessional-${obtainedKey}`}'));
+  assert.match(source, /id=\{`\$\{componentId\}-sessional-\$\{obtainedKey\}`\}[\s\S]*?value=\{sessionalInputs\[obtainedKey\]\}[\s\S]*?aria-label=\{`\$\{label\} obtained marks`\}/);
+  assert.match(source, /value=\{sessionalInputs\[totalKey\]\}[\s\S]*?aria-label=\{`\$\{label\} total marks`\}/);
+  assert.equal(source.includes('id={`${componentId}-sessional-${totalKey}`}'), false);
+  for (const name of ['Quizzes obtained out of 15', 'Assignments obtained out of 10', 'Midterm obtained out of 25', 'Final exam obtained out of 50']) {
+    assert.ok(source.includes(`aria-label="${name}"`));
+  }
+  assert.match(source, /<label[^>]*>\s*<input\s*type="checkbox"\s*checked=\{sessionalInputs\.hasLab\}/);
+});
+
 if (failed > 0) {
   console.error(`\n❌ ${failed} of ${passed + failed} test suites failed.`);
 } else {

@@ -308,7 +308,7 @@ export default function App() {
     setActivePath(normalized);
     const newUrl = normalized === 'home' ? '/' : `#${normalized}`;
     window.history.pushState({ path: normalized }, '', newUrl);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: reduceMotion ? 'instant' : 'smooth' });
   };
 
   const handleSelectSubject = (subj) => {
@@ -316,7 +316,7 @@ export default function App() {
     setActivePath('subject-papers');
     const codeParam = subj?.code ? `?code=${encodeURIComponent(subj.code)}` : '';
     window.history.pushState({ path: 'subject-papers', code: subj?.code }, '', `#subject-papers${codeParam}`);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: reduceMotion ? 'instant' : 'smooth' });
   };
 
   const handleToggleLanguage = () => {

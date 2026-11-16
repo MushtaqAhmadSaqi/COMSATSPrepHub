@@ -176,7 +176,7 @@ html.dark .quiz-counter {
 .quiz-option-btn.selected .quiz-option-letter {
   background: var(--brand);
   border-color: var(--brand);
-  color: #ffffff;
+  color: var(--on-brand);
 }
 
 /* ─── Hint Box ──────────────────────────────────────────────────── */
@@ -202,7 +202,7 @@ html.dark .quiz-counter {
   padding: 0.875rem 1.75rem;
   border-radius: 9999px;
   background: var(--brand);
-  color: #ffffff;
+  color: var(--on-brand);
   font-weight: 800;
   font-size: 0.9375rem;
   font-family: var(--font-family);
@@ -505,7 +505,7 @@ html.dark .quiz-chip.selected {
   padding: 1rem;
   border-radius: 9999px;
   background: var(--brand);
-  color: #ffffff;
+  color: var(--on-brand);
   font-weight: 800;
   font-size: 1rem;
   font-family: var(--font-family);

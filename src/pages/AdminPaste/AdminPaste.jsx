@@ -782,6 +782,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
 
         <textarea
           id="admin-raw-paper-textarea"
+          aria-label="Past paper AI JSON output"
           className="admin-textarea"
           placeholder="Paste AI JSON output here... e.g. { 'subject_code': 'CSC322', 'questions': [...] }"
           value={rawText}

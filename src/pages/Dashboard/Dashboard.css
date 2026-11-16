@@ -750,6 +750,11 @@ html.dark .study-dashboard {
   background: radial-gradient(circle at 88% 4%, rgba(52, 112, 197, 0.2), transparent 28rem), var(--sd-bg);
 }
 
+html.dark .study-dashboard__preview {
+  background: linear-gradient(110deg, var(--sd-bg), var(--sd-surface));
+  border-color: var(--sd-line);
+}
+
 html.dark .study-dashboard__metric,
 html.dark .study-dashboard__activity,
 html.dark .study-dashboard__tools {

@@ -1,0 +1,174 @@
+{
+  "browser": "Isolated headless Microsoft Edge",
+  "checks": [
+    {
+      "name": "Upload tabs: End, Home and panel association",
+      "passed": true
+    },
+    {
+      "name": "Upload file input: focus, invalid file and recovery",
+      "passed": true
+    },
+    {
+      "name": "Home suggestions remain visible during native Tab navigation",
+      "passed": true
+    },
+    {
+      "name": "Auth modes preserve opener and restore focus on Escape",
+      "passed": true
+    },
+    {
+      "name": "Command palette active selection follows keyboard with input focus",
+      "passed": true
+    },
+    {
+      "name": "Mock install prompt is hidden after accepted outcome",
+      "passed": true
+    },
+    {
+      "name": "Mock install prompt is hidden after dismissed outcome",
+      "passed": true
+    },
+    {
+      "name": "Install banner stays centered and its actions fit at 375px",
+      "passed": true
+    },
+    {
+      "name": "Install banner stays centered and its actions fit at 768px",
+      "passed": true
+    },
+    {
+      "name": "Install banner stays centered and its actions fit at 1440px",
+      "passed": true
+    },
+    {
+      "name": "Reduced motion preserves hidden scroll control and instant scroll behavior",
+      "passed": true
+    },
+    {
+      "name": "Generic report Modal inside main overlays navigation, traps focus and restores opener",
+      "passed": true
+    },
+    {
+      "name": "AI radio groups support native arrow selection and one Tab stop",
+      "passed": true
+    },
+    {
+      "name": "Study tabs wrap and keep panel label synchronized",
+      "passed": true
+    },
+    {
+      "name": "Dark account action has the intended existing danger foreground",
+      "passed": true
+    },
+    {
+      "name": "Cookie notice clears the mobile navigation at 375px",
+      "passed": true
+    },
+    {
+      "name": "Cookie notice clears the mobile navigation at 768px",
+      "passed": true
+    },
+    {
+      "name": "upload: no horizontal overflow at 375px",
+      "passed": true
+    },
+    {
+      "name": "ai-quiz-generator: no horizontal overflow at 375px",
+      "passed": true
+    },
+    {
+      "name": "study-hub: no horizontal overflow at 375px",
+      "passed": true
+    },
+    {
+      "name": "dashboard: no horizontal overflow at 375px",
+      "passed": true
+    },
+    {
+      "name": "home: no horizontal overflow at 375px",
+      "passed": true
+    },
+    {
+      "name": "upload: no horizontal overflow at 768px",
+      "passed": true
+    },
+    {
+      "name": "ai-quiz-generator: no horizontal overflow at 768px",
+      "passed": true
+    },
+    {
+      "name": "study-hub: no horizontal overflow at 768px",
+      "passed": true
+    },
+    {
+      "name": "dashboard: no horizontal overflow at 768px",
+      "passed": true
+    },
+    {
+      "name": "home: no horizontal overflow at 768px",
+      "passed": true
+    },
+    {
+      "name": "upload: no horizontal overflow at 1024px",
+      "passed": true
+    },
+    {
+      "name": "ai-quiz-generator: no horizontal overflow at 1024px",
+      "passed": true
+    },
+    {
+      "name": "study-hub: no horizontal overflow at 1024px",
+      "passed": true
+    },
+    {
+      "name": "dashboard: no horizontal overflow at 1024px",
+      "passed": true
+    },
+    {
+      "name": "home: no horizontal overflow at 1024px",
+      "passed": true
+    },
+    {
+      "name": "upload: no horizontal overflow at 1440px",
+      "passed": true
+    },
+    {
+      "name": "ai-quiz-generator: no horizontal overflow at 1440px",
+      "passed": true
+    },
+    {
+      "name": "study-hub: no horizontal overflow at 1440px",
+      "passed": true
+    },
+    {
+      "name": "dashboard: no horizontal overflow at 1440px",
+      "passed": true
+    },
+    {
+      "name": "home: no horizontal overflow at 1440px",
+      "passed": true
+    }
+  ],
+  "screenshots": [
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-verification-2026-11-16\\upload-dark-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-verification-2026-11-16\\ai-quiz-generator-dark-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-verification-2026-11-16\\study-hub-dark-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-verification-2026-11-16\\dashboard-dark-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-verification-2026-11-16\\home-dark-375-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-verification-2026-11-16\\upload-dark-1440-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-verification-2026-11-16\\ai-quiz-generator-dark-1440-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-verification-2026-11-16\\study-hub-dark-1440-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-verification-2026-11-16\\dashboard-dark-1440-after.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-verification-2026-11-16\\home-dark-1440-after.png"
+  ],
+  "blockedRequests": [],
+  "consoleErrors": [],
+  "exceptions": [],
+  "fontStatus": {
+    "inter": true,
+    "display": true,
+    "icons": true
+  },
+  "completed": true
+}

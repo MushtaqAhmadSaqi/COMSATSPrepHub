@@ -36,6 +36,26 @@
   background: var(--surface-2);
 }
 
+@media (max-width: 639px) {
+  .upload-container {
+    padding: var(--space-8) var(--space-4);
+  }
+
+  .upload-card {
+    padding: var(--space-6);
+  }
+
+  .upload-dropzone {
+    padding: var(--space-8) var(--space-4);
+  }
+}
+
+.upload-dropzone:focus-within {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--ring);
+}
+
 .upload-dropzone:hover,
 .upload-dropzone.drag-over {
   border-color: var(--brand);

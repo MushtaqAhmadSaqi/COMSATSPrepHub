@@ -47,7 +47,7 @@ export default function OfflineBanner() {
         gap: '0.5rem',
         zIndex: 9999,
         background: isOffline ? '#ef4444' : '#10b981',
-        color: '#ffffff',
+        color: '#0f172a',
         transition: 'all 0.3s ease'
       }}
     >

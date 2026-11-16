@@ -127,7 +127,7 @@ export default function Account({
                 padding: '0.625rem 1.25rem',
                 borderRadius: '9999px',
                 background: 'var(--brand)',
-                color: '#fff',
+                color: 'var(--on-brand)',
                 border: 'none',
                 cursor: 'pointer',
                 fontWeight: 600
@@ -212,7 +212,7 @@ export default function Account({
                   padding: '0.625rem 1.25rem',
                   borderRadius: '9999px',
                   background: 'var(--brand)',
-                  color: '#fff',
+                  color: 'var(--on-brand)',
                   border: 'none',
                   cursor: updatingPassword ? 'default' : 'pointer',
                   fontWeight: 600
@@ -301,12 +301,12 @@ export default function Account({
           <button
             type="button"
             onClick={handleClear}
+            className="account-clear-data"
             style={{
               minHeight: '44px',
               padding: '0.625rem 1.25rem',
               borderRadius: '9999px',
               border: '1px solid var(--danger)',
-              color: 'var(--danger)',
               background: 'transparent',
               cursor: 'pointer',
               fontWeight: 600,

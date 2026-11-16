@@ -74,7 +74,7 @@ function DepartmentChip({ dept, isSelected, onClick }) {
         borderRadius: '9999px',
         border: '1.5px solid var(--border)',
         background: isSelected ? 'var(--brand)' : 'var(--surface)',
-        color: isSelected ? '#ffffff' : 'var(--text-muted)',
+        color: isSelected ? 'var(--on-brand)' : 'var(--text-muted)',
         fontWeight: 700,
         fontSize: '0.8125rem',
         cursor: 'pointer',
