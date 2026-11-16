@@ -3,6 +3,27 @@ import { authHelper } from './supabase.js';
 import { sanitizePlainText } from '../utils/sanitize.js';
 import { logger } from '../utils/logger.js';
 
+export class AiQuizRequestError extends Error {
+  constructor(message, { status = 0, code = 'AI_REQUEST_FAILED' } = {}) {
+    super(message);
+    this.name = 'AiQuizRequestError';
+    this.status = status;
+    this.code = code;
+  }
+}
+
+async function readServerError(response, fallbackMessage) {
+  try {
+    const payload = await response.json();
+    if (payload && typeof payload.error === 'string' && payload.error.trim()) {
+      return payload.error.trim();
+    }
+  } catch {
+    // response body was not JSON
+  }
+  return fallbackMessage;
+}
+
 export async function generateQuizWithGemini({
   subject,
   subjectCode = '',
@@ -49,6 +70,16 @@ export async function generateQuizWithGemini({
       signal
     });
 
+    if (response.status === 401 || response.status === 429) {
+      const fallbackMessage = response.status === 401
+        ? 'Please sign in to generate AI quizzes.'
+        : 'You have reached the AI quiz limit. Please wait and try again.';
+      throw new AiQuizRequestError(await readServerError(response, fallbackMessage), {
+        status: response.status,
+        code: response.status === 401 ? 'AUTH_REQUIRED' : 'RATE_LIMITED'
+      });
+    }
+
     if (response.ok) {
       const payload = await response.json();
       if (
@@ -88,7 +119,7 @@ export async function generateQuizWithGemini({
       }
     }
   } catch (err) {
-    if (err?.name === 'AbortError') {
+    if (err?.name === 'AbortError' || err instanceof AiQuizRequestError) {
       throw err;
     }
     logger.warn(

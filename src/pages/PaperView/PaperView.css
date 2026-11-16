@@ -725,3 +725,33 @@
     font-size: 11pt;
   }
 }
+
+/* Provenance notice for sample papers and curated practice questions */
+
+.paperview-container .paperview-provenance {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border, #dfe5ef);
+  border-left: 4px solid var(--warning, #d97706);
+  border-radius: 10px;
+  background: var(--warning-soft, rgba(217, 119, 6, 0.12));
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.paperview-container .paperview-provenance p {
+  margin: 0;
+}
+
+.paperview-container .paperview-provenance p + p {
+  margin-top: 0.4rem;
+}
+
+.paperview-container .paperview-provenance .material-symbols-outlined {
+  color: var(--warning, #d97706);
+  font-size: 1.25rem;
+  line-height: 1.3;
+}

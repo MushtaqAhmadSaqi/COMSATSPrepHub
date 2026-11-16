@@ -136,7 +136,9 @@ html.dark .desktop-nav-links {
   border-color: rgba(51, 65, 85, 0.6);
 }
 
-@media (min-width: 768px) {
+/* Tablets (768-1023px) keep the compact top bar + bottom nav: the full pill
+   navigation plus search, language, theme, and sign-in does not fit. */
+@media (min-width: 1024px) {
   .desktop-nav-links {
     display: flex;
   }
@@ -144,7 +146,7 @@ html.dark .desktop-nav-links {
 
 /* ─── Nav Link Button ──────────────────────────────────────────── */
 .nav-link-btn {
-  padding: 0.5rem 1.125rem;
+  padding: 0.5rem 0.875rem;
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 600;
@@ -154,6 +156,12 @@ html.dark .desktop-nav-links {
   transition: all 0.2s var(--ease);
   position: relative;
   letter-spacing: -0.01em;
+}
+
+@media (min-width: 1280px) {
+  .nav-link-btn {
+    padding: 0.5rem 1.125rem;
+  }
 }
 
 .nav-link-btn:hover {
@@ -273,7 +281,7 @@ html.dark .cmd-trigger-btn {
   display: none;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1280px) {
   .cmd-trigger-btn {
     width: auto;
     height: auto;
@@ -389,7 +397,7 @@ html.dark .cmd-trigger-btn {
   animation: fadeInUp 0.5s 0.2s var(--ease) both;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .mobile-bottom-nav {
     display: none;
   }

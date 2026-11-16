@@ -245,9 +245,10 @@ export function getOfflineExamQuestions(
   year = '2023'
 ) {
   const text = `${subjectName} ${subjectCode} ${paperTitle}`.toLowerCase();
+  const withProvenance = (list) => list.map((question) => ({ ...question, source: 'curated' }));
 
   if (text.includes('math') || text.includes('calculus') || text.includes('mth104') || text.includes('mth105') || text.includes('linear')) {
-    return [
+    return withProvenance([
       {
         id: 1,
         number: 'Question 1',
@@ -280,11 +281,11 @@ export function getOfflineExamQuestions(
         questionText: 'Given the matrix A = [[4, 1], [2, 3]], find the eigenvalues and corresponding eigenvectors.',
         answerText: 'Step 1: Characteristic Equation det(A - λI) = 0:\n|[4-λ, 1], [2, 3-λ]| = (4-λ)(3-λ) - (1)(2) = λ² - 7λ + 10 = 0\n\nStep 2: Solve for λ:\n(λ - 5)(λ - 2) = 0 => Eigenvalues: λ1 = 5, λ2 = 2.\n\nStep 3: Eigenvectors:\nFor λ1 = 5: [-1x + y = 0] => y = x => Eigenvector v1 = [1, 1]^T\nFor λ2 = 2: [2x + y = 0] => y = -2x => Eigenvector v2 = [1, -2]^T.'
       }
-    ];
+    ]);
   }
 
   if (text.includes('database') || text.includes('sql') || text.includes('csc371') || text.includes('db')) {
-    return [
+    return withProvenance([
       {
         id: 1,
         number: 'Question 1',
@@ -309,10 +310,10 @@ export function getOfflineExamQuestions(
         questionText: 'Write SQL queries for an Employee(EmpID, Name, Salary, DeptID) table:\na) Find top 3 highest paid employees.\nb) Find average salary of each department having more than 5 employees.',
         answerText: 'Query a:\nSELECT EmpID, Name, Salary\nFROM Employee\nORDER BY Salary DESC\nLIMIT 3;\n\nQuery b:\nSELECT DeptID, AVG(Salary) AS AvgSalary\nFROM Employee\nGROUP BY DeptID\nHAVING COUNT(EmpID) > 5;'
       }
-    ];
+    ]);
   }
 
-  return [
+  return withProvenance([
     {
       id: 1,
       number: 'Question 1',
@@ -345,7 +346,7 @@ export function getOfflineExamQuestions(
       questionText: 'Construct a balanced binary search tree (AVL Tree) for elements: 10, 20, 30, 40, 50, 25. Show rotation steps.',
       answerText: 'Step 1: Insert 10, 20, 30 -> Right-Right (RR) imbalance at 10. Perform Left Rotation at 10. Root = 20.\nStep 2: Insert 40, 50 -> RR imbalance at 30. Perform Left Rotation at 30.\nStep 3: Insert 25 -> RL imbalance at 20. Perform Right Rotation at 40, then Left Rotation at 20. Root = 30.'
     }
-  ];
+  ]);
 }
 
 export function getOfflineQuestions(

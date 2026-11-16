@@ -1,57 +1,23 @@
 // api/generate-quiz.js
 // Server-side AI Quiz Generation Endpoint with Gemini -> Groq -> OpenRouter Fallback Chain
 
+import {
+  sanitizeField,
+  checkRateLimit,
+  requireUser,
+  reserveAiQuizUsage,
+  sendError
+} from './_lib/security.js';
+
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
 const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-8b-instruct:free';
 const AI_QUIZ_LIMIT = 10;
 const PROVIDER_TIMEOUT_MS = 9500;
+const RATE_LIMIT_PER_MINUTE = 8;
 
 const ALLOWED_DIFFICULTIES = new Set(['Easy', 'Medium', 'Hard', 'balanced']);
 const ALLOWED_QUESTION_TYPES = new Set(['mcq', 'conceptual', 'mixed']);
-
-function sanitizeField(val, maxLen = 120) {
-  return String(val || '')
-    .replace(/[<>&"'`]/g, '')
-    .replace(/[\x00-\x1F\x7F]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, maxLen);
-}
-
-function getBearerToken(req) {
-  const header = req.headers?.authorization || req.headers?.Authorization || '';
-  if (!header.toLowerCase().startsWith('bearer ')) return null;
-  return header.slice(7).trim() || null;
-}
-
-async function checkUpstashRateLimit(ip) {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return { allowed: true };
-
-  try {
-    const key = `ratelimit:quiz:${ip}`;
-    const res = await fetch(`${url}/pipeline`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify([
-        ['INCR', key],
-        ['EXPIRE', key, 60]
-      ]),
-      signal: AbortSignal.timeout(2000)
-    });
-    if (!res.ok) return { allowed: true };
-    const data = await res.json();
-    const count = Number(data?.[0]?.result || 1);
-    return { allowed: count <= 8 };
-  } catch {
-    return { allowed: true };
-  }
-}
 
 function buildIsolatedPrompt({ subjectLabel, topic, questionType, difficulty, safeQuestionCount }) {
   return `You are an expert COMSATS University exam coach.
@@ -115,7 +81,7 @@ async function callOpenAiCompatible(endpoint, apiKey, model, prompt) {
   return data?.choices?.[0]?.message?.content || '';
 }
 
-function parseAndValidateQuiz(rawText, expectedCount) {
+export function parseAndValidateQuiz(rawText, expectedCount) {
   const cleaned = String(rawText || '').replace(/```json|```/g, '').trim();
   const match = cleaned.match(/\{[\s\S]*\}/);
   const parsed = JSON.parse(match ? match[0] : cleaned);
@@ -123,19 +89,39 @@ function parseAndValidateQuiz(rawText, expectedCount) {
   if (!parsed || !Array.isArray(parsed.questions) || parsed.questions.length === 0) {
     throw new Error('Invalid AI quiz payload');
   }
+  if (parsed.questions.length < expectedCount) {
+    throw new Error(
+      `AI quiz returned ${parsed.questions.length} questions but ${expectedCount} were requested`
+    );
+  }
 
   const questions = parsed.questions.slice(0, expectedCount).map((q, idx) => {
-    const options = Array.isArray(q.options)
-      ? q.options.slice(0, 4).map((o) => sanitizeField(o, 240))
-      : [];
-    if (options.length !== 4 || options.some((o) => !o)) {
-      throw new Error(`Question ${idx + 1} missing 4 valid options`);
+    const question = sanitizeField(q?.question, 500);
+    if (!question) {
+      throw new Error(`Question ${idx + 1} has empty question text`);
     }
-    const correct = Number.isInteger(q.correctAnswer) ? q.correctAnswer : 0;
+
+    const rawOptions = Array.isArray(q?.options) ? q.options : [];
+    if (rawOptions.length !== 4) {
+      throw new Error(`Question ${idx + 1} must have exactly 4 options`);
+    }
+    const options = rawOptions.map((option) => sanitizeField(option, 240));
+    if (options.some((option) => !option)) {
+      throw new Error(`Question ${idx + 1} has an empty option`);
+    }
+    const normalized = new Set(options.map((option) => option.toLowerCase()));
+    if (normalized.size !== options.length) {
+      throw new Error(`Question ${idx + 1} has duplicate options`);
+    }
+
+    if (!Number.isInteger(q?.correctAnswer) || q.correctAnswer < 0 || q.correctAnswer > 3) {
+      throw new Error(`Question ${idx + 1} has an invalid correctAnswer index`);
+    }
+
     return {
-      question: sanitizeField(q.question, 500),
+      question,
       options,
-      correctAnswer: correct >= 0 && correct <= 3 ? correct : 0,
+      correctAnswer: q.correctAnswer,
       explanation: sanitizeField(q.explanation || 'Review the course lecture notes.', 600)
     };
   });
@@ -145,20 +131,10 @@ function parseAndValidateQuiz(rawText, expectedCount) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return sendError(res, 405, 'Method not allowed');
   }
 
-  const ip =
-    (req.headers?.['x-forwarded-for'] || '').split(',')[0].trim() ||
-    req.socket?.remoteAddress ||
-    'unknown';
-
-  const rateStatus = await checkUpstashRateLimit(ip);
-  if (!rateStatus.allowed) {
-    return res.status(429).json({ error: 'Too many requests. Please wait a minute and try again.' });
-  }
-
-  const body = req.body || {};
+  const body = req.body && typeof req.body === 'object' ? req.body : {};
   const subject = sanitizeField(body.subject, 120);
   const subjectCode = sanitizeField(body.subjectCode, 20);
   const topic = sanitizeField(body.topic || body.topics, 140);
@@ -167,43 +143,31 @@ export default async function handler(req, res) {
   const safeQuestionCount = Math.min(Math.max(Number(body.questionCount) || 10, 1), 20);
 
   if (!subject) {
-    return res.status(400).json({ error: 'Subject is required.' });
+    return sendError(res, 400, 'Subject is required.');
   }
 
-  // Optional Supabase quota verification when service role key is configured
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  let usageInfo = null;
+  const rateStatus = await checkRateLimit({
+    req,
+    scope: 'quiz',
+    limit: RATE_LIMIT_PER_MINUTE,
+    tooManyMessage: 'Too many requests. Please wait a minute and try again.'
+  });
+  if (!rateStatus.allowed) {
+    return sendError(res, rateStatus.status, rateStatus.error);
+  }
 
-  if (supabaseUrl && serviceRoleKey) {
-    const token = getBearerToken(req);
-    if (!token) {
-      return res.status(401).json({ error: 'Please sign in to generate AI quizzes.' });
-    }
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { persistSession: false }
-    });
-    const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
-    if (userError || !userData?.user) {
-      return res.status(401).json({ error: 'Invalid or expired session. Please sign in again.' });
-    }
-    const { data: usageRows, error: usageError } = await supabaseAdmin.rpc(
-      'reserve_ai_quiz_generation',
-      { p_user_id: userData.user.id, p_limit: AI_QUIZ_LIMIT }
-    );
-    if (!usageError && usageRows) {
-      const usage = Array.isArray(usageRows) ? usageRows[0] : usageRows;
-      if (usage && !usage.allowed) {
-        return res.status(429).json({
-          error: `You have reached your ${AI_QUIZ_LIMIT}-quiz generation limit.`,
-          usage: { used: usage.used ?? AI_QUIZ_LIMIT, remaining: 0, limit: AI_QUIZ_LIMIT }
-        });
-      }
-      if (usage) {
-        usageInfo = { used: usage.used, remaining: usage.remaining, limit: AI_QUIZ_LIMIT };
-      }
-    }
+  const auth = await requireUser(req, 'AI quiz generation');
+  if (!auth.ok) {
+    return sendError(res, auth.status, auth.error);
+  }
+
+  const quota = await reserveAiQuizUsage({
+    supabaseAdmin: auth.supabaseAdmin,
+    userId: auth.user.id,
+    limit: AI_QUIZ_LIMIT
+  });
+  if (!quota.ok) {
+    return sendError(res, quota.status, quota.error, quota.usage ? { usage: quota.usage } : {});
   }
 
   const subjectLabel = subjectCode ? `${subject} (${subjectCode})` : subject;
@@ -243,9 +207,11 @@ export default async function handler(req, res) {
   ].filter(Boolean);
 
   if (providers.length === 0) {
-    return res.status(503).json({
-      error: 'No AI provider keys configured on server; client will use offline question bank.'
-    });
+    return sendError(
+      res,
+      503,
+      'No AI provider keys configured on server; client will use offline question bank.'
+    );
   }
 
   for (const provider of providers) {
@@ -261,14 +227,16 @@ export default async function handler(req, res) {
           isAIGenerated: true,
           provider: provider.name
         },
-        ...(usageInfo ? { usage: usageInfo } : {})
+        ...(quota.usage ? { usage: quota.usage } : {})
       });
     } catch (err) {
       console.warn(`[generate-quiz] Provider ${provider.name} failed:`, err?.message || err);
     }
   }
 
-  return res.status(502).json({
-    error: 'All configured AI providers are temporarily unavailable. Falling back to curated question bank.'
-  });
+  return sendError(
+    res,
+    502,
+    'All configured AI providers are temporarily unavailable. Falling back to curated question bank.'
+  );
 }

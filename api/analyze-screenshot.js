@@ -1,96 +1,133 @@
 // api/analyze-screenshot.js
 // Server-side CUOnline Portal Screenshot OCR Endpoint via Gemini Vision (Native Fetch)
 
+import {
+  sanitizeField,
+  checkRateLimit,
+  requireUser,
+  sendError
+} from './_lib/security.js';
+
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const MAX_BASE64_LENGTH = 4 * 1024 * 1024; // ~3 MB image max
 const ALLOWED_MIMES = new Set(['image/png', 'image/jpeg', 'image/webp']);
 const TIMEOUT_MS = 9500;
+const RATE_LIMIT_PER_MINUTE = 5;
+const MAX_MARK_ENTRIES = 20;
 
-function getBearerToken(req) {
-  const header = req.headers?.authorization || req.headers?.Authorization || '';
-  if (!header.toLowerCase().startsWith('bearer ')) return null;
-  return header.slice(7).trim() || null;
+export function parseImageDataUrl(rawImage) {
+  const value = String(rawImage || '');
+  if (!value) {
+    return { ok: false, status: 400, error: 'Screenshot image data is required.' };
+  }
+  if (value.length > MAX_BASE64_LENGTH) {
+    return { ok: false, status: 413, error: 'Screenshot image exceeds the 3 MB size limit.' };
+  }
+
+  const match = value.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,([A-Za-z0-9+/=\s]+)$/);
+  if (!match || !ALLOWED_MIMES.has(match[1])) {
+    return {
+      ok: false,
+      status: 415,
+      error: 'Screenshot must be a PNG, JPEG, or WebP image data URL.'
+    };
+  }
+
+  const base64Data = match[2].replace(/\s+/g, '');
+  if (!base64Data || base64Data.length % 4 !== 0) {
+    return { ok: false, status: 400, error: 'Screenshot image data is not valid base64.' };
+  }
+
+  return { ok: true, mimeType: match[1], base64Data };
 }
 
-async function checkUpstashRateLimit(ip) {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return { allowed: true };
+function toNumber(value, { min = 0, max = 1000, integer = false } = {}) {
+  if (value === null || value === undefined || value === '') return null;
+  const number = Number(value);
+  if (!Number.isFinite(number)) return null;
+  if (integer && !Number.isInteger(number)) return null;
+  if (number < min || number > max) return null;
+  return number;
+}
 
-  try {
-    const key = `ratelimit:ocr:${ip}`;
-    const res = await fetch(`${url}/pipeline`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify([
-        ['INCR', key],
-        ['EXPIRE', key, 60]
-      ]),
-      signal: AbortSignal.timeout(2000)
-    });
-    if (!res.ok) return { allowed: true };
-    const data = await res.json();
-    const count = Number(data?.[0]?.result || 1);
-    return { allowed: count <= 5 };
-  } catch {
-    return { allowed: true };
+function parseMarkPair(entry) {
+  if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return null;
+  const obtained = toNumber(entry.obtained, { min: 0, max: 1000 });
+  const total = toNumber(entry.total, { min: 1, max: 1000 });
+  if (obtained === null || total === null || obtained > total) return null;
+  return { obtained, total };
+}
+
+function parseMarkList(list) {
+  if (!Array.isArray(list)) return [];
+  return list
+    .slice(0, MAX_MARK_ENTRIES)
+    .map(parseMarkPair)
+    .filter(Boolean);
+}
+
+export function validateOcrPayload(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    throw new Error('OCR payload is not an object');
   }
+
+  const subjectName = sanitizeField(raw.subjectName, 120);
+  if (!subjectName) {
+    throw new Error('OCR payload is missing the subject name');
+  }
+
+  const theory = raw.theory && typeof raw.theory === 'object' && !Array.isArray(raw.theory)
+    ? raw.theory
+    : null;
+  if (!theory) {
+    throw new Error('OCR payload is missing the theory marks section');
+  }
+
+  const quizzes = parseMarkList(theory.quizzes);
+  const assignments = parseMarkList(theory.assignments);
+  const mid = parseMarkPair(theory.mid);
+  const final = parseMarkPair(theory.final);
+
+  if (quizzes.length === 0 && assignments.length === 0 && !mid && !final) {
+    throw new Error('OCR payload contained no usable marks');
+  }
+
+  return {
+    subjectName,
+    creditHours: toNumber(raw.creditHours, { min: 0, max: 12, integer: true }),
+    theory: { quizzes, assignments, mid, final }
+  };
 }
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return sendError(res, 405, 'Method not allowed');
   }
 
-  const ip =
-    (req.headers?.['x-forwarded-for'] || '').split(',')[0].trim() ||
-    req.socket?.remoteAddress ||
-    'unknown';
+  const image = parseImageDataUrl(req.body?.imageBase64);
+  if (!image.ok) {
+    return sendError(res, image.status, image.error);
+  }
 
-  const rateStatus = await checkUpstashRateLimit(ip);
+  const rateStatus = await checkRateLimit({
+    req,
+    scope: 'ocr',
+    limit: RATE_LIMIT_PER_MINUTE,
+    tooManyMessage: 'Too many screenshot scans. Please wait a minute and try again.'
+  });
   if (!rateStatus.allowed) {
-    return res.status(429).json({ error: 'Too many screenshot scans. Please wait a minute and try again.' });
+    return sendError(res, rateStatus.status, rateStatus.error);
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (supabaseUrl && serviceRoleKey) {
-    const token = getBearerToken(req);
-    if (!token) {
-      return res.status(401).json({ error: 'Please sign in to use the AI Screenshot Scanner.' });
-    }
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { persistSession: false }
-    });
-    const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
-    if (userError || !userData?.user) {
-      return res.status(401).json({ error: 'Your session is invalid or expired. Please sign in again.' });
-    }
-  }
-
-  const rawImage = String(req.body?.imageBase64 || '');
-  if (!rawImage) {
-    return res.status(400).json({ error: 'Screenshot image data is required.' });
-  }
-  if (rawImage.length > MAX_BASE64_LENGTH) {
-    return res.status(413).json({ error: 'Screenshot image exceeds the 3 MB size limit.' });
+  const auth = await requireUser(req, 'the AI Screenshot Scanner');
+  if (!auth.ok) {
+    return sendError(res, auth.status, auth.error);
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(503).json({
-      error: 'GEMINI_API_KEY is not configured on the server.'
-    });
+    return sendError(res, 503, 'GEMINI_API_KEY is not configured on the server.');
   }
-
-  const mimeMatch = rawImage.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,/);
-  const mimeType = mimeMatch && ALLOWED_MIMES.has(mimeMatch[1]) ? mimeMatch[1] : 'image/png';
-  const base64Data = rawImage.replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, '').trim();
 
   const prompt = `You are an expert COMSATS University student portal (CUOnline) OCR parser.
 Analyze this screenshot showing marks details (quizzes, assignments, midterm, or final exam).
@@ -116,7 +153,7 @@ Return ONLY valid JSON matching this schema:
           {
             parts: [
               { text: prompt },
-              { inlineData: { mimeType, data: base64Data } }
+              { inlineData: { mimeType: image.mimeType, data: image.base64Data } }
             ]
           }
         ],
@@ -142,11 +179,25 @@ Return ONLY valid JSON matching this schema:
     const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
     const parsedData = JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);
 
-    return res.status(200).json(parsedData);
+    let validated;
+    try {
+      validated = validateOcrPayload(parsedData);
+    } catch (validationError) {
+      console.warn('[analyze-screenshot] OCR payload rejected:', validationError?.message || validationError);
+      return sendError(
+        res,
+        422,
+        'The marks table could not be read reliably. Please upload a clearer screenshot.'
+      );
+    }
+
+    return res.status(200).json(validated);
   } catch (err) {
     console.warn('[analyze-screenshot] OCR error:', err?.message || err);
-    return res.status(502).json({
-      error: 'Could not extract marks from this screenshot. Please ensure the CUOnline marks table is clearly visible.'
-    });
+    return sendError(
+      res,
+      502,
+      'Could not extract marks from this screenshot. Please ensure the CUOnline marks table is clearly visible.'
+    );
   }
 }

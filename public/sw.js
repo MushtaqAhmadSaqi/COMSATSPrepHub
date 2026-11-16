@@ -1,4 +1,4 @@
-const CACHE_NAME = 'comsatsprephub-shell-v2';
+const CACHE_NAME = 'comsatsprephub-shell-v3';
 const PRECACHE_URLS = ['/', '/index.html', '/logo.png', '/site.webmanifest'];
 
 self.addEventListener('install', (event) => {
@@ -46,10 +46,18 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigation & App Shell: Network First with offline cache fallback
+  // Navigation & App Shell: Network First, and keep the cached shell fresh
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(() => caches.match('/index.html'))
+      fetch(request)
+        .then((res) => {
+          if (res.ok && res.type === 'basic') {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', clone));
+          }
+          return res;
+        })
+        .catch(() => caches.match('/index.html'))
     );
   }
 });

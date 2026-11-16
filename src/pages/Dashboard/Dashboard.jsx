@@ -70,7 +70,7 @@ export default function Dashboard({
   ));
   const [dataVersion, setDataVersion] = useState(0);
 
-  const prefs = useMemo(() => getStudentPrefs(), []);
+  const prefs = useMemo(() => getStudentPrefs(), [dataVersion]);
   const fullName = user?.user_metadata?.full_name?.trim();
   const displayName =
     fullName?.split(/\s+/)[0] ||
@@ -104,6 +104,17 @@ export default function Dashboard({
 
     window.addEventListener('pph:study-activity', handleLocalActivity);
     return () => window.removeEventListener('pph:study-activity', handleLocalActivity);
+  }, []);
+
+  useEffect(() => {
+    const handleOwnerChange = () => {
+      setLiveActivity(getRecentActivity());
+      setExams(getExamCountdowns());
+      setDataVersion((version) => version + 1);
+    };
+
+    window.addEventListener('pph:workspace-owner-changed', handleOwnerChange);
+    return () => window.removeEventListener('pph:workspace-owner-changed', handleOwnerChange);
   }, []);
 
   useEffect(() => {

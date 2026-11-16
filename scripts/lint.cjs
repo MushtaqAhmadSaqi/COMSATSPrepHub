@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 /**
- * COMSATSPrepHub AST Syntax & Security Policy Linter
+ * COMSATSPrepHub Syntax & Security Policy Linter
  * Enforces:
  * 1. Zero server-only AI or Supabase Service Role keys inside src/
  * 2. Zero Mermaid 'loose' security mode in src/
  * 3. Zero 'FOR ALL USING (true)' RLS policies in src/ or supabase/
- * 4. Valid syntax across api/, scripts/, and src/
+ * 4. Real syntax validation (node --check) across api/, scripts/, and src/
+ * 5. Every API route exports a default handler; shared _lib code does not
  */
 const fs = require('fs');
 const path = require('path');
+const { spawnSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const FORBIDDEN_CLIENT_PATTERNS = [
@@ -58,9 +60,42 @@ for (const file of sqlFiles) {
   }
 }
 
+const apiFiles = walkFiles(path.join(ROOT, 'api'), ['.js']);
+for (const file of apiFiles) {
+  const rel = path.relative(ROOT, file);
+  const content = fs.readFileSync(file, 'utf8');
+  const isRoute = path.dirname(rel) === 'api' && !path.basename(rel).startsWith('_');
+  if (isRoute && !/export\s+default\s+(?:async\s+)?function/.test(content)) {
+    console.error(`❌ [API LINT] ${rel}: API route must export a default handler function`);
+    errors++;
+  }
+  if (/Access-Control-Allow-Origin['"]?\s*[,:]\s*['"]\*['"]/.test(content)) {
+    console.error(`❌ [API LINT] ${rel}: Wildcard CORS on an authenticated endpoint`);
+    errors++;
+  }
+}
+
+const scriptFiles = walkFiles(path.join(ROOT, 'scripts'), ['.js', '.cjs', '.mjs']);
+const syntaxFiles = [
+  ...apiFiles,
+  ...scriptFiles,
+  ...srcFiles.filter((file) => file.endsWith('.js'))
+];
+for (const file of syntaxFiles) {
+  const check = spawnSync(process.execPath, ['--check', file], { encoding: 'utf8' });
+  if (check.status !== 0) {
+    const rel = path.relative(ROOT, file);
+    console.error(`❌ [SYNTAX LINT] ${rel}: ${(check.stderr || '').trim().split('\n')[0]}`);
+    errors++;
+  }
+}
+
 if (errors > 0) {
   console.error(`\nLint failed with ${errors} error(s).`);
   process.exit(1);
 }
 
-console.log(`✅ Lint passed across ${srcFiles.length} client files and ${sqlFiles.length} SQL migration(s).`);
+console.log(
+  `✅ Lint passed across ${srcFiles.length} client files, ${apiFiles.length} API file(s), ` +
+  `${scriptFiles.length} script(s), ${syntaxFiles.length} syntax check(s), and ${sqlFiles.length} SQL migration(s).`
+);

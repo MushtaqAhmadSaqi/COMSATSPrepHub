@@ -13,7 +13,7 @@ const FAQS = [
   },
   {
     q: 'Can I use COMSATSPrepHub without creating an account?',
-    a: 'Yes! Guest students can browse past papers, practice quizzes, and use the GPA calculator. Signing in enables cross-device sync, bookmarks, and streak tracking.'
+    a: 'Yes! Guest students can browse past papers, practice quizzes, and use the GPA calculator. Signing in syncs your activity feed across devices; bookmarks, notes, and flashcards stay in this browser.'
   },
   {
     q: 'How do I contribute a past paper or solution?',
@@ -28,21 +28,28 @@ export default function FaqContact() {
   const [message, setMessage] = useState('');
   const [sent, setSent] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !email || !message) {
       toast.error('Please fill in all fields.');
       return;
     }
-    addModerationSubmission({
+    const { sync } = addModerationSubmission({
       type: 'contact',
       subjectCode: 'SUPPORT',
       title: `Support Inquiry from ${name.trim()}`,
       contributor: `${name.trim()} (${email.trim()})`,
       details: message.trim()
     });
-    setSent(true);
-    toast.success('Your message has been sent to the student team!');
+    const result = await sync;
+    if (result.ok) {
+      setSent(true);
+      toast.success('Your message was submitted to the student team queue.');
+    } else {
+      toast.error(
+        'We could not reach the server, so your message is only saved in this browser. Please retry or email us directly.'
+      );
+    }
   };
 
   return (
@@ -113,7 +120,7 @@ export default function FaqContact() {
           <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
             <span className="material-symbols-outlined" style={{ fontSize: '3rem', color: '#10b981' }}>check_circle</span>
             <h3 style={{ margin: '0.5rem 0' }}>Thank you!</h3>
-            <p style={{ color: 'var(--text-subtle)' }}>We have received your message and will get back to you soon.</p>
+            <p style={{ color: 'var(--text-subtle)' }}>Your message is in the support queue. You can also email us using the links in the footer.</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

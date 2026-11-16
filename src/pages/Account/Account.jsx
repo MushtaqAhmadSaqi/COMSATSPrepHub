@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { exportAllStudentData, clearAllStudentData, getStudentPrefs, saveStudentPrefs } from '../../utils/studyTracker';
+import React, { useEffect, useState } from 'react';
+import { exportAllStudentData, clearAllStudentData, clearCloudStudyActivity, getStudentPrefs, saveStudentPrefs } from '../../utils/studyTracker';
 import { getAnalyticsConsent, setAnalyticsConsent } from '../../utils/analytics';
 import { updatePassword, validatePasswordStrength } from '../../services/auth';
 import { toast } from '../../utils/toast';
@@ -16,6 +16,12 @@ export default function Account({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [updatingPassword, setUpdatingPassword] = useState(false);
 
+  useEffect(() => {
+    const handleOwnerChange = () => setPrefs(getStudentPrefs());
+    window.addEventListener('pph:workspace-owner-changed', handleOwnerChange);
+    return () => window.removeEventListener('pph:workspace-owner-changed', handleOwnerChange);
+  }, []);
+
   const handleExport = () => {
     const data = exportAllStudentData();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -28,10 +34,18 @@ export default function Account({
     toast.success('Downloaded student data backup!');
   };
 
-  const handleClear = () => {
-    if (window.confirm('Are you sure you want to delete all local study history, bookmarks, and quiz attempts? This cannot be undone.')) {
-      clearAllStudentData();
-      toast.info('All local study data cleared.');
+  const handleClear = async () => {
+    if (!window.confirm('Are you sure you want to delete all local study history, bookmarks, and quiz attempts? This cannot be undone.')) {
+      return;
+    }
+    const cloud = user ? await clearCloudStudyActivity() : { ok: true, reason: 'guest' };
+    clearAllStudentData();
+    if (cloud.ok) {
+      toast.info(user ? 'All local and synced study data cleared.' : 'All local study data cleared.');
+    } else {
+      toast.error(
+        'Local study data cleared, but your synced activity could not be deleted. Please retry or email us from the footer.'
+      );
     }
   };
 
@@ -83,7 +97,7 @@ export default function Account({
       <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--brand)' }}>Student Account &amp; Settings</h1>
         <p style={{ color: 'var(--text-subtle)', marginTop: '0.5rem' }}>
-          Manage your campus preferences, sync status, privacy controls, and data export.
+          Manage your campus preferences, privacy controls, and data export.
         </p>
       </div>
 
@@ -96,13 +110,14 @@ export default function Account({
           <div>
             <p><strong>Signed in as:</strong> {user.email}</p>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-subtle)', marginTop: '0.25rem' }}>
-              Your progress and saved papers are synchronized with your account.
+              Your activity feed is synced with your account. Bookmarks, notes, flashcards, GPA plans,
+              and exam countdowns stay in this browser.
             </p>
           </div>
         ) : (
           <div>
             <p style={{ color: 'var(--text-subtle)', marginBottom: '1rem' }}>
-              You are using local guest mode. Sign in to sync your study activity across devices.
+              You are using local guest mode. Sign in to sync your activity feed across devices; bookmarks, notes, and flashcards stay in this browser.
             </p>
             <button
               type="button"

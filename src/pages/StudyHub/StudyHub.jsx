@@ -114,6 +114,18 @@ export default function StudyHub() {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    const handleOwnerChange = () => {
+      setCards(getFlashcardsQueue());
+      setChallengeStatus(getDailyChallengeStatus());
+      setCardIndex(0);
+      setFlipped(false);
+    };
+
+    window.addEventListener('pph:workspace-owner-changed', handleOwnerChange);
+    return () => window.removeEventListener('pph:workspace-owner-changed', handleOwnerChange);
+  }, []);
+
   const dueCards = getDueFlashcards(cards, now);
   const safeCardIndex = dueCards.length > 0 ? Math.min(cardIndex, dueCards.length - 1) : 0;
 

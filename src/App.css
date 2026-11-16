@@ -45,7 +45,7 @@
   z-index: 1;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .main-content {
     padding-bottom: 2rem;
   }

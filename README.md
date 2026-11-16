@@ -77,7 +77,7 @@ Use daily challenges, streaks, spaced-repetition flashcards, course cheat-sheets
 </tr>
 </table>
 
-> **Built for flexibility:** Guest mode works without an account. Sign in with Supabase when you want cloud sync for progress, bookmarks, and exam countdowns.
+> **Built for flexibility:** Guest mode works without an account. Sign in with Supabase to sync your activity feed across devices; bookmarks, notes, flashcards, GPA plans, and exam countdowns stay in your browser.
 
 ## 🔁 A simple study loop
 
@@ -123,9 +123,12 @@ cp .env.example .env
 | `GEMINI_API_KEY` | Server | Recommended | Primary AI provider |
 | `GROQ_API_KEY` | Server | Optional | Secondary AI fallback |
 | `OPENROUTER_API_KEY` | Server | Optional | Tertiary AI fallback |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server | Optional | Server-only quota verification |
-| `UPSTASH_REDIS_REST_URL` | Server | Optional | Distributed rate limiting |
-| `UPSTASH_REDIS_REST_TOKEN` | Server | Optional | Upstash Redis authentication |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server | Required for `/api` | Server-only session verification and quota checks |
+| `SUPABASE_URL` | Server | Required for `/api` | Server-side Supabase URL (falls back to `VITE_SUPABASE_URL`) |
+| `UPSTASH_REDIS_REST_URL` | Server | Required for `/api` | Distributed rate limiting |
+| `UPSTASH_REDIS_REST_TOKEN` | Server | Required for `/api` | Upstash Redis authentication |
+
+Both API routes fail closed: if server authentication or the rate limiter is not configured, they return `503` and the client falls back to the curated question bank instead of calling a paid AI provider anonymously.
 
 </details>
 

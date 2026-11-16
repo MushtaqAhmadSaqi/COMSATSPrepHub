@@ -175,8 +175,13 @@ export default function PaperView({
   };
 
   const handleSaveNote = () => {
-    savePaperNote(paperKey, noteText);
-    toast.success('Personal study notes saved!');
+    if (!paperKey) {
+      toast.error('Notes are unavailable for this paper.');
+      return;
+    }
+    const saved = savePaperNote(paperKey, noteText);
+    if (saved) toast.success('Personal study notes saved!');
+    else toast.error('Could not save notes — browser storage is full or unavailable.');
   };
 
   const handleQuizFromPaper = () => {
@@ -192,10 +197,10 @@ export default function PaperView({
     }
   };
 
-  const handleReportSubmit = (e) => {
+  const handleReportSubmit = async (e) => {
     e.preventDefault();
     if (!reportText.trim()) return;
-    addModerationSubmission({
+    const { sync } = addModerationSubmission({
       type: 'report',
       subjectCode: paper.subjectCode || 'GENERAL',
       title: `Issue Report: ${paper.title}`,
@@ -203,7 +208,14 @@ export default function PaperView({
     });
     setReportText('');
     setReportModalOpen(false);
-    toast.success('Thank you! Your report was sent to the moderation team.');
+    const result = await sync;
+    if (result.ok) {
+      toast.success('Thank you! Your report is in the moderation queue.');
+    } else {
+      toast.error(
+        'We could not reach the server, so your report was only saved in this browser. Please retry or email us directly.'
+      );
+    }
   };
 
   if (!authReady) {
@@ -246,6 +258,11 @@ export default function PaperView({
     paper.totalMarks !== ''
       ? `${paper.totalMarks} Marks`
       : 'Not specified';
+
+  const isSamplePaper =
+    Boolean(paper.isSample) || String(paper.id || '').startsWith('fallback-');
+  const usesCuratedQuestions =
+    questions.length > 0 && questions.every((q) => q?.source === 'curated');
 
   const breadcrumbItems = [
     {
@@ -448,6 +465,26 @@ export default function PaperView({
               <span>{paper.semester || 'Not specified'}</span>
             </div>
           </div>
+
+          {(isSamplePaper || usesCuratedQuestions) && (
+            <div className="paperview-provenance" role="note">
+              <span className="material-symbols-outlined" aria-hidden="true">info</span>
+              <div>
+                {isSamplePaper && (
+                  <p>
+                    <strong>Sample practice paper.</strong> This set is generated for practice and is
+                    not an official COMSATS examination.
+                  </p>
+                )}
+                {usesCuratedQuestions && (
+                  <p>
+                    <strong>Curated practice questions.</strong> These questions come from the practice
+                    bank and are not taken from this specific examination paper.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Safe PDF embed */}

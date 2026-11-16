@@ -8,20 +8,22 @@ const catalogByCode = new Map(
 );
 
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const SUBJECTS_FALLBACK_TTL_MS = 30 * 1000;
 const memoryCache = new Map();
+let subjectsRequest = null;
 
 function getCached(key) {
   const entry = memoryCache.get(key);
   if (!entry) return null;
-  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+  if (Date.now() - entry.timestamp >= entry.ttl) {
     memoryCache.delete(key);
     return null;
   }
   return entry.data;
 }
 
-function setCached(key, data) {
-  memoryCache.set(key, { timestamp: Date.now(), data });
+function setCached(key, data, ttl = CACHE_TTL_MS) {
+  memoryCache.set(key, { timestamp: Date.now(), data, ttl });
 }
 
 export function clearPapersCache() {
@@ -54,13 +56,25 @@ export async function fetchSubjectsFromSupabase() {
     return DEFAULT_SUBJECTS;
   }
 
+  if (subjectsRequest) return subjectsRequest;
+  subjectsRequest = loadSubjectsFromSupabase();
+  try {
+    return await subjectsRequest;
+  } finally {
+    subjectsRequest = null;
+  }
+}
+
+async function loadSubjectsFromSupabase() {
   try {
     const { data, error } = await supabase
       .from('past_papers')
-      .select('subject_code, subject_name');
+      .select('subject_code, subject_name')
+      .retry(false);
 
     if (error) {
       logger.warn('papersService.fetchSubjects', error.message);
+      setCached('subjects_all', DEFAULT_SUBJECTS, SUBJECTS_FALLBACK_TTL_MS);
       return DEFAULT_SUBJECTS;
     }
 
@@ -105,6 +119,7 @@ export async function fetchSubjectsFromSupabase() {
     return result;
   } catch (err) {
     logger.warn('papersService.fetchSubjects', err?.message || err);
+    setCached('subjects_all', DEFAULT_SUBJECTS, SUBJECTS_FALLBACK_TTL_MS);
     return DEFAULT_SUBJECTS;
   }
 }
@@ -112,44 +127,22 @@ export async function fetchSubjectsFromSupabase() {
 function buildFallbackPapers(subjectCode, subjectName) {
   const code = String(subjectCode || 'CSC211').trim().toUpperCase();
   const name = String(subjectName || catalogByCode.get(code)?.name || 'Course').trim();
-  return [
-    {
-      id: `fallback-${code.toLowerCase()}-terminal-2024`,
-      title: `${name} — Terminal Examination (Spring 2024)`,
-      term: 'Terminal',
-      year: 2024,
-      semester: 'Spring 2024',
-      file_url: null,
-      subjectCode: code,
-      subjectName: name,
-      totalMarks: 50,
-      instructorName: 'COMSATS Faculty'
-    },
-    {
-      id: `fallback-${code.toLowerCase()}-midterm-2024`,
-      title: `${name} — Midterm Examination (Spring 2024)`,
-      term: 'Midterm',
-      year: 2024,
-      semester: 'Spring 2024',
-      file_url: null,
-      subjectCode: code,
-      subjectName: name,
-      totalMarks: 25,
-      instructorName: 'COMSATS Faculty'
-    },
-    {
-      id: `fallback-${code.toLowerCase()}-terminal-2023`,
-      title: `${name} — Terminal Examination (Fall 2023)`,
-      term: 'Terminal',
-      year: 2023,
-      semester: 'Fall 2023',
-      file_url: null,
-      subjectCode: code,
-      subjectName: name,
-      totalMarks: 50,
-      instructorName: 'COMSATS Faculty'
-    }
-  ];
+  // These are clearly-labelled practice sets, never an imitation of a real exam.
+  // Ids are kept stable so existing bookmarks still resolve.
+  const sample = (idSuffix, label) => ({
+    id: `fallback-${code.toLowerCase()}-${idSuffix}`,
+    title: `${name} — Sample Practice Paper ${label}`,
+    term: 'Sample',
+    year: null,
+    semester: '',
+    file_url: null,
+    subjectCode: code,
+    subjectName: name,
+    totalMarks: null,
+    instructorName: '',
+    isSample: true
+  });
+  return [sample('terminal-2024', 'A'), sample('midterm-2024', 'B'), sample('terminal-2023', 'C')];
 }
 
 /**

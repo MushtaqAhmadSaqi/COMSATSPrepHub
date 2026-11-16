@@ -11,7 +11,7 @@ const SECTIONS = [
   {
     icon: 'shield_lock',
     title: '2. Privacy Policy & Minimal Data Handling',
-    body: 'We collect only the minimum information required to provide your study workspace: (a) if you use Guest Mode, your quiz history, bookmarks, flashcards, and GPA calculations stay locally in your browser (localStorage/sessionStorage under `pph_*` keys) and are never sent to our servers; (b) if you create a Supabase account, your email address, display name, and synced study progress are stored in our Row-Level-Security (RLS) protected database where only you can read or modify your rows; (c) AI quiz generation sends only the sanitized course/topic name to our server endpoint (`/api/generate-quiz`) and never transmits your personal identity or email to AI providers. We never sell or rent student data.'
+    body: 'We collect only the minimum information required to provide your study workspace: (a) if you use Guest Mode, your quiz history, bookmarks, flashcards, and GPA calculations stay locally in your browser (localStorage/sessionStorage under `pph_*` keys) and are never sent to our servers; (b) if you create a Supabase account, your email address and display name are stored in our Row-Level-Security (RLS) protected database, and your study activity feed is synced there so only you can read or delete your rows — bookmarks, notes, flashcards, GPA plans, and exam countdowns remain in your browser only; (c) AI quiz generation sends only the sanitized course/topic name to our server endpoint (`/api/generate-quiz`) and never transmits your personal identity or email to AI providers. We never sell or rent student data.'
   },
   {
     icon: 'cookie',

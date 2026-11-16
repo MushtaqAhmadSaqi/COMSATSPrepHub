@@ -70,16 +70,23 @@ export default function Upload() {
     if (submitting) return;
     setSubmitting(true);
 
-    setTimeout(() => {
-      addModerationSubmission({
+    setTimeout(async () => {
+      const { sync } = addModerationSubmission({
         type: activeTab,
         subjectCode: subjectCode.trim(),
         title: `${subjectCode.trim()} — ${examType.trim()}`,
         contributor: uploaderName.trim() || 'Student Contributor',
         details: activeTab === 'upload' ? selectedFile?.name : requestDetails.trim()
       });
-      setSubmitted(true);
+      const result = await sync;
       setSubmitting(false);
+      if (!result.ok) {
+        toast.error(
+          'We could not reach the server, so this was saved on your device only. Please retry before closing the page.'
+        );
+        return;
+      }
+      setSubmitted(true);
       toast.success(
         activeTab === 'upload'
           ? 'Paper submitted to moderation queue!'

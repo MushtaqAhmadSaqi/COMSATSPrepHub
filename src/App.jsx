@@ -14,7 +14,7 @@ import { SkeletonCard } from './components/ui/Skeleton';
 import { ToastProvider } from './utils/toast';
 import { isAdminUser } from './utils/adminGuard';
 import { updatePageSeo } from './utils/seo';
-import { getStudentPrefs, saveStudentPrefs } from './utils/studyTracker';
+import { getStudentPrefs, saveStudentPrefs, setStudentWorkspaceOwner } from './utils/studyTracker';
 import { DEFAULT_SUBJECTS } from './constants/subjects';
 import { resolveSubjectFromRoute, getRouteSubjectCode, isPasswordRecoveryUrl } from './utils/routeState';
 import { supabase } from './services/supabase';
@@ -235,6 +235,7 @@ export default function App() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
+      setStudentWorkspaceOwner(data?.session?.user?.id || null);
       setUser(data?.session?.user ?? null);
       setAuthReady(true);
       if (data?.session?.user && sessionStorage.getItem('pph_pendingPaper') === 'true') {
@@ -242,10 +243,12 @@ export default function App() {
         window.history.replaceState({ path: 'paper-view' }, '', '#paper-view');
       }
     }).catch(() => {
+      setStudentWorkspaceOwner(null);
       setAuthReady(true);
     });
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setStudentWorkspaceOwner(session?.user?.id || null);
       setUser(session?.user ?? null);
       setAuthReady(true);
       if (event === 'PASSWORD_RECOVERY') {

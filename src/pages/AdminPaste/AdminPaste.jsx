@@ -547,7 +547,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
           targetPaperId = dupInfo.existingId;
           actionTaken = 'replaced';
 
-          // A. Update the existing past_papers record
+          // Update the existing past_papers record
           const { error: updateErr } = await supabase
             .from('past_papers')
             .update({
@@ -564,16 +564,6 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
 
           if (updateErr) {
             throw new Error(`Failed to update paper "${paper.title}": ${ updateErr.message } `);
-          }
-
-          // B. Delete existing questions for this paper
-          const { error: delErr } = await supabase
-            .from('questions')
-            .delete()
-            .eq('paper_id', targetPaperId);
-
-          if (delErr) {
-            throw new Error(`Failed to clear old questions for paper "${paper.title}": ${ delErr.message } `);
           }
         } else {
           // CASE 2: NEW PAPER -> INSERT IT
@@ -607,24 +597,31 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
           actionTaken = 'created';
         }
 
-        // C. Insert the new questions
-        if (paper.questions.length > 0) {
-          const formattedQuestions = paper.questions.map((q) => ({
-            paper_id: targetPaperId,
-            question_number: q.question_number,
-            question_text: q.question_text,
-            model_answer: q.model_answer || null,
-            marks: q.marks,
-            clo: q.clo
-          }));
+        // Replace questions atomically (old rows are only removed once the new
+        // rows are guaranteed to insert inside the same transaction).
+        const formattedQuestions = paper.questions.map((q) => ({
+          question_number: q.question_number,
+          question_text: q.question_text,
+          model_answer: q.model_answer || null,
+          marks: q.marks,
+          clo: q.clo
+        }));
 
-          const { error: qErr } = await supabase
-            .from('questions')
-            .insert(formattedQuestions);
+        const { error: qErr } = await supabase.rpc('replace_paper_questions', {
+          p_paper_id: targetPaperId,
+          p_questions: formattedQuestions
+        });
 
-          if (qErr) {
-            throw new Error(`Paper record was saved, but question insertion failed: ${ qErr.message } `);
+        if (qErr) {
+          if (actionTaken === 'created') {
+            await supabase.from('past_papers').delete().eq('id', targetPaperId);
           }
+          const isRls = qErr.code === '42501' || qErr.message?.includes('row-level security');
+          throw new Error(
+            isRls
+              ? `Supabase Row Level Security(RLS) blocked the question replacement for "${paper.title}". Apply the latest migration and confirm your user is an admin.`
+              : `Failed to save questions for paper "${paper.title}": ${ qErr.message }`
+          );
         }
 
         results.push({

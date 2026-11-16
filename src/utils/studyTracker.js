@@ -10,6 +10,83 @@ const EXAMS_KEY = 'pph_exam_countdowns';
 const PREFS_KEY = 'pph_student_prefs';
 const SUBMISSIONS_KEY = 'pph_moderation_queue';
 const GPA_HISTORY_KEY = 'pph_gpa_semesters';
+const WORKSPACE_OWNER_KEY = 'pph_workspace_owner';
+
+const WORKSPACE_KEYS = [
+  STORAGE_KEY,
+  BOOKMARKS_KEY,
+  NOTES_KEY,
+  FLASHCARDS_KEY,
+  DAILY_KEY,
+  EXAMS_KEY,
+  PREFS_KEY,
+  SUBMISSIONS_KEY,
+  GPA_HISTORY_KEY
+];
+
+function readRaw(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeRaw(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // quota exceeded
+  }
+}
+
+function removeRaw(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // ignore
+  }
+}
+
+function archiveKey(owner, key) {
+  return `pph:archive:${owner}:${key}`;
+}
+
+function getWorkspaceOwner() {
+  return readRaw(WORKSPACE_OWNER_KEY);
+}
+
+/**
+ * Switches the local study workspace to the given account so two accounts on
+ * the same browser never read each other's history, bookmarks, or notes.
+ * The previous owner's data is archived (not deleted) and restored when that
+ * owner signs in again.
+ */
+export function setStudentWorkspaceOwner(userId) {
+  const nextOwner = userId ? `user:${userId}` : 'guest';
+  const currentOwner = getWorkspaceOwner();
+  if (currentOwner === nextOwner) return false;
+
+  if (currentOwner) {
+    for (const key of WORKSPACE_KEYS) {
+      const value = readRaw(key);
+      if (value === null) continue;
+      writeRaw(archiveKey(currentOwner, key), value);
+      removeRaw(key);
+    }
+    for (const key of WORKSPACE_KEYS) {
+      const archived = readRaw(archiveKey(nextOwner, key));
+      if (archived !== null) writeRaw(key, archived);
+    }
+  }
+
+  writeRaw(WORKSPACE_OWNER_KEY, nextOwner);
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('pph:workspace-owner-changed', { detail: { owner: nextOwner } }));
+  }
+  return true;
+}
 
 function safeReadJson(key, fallback) {
   try {
@@ -586,22 +663,35 @@ export function addModerationSubmission(entry) {
   const next = [item, ...current].slice(0, 50);
   safeWriteJson(SUBMISSIONS_KEY, next);
 
-  if (isSupabaseConfigured) {
-    supabase
-      .from('paper_submissions')
-      .insert({
-        type: item.type,
-        subject_code: item.subjectCode,
-        title: item.title,
-        contributor: item.contributor,
-        details: item.details,
-        status: 'pending'
-      })
-      .then(() => {})
-      .catch(() => {});
-  }
+  const sync = isSupabaseConfigured
+    ? syncSubmissionToSupabase(item)
+    : Promise.resolve({ ok: false, reason: 'unconfigured' });
 
-  return item;
+  return { item, sync };
+}
+
+async function syncSubmissionToSupabase(item) {
+  try {
+    const { data } = await supabase.auth.getSession();
+    const userId = data?.session?.user?.id ?? null;
+    const { error } = await supabase.from('paper_submissions').insert({
+      user_id: userId,
+      type: item.type,
+      subject_code: item.subjectCode,
+      title: item.title,
+      contributor: item.contributor,
+      details: item.details,
+      status: 'pending'
+    });
+    if (error) {
+      logger.warn('studyTracker.submitModeration', error.message);
+      return { ok: false, reason: 'server', message: error.message };
+    }
+    return { ok: true };
+  } catch (error) {
+    logger.warn('studyTracker.submitModeration', error);
+    return { ok: false, reason: 'network' };
+  }
 }
 
 export function updateModerationSubmissionStatus(id, status) {
@@ -631,22 +721,30 @@ export function exportAllStudentData() {
 }
 
 export function clearAllStudentData() {
-  const keys = [
-    STORAGE_KEY,
-    BOOKMARKS_KEY,
-    NOTES_KEY,
-    FLASHCARDS_KEY,
-    DAILY_KEY,
-    EXAMS_KEY,
-    PREFS_KEY,
-    SUBMISSIONS_KEY,
-    GPA_HISTORY_KEY
-  ];
-  keys.forEach((k) => {
-    try {
-      localStorage.removeItem(k);
-    } catch {
-      // ignore
+  WORKSPACE_KEYS.forEach((k) => removeRaw(k));
+
+  const owner = getWorkspaceOwner();
+  if (owner) {
+    WORKSPACE_KEYS.forEach((k) => removeRaw(archiveKey(owner, k)));
+  }
+}
+
+export async function clearCloudStudyActivity() {
+  if (!isSupabaseConfigured) return { ok: false, reason: 'unconfigured' };
+
+  try {
+    const { data } = await supabase.auth.getSession();
+    const userId = data?.session?.user?.id;
+    if (!userId) return { ok: false, reason: 'guest' };
+
+    const { error } = await supabase.from('user_activity').delete().eq('user_id', userId);
+    if (error) {
+      logger.warn('studyTracker.clearCloudStudyActivity', error.message);
+      return { ok: false, reason: 'server' };
     }
-  });
+    return { ok: true };
+  } catch (error) {
+    logger.warn('studyTracker.clearCloudStudyActivity', error);
+    return { ok: false, reason: 'network' };
+  }
 }
