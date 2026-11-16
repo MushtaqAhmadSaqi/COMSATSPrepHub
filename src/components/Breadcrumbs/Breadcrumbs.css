@@ -30,6 +30,9 @@
 }
 
 .breadcrumbs-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
   background: transparent;
   border: none;
   padding: 0;
