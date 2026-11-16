@@ -1,5 +1,5 @@
 import React, { useId, useRef, useState } from 'react';
-import { GRADING_SCALE, calcSessionalCourseResult } from '../../services/gpaEngine';
+import { GRADING_SCALE, calcSessionalCourseResult, COURSE_CREDIT_MIN, COURSE_CREDIT_MAX, isValidCourseCredits } from '../../services/gpaEngine';
 import { getSemesterGpaHistory, saveSemesterGpaEntry } from '../../utils/studyTracker';
 import { useToast } from '../../utils/toast';
 import './GpaCalculator.css';
@@ -77,10 +77,7 @@ export default function GpaCalculator() {
     const grade = GRADING_SCALE.find((item) => item.letter === course.grade);
     const oldGradeInfo = GRADING_SCALE.find((item) => item.letter === course.oldGrade);
 
-    const validCredits =
-      credits !== null &&
-      Number.isInteger(credits) &&
-      credits > 0;
+    const validCredits = isValidCourseCredits(credits);
 
     return {
       ...course,
@@ -324,8 +321,8 @@ export default function GpaCalculator() {
                         <input
                           id={`${rowId}-credits`}
                           type="number"
-                          min="1"
-                          max="6"
+                          min={COURSE_CREDIT_MIN}
+                          max={COURSE_CREDIT_MAX}
                           step="1"
                           inputMode="numeric"
                           value={course.credits}
@@ -646,63 +643,71 @@ export default function GpaCalculator() {
               )}
             </div>
 
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: `repeat(${Math.max(1, semesterHistory.length)}, minmax(48px, 1fr))`,
-                gap: '0.75rem',
-                alignItems: 'end',
-                height: '130px',
-                padding: '1rem 0.5rem 0',
-                borderBottom: '1px solid var(--gw-line)'
-              }}
-            >
-              {semesterHistory.map((item) => {
-                const heightPct = Math.max(12, Math.min(100, Math.round((item.sgpa / 4) * 100)));
-                return (
-                  <div
-                    key={item.id}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      height: '100%',
-                      justifyContent: 'flex-end',
-                      gap: '0.35rem'
-                    }}
-                  >
-                    <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--gw-brand)' }}>
-                      {Number(item.sgpa).toFixed(2)}
-                    </span>
-                    <div
-                      style={{
-                        width: '100%',
-                        maxWidth: '42px',
-                        height: `${heightPct}%`,
-                        background: 'var(--gw-brand)',
-                        borderRadius: '6px 6px 0 0'
-                      }}
-                      title={`${item.label}: ${item.sgpa} SGPA (${item.credits} Cr)`}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: `repeat(${Math.max(1, semesterHistory.length)}, minmax(48px, 1fr))`,
-                gap: '0.75rem',
-                paddingTop: '0.4rem',
-                textAlign: 'center',
-                fontSize: '0.72rem',
-                color: 'var(--gw-muted)'
-              }}
-            >
-              {semesterHistory.map((item) => (
-                <span key={item.id}>{item.label}</span>
-              ))}
-            </div>
+            {semesterHistory.length === 0 ? (
+              <p style={{ color: 'var(--gw-muted)', fontSize: '0.875rem', margin: 0 }}>
+                No saved semesters yet. Calculate an SGPA and save it to start your trend.
+              </p>
+            ) : (
+              <>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: `repeat(${Math.max(1, semesterHistory.length)}, minmax(48px, 1fr))`,
+                    gap: '0.75rem',
+                    alignItems: 'end',
+                    height: '130px',
+                    padding: '1rem 0.5rem 0',
+                    borderBottom: '1px solid var(--gw-line)'
+                  }}
+                >
+                  {semesterHistory.map((item) => {
+                    const heightPct = Math.max(12, Math.min(100, Math.round((item.sgpa / 4) * 100)));
+                    return (
+                      <div
+                        key={item.id}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          height: '100%',
+                          justifyContent: 'flex-end',
+                          gap: '0.35rem'
+                        }}
+                      >
+                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--gw-brand)' }}>
+                          {Number(item.sgpa).toFixed(2)}
+                        </span>
+                        <div
+                          style={{
+                            width: '100%',
+                            maxWidth: '42px',
+                            height: `${heightPct}%`,
+                            background: 'var(--gw-brand)',
+                            borderRadius: '6px 6px 0 0'
+                          }}
+                          title={`${item.label}: ${item.sgpa} SGPA (${item.credits} Cr)`}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: `repeat(${Math.max(1, semesterHistory.length)}, minmax(48px, 1fr))`,
+                    gap: '0.75rem',
+                    paddingTop: '0.4rem',
+                    textAlign: 'center',
+                    fontSize: '0.72rem',
+                    color: 'var(--gw-muted)'
+                  }}
+                >
+                  {semesterHistory.map((item) => (
+                    <span key={item.id}>{item.label}</span>
+                  ))}
+                </div>
+              </>
+            )}
           </section>
 
           {/* Internal Course Sessional Marks Estimator */}

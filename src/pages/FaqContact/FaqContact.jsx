@@ -71,6 +71,8 @@ export default function FaqContact() {
               <button
                 type="button"
                 onClick={() => setOpenIdx(openIdx === i ? null : i)}
+                aria-expanded={openIdx === i}
+                aria-controls={`faq-answer-${i}`}
                 style={{
                   width: '100%',
                   padding: '1rem 1.25rem',
@@ -92,7 +94,7 @@ export default function FaqContact() {
                 </span>
               </button>
               {openIdx === i && (
-                <div style={{ padding: '0 1.25rem 1.25rem', color: 'var(--text-subtle)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                <div id={`faq-answer-${i}`} style={{ padding: '0 1.25rem 1.25rem', color: 'var(--text-subtle)', fontSize: '0.9rem', lineHeight: 1.6 }}>
                   {faq.a}
                 </div>
               )}
@@ -116,8 +118,9 @@ export default function FaqContact() {
         ) : (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Name</label>
+              <label htmlFor="contact-name" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Name</label>
               <input
+                id="contact-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -127,8 +130,9 @@ export default function FaqContact() {
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Email</label>
+              <label htmlFor="contact-email" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Email</label>
               <input
+                id="contact-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -138,8 +142,9 @@ export default function FaqContact() {
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Message</label>
+              <label htmlFor="contact-message" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Message</label>
               <textarea
+                id="contact-message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={4}

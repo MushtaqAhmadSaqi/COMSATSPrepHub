@@ -78,7 +78,13 @@ export default function CommandPalette({
       return;
     }
 
-    if (results.length === 0) return;
+    if (results.length === 0) {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+      return;
+    }
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();

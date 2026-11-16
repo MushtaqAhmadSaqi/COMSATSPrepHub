@@ -16,6 +16,7 @@ import { isAdminUser } from './utils/adminGuard';
 import { updatePageSeo } from './utils/seo';
 import { getStudentPrefs, saveStudentPrefs } from './utils/studyTracker';
 import { DEFAULT_SUBJECTS } from './constants/subjects';
+import { resolveSubjectFromRoute, getRouteSubjectCode, isPasswordRecoveryUrl } from './utils/routeState';
 import { supabase } from './services/supabase';
 
 import Home from './pages/Home/Home';
@@ -151,14 +152,14 @@ export default function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isCmdPaletteOpen, setIsCmdPaletteOpen] = useState(false);
   const [pendingPaper, setPendingPaper] = useState(null);
+  const [passwordRecovery, setPasswordRecovery] = useState(() => (
+    typeof window !== 'undefined' && isPasswordRecoveryUrl(window.location.hash, window.location.search)
+  ));
 
   const [selectedSubject, setSelectedSubject] = useState(() => {
     try {
-      const urlCode = getCourseCodeFromLocation();
-      if (urlCode) {
-        const match = DEFAULT_SUBJECTS.find((s) => s.code.toUpperCase() === urlCode);
-        if (match) return match;
-      }
+      const match = resolveSubjectFromRoute(getCourseCodeFromLocation(), DEFAULT_SUBJECTS);
+      if (match) return match;
       const raw = sessionStorage.getItem('pph_selectedSubject');
       const parsed = raw ? JSON.parse(raw) : null;
       return parsed && typeof parsed === 'object' && parsed.code ? parsed : null;
@@ -244,9 +245,13 @@ export default function App() {
       setAuthReady(true);
     });
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
       setAuthReady(true);
+      if (event === 'PASSWORD_RECOVERY') {
+        setPasswordRecovery(true);
+        setActivePath('account');
+      }
       if (session?.user && sessionStorage.getItem('pph_pendingPaper') === 'true') {
         setActivePath('paper-view');
         window.history.replaceState({ path: 'paper-view' }, '', '#paper-view');
@@ -264,17 +269,22 @@ export default function App() {
       const pathFromState = e?.state?.path;
       const pathFromHash = window.location.hash.replace(/^#/, '');
       const targetPath = pathFromState || pathFromHash || 'home';
+      const code = getRouteSubjectCode(e, getCourseCodeFromLocation());
+      const matched = resolveSubjectFromRoute(code, DEFAULT_SUBJECTS);
+      if (matched) setSelectedSubject(matched);
       setActivePath(normalizeRoute(targetPath));
     };
 
-    const urlCode = getCourseCodeFromLocation();
-    if (urlCode) {
-      const matched = DEFAULT_SUBJECTS.find((s) => s.code.toUpperCase() === urlCode);
-      if (matched) setSelectedSubject(matched);
-    }
+    const initialCode = getCourseCodeFromLocation();
+    const initialSubject = resolveSubjectFromRoute(initialCode, DEFAULT_SUBJECTS);
+    if (initialSubject) setSelectedSubject(initialSubject);
+
     const initialHash = window.location.hash.replace(/^#/, '');
     const initialPathname = window.location.pathname.replace(/^\/+|\/+$/g, '');
-    if (initialHash) {
+    if (isPasswordRecoveryUrl(window.location.hash, window.location.search)) {
+      setPasswordRecovery(true);
+      setActivePath('account');
+    } else if (initialHash) {
       setActivePath(normalizeRoute(initialHash));
     } else if (initialPathname) {
       setActivePath(normalizeRoute(initialPathname));
@@ -396,6 +406,11 @@ export default function App() {
             user={user}
             onNavigate={handleNavigate}
             onOpenAuth={() => setIsAuthOpen(true)}
+            passwordRecovery={passwordRecovery}
+            onPasswordUpdated={() => {
+              setPasswordRecovery(false);
+              window.history.replaceState({ path: 'account' }, '', '#account');
+            }}
           />
         );
       case 'upload':
@@ -496,7 +511,16 @@ export default function App() {
     <ToastProvider>
       <div className="app-container">
         {/* Accessibility: skip-to-content link */}
-        <a href="#main-content" className="skip-link">Skip to content</a>
+        <a
+          href="#main-content"
+          className="skip-link"
+          onClick={(event) => {
+            event.preventDefault();
+            document.getElementById('main-content')?.focus();
+          }}
+        >
+          Skip to content
+        </a>
 
         <OfflineBanner />
 
@@ -512,7 +536,7 @@ export default function App() {
           onOpenCommandPalette={() => setIsCmdPaletteOpen(true)}
         />
 
-        <main className="main-content" id="main-content">
+        <main className="main-content" id="main-content" tabIndex={-1}>
           <ErrorBoundary>
             <Suspense fallback={<RouteLoadingFallback />}>
               <AnimatePresence mode="wait">

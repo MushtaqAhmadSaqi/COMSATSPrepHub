@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import {
   getDailyChallengeStatus,
   recordDailyChallengeCompletion,
   getFlashcardsQueue,
+  getDueFlashcards,
   reviewFlashcard,
   addCustomFlashcard
 } from '../../utils/studyTracker';
@@ -103,12 +104,21 @@ export default function StudyHub() {
   const [cards, setCards] = useState(() => getFlashcardsQueue());
   const [cardIndex, setCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
   const [newCourse, setNewCourse] = useState('CSC211');
   const [newFront, setNewFront] = useState('');
   const [newBack, setNewBack] = useState('');
 
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const dueCards = getDueFlashcards(cards, now);
+  const safeCardIndex = dueCards.length > 0 ? Math.min(cardIndex, dueCards.length - 1) : 0;
+
   const currentQ = SAMPLE_DAILY_QUESTIONS[qIndex];
-  const currentCard = cards[cardIndex];
+  const currentCard = dueCards[safeCardIndex] || null;
 
   const handleOptionSelect = (idx) => {
     if (selectedOpt !== null) return;
@@ -134,12 +144,15 @@ export default function StudyHub() {
     if (!currentCard) return;
     const updated = reviewFlashcard(currentCard.id, rating);
     setCards(updated);
+    setNow(Date.now());
     setFlipped(false);
-    if (cardIndex + 1 < updated.length) {
-      setCardIndex((i) => i + 1);
-    } else {
+
+    const remainingDue = getDueFlashcards(updated, Date.now());
+    if (remainingDue.length === 0) {
       setCardIndex(0);
-      toast.success('Completed flashcard review round!');
+      toast.success('All caught up! No flashcards are due right now.');
+    } else {
+      setCardIndex((i) => Math.min(i, remainingDue.length - 1));
     }
   };
 
@@ -156,6 +169,7 @@ export default function StudyHub() {
     });
     setCards(updated);
     setCardIndex(0);
+    setNow(Date.now());
     setFlipped(false);
     setNewFront('');
     setNewBack('');
@@ -190,7 +204,7 @@ export default function StudyHub() {
           className={`study-hub-tab ${activeTab === 'flashcards' ? 'active' : ''}`}
         >
           <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">style</span>
-          Leitner Flashcards ({cards.length})
+          Leitner Flashcards ({dueCards.length} due)
         </button>
         <button
           type="button"
@@ -289,7 +303,7 @@ export default function StudyHub() {
             <div>
               <div className="flashcard-meta-row">
                 <span className="leitner-badge">
-                  {currentCard.subjectCode} · Card {cardIndex + 1} of {cards.length}
+                  {currentCard.subjectCode} · Card {safeCardIndex + 1} of {dueCards.length}
                 </span>
                 <span className="leitner-badge">
                   <span className="material-symbols-outlined" style={{ fontSize: '15px' }} aria-hidden="true">inventory_2</span>
@@ -359,7 +373,9 @@ export default function StudyHub() {
               )}
             </div>
           ) : (
-            <p style={{ textAlign: 'center' }}>No flashcards in queue.</p>
+            <p style={{ textAlign: 'center' }}>
+              All caught up! No flashcards are due right now. Cards return when their review interval elapses.
+            </p>
           )}
 
           {/* Create Custom Flashcard */}

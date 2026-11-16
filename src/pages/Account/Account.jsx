@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
 import { exportAllStudentData, clearAllStudentData, getStudentPrefs, saveStudentPrefs } from '../../utils/studyTracker';
 import { getAnalyticsConsent, setAnalyticsConsent } from '../../utils/analytics';
+import { updatePassword, validatePasswordStrength } from '../../services/auth';
 import { toast } from '../../utils/toast';
 
-export default function Account({ user, onOpenAuth = () => {} }) {
+export default function Account({
+  user,
+  onOpenAuth = () => {},
+  passwordRecovery = false,
+  onPasswordUpdated = () => {}
+}) {
   const [prefs, setPrefs] = useState(() => getStudentPrefs());
   const [analyticsConsent, setConsentState] = useState(() => getAnalyticsConsent() || 'declined');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [updatingPassword, setUpdatingPassword] = useState(false);
 
   const handleExport = () => {
     const data = exportAllStudentData();
@@ -38,6 +47,35 @@ export default function Account({ user, onOpenAuth = () => {} }) {
     setAnalyticsConsent(next);
     setConsentState(next);
     toast.info(next === 'accepted' ? 'Anonymous analytics enabled.' : 'Analytics disabled (essential storage only).');
+  };
+
+  const handleSetNewPassword = async (e) => {
+    e.preventDefault();
+    if (updatingPassword) return;
+
+    const check = validatePasswordStrength(newPassword);
+    if (!check.valid) {
+      toast.error(check.error);
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('The two passwords do not match.');
+      return;
+    }
+
+    setUpdatingPassword(true);
+    const res = await updatePassword(newPassword);
+    setUpdatingPassword(false);
+
+    if (!res.ok) {
+      toast.error(res.error);
+      return;
+    }
+
+    setNewPassword('');
+    setConfirmPassword('');
+    toast.success('Password updated. Use your new password the next time you sign in.');
+    onPasswordUpdated();
   };
 
   return (
@@ -85,6 +123,96 @@ export default function Account({ user, onOpenAuth = () => {} }) {
           </div>
         )}
       </div>
+
+      {passwordRecovery && (
+        <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: 'var(--radius-xl)', border: '2px solid var(--brand)', boxShadow: 'var(--shadow-2)', marginBottom: '1.5rem' }}>
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span className="material-symbols-outlined" style={{ color: 'var(--brand)' }} aria-hidden="true">lock_reset</span>
+            Set a New Password
+          </h2>
+
+          {user ? (
+            <form onSubmit={handleSetNewPassword} noValidate>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-subtle)', marginBottom: '1rem' }}>
+                You reached this page from a password reset link. Choose a new password to finish recovery.
+              </p>
+
+              <label htmlFor="account-new-password" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.35rem' }}>
+                New password
+              </label>
+              <input
+                id="account-new-password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                autoComplete="new-password"
+                required
+                style={{
+                  minHeight: '44px',
+                  width: '100%',
+                  maxWidth: '360px',
+                  padding: '0.625rem 1rem',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-strong)',
+                  background: 'var(--surface-2)',
+                  color: 'var(--text)',
+                  fontSize: '1rem',
+                  marginBottom: '0.85rem'
+                }}
+              />
+
+              <label htmlFor="account-confirm-password" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.35rem' }}>
+                Confirm new password
+              </label>
+              <input
+                id="account-confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                autoComplete="new-password"
+                required
+                style={{
+                  minHeight: '44px',
+                  width: '100%',
+                  maxWidth: '360px',
+                  padding: '0.625rem 1rem',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-strong)',
+                  background: 'var(--surface-2)',
+                  color: 'var(--text)',
+                  fontSize: '1rem',
+                  marginBottom: '0.5rem'
+                }}
+              />
+
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-subtle)', marginBottom: '1rem' }}>
+                Use 8+ characters with uppercase, lowercase, and a number.
+              </p>
+
+              <button
+                type="submit"
+                disabled={updatingPassword}
+                style={{
+                  minHeight: '44px',
+                  padding: '0.625rem 1.25rem',
+                  borderRadius: '9999px',
+                  background: 'var(--brand)',
+                  color: '#fff',
+                  border: 'none',
+                  cursor: updatingPassword ? 'default' : 'pointer',
+                  fontWeight: 600
+                }}
+              >
+                {updatingPassword ? 'Updating…' : 'Update Password'}
+              </button>
+            </form>
+          ) : (
+            <p style={{ fontSize: '0.875rem', color: 'var(--danger)' }} role="alert">
+              This password reset link is invalid or has expired. Request a new reset email from the sign-in page.
+            </p>
+          )}
+        </div>
+      )}
 
       <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-2)', marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

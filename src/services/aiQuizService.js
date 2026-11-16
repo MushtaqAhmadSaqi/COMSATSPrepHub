@@ -98,5 +98,8 @@ export async function generateQuizWithGemini({
   }
 
   // Graceful fallback to built-in COMSATS question bank when offline or no server API key is configured
-  return getOfflineQuestions(subject, subjectCode, questionCount, difficulty);
+  return getOfflineQuestions(subject, subjectCode, questionCount, difficulty).map((question) => ({
+    ...question,
+    provider: 'Curated Bank'
+  }));
 }

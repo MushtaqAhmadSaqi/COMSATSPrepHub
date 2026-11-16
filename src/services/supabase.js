@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/logger.js';
 
 // Read exclusively from environment variables — never hardcode project credentials in source code
 const SUPABASE_URL = String(import.meta.env?.VITE_SUPABASE_URL || '').trim();

@@ -4,7 +4,8 @@ import {
   signUpWithEmail,
   signInWithGoogle,
   requestPasswordReset,
-  validatePasswordStrength
+  validatePasswordStrength,
+  getSignupOutcome
 } from '../../services/auth';
 import { useToast } from '../../utils/toast';
 import '../../components/AuthModal/AuthModal.css';
@@ -68,13 +69,19 @@ export default function Auth({ onLoginSuccess = () => {} }) {
     if (isSignUp) {
       const res = await signUpWithEmail(fullName, email, password);
       setLoading(false);
-      if (!res.ok) {
-        setErrorMsg(res.error);
-        toast.error(res.error);
+      const outcome = getSignupOutcome(res);
+      if (outcome.kind === 'error') {
+        setErrorMsg(outcome.error);
+        toast.error(outcome.error);
+      } else if (outcome.kind === 'confirm-email') {
+        setSuccessMsg('Account created. Check your email inbox to confirm your address, then sign in.');
+        toast.info('Confirm your email address to finish signing in.');
+        setMode('login');
+        setPassword('');
       } else {
         setSuccessMsg('Account created! Signing you in...');
         toast.success('Account created successfully!');
-        if (res.user) onLoginSuccess(res.user);
+        if (outcome.user) onLoginSuccess(outcome.user);
       }
     } else {
       const res = await signInWithEmail(email, password);

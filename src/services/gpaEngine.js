@@ -21,6 +21,17 @@ export const DEFAULT_SCHEME = {
   lab: { assignmentWeight: 25, midWeight: 25, finalWeight: 50 }
 };
 
+export const COURSE_CREDIT_MIN = 1;
+export const COURSE_CREDIT_MAX = 6;
+
+export function isValidCourseCredits(credits) {
+  return (
+    Number.isInteger(credits) &&
+    credits >= COURSE_CREDIT_MIN &&
+    credits <= COURSE_CREDIT_MAX
+  );
+}
+
 function toNum(value, fallback = 0) {
   if (value === '' || value == null) return fallback;
   const num = Number(value);

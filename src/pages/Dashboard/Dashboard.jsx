@@ -68,6 +68,7 @@ export default function Dashboard({
   const [liveActivity, setLiveActivity] = useState(() => (
     activity.length > 0 ? activity : getRecentActivity()
   ));
+  const [dataVersion, setDataVersion] = useState(0);
 
   const prefs = useMemo(() => getStudentPrefs(), []);
   const fullName = user?.user_metadata?.full_name?.trim();
@@ -76,11 +77,11 @@ export default function Dashboard({
     user?.email?.split('@')[0] ||
     'Student';
 
-  const localStats = stats || getStudyStats();
+  const localStats = useMemo(() => stats || getStudyStats(), [stats, dataVersion]);
   const localActivity = liveActivity;
-  const bookmarkedPapers = useMemo(() => getBookmarkedPapers(), []);
-  const weakTopics = useMemo(() => getWeakTopicsSummary(), []);
-  const quizHistory = useMemo(() => getQuizHistory(6), []);
+  const bookmarkedPapers = useMemo(() => getBookmarkedPapers(), [dataVersion]);
+  const weakTopics = useMemo(() => getWeakTopicsSummary(), [dataVersion]);
+  const quizHistory = useMemo(() => getQuizHistory(6), [dataVersion]);
 
   const hasRealHistory =
     (localStats?.quizzesAttempted || 0) > 0 ||
@@ -97,6 +98,7 @@ export default function Dashboard({
           { ...event.detail, time: new Date(event.detail.timestamp).toLocaleDateString() },
           ...current.filter((item) => item.id !== event.detail.id)
         ].slice(0, 12));
+        setDataVersion((version) => version + 1);
       }
     };
 
@@ -127,6 +129,7 @@ export default function Dashboard({
         const remoteItems = (data || []).map(mapRemoteActivity);
         mergeRemoteActivity(remoteItems);
         setLiveActivity(remoteItems);
+        setDataVersion((version) => version + 1);
       }
     }
 
@@ -145,10 +148,12 @@ export default function Dashboard({
           },
           (payload) => {
             const item = mapRemoteActivity(payload.new);
+            mergeRemoteActivity([item]);
             setLiveActivity((current) => [
               item,
               ...current.filter((existing) => existing.id !== item.id)
             ].slice(0, 12));
+            setDataVersion((version) => version + 1);
           }
         )
         .subscribe();

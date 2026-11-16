@@ -1,6 +1,6 @@
-import { supabase } from './supabase';
-import { isSafeRedirectUrl } from '../utils/sanitize';
-import { logger } from '../utils/logger';
+import { supabase } from './supabase.js';
+import { isSafeRedirectUrl } from '../utils/sanitize.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * Validates password strength:
@@ -50,6 +50,9 @@ function getReadableAuthError(error, mode = 'login') {
   if (raw.includes('unable to validate email') || raw.includes('invalid email')) {
     return 'Please enter a valid email address.';
   }
+  if (raw.includes('auth session missing') || raw.includes('session missing')) {
+    return 'Your password reset link has expired or was already used. Please request a new reset email.';
+  }
   if (raw.includes('supabase is not configured')) {
     return 'Authentication service is not configured in this environment.';
   }
@@ -94,7 +97,12 @@ export async function signUpWithEmail(fullName, email, password, extraMeta = {})
       }
     });
     if (error) return { ok: false, error: getReadableAuthError(error, 'signup') };
-    return { ok: true, session: data.session, user: data.user };
+    return {
+      ok: true,
+      session: data.session,
+      user: data.user,
+      requiresEmailConfirmation: !data.session
+    };
   } catch (err) {
     logger.error('auth.signUpWithEmail', err);
     return { ok: false, error: getReadableAuthError(err, 'signup') };
@@ -148,5 +156,34 @@ export async function requestPasswordReset(email) {
       message: 'If an account exists for that email, a password reset link has been sent.'
     };
   }
+}
+
+export async function updatePassword(newPassword) {
+  const pwdCheck = validatePasswordStrength(newPassword);
+  if (!pwdCheck.valid) {
+    return { ok: false, error: pwdCheck.error };
+  }
+
+  try {
+    const { data, error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) return { ok: false, error: getReadableAuthError(error, 'signup') };
+    return { ok: true, user: data?.user ?? null };
+  } catch (err) {
+    logger.error('auth.updatePassword', err);
+    return { ok: false, error: getReadableAuthError(err, 'signup') };
+  }
+}
+
+export function getSignupOutcome(result) {
+  if (!result?.ok) {
+    return {
+      kind: 'error',
+      error: result?.error || 'Could not create account right now. Please try again.'
+    };
+  }
+  if (!result.session) {
+    return { kind: 'confirm-email' };
+  }
+  return { kind: 'signed-in', user: result.user ?? null };
 }
 

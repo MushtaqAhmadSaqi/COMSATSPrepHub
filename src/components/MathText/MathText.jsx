@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import { resolveDisplayMath } from './mathRenderSafety.js';
 import './MathText.css';
 
 // Lazy-load and initialize mermaid with strict security only when a diagram is rendered
@@ -225,6 +226,28 @@ function renderInlineWithMath(rawText, keyPrefix = '') {
 
     return <React.Fragment key={k}>{inlineParts}</React.Fragment>;
   });
+}
+
+/**
+ * Renders display math without ever injecting unparsed source as HTML.
+ */
+function DisplayMath({ html, formula }) {
+  const resolved = resolveDisplayMath({ html, formula });
+
+  if (resolved.mode === 'html') {
+    return (
+      <div
+        className="math-display-container"
+        dangerouslySetInnerHTML={{ __html: resolved.value }}
+      />
+    );
+  }
+
+  return (
+    <div className="math-display-container math-render-fallback">
+      <span className="math-fallback-text">{resolved.value}</span>
+    </div>
+  );
 }
 
 /**
@@ -508,10 +531,10 @@ export default function MathText({ text, className = '' }) {
           flushTable();
           const html = renderKaTeX(formula, true);
           elements.push(
-            <div
+            <DisplayMath
               key={`math-disp-${i}`}
-              className="math-display-container"
-              dangerouslySetInnerHTML={{ __html: html || formula }}
+              html={html}
+              formula={formula}
             />
           );
           i++;
@@ -545,10 +568,10 @@ export default function MathText({ text, className = '' }) {
         const formula = displayBlockMatch[2];
         const html = renderKaTeX(formula, true);
         elements.push(
-          <div
+          <DisplayMath
             key={`math-disp-${i}`}
-            className="math-display-container"
-            dangerouslySetInnerHTML={{ __html: html || formula }}
+            html={html}
+            formula={formula}
           />
         );
         i++;
@@ -560,10 +583,10 @@ export default function MathText({ text, className = '' }) {
         flushList();
         const html = renderKaTeX(trimmed, true);
         elements.push(
-          <div
+          <DisplayMath
             key={`math-raw-env-${i}`}
-            className="math-display-container"
-            dangerouslySetInnerHTML={{ __html: html || trimmed }}
+            html={html}
+            formula={trimmed}
           />
         );
         i++;

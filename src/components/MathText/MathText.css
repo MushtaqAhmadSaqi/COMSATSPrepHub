@@ -35,6 +35,18 @@
   padding: 0.25rem 0;
 }
 
+.math-render-fallback {
+  text-align: left;
+}
+
+.math-fallback-text {
+  display: block;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
 /* Inline Math Tokens ($...$) — prevent horizontal blowout on narrow mobile screens */
 .katex-inline-math,
 .katex-auto-math {

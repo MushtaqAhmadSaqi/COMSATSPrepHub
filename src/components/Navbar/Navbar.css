@@ -397,7 +397,7 @@ html.dark .cmd-trigger-btn {
 
 .mobile-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.125rem;
   width: 100%;
   align-items: center;

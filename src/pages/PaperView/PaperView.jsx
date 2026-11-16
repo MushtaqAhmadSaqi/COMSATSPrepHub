@@ -12,6 +12,7 @@ import {
   addModerationSubmission
 } from '../../utils/studyTracker';
 import { useToast } from '../../utils/toast';
+import { getPaperKey, hasPaperIdentity } from '../../utils/paperSelection';
 import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 import Modal from '../../components/ui/Modal';
 import { SkeletonListItem } from '../../components/ui/Skeleton';
@@ -50,15 +51,7 @@ function MarkdownAnswer({ text }) {
 /* ── Component ──────────────────────────────────────────── */
 
 export default function PaperView({
-  paper = {
-    id: 'default-paper',
-    title: 'Terminal Examination — Fall 2023',
-    term: 'Terminal',
-    year: '2023',
-    file_url: null,
-    subjectName: 'Data Structures & Algorithms',
-    subjectCode: 'CSC211'
-  },
+  paper = null,
   onBack = () => {},
   onNavigate,
   onStartPaperQuiz,
@@ -66,6 +59,8 @@ export default function PaperView({
   authReady = true,
   onRequireAuth = () => {}
 }) {
+  const paperKey = getPaperKey(paper);
+  const hasPaper = hasPaperIdentity(paper);
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -75,19 +70,23 @@ export default function PaperView({
 
   // New interactive controls: zoom, bookmark, personal note, report problem modal
   const [zoomScale, setZoomScale] = useState(1);
-  const [bookmarked, setBookmarked] = useState(() => isPaperBookmarked(paper?.id || paper?.title));
-  const [noteText, setNoteText] = useState(() => getPaperNote(paper?.id || paper?.title));
+  const [bookmarked, setBookmarked] = useState(() => (paperKey ? isPaperBookmarked(paperKey) : false));
+  const [noteText, setNoteText] = useState(() => (paperKey ? getPaperNote(paperKey) : ''));
   const [showNotesPanel, setShowNotesPanel] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportText, setReportText] = useState('');
 
   const toast = useToast();
-  const paperKey = paper?.id || paper?.title || 'default-paper';
 
   const safeFileUrl = isSafeHttpUrl(paper?.file_url) ? paper.file_url.trim() : null;
   const requiresAuthentication = authReady && !user;
 
   useEffect(() => {
+    if (!paperKey) {
+      setBookmarked(false);
+      setNoteText('');
+      return;
+    }
     setBookmarked(isPaperBookmarked(paperKey));
     setNoteText(getPaperNote(paperKey));
   }, [paperKey]);
@@ -95,10 +94,10 @@ export default function PaperView({
 
 
   useEffect(() => {
-    if (user && (paper?.title || paper?.id)) {
+    if (user && hasPaper) {
       recordPaperView(paper);
     }
-  }, [paper, user]);
+  }, [hasPaper, paperKey, user]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -116,7 +115,10 @@ export default function PaperView({
   }, []);
 
   useEffect(() => {
-    if (!authReady) return undefined;
+    if (!authReady || !hasPaper) {
+      setLoading(false);
+      return undefined;
+    }
 
     let cancelled = false;
 
@@ -140,7 +142,7 @@ export default function PaperView({
     return () => {
       cancelled = true;
     };
-  }, [paper, reloadKey, authReady]);
+  }, [hasPaper, paperKey, reloadKey, authReady]);
 
   const toggleAnswer = (id) => {
     setExpandedAnswers((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -204,6 +206,37 @@ export default function PaperView({
     toast.success('Thank you! Your report was sent to the moderation team.');
   };
 
+  if (!authReady) {
+    return (
+      <div className="paperview-container" role="status" aria-live="polite">
+        <div className="paperview-exam-sheet" style={{ padding: '2.5rem 1.5rem' }}>
+          <SkeletonListItem />
+          <SkeletonListItem />
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasPaper) {
+    return (
+      <div className="paperview-container">
+        <div className="paperview-exam-sheet" style={{ padding: '2.5rem 1.5rem', textAlign: 'center' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', color: 'var(--text-subtle)' }} aria-hidden="true">
+            description
+          </span>
+          <h2 style={{ margin: '0.75rem 0 0.5rem', color: 'var(--text)' }}>No paper selected</h2>
+          <p style={{ color: 'var(--text-subtle)', marginBottom: '1.25rem' }}>
+            Choose a course and paper to view its questions and model answers.
+          </p>
+          <button type="button" className="paperview-btn-secondary" onClick={onBack}>
+            <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            Back to papers
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const displaySubject =
     paper.subjectName || paper.subjectCode || 'Past paper';
 
@@ -225,18 +258,6 @@ export default function PaperView({
     { label: displaySubject, onClick: onBack },
     { label: paper.title || 'Paper View' }
   ];
-
-  if (!authReady) {
-    return (
-      <div className="paperview-container" role="status" aria-live="polite">
-        <div className="paperview-exam-sheet" style={{ padding: '2.5rem 1.5rem' }}>
-          <SkeletonListItem />
-          <SkeletonListItem />
-        </div>
-      </div>
-    );
-  }
-
 
   return (
     <div className="paperview-container">

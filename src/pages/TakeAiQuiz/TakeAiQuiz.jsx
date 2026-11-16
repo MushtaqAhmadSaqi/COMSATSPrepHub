@@ -78,7 +78,9 @@ export default function TakeAiQuiz({
             subject: quizParams.topic || 'AI Practice Quiz',
             subjectCode: quizParams.subjectCode || '',
             questionCount: generated.length,
-            provider: generated[0]?.provider || 'Gemini'
+            provider:
+              generated[0]?.provider ||
+              (generated[0]?.isOfflineFallback ? 'Curated Bank' : 'AI')
           });
         }
       } catch (err) {

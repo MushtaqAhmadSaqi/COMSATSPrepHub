@@ -1,5 +1,7 @@
 const CONSENT_KEY = 'pph_analytics_consent';
 let gaInitialized = false;
+let gaMeasurementId = '';
+let gaScriptEl = null;
 
 export function getAnalyticsConsent() {
   try {
@@ -7,6 +9,18 @@ export function getAnalyticsConsent() {
   } catch {
     return null;
   }
+}
+
+export function disableAnalytics() {
+  if (typeof window === 'undefined') return;
+  if (gaMeasurementId) {
+    window[`ga-disable-${gaMeasurementId}`] = true;
+  }
+  if (gaScriptEl?.parentNode) {
+    gaScriptEl.parentNode.removeChild(gaScriptEl);
+  }
+  gaScriptEl = null;
+  gaInitialized = false;
 }
 
 export function setAnalyticsConsent(status) {
@@ -22,6 +36,8 @@ export function setAnalyticsConsent(status) {
 
   if (status === 'accepted') {
     initConsentGatedAnalytics();
+  } else {
+    disableAnalytics();
   }
 }
 
@@ -34,10 +50,14 @@ export function initConsentGatedAnalytics() {
   if (!measurementId || !/^G-[A-Z0-9]+$/i.test(measurementId)) return;
 
   gaInitialized = true;
+  gaMeasurementId = measurementId;
+  window[`ga-disable-${measurementId}`] = false;
+
   const script = document.createElement('script');
   script.async = true;
   script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
   document.head.appendChild(script);
+  gaScriptEl = script;
 
   window.dataLayer = window.dataLayer || [];
   function gtag() {

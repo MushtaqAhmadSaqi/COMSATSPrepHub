@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { fetchSubjectsFromSupabase } from '../../services/papersService';
 import { generateQuizWithGemini } from '../../services/aiQuizService';
 import { recordQuizAttempt, getStudentPrefs } from '../../utils/studyTracker';
+import { canSubmitAnswer, scoreAnswers, getAnswerState } from '../../utils/quizSession';
 import { fireConfetti } from '../../utils/confetti';
 import { useToast } from '../../utils/toast';
 import { SubjectCardSkeleton } from '../../components/ui/Skeleton';
@@ -86,7 +87,6 @@ export default function Quiz() {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [revealed, setRevealed] = useState(false);
-  const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [showHint, setShowHint] = useState(false);
   const [showStepByStep, setShowStepByStep] = useState(false);
@@ -97,6 +97,9 @@ export default function Quiz() {
 
   const toast = useToast();
   const prevStreakRef = useRef(0);
+  const finishedRef = useRef(false);
+  const finishQuizRef = useRef(() => {});
+  const score = scoreAnswers(userAnswers);
 
   const loadSubjects = async () => {
     setSubjectsLoading(true);
@@ -116,21 +119,6 @@ export default function Quiz() {
   }, []);
 
   // Timer countdown when in timed mode
-  useEffect(() => {
-    if (step !== 'playing' || quizMode !== 'timed' || timeLeftSec <= 0) return undefined;
-    const timer = setInterval(() => {
-      setTimeLeftSec((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setStep('finished');
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [step, quizMode, timeLeftSec]);
-
   const filteredSubjects = subjects.filter(
     (s) =>
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -147,12 +135,12 @@ export default function Quiz() {
     setCurrentIdx(0);
     setSelectedOption(null);
     setRevealed(false);
-    setScore(0);
     setStreak(0);
     setShowHint(false);
     setShowStepByStep(false);
     setMarkedForReview({});
     setUserAnswers({});
+    finishedRef.current = false;
     if (quizMode === 'timed') {
       setTimeLeftSec(questionList.length * 45);
     }
@@ -178,7 +166,7 @@ export default function Quiz() {
   };
 
   const handleSubmitAnswer = () => {
-    if (selectedOption === null) return;
+    if (!canSubmitAnswer(userAnswers, currentIdx, selectedOption)) return;
     setRevealed(true);
     const isCorrect = selectedOption === questions[currentIdx].correct;
     setUserAnswers((prev) => ({
@@ -186,9 +174,7 @@ export default function Quiz() {
       [currentIdx]: { selected: selectedOption, isCorrect }
     }));
     if (isCorrect) {
-      const newScore = score + 1;
       const newStreak = streak + 1;
-      setScore(newScore);
       setStreak(newStreak);
       prevStreakRef.current = newStreak;
     } else {
@@ -198,6 +184,9 @@ export default function Quiz() {
   };
 
   const finishQuiz = () => {
+    if (finishedRef.current || questions.length === 0) return;
+    finishedRef.current = true;
+
     const wrongQuestions = questions.filter((_, idx) => !userAnswers[idx]?.isCorrect);
     const pct = Math.round((score / questions.length) * 100);
     recordQuizAttempt({
@@ -214,28 +203,44 @@ export default function Quiz() {
     setStep('finished');
   };
 
+  useEffect(() => {
+    finishQuizRef.current = finishQuiz;
+  });
+
+  useEffect(() => {
+    if (step !== 'playing' || quizMode !== 'timed') return undefined;
+    const timer = setInterval(() => {
+      setTimeLeftSec((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [step, quizMode]);
+
+  useEffect(() => {
+    if (step === 'playing' && quizMode === 'timed' && timeLeftSec === 0) {
+      finishQuizRef.current();
+    }
+  }, [step, quizMode, timeLeftSec]);
+
   const handleNextQuestion = () => {
     if (currentIdx + 1 >= questions.length) {
       finishQuiz();
-    } else {
-      setCurrentIdx(currentIdx + 1);
-      setSelectedOption(null);
-      setRevealed(false);
-      setShowHint(false);
-      setShowStepByStep(false);
+      return;
     }
+
+    const nextIdx = currentIdx + 1;
+    setCurrentIdx(nextIdx);
+    const nextState = getAnswerState(userAnswers, nextIdx);
+    setSelectedOption(nextState.selectedOption);
+    setRevealed(nextState.revealed);
+    setShowHint(false);
+    setShowStepByStep(false);
   };
 
   const handleJumpToQuestion = (idx) => {
     setCurrentIdx(idx);
-    const prevAns = userAnswers[idx];
-    if (prevAns) {
-      setSelectedOption(prevAns.selected);
-      setRevealed(true);
-    } else {
-      setSelectedOption(null);
-      setRevealed(false);
-    }
+    const answerState = getAnswerState(userAnswers, idx);
+    setSelectedOption(answerState.selectedOption);
+    setRevealed(answerState.revealed);
     setShowHint(false);
     setShowStepByStep(false);
   };
@@ -275,10 +280,10 @@ export default function Quiz() {
     setCurrentIdx(0);
     setSelectedOption(null);
     setRevealed(false);
-    setScore(0);
     setStreak(0);
     setShowHint(false);
     setError('');
+    finishedRef.current = false;
   };
 
   useEffect(() => {

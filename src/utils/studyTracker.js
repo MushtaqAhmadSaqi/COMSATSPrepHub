@@ -1,5 +1,6 @@
-import { supabase, isSupabaseConfigured } from '../services/supabase';
-import { logger } from './logger';
+import { supabase, isSupabaseConfigured } from '../services/supabase.js';
+import { logger } from './logger.js';
+import { getAnalyticsConsent } from './analytics.js';
 const STORAGE_KEY = 'pph_study_history';
 const BOOKMARKS_KEY = 'pph_bookmarks';
 const NOTES_KEY = 'pph_paper_notes';
@@ -108,9 +109,23 @@ export function mapRemoteActivity(item) {
 
 export function mergeRemoteActivity(items) {
   const remoteItems = Array.isArray(items) ? items : [];
-  const knownIds = new Set(readHistory().map((item) => item.id));
-  const additions = remoteItems.filter((item) => item?.id && !knownIds.has(item.id));
-  if (additions.length > 0) writeHistory([...additions, ...readHistory()]);
+  const existing = readHistory();
+  const knownIds = new Set(existing.map((item) => item.id));
+  const additions = [];
+
+  for (const item of remoteItems) {
+    if (!item?.id || knownIds.has(item.id)) continue;
+    knownIds.add(item.id);
+    additions.push(item);
+  }
+
+  if (additions.length > 0) {
+    const merged = [...existing, ...additions].sort(
+      (a, b) => (Number(b.timestamp) || 0) - (Number(a.timestamp) || 0)
+    );
+    writeHistory(merged);
+  }
+
   return getRecentActivity();
 }
 
@@ -230,40 +245,39 @@ export function getWeakTopicsSummary() {
     .sort((a, b) => a.averageAccuracy - b.averageAccuracy);
 }
 
-function getStudyStreak() {
+function toDayKey(date) {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+    d.getDate()
+  ).padStart(2, '0')}`;
+}
+
+function dayKeyDaysAgo(daysAgo) {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() - daysAgo);
+  return toDayKey(date);
+}
+
+export function getStudyStreak() {
   const history = readHistory();
   if (history.length === 0) return 0;
 
-  const uniqueDays = Array.from(
-    new Set(
-      history.map((item) => {
-        const d = new Date(item.timestamp);
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
-          d.getDate()
-        ).padStart(2, '0')}`;
-      })
-    )
-  ).sort().reverse();
+  const studiedDays = new Set(history.map((item) => toDayKey(item.timestamp)));
+  let offset = studiedDays.has(dayKeyDaysAgo(0))
+    ? 0
+    : studiedDays.has(dayKeyDaysAgo(1))
+      ? 1
+      : null;
+
+  if (offset === null) return 0;
 
   let streak = 0;
-  const today = new Date();
-  for (let i = 0; i < uniqueDays.length; i++) {
-    const checkDate = new Date(today);
-    checkDate.setDate(today.getDate() - i);
-    const key = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(
-      2,
-      '0'
-    )}-${String(checkDate.getDate()).padStart(2, '0')}`;
-    if (uniqueDays.includes(key)) {
-      streak++;
-    } else if (i === 0) {
-      // Allow streak to persist if studied yesterday
-      continue;
-    } else {
-      break;
-    }
+  while (studiedDays.has(dayKeyDaysAgo(offset))) {
+    streak++;
+    offset++;
   }
-  return Math.max(streak, uniqueDays.length > 0 ? 1 : 0);
+  return streak;
 }
 
 export function getStudyStats() {
@@ -436,6 +450,11 @@ export function getFlashcardsQueue() {
   }));
 }
 
+export function getDueFlashcards(cards, now = Date.now()) {
+  const list = Array.isArray(cards) ? cards : [];
+  return list.filter((card) => !card.nextReview || card.nextReview <= now);
+}
+
 export function reviewFlashcard(cardId, rating = 'good') {
   const list = getFlashcardsQueue();
   const intervalsMs = {
@@ -508,11 +527,7 @@ export function saveExamCountdowns(list) {
 
 /* ── Semester GPA History ── */
 export function getSemesterGpaHistory() {
-  const list = safeReadJson(GPA_HISTORY_KEY, [
-    { id: 'sem-1', label: 'Sem 1', sgpa: 3.18, credits: 16 },
-    { id: 'sem-2', label: 'Sem 2', sgpa: 3.42, credits: 17 },
-    { id: 'sem-3', label: 'Sem 3', sgpa: 3.55, credits: 18 }
-  ]);
+  const list = safeReadJson(GPA_HISTORY_KEY, []);
   return Array.isArray(list) ? list : [];
 }
 
@@ -607,7 +622,11 @@ export function exportAllStudentData() {
     notes: safeReadJson(NOTES_KEY, {}),
     history: readHistory(),
     gpaHistory: getSemesterGpaHistory(),
-    exams: getExamCountdowns()
+    exams: getExamCountdowns(),
+    flashcards: safeReadJson(FLASHCARDS_KEY, []),
+    dailyChallenge: safeReadJson(DAILY_KEY, {}),
+    moderationSubmissions: safeReadJson(SUBMISSIONS_KEY, []),
+    analyticsConsent: getAnalyticsConsent()
   };
 }
 
