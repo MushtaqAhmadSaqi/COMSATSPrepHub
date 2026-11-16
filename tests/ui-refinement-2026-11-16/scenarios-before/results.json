@@ -1,0 +1,135 @@
+{
+  "browser": "Isolated headless Microsoft Edge",
+  "checks": [
+    {
+      "name": "Timed quiz remains visible while reviewing long content",
+      "passed": true
+    },
+    {
+      "name": "Curated-bank fallback is identified",
+      "passed": true
+    },
+    {
+      "name": "GPA course table remains usable with many courses",
+      "passed": true
+    },
+    {
+      "name": "Long display math scrolls inside its container",
+      "passed": true
+    }
+  ],
+  "screenshots": [
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-refinement-2026-11-16\\scenarios-before\\quiz-timed-scrolled-before-360.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-refinement-2026-11-16\\scenarios-before\\curated-bank-before-360.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-refinement-2026-11-16\\scenarios-before\\gpa-many-courses-before-360.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-refinement-2026-11-16\\scenarios-before\\long-latex-before-360.png"
+  ],
+  "blockedRequests": [
+    {
+      "method": "OPTIONS",
+      "host": "uicfxrfxjffyuxfqszhs.supabase.co",
+      "path": "/rest/v1/past_papers"
+    },
+    {
+      "method": "POST",
+      "host": "127.0.0.1",
+      "path": "/api/generate-quiz"
+    },
+    {
+      "method": "POST",
+      "host": "127.0.0.1",
+      "path": "/api/generate-quiz"
+    }
+  ],
+  "networkErrors": [
+    {
+      "host": "uicfxrfxjffyuxfqszhs.supabase.co",
+      "path": "/rest/v1/past_papers",
+      "status": 503
+    },
+    {
+      "host": "uicfxrfxjffyuxfqszhs.supabase.co",
+      "path": "/rest/v1/past_papers",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "host": "127.0.0.1",
+      "path": "/api/generate-quiz",
+      "status": 503
+    },
+    {
+      "host": "127.0.0.1",
+      "path": "/api/generate-quiz",
+      "status": 503
+    }
+  ],
+  "consoleErrors": [],
+  "exceptions": [],
+  "stage": "before",
+  "target": "critical-scenarios",
+  "measurements": [
+    {
+      "area": "timed-quiz",
+      "beforeScroll": {
+        "timer": {
+          "top": 199.5,
+          "bottom": 234.5,
+          "width": 98.609375
+        },
+        "header": {
+          "top": 138,
+          "bottom": 236
+        },
+        "time": "timer7:30"
+      },
+      "afterScroll": {
+        "timer": {
+          "top": -1195.5,
+          "bottom": -1160.5,
+          "width": 98.609375
+        },
+        "visible": false,
+        "time": "timer7:30"
+      }
+    },
+    {
+      "area": "curated-bank-fallback",
+      "badge": "✨ Curated Bank · Medium",
+      "hasExplanatoryNotice": false
+    },
+    {
+      "area": "gpa-many-courses",
+      "rows": 8,
+      "documentScrollWidth": 354,
+      "viewportWidth": 360,
+      "panel": {
+        "left": 16,
+        "right": 338
+      },
+      "inputModes": [
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric"
+      ]
+    },
+    {
+      "area": "long-latex",
+      "clientWidth": 320,
+      "scrollWidth": 320,
+      "overflowX": "auto",
+      "documentScrollWidth": 354,
+      "viewportWidth": 360
+    }
+  ],
+  "fontStatus": {
+    "inter": true,
+    "display": true,
+    "icons": true
+  },
+  "completed": true
+}

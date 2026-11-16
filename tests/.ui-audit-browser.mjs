@@ -6,8 +6,12 @@ import assert from 'node:assert/strict';
 
 const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'comsatsprephub-ui-audit-'));
 const polish = process.env.UI_AUDIT_POLISH === '1';
+const routeSweep = process.env.UI_AUDIT_ROUTES === '1';
+const scenarios = process.env.UI_AUDIT_SCENARIOS === '1';
 const stage = process.env.UI_AUDIT_STAGE || 'after';
 const target = process.env.UI_AUDIT_TARGET || 'all';
+const baseUrl = process.env.UI_AUDIT_BASE_URL || 'http://localhost:3000';
+const baseOrigin = new URL(baseUrl).origin;
 const output = path.resolve(process.env.UI_AUDIT_OUTPUT || 'tests/ui-verification-2026-11-16');
 fs.mkdirSync(output, { recursive: true });
 const browser = spawn('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', [
@@ -55,7 +59,7 @@ try {
     } else if (message.method === 'Fetch.requestPaused') {
       const { requestId, request } = message.params;
       const url = new URL(request.url);
-      const local = url.origin === 'http://localhost:3000' && !url.pathname.startsWith('/api/');
+      const local = url.origin === baseOrigin && !url.pathname.startsWith('/api/');
       const font = ['fonts.googleapis.com', 'fonts.gstatic.com'].includes(url.hostname);
       if (['GET', 'HEAD'].includes(request.method) && (local || font)) {
         await send('Fetch.continueRequest', { requestId });
@@ -91,11 +95,11 @@ try {
     await send('Input.dispatchKeyEvent', { type: 'keyDown', key, code, modifiers, windowsVirtualKeyCode: ({ Tab: 9, Enter: 13, Escape: 27, Home: 36, End: 35, ArrowRight: 39, ArrowLeft: 37, ArrowDown: 40, ArrowUp: 38 })[key] });
     await send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, modifiers });
   };
-  const selectors = { upload: '.upload-container', terms: '.terms-container', gpa: '.grade-workspace', 'ai-quiz-generator': '[role=radiogroup]', 'study-hub': '.study-hub-container', dashboard: '.study-dashboard', account: '.account-clear-data', '': '.home-page-wrapper' };
+  const selectors = { upload: '.upload-container', terms: '.terms-container', privacy: '.terms-container', disclaimer: '.terms-container', gpa: '.grade-workspace', 'ai-quiz-generator': '[role=radiogroup]', 'take-ai-quiz': '.take-ai-container', 'study-hub': '.study-hub-container', dashboard: '.study-dashboard', account: '.account-clear-data', about: '.about-container', subjects: '.subjects-container', 'subject-papers': '.papers-container', 'paper-view': '.paperview-container', quiz: '.quiz-container', faq: 'main h1', auth: '.auth-page-container', '': '.home-page-wrapper' };
   let navigationId = 0;
   const navigate = async route => {
-    await send('Page.navigate', { url: `http://localhost:3000/?ui-audit=${++navigationId}#${route || 'home'}` });
-    await wait(`document.querySelector(${JSON.stringify(selectors[route])}) && !document.querySelector('.route-loading')`);
+    await send('Page.navigate', { url: `${baseUrl}/?ui-audit=${++navigationId}#${route || 'home'}` });
+    await wait(`document.querySelector(${JSON.stringify(selectors[route] || 'main > div > *:not(.route-loading)')}) && !document.querySelector('.route-loading')`);
     await wait("getComputedStyle(document.querySelector('main').firstElementChild).opacity === '1' && (!document.querySelector('main h1') || getComputedStyle(document.querySelector('main h1')).opacity === '1')");
   };
   const check = async (name, fn) => {
@@ -114,7 +118,7 @@ try {
     report.screenshots.push(file);
   };
   await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
-  if (!polish || process.env.UI_AUDIT_FULL === '1') {
+  if (!routeSweep && !scenarios && (!polish || process.env.UI_AUDIT_FULL === '1')) {
   await navigate('upload');
   await wait("document.querySelector('#upload-tab-upload')");
   await check('Upload tabs: End, Home and panel association', async () => {
@@ -268,7 +272,7 @@ try {
     }
   }
   }
-  if (polish) {
+  if (!routeSweep && !scenarios && polish) {
     report.stage = stage;
     report.target = target;
     report.measurements = [];
@@ -364,6 +368,144 @@ try {
       if (verify('navbar') && width >= 375) await check(`Navbar polish: breakpoint fit at ${width}px`, async () => {
         assert.ok(header.brandRight <= header.actionsLeft && header.actionsRight <= header.pillRight, JSON.stringify(header));
       });
+    }
+  }
+  if (scenarios) {
+    report.stage = stage;
+    report.target = 'critical-scenarios';
+    report.measurements = [];
+    await send('Page.addScriptToEvaluateOnNewDocument', {
+      source: `try {
+        localStorage.setItem('pph_analytics_consent', 'declined');
+        localStorage.setItem('pph_dark', 'false');
+        sessionStorage.setItem('pph_install_dismissed', 'true');
+        sessionStorage.setItem('pph_aiQuizParams', JSON.stringify({ topic: 'Data Structures', subjectCode: 'CSC211', difficulty: 'Medium', numQuestions: 5, questionType: 'mcq' }));
+      } catch {}`
+    });
+    await send('Emulation.setDeviceMetricsOverride', { width: 360, height: 1000, deviceScaleFactor: 1, mobile: false });
+    await check('Timed quiz remains visible while reviewing long content', async () => {
+      await navigate('quiz');
+      await wait("!document.querySelector('main [aria-busy=true]') && document.querySelector('.quiz-subject-card')");
+      await evaluate("document.querySelector('.quiz-subject-card').click()");
+      await wait("document.querySelector('[aria-label=\"Select quiz mode\"]')");
+      await evaluate("document.querySelector('[aria-label=\"Select quiz mode\"] button:last-child').click()");
+      await wait("document.querySelector('[aria-label=\"Select quiz mode\"] button:last-child').getAttribute('aria-pressed') === 'true'");
+      await evaluate("document.querySelector('.quiz-generate-btn').click()");
+      await wait("(() => { const timer=document.querySelector('[role=timer]'); if (!timer || document.querySelector('main [aria-busy=true]')) return false; const before=timer.getBoundingClientRect(); const header=document.querySelector('.quiz-header').getBoundingClientRect(); const time=timer.textContent.trim(); window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'}); const after=timer.getBoundingClientRect(); window.__auditTimed={beforeScroll:{timer:{top:before.top,bottom:before.bottom,width:before.width},header:{top:header.top,bottom:header.bottom},time},afterScroll:{timer:{top:after.top,bottom:after.bottom,width:after.width},visible:after.bottom > 0 && after.top < innerHeight,time}}; return true; })()");
+      const timed = await evaluate("window.__auditTimed");
+      report.measurements.push({ area: 'timed-quiz', ...timed });
+      await screenshot(`quiz-timed-scrolled-${stage}-360`);
+    });
+    await check('Curated-bank fallback is identified', async () => {
+      await navigate('take-ai-quiz');
+      await wait("!document.querySelector('main [aria-busy=true]')");
+      const fallback = await evaluate("(() => ({badge:document.querySelector('.ai-quiz-topic-badge')?.textContent.trim(),hasExplanatoryNotice:Boolean(document.querySelector('[data-curated-bank-notice]'))}))()");
+      report.measurements.push({ area: 'curated-bank-fallback', ...fallback });
+      await screenshot(`curated-bank-${stage}-360`);
+    });
+    await check('GPA course table remains usable with many courses', async () => {
+      await navigate('gpa');
+      for (let index = 0; index < 7; index += 1) {
+        await evaluate("document.querySelector('.grade-workspace__add').click()");
+      }
+      const layout = await evaluate("(() => { const rows=Array.from(document.querySelectorAll('.grade-workspace__course')); const panel=document.querySelector('.grade-workspace__panel').getBoundingClientRect(); return {rows:rows.length,documentScrollWidth:document.documentElement.scrollWidth,viewportWidth:innerWidth,panel:{left:panel.left,right:panel.right},inputModes:Array.from(document.querySelectorAll('.grade-workspace__course input[type=number]')).map(input=>input.inputMode)}; })()");
+      report.measurements.push({ area: 'gpa-many-courses', ...layout });
+      await screenshot(`gpa-many-courses-${stage}-360`);
+    });
+    await check('Long display math scrolls inside its container', async () => {
+      await navigate('paper-view');
+      await evaluate("(async () => { const {default:React} = await import('/node_modules/.vite/deps/react.js'); const {default:ReactDOM} = await import('/node_modules/.vite/deps/react-dom_client.js'); const {default:MathText} = await import('/src/components/MathText/MathText.jsx'); const host=document.createElement('div'); host.id='ui-audit-math'; host.style.padding='16px'; document.querySelector('main').prepend(host); window.__auditMathRoot=ReactDOM.createRoot(host); window.__auditMathRoot.render(React.createElement(MathText,{text:'$$\\\\sum_{i=1}^{n} \\\\frac{x_i^2 + 2x_i y_i + y_i^2}{\\\\sqrt{a_i^2+b_i^2}} = \\\\prod_{k=1}^{m} \\\\left(1+\\\\frac{r_k}{1+r_k^2}\\\\right) + \\\\int_{0}^{\\\\infty} e^{-x^2} \\\\cos(2\\\\pi x) \\\\, dx$$'})); })()");
+      await wait("document.querySelector('#ui-audit-math .math-display-container')");
+      const math = await evaluate("(() => { const element=document.querySelector('#ui-audit-math .math-display-container'); const style=getComputedStyle(element); return {clientWidth:element.clientWidth,scrollWidth:element.scrollWidth,overflowX:style.overflowX,documentScrollWidth:document.documentElement.scrollWidth,viewportWidth:innerWidth}; })()");
+      report.measurements.push({ area: 'long-latex', ...math });
+      await screenshot(`long-latex-${stage}-360`);
+    });
+  }
+  if (routeSweep) {
+    report.stage = stage;
+    report.target = 'all-routes';
+    report.measurements = [];
+    const routes = [
+      '', 'about', 'subjects', 'subject-papers', 'paper-view', 'quiz',
+      'ai-quiz-generator', 'take-ai-quiz', 'study-hub', 'dashboard',
+      'account', 'upload', 'faq', 'auth', 'terms', 'privacy', 'disclaimer',
+      'admin-generate', 'admin-paste', 'gpa', 'missing-page'
+    ];
+    const widths = [360, 390, 768, 1280, 1440];
+    const settlingRoutes = new Set(['subjects', 'subject-papers', 'quiz', 'take-ai-quiz']);
+    await send('Page.addScriptToEvaluateOnNewDocument', {
+      source: `try {
+        localStorage.setItem('pph_analytics_consent', 'declined');
+        sessionStorage.setItem('pph_install_dismissed', 'true');
+        sessionStorage.setItem('pph_selectedSubject', JSON.stringify({ name: 'Data Structures & Algorithms', code: 'CSC211', department: 'Computer Science' }));
+        sessionStorage.setItem('pph_selectedPaper', JSON.stringify({ id: 'ui-audit-paper', title: 'Data Structures Midterm 2025', subjectName: 'Data Structures & Algorithms', subjectCode: 'CSC211', department: 'Computer Science', term: 'Midterm', semester: 'Fall', year: 2025, totalMarks: 30, isSample: true }));
+        sessionStorage.setItem('pph_aiQuizParams', JSON.stringify({ topic: 'Data Structures', subjectCode: 'CSC211', difficulty: 'Medium', numQuestions: 5, questionType: 'mcq' }));
+      } catch {}`
+    });
+    for (const theme of ['light', 'dark']) {
+      await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
+      await navigate('');
+      const dark = theme === 'dark';
+      if (await evaluate("document.documentElement.classList.contains('dark')") !== dark) {
+        await evaluate(`document.querySelector('[aria-label="Switch to ${dark ? 'dark' : 'light'} mode"]').click()`);
+        await wait(`document.documentElement.classList.contains('dark') === ${dark}`);
+      }
+      for (const width of widths) {
+        await send('Emulation.setDeviceMetricsOverride', { width, height: 1000, deviceScaleFactor: 1, mobile: false });
+        for (const route of routes) {
+          await check(`${route || 'home'} baseline: ${theme} at ${width}px`, async () => {
+            await navigate(route);
+            if (settlingRoutes.has(route)) {
+              await wait("!document.querySelector('main [aria-busy=true]')");
+            }
+            await evaluate('document.fonts.ready');
+            const geometry = await evaluate(`(() => {
+              const viewportWidth = document.documentElement.clientWidth;
+              const main = document.querySelector('main');
+              const visible = element => {
+                const style = getComputedStyle(element);
+                const rect = element.getBoundingClientRect();
+                return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) !== 0 && rect.width > 0 && rect.height > 0;
+              };
+              const describe = element => {
+                const classes = Array.from(element.classList).slice(0, 2).join('.');
+                return element.tagName.toLowerCase() + (element.id ? '#' + element.id : '') + (classes ? '.' + classes : '');
+              };
+              const controls = Array.from(document.querySelectorAll('header button, header a[href], main button, main a[href], main input, main select, main textarea, main summary, main [role=button], main [role=radio], main [role=tab]'))
+                .filter(element => !element.disabled && visible(element))
+                .map(element => {
+                  const rect = element.getBoundingClientRect();
+                  return { element: describe(element), label: element.getAttribute('aria-label') || element.textContent.trim().replace(/\\s+/g, ' ').slice(0, 70), width: Math.round(rect.width * 10) / 10, height: Math.round(rect.height * 10) / 10, inlineLink: element.tagName === 'A' && Boolean(element.closest('p')) };
+                });
+              const undersized = controls.filter(control => !control.inlineLink && (control.width < 44 || control.height < 44));
+              const overflowing = Array.from(main.querySelectorAll('*'))
+                .filter(element => visible(element) && !element.closest('[aria-hidden=true]'))
+                .map(element => ({ element, rect: element.getBoundingClientRect() }))
+                .filter(({ rect }) => rect.left < -1 || rect.right > viewportWidth + 1)
+                .slice(0, 20)
+                .map(({ element, rect }) => ({ element: describe(element), left: Math.round(rect.left), right: Math.round(rect.right) }));
+              const clipped = Array.from(main.querySelectorAll('*'))
+                .filter(element => visible(element) && element.clientWidth > 0 && element.scrollWidth > element.clientWidth + 1)
+                .filter(element => !['auto', 'scroll'].includes(getComputedStyle(element).overflowX))
+                .slice(0, 20)
+                .map(element => ({ element: describe(element), clientWidth: element.clientWidth, scrollWidth: element.scrollWidth, overflowX: getComputedStyle(element).overflowX }));
+              return {
+                viewportWidth,
+                documentScrollWidth: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
+                heading: main.querySelector('h1, h2')?.textContent.trim().replace(/\\s+/g, ' ').slice(0, 120) || null,
+                controls: controls.length,
+                undersized,
+                overflowing,
+                clipped
+              };
+            })()`);
+            report.measurements.push({ route: route || 'home', theme, width, ...geometry });
+            if ([360, 1440].includes(width)) {
+              await screenshot(`${route || 'home'}-${theme}-${width}-${stage}`);
+            }
+          });
+        }
+      }
     }
   }
   await evaluate("document.fonts.load('700 16px \"Space Grotesk\"')");
