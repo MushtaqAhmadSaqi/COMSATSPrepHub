@@ -5,7 +5,8 @@
   position: relative;
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  /* clip (not hidden) so position:sticky descendants keep sticking to the viewport */
+  overflow-x: clip;
 }
 
 /* Decorative animated background mesh */
@@ -53,4 +54,8 @@
   .main-content {
     padding-bottom: 2rem;
   }
+}
+
+.app-container--exam .main-content {
+  padding-bottom: 2rem;
 }

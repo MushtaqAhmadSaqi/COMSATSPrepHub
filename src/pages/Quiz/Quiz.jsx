@@ -8,11 +8,18 @@ import { fireConfetti } from '../../utils/confetti';
 import { useToast } from '../../utils/toast';
 import { SubjectCardSkeleton } from '../../components/ui/Skeleton';
 import PageHeader from '../../components/PageHeader/PageHeader';
+import Modal from '../../components/ui/Modal';
 import './Quiz.css';
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 const QUESTION_COUNTS = [5, 10, 15, 20];
 const LETTERS = ['A', 'B', 'C', 'D'];
+
+function formatDuration(totalSeconds) {
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = String(totalSeconds % 60).padStart(2, '0');
+  return `${mins}:${secs}`;
+}
 
 /* Bilingual helper for step-by-step explanations */
 function buildStepByStepExplanation(q, lang = 'en') {
@@ -71,7 +78,7 @@ function AnimatedOption({ letter, opt, index, selectedOption, revealed, correct,
   );
 }
 
-export default function Quiz() {
+export default function Quiz({ onExamActiveChange }) {
   const [step, setStep] = useState('select');
   const [subjects, setSubjects] = useState([]);
   const [subjectsLoading, setSubjectsLoading] = useState(true);
@@ -94,12 +101,24 @@ export default function Quiz() {
   const [markedForReview, setMarkedForReview] = useState({});
   const [userAnswers, setUserAnswers] = useState({});
   const [error, setError] = useState('');
+  const [confirmExit, setConfirmExit] = useState(false);
+  const [confirmFinish, setConfirmFinish] = useState(false);
+  const [elapsedSec, setElapsedSec] = useState(null);
 
   const toast = useToast();
   const prevStreakRef = useRef(0);
   const finishedRef = useRef(false);
   const finishQuizRef = useRef(() => {});
+  const startedAtRef = useRef(null);
+  const navigatorRef = useRef(null);
   const score = scoreAnswers(userAnswers);
+
+  // Distraction-free exam mode: hide the site chrome only while a timed exam runs
+  useEffect(() => {
+    const active = step === 'playing' && quizMode === 'timed';
+    onExamActiveChange?.(active);
+    return () => onExamActiveChange?.(false);
+  }, [step, quizMode, onExamActiveChange]);
 
   const loadSubjects = async () => {
     setSubjectsLoading(true);
@@ -140,6 +159,10 @@ export default function Quiz() {
     setShowStepByStep(false);
     setMarkedForReview({});
     setUserAnswers({});
+    setConfirmExit(false);
+    setConfirmFinish(false);
+    setElapsedSec(null);
+    startedAtRef.current = Date.now();
     finishedRef.current = false;
     if (quizMode === 'timed') {
       setTimeLeftSec(questionList.length * 45);
@@ -186,6 +209,7 @@ export default function Quiz() {
   const finishQuiz = () => {
     if (finishedRef.current || questions.length === 0) return;
     finishedRef.current = true;
+    setElapsedSec(Math.max(0, Math.round((Date.now() - (startedAtRef.current || Date.now())) / 1000)));
 
     const wrongQuestions = questions.filter((_, idx) => !userAnswers[idx]?.isCorrect);
     const pct = Math.round((score / questions.length) * 100);
@@ -221,9 +245,20 @@ export default function Quiz() {
     }
   }, [step, quizMode, timeLeftSec]);
 
+  const unansweredCount = questions.length - Object.keys(userAnswers).length;
+  const flaggedCount = Object.values(markedForReview).filter(Boolean).length;
+
+  const requestFinish = () => {
+    if (unansweredCount > 0 || flaggedCount > 0) {
+      setConfirmFinish(true);
+    } else {
+      finishQuiz();
+    }
+  };
+
   const handleNextQuestion = () => {
     if (currentIdx + 1 >= questions.length) {
-      finishQuiz();
+      requestFinish();
       return;
     }
 
@@ -232,6 +267,17 @@ export default function Quiz() {
     const nextState = getAnswerState(userAnswers, nextIdx);
     setSelectedOption(nextState.selectedOption);
     setRevealed(nextState.revealed);
+    setShowHint(false);
+    setShowStepByStep(false);
+  };
+
+  const handlePrevQuestion = () => {
+    if (currentIdx === 0) return;
+    const prevIdx = currentIdx - 1;
+    setCurrentIdx(prevIdx);
+    const prevState = getAnswerState(userAnswers, prevIdx);
+    setSelectedOption(prevState.selectedOption);
+    setRevealed(prevState.revealed);
     setShowHint(false);
     setShowStepByStep(false);
   };
@@ -310,12 +356,29 @@ export default function Quiz() {
         } else {
           handleNextQuestion();
         }
+      } else if (key === 'ArrowRight') {
+        e.preventDefault();
+        handleNextQuestion();
+      } else if (key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrevQuestion();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   });
+
+  // Keep the current question pill in view inside the compact mobile navigator
+  useEffect(() => {
+    const nav = navigatorRef.current;
+    if (!nav || nav.scrollWidth <= nav.clientWidth) return;
+    const active = nav.querySelector('[aria-current="step"]');
+    if (!active) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const target = active.offsetLeft - nav.clientWidth / 2 + active.clientWidth / 2;
+    nav.scrollTo({ left: Math.max(0, target), behavior: reduce ? 'auto' : 'smooth' });
+  }, [currentIdx, step]);
 
   // SELECT SUBJECT
   if (step === 'select') {
@@ -553,7 +616,7 @@ export default function Quiz() {
 
     return (
       <motion.div
-        className="quiz-container"
+        className={`quiz-container${quizMode === 'timed' ? ' quiz-container--exam' : ''}`}
         key={currentIdx}
         initial={{ opacity: 0, x: 14 }}
         animate={{ opacity: 1, x: 0 }}
@@ -561,7 +624,7 @@ export default function Quiz() {
       >
         <div className="quiz-header" style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
           <h1>{selectedSubject?.name}</h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
             {quizMode === 'timed' && (
               <span
                 role="timer"
@@ -586,73 +649,75 @@ export default function Quiz() {
                 borderRadius: '9999px',
                 border: '1px solid var(--border)',
                 background: isMarked ? 'var(--accent-soft)' : 'var(--surface)',
-                color: isMarked ? 'var(--accent)' : 'var(--text-subtle)',
+                color: isMarked ? 'var(--text)' : 'var(--text-subtle)',
                 fontSize: '0.75rem',
                 fontWeight: 700,
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.25rem',
-                minHeight: '38px'
+                minHeight: '44px',
+                cursor: 'pointer'
               }}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">
+              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: isMarked ? 'var(--accent)' : undefined }} aria-hidden="true">
                 {isMarked ? 'bookmark_flag' : 'flag'}
               </span>
               {isMarked ? 'Marked for Review' : 'Mark for Review'}
             </button>
+            {quizMode === 'timed' && (
+              <button
+                type="button"
+                className="quiz-exit-btn"
+                onClick={() => setConfirmExit(true)}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">logout</span>
+                Exit Exam
+              </button>
+            )}
           </div>
         </div>
 
         {/* Question Navigator Pill Bar */}
-        <nav
-          aria-label="Question navigator"
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '0.375rem',
-            marginBottom: '1rem'
-          }}
-        >
+        <nav aria-label="Question navigator" className="quiz-navigator" ref={navigatorRef}>
           {questions.map((_, idx) => {
             const ans = userAnswers[idx];
-            const marked = markedForReview[idx];
+            const marked = Boolean(markedForReview[idx]);
             const isCurr = idx === currentIdx;
-            let bg = 'var(--surface)';
-            let color = 'var(--text-subtle)';
-            if (isCurr) {
-              bg = 'var(--brand)';
-              color = '#ffffff';
-            } else if (marked) {
-              bg = 'var(--accent-soft)';
-              color = 'var(--accent)';
-            } else if (ans) {
-              bg = ans.isCorrect ? 'rgba(16, 185, 129, 0.16)' : 'rgba(239, 68, 68, 0.16)';
-              color = ans.isCorrect ? '#059669' : '#dc2626';
-            }
+            const status = marked ? 'flagged' : ans ? (ans.isCorrect ? 'correct' : 'incorrect') : 'unanswered';
+            const statusLabel = marked
+              ? 'flagged for review'
+              : ans
+                ? (ans.isCorrect ? 'answered correctly' : 'answered incorrectly')
+                : 'unanswered';
 
             return (
               <button
                 key={idx}
                 type="button"
+                className={`quiz-nav-pill quiz-nav-pill--${status}${isCurr ? ' current' : ''}`}
                 onClick={() => handleJumpToQuestion(idx)}
-                aria-label={`Go to Question ${idx + 1}${marked ? ' (marked for review)' : ''}`}
+                aria-label={`Question ${idx + 1}: ${statusLabel}`}
                 aria-current={isCurr ? 'step' : undefined}
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  border: `1.5px solid ${isCurr ? 'var(--brand)' : 'var(--border)'}`,
-                  background: bg,
-                  color,
-                  fontSize: '0.75rem',
-                  fontWeight: 800
-                }}
               >
-                {idx + 1}
+                <span className="quiz-nav-number">{idx + 1}</span>
+                {marked ? (
+                  <span className="material-symbols-outlined quiz-nav-icon" aria-hidden="true">flag</span>
+                ) : ans ? (
+                  <span className="material-symbols-outlined quiz-nav-icon" aria-hidden="true">
+                    {ans.isCorrect ? 'check' : 'close'}
+                  </span>
+                ) : (
+                  <span className="quiz-nav-dot" aria-hidden="true" />
+                )}
               </button>
             );
           })}
         </nav>
+        <div className="quiz-nav-legend" aria-hidden="true">
+          <span><span className="material-symbols-outlined quiz-nav-icon">check</span> Answered</span>
+          <span><span className="material-symbols-outlined quiz-nav-icon">flag</span> Flagged</span>
+          <span><span className="quiz-nav-dot" /> Unanswered</span>
+        </div>
 
         <div className="quiz-progress-meta">
           <span className="quiz-counter-text">Question {currentIdx + 1} of {questions.length}</span>
@@ -663,6 +728,12 @@ export default function Quiz() {
               </span>
               {streak} streak
             </span>
+          )}
+          {quizMode === 'timed' && (
+            <button type="button" className="quiz-finish-link" onClick={requestFinish}>
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">task_alt</span>
+              Finish Exam
+            </button>
           )}
         </div>
 
@@ -700,7 +771,7 @@ export default function Quiz() {
           </div>
 
           <div className="quiz-keyboard-tip">
-            Tip: press 1–4 to answer, Enter to continue
+            Tip: press 1–4 to answer, Enter to submit/continue, ← → to move between questions
           </div>
 
           {q.hint && !revealed && (
@@ -753,10 +824,12 @@ export default function Quiz() {
                       background: 'var(--surface)',
                       border: '1px solid var(--border)',
                       borderRadius: '9999px',
-                      padding: '0.2rem 0.65rem',
+                      padding: '0.4rem 0.85rem',
                       fontSize: '0.72rem',
                       fontWeight: 700,
-                      color: 'var(--brand)'
+                      color: 'var(--brand)',
+                      minHeight: '44px',
+                      cursor: 'pointer'
                     }}
                   >
                     {showStepByStep ? 'Hide Step-by-Step' : '✨ Explain Step-by-Step'}
@@ -768,10 +841,12 @@ export default function Quiz() {
                       background: 'var(--surface)',
                       border: '1px solid var(--border)',
                       borderRadius: '9999px',
-                      padding: '0.2rem 0.65rem',
+                      padding: '0.4rem 0.85rem',
                       fontSize: '0.72rem',
                       fontWeight: 700,
-                      color: 'var(--text)'
+                      color: 'var(--text)',
+                      minHeight: '44px',
+                      cursor: 'pointer'
                     }}
                   >
                     {explainLang === 'en' ? 'اردو میں دیکھیں' : 'Switch to English'}
@@ -822,7 +897,7 @@ export default function Quiz() {
                 type="button"
                 className="btn-quiz-next"
                 onClick={handleNextQuestion}
-                style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}
+                style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#0f172a' }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -832,6 +907,97 @@ export default function Quiz() {
             )}
           </div>
         </div>
+
+        <Modal isOpen={confirmExit} onClose={() => setConfirmExit(false)} title="Exit this exam?">
+          <p style={{ margin: '0 0 1.25rem', color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+            Your answers so far will not be scored or saved. The exam timer keeps running while this dialog is open.
+          </p>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={() => setConfirmExit(false)}
+              style={{
+                minHeight: '44px',
+                padding: '0.5rem 1.1rem',
+                borderRadius: '9999px',
+                border: '1.5px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text)',
+                fontWeight: 700,
+                fontSize: '0.875rem',
+                cursor: 'pointer'
+              }}
+            >
+              Keep Going
+            </button>
+            <button
+              type="button"
+              onClick={() => { setConfirmExit(false); handleRestart(); }}
+              style={{
+                minHeight: '44px',
+                padding: '0.5rem 1.1rem',
+                borderRadius: '9999px',
+                border: 'none',
+                background: 'var(--danger)',
+                color: '#ffffff',
+                fontWeight: 700,
+                fontSize: '0.875rem',
+                cursor: 'pointer'
+              }}
+            >
+              Exit Exam
+            </button>
+          </div>
+        </Modal>
+
+        <Modal isOpen={confirmFinish} onClose={() => setConfirmFinish(false)} title="Submit exam?">
+          <p style={{ margin: '0 0 1.25rem', color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+            You still have{' '}
+            <strong style={{ color: 'var(--text)' }}>{unansweredCount} unanswered</strong> and{' '}
+            <strong style={{ color: 'var(--text)' }}>{flaggedCount} flagged</strong>{' '}
+            {unansweredCount + flaggedCount === 1 ? 'question' : 'questions'}. Unanswered questions count as incorrect.
+          </p>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={() => {
+                setConfirmFinish(false);
+                const target = questions.findIndex((_, idx) => !userAnswers[idx] || markedForReview[idx]);
+                if (target >= 0) handleJumpToQuestion(target);
+              }}
+              style={{
+                minHeight: '44px',
+                padding: '0.5rem 1.1rem',
+                borderRadius: '9999px',
+                border: '1.5px solid var(--border)',
+                background: 'var(--surface)',
+                color: 'var(--text)',
+                fontWeight: 700,
+                fontSize: '0.875rem',
+                cursor: 'pointer'
+              }}
+            >
+              Review Remaining
+            </button>
+            <button
+              type="button"
+              onClick={() => { setConfirmFinish(false); finishQuiz(); }}
+              style={{
+                minHeight: '44px',
+                padding: '0.5rem 1.1rem',
+                borderRadius: '9999px',
+                border: 'none',
+                background: 'var(--brand)',
+                color: 'var(--on-brand)',
+                fontWeight: 700,
+                fontSize: '0.875rem',
+                cursor: 'pointer'
+              }}
+            >
+              Submit Anyway
+            </button>
+          </div>
+        </Modal>
       </motion.div>
     );
   }
@@ -839,9 +1005,13 @@ export default function Quiz() {
   // FINISHED
   if (step === 'finished') {
     const pct = Math.round((score / questions.length) * 100);
-    const wrongItems = questions
-      .map((q, idx) => ({ ...q, idx, userAns: userAnswers[idx]?.selected }))
-      .filter((item) => item.userAns !== item.correct);
+    const reviewItems = questions.map((q, idx) => ({
+      ...q,
+      idx,
+      userAns: userAnswers[idx]?.selected,
+      status: userAnswers[idx] == null ? 'skipped' : userAnswers[idx].isCorrect ? 'correct' : 'incorrect'
+    }));
+    const missedCount = reviewItems.filter((item) => item.status !== 'correct').length;
 
     return (
       <motion.div
@@ -857,7 +1027,7 @@ export default function Quiz() {
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: 'spring', stiffness: 200, damping: 15 }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '3.5rem', color: pct >= 60 ? '#10b981' : '#f59e0b' }} aria-hidden="true">
+            <span className="material-symbols-outlined" style={{ fontSize: '3.5rem', color: pct >= 60 ? 'var(--success)' : 'var(--accent)' }} aria-hidden="true">
               {pct >= 75 ? 'military_tech' : pct >= 50 ? 'emoji_events' : 'school'}
             </span>
           </motion.div>
@@ -880,36 +1050,44 @@ export default function Quiz() {
               <span className="quiz-stat-label">Questions</span>
             </div>
             <div className="quiz-stat-item">
-              <span className="quiz-stat-value" style={{ color: '#10b981' }}>{score}</span>
+              <span className="quiz-stat-value" style={{ color: 'var(--success)' }}>{score}</span>
               <span className="quiz-stat-label">Correct</span>
             </div>
             <div className="quiz-stat-item">
-              <span className="quiz-stat-value" style={{ color: '#ef4444' }}>{questions.length - score}</span>
+              <span className="quiz-stat-value" style={{ color: 'var(--danger)' }}>{questions.length - score}</span>
               <span className="quiz-stat-label">Incorrect</span>
             </div>
+            {elapsedSec != null && (
+              <div className="quiz-stat-item">
+                <span className="quiz-stat-value">{formatDuration(elapsedSec)}</span>
+                <span className="quiz-stat-label">Time Taken</span>
+              </div>
+            )}
           </div>
 
-          {/* Weak-Topic Detection & Review Wrong Answers */}
-          {wrongItems.length > 0 && (
-            <div
-              style={{
-                textAlign: 'left',
-                marginTop: '2rem',
-                padding: '1.25rem',
-                borderRadius: 'var(--radius-lg)',
-                background: 'var(--surface-2)',
-                border: '1px solid var(--border)'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.875rem' }}>
-                <div>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--warning)', textTransform: 'uppercase' }}>
-                    🎯 Weak-Topic Detection &amp; Answer Review
-                  </span>
-                  <h3 style={{ fontSize: '1.0625rem', fontWeight: 800, color: 'var(--text)' }}>
-                    Review {wrongItems.length} Missed {wrongItems.length === 1 ? 'Question' : 'Questions'}
-                  </h3>
-                </div>
+          {/* Per-question review with weak-topic detection and missed-question retry */}
+          <div
+            style={{
+              textAlign: 'left',
+              marginTop: '2rem',
+              padding: '1.25rem',
+              borderRadius: 'var(--radius-lg)',
+              background: 'var(--surface-2)',
+              border: '1px solid var(--border)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.875rem' }}>
+              <div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase' }}>
+                  Answer Review
+                </span>
+                <h3 style={{ fontSize: '1.0625rem', fontWeight: 800, color: 'var(--text)' }}>
+                  {missedCount > 0
+                    ? `${missedCount} Missed ${missedCount === 1 ? 'Question' : 'Questions'} to Revisit`
+                    : 'Every Question Answered Correctly'}
+                </h3>
+              </div>
+              {missedCount > 0 && (
                 <button
                   type="button"
                   onClick={handleRetryWrongQuestions}
@@ -921,43 +1099,54 @@ export default function Quiz() {
                     color: 'var(--on-brand)',
                     fontSize: '0.8125rem',
                     fontWeight: 700,
-                    minHeight: '40px'
+                    minHeight: '44px',
+                    cursor: 'pointer'
                   }}
                 >
-                  Retry Wrong Questions Only ({wrongItems.length})
+                  Retry Missed Questions ({missedCount})
                 </button>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {wrongItems.map((item) => (
-                  <div
-                    key={item.idx}
-                    style={{
-                      padding: '0.875rem',
-                      borderRadius: 'var(--radius-sm)',
-                      background: 'var(--surface)',
-                      border: '1px solid var(--border)'
-                    }}
-                  >
-                    <p style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text)', marginBottom: '0.35rem' }}>
-                      Q{item.idx + 1}. {item.question}
-                    </p>
-                    <p style={{ fontSize: '0.8125rem', color: '#dc2626', marginBottom: '0.2rem' }}>
-                      Your answer: {item.userAns != null ? `${LETTERS[item.userAns]}. ${item.options[item.userAns]}` : 'Not answered'}
-                    </p>
-                    <p style={{ fontSize: '0.8125rem', color: '#059669', fontWeight: 700, marginBottom: '0.25rem' }}>
-                      Correct answer: {LETTERS[item.correct]}. {item.options[item.correct]}
-                    </p>
-                    {item.hint && (
-                      <p style={{ fontSize: '0.78rem', color: 'var(--text-subtle)', margin: 0 }}>
-                        💡 {item.hint}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
+              )}
             </div>
-          )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {reviewItems.map((item) => (
+                <div
+                  key={item.idx}
+                  style={{
+                    padding: '0.875rem',
+                    borderRadius: 'var(--radius-sm)',
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem', flexWrap: 'wrap' }}>
+                    <span className={`quiz-review-status quiz-review-status--${item.status}`}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '14px' }} aria-hidden="true">
+                        {item.status === 'correct' ? 'check_circle' : item.status === 'incorrect' ? 'cancel' : 'remove_circle'}
+                      </span>
+                      {item.status === 'correct' ? 'Correct' : item.status === 'incorrect' ? 'Incorrect' : 'Skipped'}
+                    </span>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-subtle)' }}>Q{item.idx + 1}</span>
+                  </div>
+                  <p style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text)', marginBottom: '0.35rem' }}>
+                    {item.question}
+                  </p>
+                  <p className={item.status === 'correct' ? undefined : 'quiz-review-wrong'} style={{ fontSize: '0.8125rem', marginBottom: '0.2rem' }}>
+                    Your answer: {item.userAns != null ? `${LETTERS[item.userAns]}. ${item.options[item.userAns]}` : 'Not answered'}
+                  </p>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text)', fontWeight: 700, marginBottom: '0.25rem' }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '14px', color: 'var(--success)', verticalAlign: 'text-bottom' }} aria-hidden="true">check</span>{' '}
+                    Correct answer: {LETTERS[item.correct]}. {item.options[item.correct]}
+                  </p>
+                  {item.hint && (
+                    <p style={{ fontSize: '0.78rem', color: 'var(--text-subtle)', margin: 0 }}>
+                      💡 {item.hint}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
 
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '2rem' }}>
             <button
@@ -974,7 +1163,7 @@ export default function Quiz() {
               type="button"
               className="btn-quiz-next"
               onClick={handleShareResult}
-              style={{ background: '#10b981' }}
+              style={{ background: '#10b981', color: '#0f172a' }}
             >
               <span className="material-symbols-outlined" aria-hidden="true">share</span>
               Share on WhatsApp

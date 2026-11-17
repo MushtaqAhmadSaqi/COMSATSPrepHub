@@ -391,9 +391,13 @@ try {
       await evaluate("document.querySelector('[aria-label=\"Select quiz mode\"] button:last-child').click()");
       await wait("document.querySelector('[aria-label=\"Select quiz mode\"] button:last-child').getAttribute('aria-pressed') === 'true'");
       await evaluate("document.querySelector('.quiz-generate-btn').click()");
-      await wait("(() => { const timer=document.querySelector('[role=timer]'); if (!timer || document.querySelector('main [aria-busy=true]')) return false; const before=timer.getBoundingClientRect(); const header=document.querySelector('.quiz-header').getBoundingClientRect(); const time=timer.textContent.trim(); window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'}); const after=timer.getBoundingClientRect(); window.__auditTimed={beforeScroll:{timer:{top:before.top,bottom:before.bottom,width:before.width},header:{top:header.top,bottom:header.bottom},time},afterScroll:{timer:{top:after.top,bottom:after.bottom,width:after.width},visible:after.bottom > 0 && after.top < innerHeight,time}}; return true; })()");
-      const timed = await evaluate("window.__auditTimed");
-      report.measurements.push({ area: 'timed-quiz', ...timed });
+      await wait("document.querySelector('[role=timer]') && !document.querySelector('main [aria-busy=true]')");
+      const beforeScroll = await evaluate("(() => { const timer=document.querySelector('[role=timer]').getBoundingClientRect(); const header=document.querySelector('.quiz-header').getBoundingClientRect(); return {timer:{top:timer.top,bottom:timer.bottom,width:timer.width},header:{top:header.top,bottom:header.bottom},time:document.querySelector('[role=timer]').textContent.trim()}; })()");
+      await evaluate("(() => { const card=document.querySelector('.quiz-card'); card.style.minHeight='1600px'; const top=card.getBoundingClientRect().top+scrollY; window.scrollTo({top:top+900,behavior:'instant'}); })()");
+      const afterScroll = await evaluate("(() => { const timer=document.querySelector('[role=timer]').getBoundingClientRect(); return {timer:{top:timer.top,bottom:timer.bottom,width:timer.width},visible:timer.bottom > 0 && timer.top < innerHeight,time:document.querySelector('[role=timer]').textContent.trim()}; })()");
+      report.measurements.push({ area: 'timed-quiz', beforeScroll, afterScroll });
+      assert.equal(afterScroll.visible, true);
+      assert.ok(Math.abs(beforeScroll.timer.width - afterScroll.timer.width) < 0.5);
       await screenshot(`quiz-timed-scrolled-${stage}-360`);
     });
     await check('Curated-bank fallback is identified', async () => {

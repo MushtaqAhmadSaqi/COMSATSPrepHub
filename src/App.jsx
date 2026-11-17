@@ -151,6 +151,7 @@ export default function App() {
   const [authReady, setAuthReady] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isCmdPaletteOpen, setIsCmdPaletteOpen] = useState(false);
+  const [examActive, setExamActive] = useState(false);
   const [pendingPaper, setPendingPaper] = useState(null);
   const [passwordRecovery, setPasswordRecovery] = useState(() => (
     typeof window !== 'undefined' && isPasswordRecoveryUrl(window.location.hash, window.location.search)
@@ -383,7 +384,7 @@ export default function App() {
           />
         );
       case 'quiz':
-        return <Quiz />;
+        return <Quiz onExamActiveChange={setExamActive} />;
       case 'ai-quiz-generator':
         return (
           <AiQuizGenerator
@@ -523,7 +524,7 @@ export default function App() {
 
   return (
     <ToastProvider>
-      <div className="app-container">
+      <div className={`app-container${examActive ? ' app-container--exam' : ''}`}>
         {/* Accessibility: skip-to-content link */}
         <a
           href="#main-content"
@@ -538,17 +539,19 @@ export default function App() {
 
         <OfflineBanner />
 
-        <Navbar
-          activePath={activePath}
-          onNavigate={handleNavigate}
-          isDark={isDark}
-          onToggleDarkMode={() => setIsDark(!isDark)}
-          lang={lang}
-          onToggleLanguage={handleToggleLanguage}
-          user={user}
-          onOpenAuth={() => setIsAuthOpen(true)}
-          onOpenCommandPalette={() => setIsCmdPaletteOpen(true)}
-        />
+        {!examActive && (
+          <Navbar
+            activePath={activePath}
+            onNavigate={handleNavigate}
+            isDark={isDark}
+            onToggleDarkMode={() => setIsDark(!isDark)}
+            lang={lang}
+            onToggleLanguage={handleToggleLanguage}
+            user={user}
+            onOpenAuth={() => setIsAuthOpen(true)}
+            onOpenCommandPalette={() => setIsCmdPaletteOpen(true)}
+          />
+        )}
 
         <main className="main-content" id="main-content" tabIndex={-1}>
           <ErrorBoundary>
@@ -570,7 +573,7 @@ export default function App() {
           </ErrorBoundary>
         </main>
 
-        <Footer onNavigate={handleNavigate} />
+        {!examActive && <Footer onNavigate={handleNavigate} />}
 
         <AuthModal
           isOpen={isAuthOpen}
@@ -595,9 +598,13 @@ export default function App() {
           isLoggedIn={!!user}
         />
 
-        <CookieNotice onNavigate={handleNavigate} />
-        <ScrollTop />
-        <InstallPrompt />
+        {!examActive && (
+          <>
+            <CookieNotice onNavigate={handleNavigate} />
+            <ScrollTop />
+            <InstallPrompt />
+          </>
+        )}
       </div>
     </ToastProvider>
   );

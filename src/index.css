@@ -177,7 +177,8 @@ html.dark {
 html, body {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  /* clip (not hidden) keeps position:sticky working; hidden creates a scroll container that breaks it */
+  overflow-x: clip;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
 }

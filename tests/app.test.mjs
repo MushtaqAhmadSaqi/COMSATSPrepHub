@@ -654,6 +654,103 @@ await runTest('Quiz: Timer expiry completes through the same recorded finish pat
   assert.ok(source.includes('if (finishedRef.current || questions.length === 0) return;'));
 });
 
+await runTest('Quiz: Exam mode hides site chrome only while a timed exam runs', () => {
+  const appSource = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  const quizSource = readFileSync(new URL('../src/pages/Quiz/Quiz.jsx', import.meta.url), 'utf8');
+  assert.ok(appSource.includes('const [examActive, setExamActive] = useState(false);'));
+  assert.ok(appSource.includes('<Quiz onExamActiveChange={setExamActive} />'));
+  assert.ok(appSource.includes('{!examActive && (') && appSource.includes('{!examActive && <Footer'));
+  assert.ok(quizSource.includes("const active = step === 'playing' && quizMode === 'timed';"));
+  assert.ok(quizSource.includes('onExamActiveChange?.(active);'));
+  assert.ok(quizSource.includes('return () => onExamActiveChange?.(false);'), 'Unmount must restore the site chrome');
+  assert.ok(quizSource.includes('setConfirmExit(true)'), 'Exiting an exam must require confirmation');
+});
+
+await runTest('Quiz: Finish confirmation guards unanswered and flagged questions', () => {
+  const source = readFileSync(new URL('../src/pages/Quiz/Quiz.jsx', import.meta.url), 'utf8');
+  const handlerSource = source.match(/const requestFinish = (\(\) => \{[\s\S]*?\n  \});/)[1];
+  let confirmed = false;
+  let finished = 0;
+  const context = {
+    unansweredCount: 2,
+    flaggedCount: 0,
+    setConfirmFinish: (value) => { confirmed = value; },
+    finishQuiz: () => { finished += 1; }
+  };
+  const handler = runInNewContext(`(${handlerSource})`, context);
+  handler();
+  assert.equal(confirmed, true, 'Unanswered questions must trigger the submit confirmation');
+  assert.equal(finished, 0);
+  context.unansweredCount = 0;
+  context.flaggedCount = 1;
+  handler();
+  assert.equal(finished, 0, 'Flagged questions must trigger the submit confirmation');
+  context.flaggedCount = 0;
+  handler();
+  assert.equal(finished, 1, 'A fully answered, unflagged exam submits directly');
+  assert.ok(source.includes('Review Remaining') && source.includes('Submit Anyway'));
+});
+
+await runTest('Quiz: Navigator states are labelled beyond colour', () => {
+  const source = readFileSync(new URL('../src/pages/Quiz/Quiz.jsx', import.meta.url), 'utf8');
+  const css = readFileSync(new URL('../src/pages/Quiz/Quiz.css', import.meta.url), 'utf8');
+  assert.ok(source.includes('aria-label={`Question ${idx + 1}: ${statusLabel}`}'));
+  for (const label of ['flagged for review', 'answered correctly', 'answered incorrectly', 'unanswered']) {
+    assert.ok(source.includes(label), `Navigator must label "${label}"`);
+  }
+  for (const state of ['correct', 'incorrect', 'flagged', 'unanswered']) {
+    assert.ok(css.includes(`.quiz-nav-pill--${state}`), `Navigator needs a ${state} style`);
+  }
+  assert.ok(source.includes('quiz-nav-legend'), 'A visible legend must explain the states');
+  assert.ok(css.includes('overflow-x: auto;'), 'Mobile navigator must scroll instead of covering the question');
+});
+
+await runTest('Quiz: Arrow keys navigate but never fire while typing', () => {
+  const source = readFileSync(new URL('../src/pages/Quiz/Quiz.jsx', import.meta.url), 'utf8');
+  const handlerSource = source.match(/const handleKeyDown = (\(e\) => \{[\s\S]*?\n    \});/)[1];
+  let next = 0;
+  let prev = 0;
+  let prevented = 0;
+  const context = {
+    document: { activeElement: { closest: () => null } },
+    questions: [{ options: ['A', 'B', 'C', 'D'] }, { options: ['A', 'B', 'C', 'D'] }],
+    currentIdx: 1,
+    revealed: true,
+    selectedOption: 0,
+    handleNextQuestion: () => { next += 1; },
+    handlePrevQuestion: () => { prev += 1; },
+    handleSubmitAnswer: () => {},
+    setSelectedOption: () => {}
+  };
+  const handler = runInNewContext(`(${handlerSource})`, context);
+  const event = (key) => ({ key, preventDefault: () => { prevented += 1; } });
+  handler(event('ArrowRight'));
+  handler(event('ArrowLeft'));
+  assert.equal(next, 1);
+  assert.equal(prev, 1);
+  assert.equal(prevented, 2, 'Arrow navigation must not scroll the page');
+  context.document.activeElement.closest = (selectors) => selectors.includes('input') ? {} : null;
+  handler(event('ArrowRight'));
+  handler(event('ArrowLeft'));
+  assert.equal(next, 1, 'Typing in an input must not navigate');
+  assert.equal(prev, 1);
+});
+
+await runTest('Quiz: Summary reports time taken and retries wrong plus skipped questions', () => {
+  const source = readFileSync(new URL('../src/pages/Quiz/Quiz.jsx', import.meta.url), 'utf8');
+  assert.ok(source.includes('startedAtRef.current = Date.now();'));
+  assert.ok(source.includes('setElapsedSec(Math.max(0, Math.round((Date.now() - (startedAtRef.current || Date.now())) / 1000)));'));
+  assert.ok(source.includes('Time Taken'));
+  assert.ok(source.includes('Retry Missed Questions'));
+  const retrySource = source.match(/const handleRetryWrongQuestions = (\(\) => \{[\s\S]*?\n  \});/)[1];
+  assert.ok(retrySource.includes('questions.filter((_, idx) => !userAnswers[idx]?.isCorrect)'), 'Retry must keep wrong AND skipped questions');
+  assert.ok(source.includes("userAnswers[idx] == null ? 'skipped'"), 'Review must distinguish skipped answers');
+  const reviewCss = readFileSync(new URL('../src/pages/Quiz/Quiz.css', import.meta.url), 'utf8');
+  for (const status of ['correct', 'incorrect', 'skipped']) {
+    assert.ok(reviewCss.includes(`.quiz-review-status--${status}`), `Review needs a ${status} chip style`);
+  }
+});
+
 await runTest('Navbar: tablet widths keep the bottom nav instead of overflowing the pill', () => {
   const navbarCss = readFileSync(new URL('../src/components/Navbar/Navbar.css', import.meta.url), 'utf8');
   const desktopNavAt = navbarCss.indexOf('.desktop-nav-links {\n    display: flex;');
