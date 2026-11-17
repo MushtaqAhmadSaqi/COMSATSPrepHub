@@ -191,7 +191,7 @@ export default function Auth({ onLoginSuccess = () => {} }) {
                   <button
                     type="button"
                     onClick={() => { setMode('reset'); setErrorMsg(''); setSuccessMsg(''); }}
-                    style={{ background: 'none', border: 'none', fontSize: '0.75rem', fontWeight: 600, color: 'var(--brand)' }}
+                    style={{ background: 'none', border: 'none', fontSize: '0.75rem', fontWeight: 600, color: 'var(--brand)', minHeight: '44px', padding: '0.25rem 0.5rem', cursor: 'pointer' }}
                   >
                     Forgot password?
                   </button>

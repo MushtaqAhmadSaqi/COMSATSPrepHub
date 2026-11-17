@@ -453,8 +453,9 @@ await runTest('Accessibility: Contact labels, FAQ disclosure, and mobile nav sem
   assert.ok(palette.includes('inputRef.current?.focus()'), 'Empty-result Tab must return focus to the search input');
 
   const navbarCss = readFileSync(new URL('../src/components/Navbar/Navbar.css', import.meta.url), 'utf8');
-  assert.ok(navbarCss.includes('grid-template-columns: repeat(4, 1fr)'));
-  assert.equal(navbarCss.includes('grid-template-columns: repeat(5, 1fr)'), false);
+  assert.ok(navbarCss.includes('grid-template-columns: repeat(5, 1fr)'));
+  const navbarJsx = readFileSync(new URL('../src/components/Navbar/Navbar.jsx', import.meta.url), 'utf8');
+  assert.ok(navbarJsx.includes("id: 'dashboard'"), 'Mobile bottom nav must include one-hand Dashboard access');
 });
 
 await runTest('Auth: Signup without an immediate session asks for email confirmation', () => {

@@ -10,9 +10,6 @@ import PageHeader from '../../components/PageHeader/PageHeader';
 import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 import './SubjectPapers.css';
 
-const EXAM_TYPES = ['All', 'Terminal', 'Midterm', 'Quiz'];
-const SEMESTERS = ['All', 'Spring', 'Fall'];
-
 export default function SubjectPapers({
   subject = { name: 'Data Structures & Algorithms', code: 'CSC211' },
   onViewPaper = () => {},
@@ -78,6 +75,29 @@ export default function SubjectPapers({
       cancelled = true;
     };
   }, [subject.code, subject.name, reloadKey]);
+
+  useEffect(() => {
+    setExamFilter('All');
+    setSemesterFilter('All');
+    setYearFilter('All');
+    setTeacherFilter('All');
+    setSearchText('');
+    setVisibleCount(8);
+  }, [subject.code]);
+
+  const availableExamTypes = useMemo(() => {
+    const terms = Array.from(
+      new Set(papers.map((p) => String(p.term || '').trim()).filter(Boolean))
+    ).sort((a, b) => a.localeCompare(b));
+    return ['All', ...terms];
+  }, [papers]);
+
+  const availableSemesters = useMemo(() => {
+    const seasons = ['Spring', 'Fall', 'Summer'].filter((season) =>
+      papers.some((p) => String(p.semester || '').toLowerCase().includes(season.toLowerCase()))
+    );
+    return ['All', ...seasons];
+  }, [papers]);
 
   const availableYears = useMemo(() => {
     const years = Array.from(
@@ -203,7 +223,7 @@ export default function SubjectPapers({
             placeholder="Search by exam, teacher (e.g. Dr. Naveed), or year…"
             style={{
               width: '100%',
-              minHeight: '42px',
+              minHeight: '44px',
               padding: '0.5rem 0.75rem',
               borderRadius: 'var(--radius-sm)',
               border: '1px solid var(--border-strong)',
@@ -224,7 +244,7 @@ export default function SubjectPapers({
             onChange={(e) => setExamFilter(e.target.value)}
             style={{
               width: '100%',
-              minHeight: '42px',
+              minHeight: '44px',
               padding: '0.5rem 0.75rem',
               borderRadius: 'var(--radius-sm)',
               border: '1px solid var(--border-strong)',
@@ -233,7 +253,7 @@ export default function SubjectPapers({
               fontSize: '0.875rem'
             }}
           >
-            {EXAM_TYPES.map((t) => (
+            {availableExamTypes.map((t) => (
               <option key={t} value={t}>{t}</option>
             ))}
           </select>
@@ -249,7 +269,7 @@ export default function SubjectPapers({
             onChange={(e) => setSemesterFilter(e.target.value)}
             style={{
               width: '100%',
-              minHeight: '42px',
+              minHeight: '44px',
               padding: '0.5rem 0.75rem',
               borderRadius: 'var(--radius-sm)',
               border: '1px solid var(--border-strong)',
@@ -258,7 +278,7 @@ export default function SubjectPapers({
               fontSize: '0.875rem'
             }}
           >
-            {SEMESTERS.map((s) => (
+            {availableSemesters.map((s) => (
               <option key={s} value={s}>{s}</option>
             ))}
           </select>
@@ -274,7 +294,7 @@ export default function SubjectPapers({
             onChange={(e) => setYearFilter(e.target.value)}
             style={{
               width: '100%',
-              minHeight: '42px',
+              minHeight: '44px',
               padding: '0.5rem 0.75rem',
               borderRadius: 'var(--radius-sm)',
               border: '1px solid var(--border-strong)',
@@ -300,7 +320,7 @@ export default function SubjectPapers({
               onChange={(e) => setTeacherFilter(e.target.value)}
               style={{
                 width: '100%',
-                minHeight: '42px',
+                minHeight: '44px',
                 padding: '0.5rem 0.75rem',
                 borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border-strong)',
@@ -326,7 +346,7 @@ export default function SubjectPapers({
             onChange={(e) => setSortBy(e.target.value)}
             style={{
               width: '100%',
-              minHeight: '42px',
+              minHeight: '44px',
               padding: '0.5rem 0.75rem',
               borderRadius: 'var(--radius-sm)',
               border: '1px solid var(--border-strong)',
@@ -394,6 +414,12 @@ export default function SubjectPapers({
 
                     <div className="paper-item-meta">
                       <span className="paper-badge">{paper.term || 'Exam'}</span>
+
+                      {paper.isSample && (
+                        <span className="paper-meta-detail" title="Clearly-labelled practice set, not a real exam">
+                          Sample practice set
+                        </span>
+                      )}
 
                       {(paper.instructorName || paper.teacher) && (
                         <span className="paper-meta-detail" title={`Instructor: ${paper.instructorName || paper.teacher}`}>

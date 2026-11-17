@@ -2,6 +2,7 @@ import React, { useState, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useCounter } from '../../utils/useCounter';
 import { DEFAULT_SUBJECTS } from '../../constants/subjects';
+import { normalizeCourseCode } from '../../utils/paperSearch';
 import {
   getRecentActivity,
   getRecentlyViewedPapers,
@@ -140,10 +141,46 @@ export default function Home({
   const [searchFocused, setSearchFocused] = useState(false);
 
   const features = [
-    { icon: 'picture_as_pdf', title: 'Past Papers',      desc: 'Verified COMSATS exam papers & model answers across semesters', path: 'subjects' },
-    { icon: 'quiz',           title: 'Practice Quizzes', desc: 'Timed & practice MCQs with instant explanations and review',    path: 'quiz' },
-    { icon: 'auto_awesome',   title: 'AI Generator',     desc: 'Generate custom quizzes on any course topic in seconds',        path: 'ai-quiz-generator' },
-    { icon: 'calculate',      title: 'GPA Calculator',   desc: 'COMSATS-accurate SGPA, CGPA, retake & target GPA planner',       path: 'gpa' }
+    {
+      icon: 'picture_as_pdf',
+      title: 'Past Paper Library',
+      desc: 'Search every COMSATS past paper by course code, teacher, or exam type — with model answers.',
+      hint: `${DEFAULT_SUBJECTS.length} courses · code search like "csc 103"`,
+      path: 'subjects',
+      wide: true
+    },
+    {
+      icon: 'timer',
+      title: 'Timed Quizzes',
+      desc: 'Exam-style MCQs with a countdown, question flagging, and instant review.',
+      path: 'quiz'
+    },
+    {
+      icon: 'auto_awesome',
+      title: 'AI Quiz Generator',
+      desc: 'Generate custom quizzes on any course topic in seconds.',
+      path: 'ai-quiz-generator'
+    },
+    {
+      icon: 'local_fire_department',
+      title: 'Study Hub',
+      desc: 'Daily challenge, spaced-repetition flashcards, and cheat sheets.',
+      path: 'study-hub'
+    },
+    {
+      icon: 'calculate',
+      title: 'GPA Calculator',
+      desc: 'COMSATS-accurate SGPA, CGPA, retake & target GPA planner.',
+      path: 'gpa'
+    },
+    {
+      icon: 'dashboard',
+      title: 'Dashboard',
+      desc: 'Your streaks, accuracy, bookmarks, notes, and exam countdowns in one place.',
+      hint: 'Works without an account — saved on this device',
+      path: 'dashboard',
+      wide: true
+    }
   ];
 
   const stats = [
@@ -155,9 +192,11 @@ export default function Home({
   const suggestions = useMemo(() => {
     const q = heroQuery.trim().toLowerCase();
     if (!q) return DEFAULT_SUBJECTS.slice(0, 5);
+    const normalized = normalizeCourseCode(heroQuery);
     return DEFAULT_SUBJECTS.filter(
       (s) =>
         s.code.toLowerCase().includes(q) ||
+        (normalized && normalizeCourseCode(s.code).includes(normalized)) ||
         s.name.toLowerCase().includes(q) ||
         s.department.toLowerCase().includes(q)
     ).slice(0, 6);
@@ -169,11 +208,8 @@ export default function Home({
 
   const handleHeroSearchSubmit = (e) => {
     e.preventDefault();
-    if (suggestions.length > 0) {
-      onSelectSubject(suggestions[0]);
-    } else {
-      onNavigate('subjects');
-    }
+    const query = heroQuery.trim();
+    onNavigate(query ? `subjects?q=${encodeURIComponent(query)}` : 'subjects');
   };
 
   return (
@@ -269,7 +305,7 @@ export default function Home({
                   fontSize: '0.9375rem',
                   outline: 'none',
                   minWidth: 0,
-                  padding: '0.45rem 0'
+                  padding: '0.6rem 0'
                 }}
               />
               <button
@@ -282,7 +318,7 @@ export default function Home({
                   padding: '0.55rem 1.1rem',
                   fontSize: '0.8125rem',
                   fontWeight: 700,
-                  minHeight: '40px'
+                  minHeight: '44px'
                 }}
               >
                 Explore
@@ -323,6 +359,7 @@ export default function Home({
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       padding: '0.625rem 0.875rem',
+                      minHeight: '44px',
                       borderRadius: 'var(--radius-sm)',
                       border: 'none',
                       background: 'transparent',
@@ -372,13 +409,13 @@ export default function Home({
           </AnimatedButton>
         </motion.div>
 
-        {/* Feature Cards — Interactive navigation cards with spotlight effect */}
+        {/* Bento destination grid — six study destinations with spotlight effect */}
         <div className="home-features-grid">
           {features.map((f, i) => (
             <SpotlightCard
               key={f.title}
-              className="home-feature-card"
-              delay={i * 0.08}
+              className={`home-feature-card ${f.wide ? 'home-feature-card--wide' : ''}`}
+              delay={i * 0.06}
               onClick={() => onNavigate(f.path)}
               ariaLabel={`Open ${f.title}: ${f.desc}`}
             >
@@ -387,6 +424,7 @@ export default function Home({
               </div>
               <div className="home-feature-title">{f.title}</div>
               <p className="home-feature-desc">{f.desc}</p>
+              {f.hint && <span className="home-feature-hint">{f.hint}</span>}
             </SpotlightCard>
           ))}
         </div>
@@ -426,7 +464,7 @@ export default function Home({
                   padding: '0.5rem 1rem',
                   fontSize: '0.8125rem',
                   fontWeight: 700,
-                  minHeight: '40px'
+                  minHeight: '44px'
                 }}
               >
                 Open Full Dashboard →
@@ -566,57 +604,64 @@ export default function Home({
 const COMING_SOON_FEATURES = [
   {
     icon: 'smart_toy',
-    gradient: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-    glow: 'rgba(99, 102, 241, 0.3)',
+    gradient: 'linear-gradient(135deg, var(--brand-2) 0%, var(--brand) 100%)',
+    glow: 'var(--brand-soft-2)',
     label: 'AI Study Buddy',
     tag: 'AI',
-    tagColor: '#6366f1',
+    tagColor: 'var(--brand)',
+    tagBg: 'var(--brand-soft)',
     desc: 'Your personal 24/7 tutor — ask any COMSATS course question in plain Urdu or English and get step-by-step explanations, formula breakdowns, and past-paper hints instantly.',
     eta: 'Coming Q1 2027'
   },
   {
     icon: 'groups',
-    gradient: 'linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%)',
-    glow: 'rgba(14, 165, 233, 0.3)',
+    gradient: 'linear-gradient(135deg, var(--brand-light) 0%, var(--brand-2) 100%)',
+    glow: 'var(--brand-soft-2)',
     label: 'Study Groups',
     tag: 'Social',
-    tagColor: '#0ea5e9',
+    tagColor: 'var(--brand)',
+    tagBg: 'var(--brand-soft)',
     desc: 'Create or join private study rooms with your class batch. Share notes, quiz each other live, and tackle past papers together with real-time collaborative annotations.',
     eta: 'Coming Q1 2027'
   },
   {
     icon: 'auto_graph',
-    gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-    glow: 'rgba(16, 185, 129, 0.3)',
+    gradient: 'linear-gradient(135deg, var(--success) 0%, var(--brand-2) 100%)',
+    glow: 'var(--success-soft)',
     label: 'Smart Weak-Point Radar',
     tag: 'Analytics',
-    tagColor: '#10b981',
+    tagColor: 'var(--success)',
+    tagBg: 'var(--success-soft)',
     desc: "Auto-detects your shakiest topics from quiz history and generates a targeted 7-day study schedule — so you spend zero time guessing what to revise.",
     eta: 'Coming Q2 2027'
   },
   {
     icon: 'model_training',
-    gradient: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
-    glow: 'rgba(245, 158, 11, 0.3)',
+    gradient: 'linear-gradient(135deg, var(--accent) 0%, var(--danger) 100%)',
+    glow: 'var(--accent-soft)',
     label: 'Mock Exam Simulator',
     tag: 'Exams',
-    tagColor: '#f59e0b',
+    tagColor: 'var(--accent)',
+    tagBg: 'var(--accent-soft)',
     desc: 'Full 3-hour timed midterm & terminal simulations with official COMSATS marking schemes. Get auto-graded, see your predicted grade, and compare with the class.',
     eta: 'Coming Q2 2027'
   },
   {
     icon: 'notifications_active',
-    gradient: 'linear-gradient(135deg, #14b8a6 0%, #2563eb 100%)',
-    glow: 'rgba(20, 184, 166, 0.3)',
+    gradient: 'linear-gradient(135deg, var(--brand) 0%, var(--success) 100%)',
+    glow: 'var(--brand-soft)',
     label: 'Exam Countdown Alerts',
     tag: 'Reminders',
-    tagColor: '#14b8a6',
+    tagColor: 'var(--brand)',
+    tagBg: 'var(--brand-soft)',
     desc: 'Set your COMSATS exam dates and receive smart push / WhatsApp reminders with daily revision tasks, so you never miss a beat in the final week.',
     eta: 'Coming Q3 2027'
   }
 ];
 
 function ComingSoonBanner() {
+  const [expanded, setExpanded] = useState(false);
+
   return (
     <motion.section
       aria-label="Coming Soon Features"
@@ -631,19 +676,19 @@ function ComingSoonBanner() {
       }}
     >
       {/* Section header */}
-      <div style={{ textAlign: 'center', marginBottom: '2.25rem' }}>
+      <div style={{ textAlign: 'center', marginBottom: expanded ? '2.25rem' : '0' }}>
         <div
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.5rem',
-            background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.12))',
-            border: '1px solid rgba(99,102,241,0.25)',
+            background: 'var(--brand-soft)',
+            border: '1px solid var(--brand-soft-2)',
             borderRadius: '9999px',
             padding: '0.35rem 1rem',
             fontSize: '0.75rem',
             fontWeight: 800,
-            color: '#6366f1',
+            color: 'var(--brand)',
             letterSpacing: '0.06em',
             textTransform: 'uppercase',
             marginBottom: '0.875rem'
@@ -661,177 +706,205 @@ function ComingSoonBanner() {
             marginBottom: '0.5rem'
           }}
         >
-          Big features are on the way 🚀
+          Big features are on the way
         </h2>
-        <p style={{ fontSize: '0.9375rem', color: 'var(--text-subtle)', maxWidth: '32rem', margin: '0 auto' }}>
+        <p style={{ fontSize: '0.9375rem', color: 'var(--text-subtle)', maxWidth: '32rem', margin: '0 auto 1.25rem' }}>
           We're building the most powerful exam-prep platform ever made for COMSATS students. Here's a sneak peek.
         </p>
+        <button
+          type="button"
+          onClick={() => setExpanded((value) => !value)}
+          aria-expanded={expanded}
+          aria-controls="coming-soon-panel"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            minHeight: '44px',
+            padding: '0.6rem 1.25rem',
+            borderRadius: '9999px',
+            border: '1.5px solid var(--border-strong)',
+            background: 'var(--surface)',
+            color: 'var(--brand)',
+            fontSize: '0.875rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            boxShadow: 'var(--shadow-1)'
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">
+            {expanded ? 'expand_less' : 'expand_more'}
+          </span>
+          {expanded ? 'Hide upcoming features' : `Preview ${COMING_SOON_FEATURES.length} upcoming features`}
+        </button>
       </div>
 
-      {/* Feature cards grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
-          gap: '1.125rem'
-        }}
-      >
-        {COMING_SOON_FEATURES.map((f, i) => (
-          <motion.div
-            key={f.label}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4, delay: i * 0.07, ease: 'easeOut' }}
+      {expanded && (
+        <div id="coming-soon-panel">
+          {/* Feature cards grid */}
+          <div
             style={{
-              position: 'relative',
-              background: 'var(--surface)',
-              borderRadius: 'var(--radius-xl)',
-              border: '1px solid var(--border)',
-              padding: '1.5rem',
-              overflow: 'hidden',
-              boxShadow: `0 4px 24px ${f.glow}, var(--shadow-1)`
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
+              gap: '1.125rem'
             }}
           >
-            {/* Subtle glow blob behind icon */}
-            <div
-              aria-hidden="true"
-              style={{
-                position: 'absolute',
-                top: '-30px',
-                right: '-20px',
-                width: '120px',
-                height: '120px',
-                background: `radial-gradient(circle, ${f.glow} 0%, transparent 70%)`,
-                pointerEvents: 'none'
-              }}
-            />
-
-            {/* Top row: icon + COMING SOON badge */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <div
+            {COMING_SOON_FEATURES.map((f, i) => (
+              <motion.div
+                key={f.label}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.07, ease: 'easeOut' }}
                 style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: 'var(--radius-md)',
-                  background: f.gradient,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  boxShadow: `0 4px 12px ${f.glow}`
+                  position: 'relative',
+                  background: 'var(--surface)',
+                  borderRadius: 'var(--radius-xl)',
+                  border: '1px solid var(--border)',
+                  padding: '1.5rem',
+                  overflow: 'hidden',
+                  boxShadow: `0 4px 24px ${f.glow}, var(--shadow-1)`
                 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '22px', color: '#fff' }} aria-hidden="true">
-                  {f.icon}
-                </span>
-              </div>
+                {/* Subtle glow blob behind icon */}
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    top: '-30px',
+                    right: '-20px',
+                    width: '120px',
+                    height: '120px',
+                    background: `radial-gradient(circle, ${f.glow} 0%, transparent 70%)`,
+                    pointerEvents: 'none'
+                  }}
+                />
 
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem' }}>
-                {/* Category tag */}
-                <span
-                  style={{
-                    fontSize: '0.65rem',
-                    fontWeight: 800,
-                    letterSpacing: '0.06em',
-                    textTransform: 'uppercase',
-                    color: f.tagColor,
-                    background: `${f.tagColor}18`,
-                    border: `1px solid ${f.tagColor}40`,
-                    borderRadius: '9999px',
-                    padding: '0.2rem 0.55rem'
-                  }}
-                >
-                  {f.tag}
-                </span>
-                {/* Coming soon pill */}
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.3rem',
-                    fontSize: '0.65rem',
-                    fontWeight: 800,
-                    letterSpacing: '0.05em',
-                    textTransform: 'uppercase',
-                    color: '#94a3b8',
-                    background: 'var(--surface-3)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '9999px',
-                    padding: '0.2rem 0.55rem'
-                  }}
-                >
-                  <span
+                {/* Top row: icon + COMING SOON badge */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                  <div
                     style={{
-                      width: '6px',
-                      height: '6px',
-                      borderRadius: '50%',
-                      background: '#f59e0b',
-                      animation: 'pulse 2s infinite',
-                      flexShrink: 0
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: 'var(--radius-md)',
+                      background: f.gradient,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      boxShadow: `0 4px 12px ${f.glow}`
                     }}
-                  />
-                  Coming Soon
-                </span>
-              </div>
-            </div>
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: '22px', color: 'var(--on-brand)' }} aria-hidden="true">
+                      {f.icon}
+                    </span>
+                  </div>
 
-            {/* Title */}
-            <h3
-              style={{
-                fontSize: '1rem',
-                fontWeight: 800,
-                color: 'var(--text)',
-                marginBottom: '0.4rem',
-                letterSpacing: '-0.01em'
-              }}
-            >
-              {f.label}
-            </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem' }}>
+                    {/* Category tag */}
+                    <span
+                      style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 800,
+                        letterSpacing: '0.06em',
+                        textTransform: 'uppercase',
+                        color: f.tagColor,
+                        background: f.tagBg,
+                        border: '1px solid var(--border)',
+                        borderRadius: '9999px',
+                        padding: '0.2rem 0.55rem'
+                      }}
+                    >
+                      {f.tag}
+                    </span>
+                    {/* Coming soon pill */}
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                        fontSize: '0.65rem',
+                        fontWeight: 800,
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
+                        color: 'var(--text-subtle)',
+                        background: 'var(--surface-3)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '9999px',
+                        padding: '0.2rem 0.55rem'
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          background: 'var(--accent)',
+                          animation: 'pulse 2s infinite',
+                          flexShrink: 0
+                        }}
+                      />
+                      Coming Soon
+                    </span>
+                  </div>
+                </div>
 
-            {/* Description */}
-            <p
-              style={{
-                fontSize: '0.8125rem',
-                color: 'var(--text-subtle)',
-                lineHeight: 1.65,
-                marginBottom: '1rem'
-              }}
-            >
-              {f.desc}
-            </p>
+                {/* Title */}
+                <h3
+                  style={{
+                    fontSize: '1rem',
+                    fontWeight: 800,
+                    color: 'var(--text)',
+                    marginBottom: '0.4rem',
+                    letterSpacing: '-0.01em'
+                  }}
+                >
+                  {f.label}
+                </h3>
 
-            {/* ETA footer */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                color: '#94a3b8',
-                borderTop: '1px solid var(--border)',
-                paddingTop: '0.875rem'
-              }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '14px' }} aria-hidden="true">schedule</span>
-              {f.eta}
-            </div>
-          </motion.div>
-        ))}
-      </div>
+                {/* Description */}
+                <p
+                  style={{
+                    fontSize: '0.8125rem',
+                    color: 'var(--text-subtle)',
+                    lineHeight: 1.65,
+                    marginBottom: '1rem'
+                  }}
+                >
+                  {f.desc}
+                </p>
 
-      {/* Bottom CTA */}
-      <div
-        style={{
-          textAlign: 'center',
-          marginTop: '2rem',
-          padding: '1.5rem',
-          background: 'linear-gradient(135deg, rgba(30,58,138,0.06) 0%, rgba(99,102,241,0.06) 100%)',
-          borderRadius: 'var(--radius-xl)',
-          border: '1px dashed var(--border-strong)'
-        }}
-      >
+                {/* ETA footer */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: 'var(--text-subtle)',
+                    borderTop: '1px solid var(--border)',
+                    paddingTop: '0.875rem'
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }} aria-hidden="true">schedule</span>
+                  {f.eta}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Bottom CTA */}
+          <div
+            style={{
+              textAlign: 'center',
+              marginTop: '2rem',
+              padding: '1.5rem',
+              background: 'linear-gradient(135deg, var(--brand-soft) 0%, var(--accent-soft) 100%)',
+              borderRadius: 'var(--radius-xl)',
+              border: '1px dashed var(--border-strong)'
+            }}
+          >
         <span className="material-symbols-outlined" style={{ fontSize: '28px', color: 'var(--brand)', display: 'block', marginBottom: '0.5rem' }} aria-hidden="true">
           campaign
         </span>
@@ -868,7 +941,9 @@ function ComingSoonBanner() {
             WhatsApp (0314 9574912)
           </a>
         </div>
-      </div>
+          </div>
+        </div>
+      )}
     </motion.section>
   );
 }

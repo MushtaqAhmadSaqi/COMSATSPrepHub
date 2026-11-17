@@ -307,7 +307,7 @@ export default function PaperView({
               type="button"
               onClick={() => setZoomScale((z) => Math.max(0.85, Number((z - 0.1).toFixed(2))))}
               aria-label="Zoom out"
-              style={{ border: 'none', background: 'transparent', padding: '0.45rem 0.7rem', color: 'var(--text)', minHeight: '40px' }}
+              style={{ border: 'none', background: 'transparent', padding: '0.45rem 0.7rem', color: 'var(--text)', minHeight: '44px', minWidth: '44px' }}
             >
               A-
             </button>
@@ -318,7 +318,7 @@ export default function PaperView({
               type="button"
               onClick={() => setZoomScale((z) => Math.min(1.35, Number((z + 0.1).toFixed(2))))}
               aria-label="Zoom in"
-              style={{ border: 'none', background: 'transparent', padding: '0.45rem 0.7rem', color: 'var(--text)', minHeight: '40px' }}
+              style={{ border: 'none', background: 'transparent', padding: '0.45rem 0.7rem', color: 'var(--text)', minHeight: '44px', minWidth: '44px' }}
             >
               A+
             </button>

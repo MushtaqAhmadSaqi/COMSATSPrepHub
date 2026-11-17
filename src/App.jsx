@@ -304,9 +304,11 @@ export default function App() {
   }, []);
 
   const handleNavigate = (path) => {
-    const normalized = normalizeRoute(path);
+    const [rawPath, rawQuery] = String(path).split('?');
+    const normalized = normalizeRoute(rawPath);
     setActivePath(normalized);
-    const newUrl = normalized === 'home' ? '/' : `#${normalized}`;
+    const querySuffix = rawQuery ? `?${rawQuery}` : '';
+    const newUrl = normalized === 'home' ? '/' : `#${normalized}${querySuffix}`;
     window.history.pushState({ path: normalized }, '', newUrl);
     window.scrollTo({ top: 0, behavior: reduceMotion ? 'instant' : 'smooth' });
   };
@@ -339,7 +341,16 @@ export default function App() {
       case 'team':
         return <About />;
       case 'subjects':
-        return <Subjects onSelectSubject={handleSelectSubject} />;
+        return (
+          <Subjects
+            onSelectSubject={handleSelectSubject}
+            onNavigate={handleNavigate}
+            onViewPaper={(paper) => {
+              setSelectedPaper(paper);
+              handleNavigate('paper-view');
+            }}
+          />
+        );
       case 'subject-papers':
         return (
           <SubjectPapers

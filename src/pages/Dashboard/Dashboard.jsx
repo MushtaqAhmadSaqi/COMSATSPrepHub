@@ -704,6 +704,8 @@ export default function Dashboard({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.85rem' }}>
               {exams.map((ex) => {
                 const days = getDaysRemaining(ex.date);
+                const isSample = String(ex.id || '').startsWith('exam-default-');
+                const isPassed = days !== null && days < 0;
                 return (
                   <div
                     key={ex.id}
@@ -711,18 +713,23 @@ export default function Dashboard({
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
+                      gap: '0.5rem',
                       padding: '0.6rem 0.75rem',
                       borderRadius: '10px',
                       border: '1px solid var(--sd-line)',
                       background: 'var(--sd-bg)',
-                      fontSize: '0.8125rem'
+                      fontSize: '0.8125rem',
+                      opacity: isPassed ? 0.75 : 1
                     }}
                   >
-                    <div>
-                      <strong style={{ display: 'block' }}>{ex.course}</strong>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--sd-muted)' }}>{ex.date}</span>
+                    <div style={{ minWidth: 0 }}>
+                      <strong style={{ display: 'block', overflowWrap: 'anywhere' }}>{ex.course}</strong>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--sd-muted)' }}>
+                        {ex.date}
+                        {isSample && ' · Sample reminder — edit or remove it'}
+                      </span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
                       <span
                         style={{
                           padding: '0.2rem 0.55rem',
@@ -730,16 +737,28 @@ export default function Dashboard({
                           background: 'var(--sd-soft)',
                           color: 'var(--sd-brand)',
                           fontSize: '0.72rem',
-                          fontWeight: 800
+                          fontWeight: 800,
+                          whiteSpace: 'nowrap'
                         }}
                       >
-                        {days === null ? '—' : days < 0 ? 'Passed' : days === 0 ? 'Today!' : `${days}d left`}
+                        {days === null ? '—' : isPassed ? 'Passed' : days === 0 ? 'Today!' : `${days}d left`}
                       </span>
                       <button
                         type="button"
                         onClick={() => handleRemoveExam(ex.id)}
                         aria-label={`Remove ${ex.course} exam reminder`}
-                        style={{ background: 'none', border: 'none', color: 'var(--sd-muted)', padding: '2px' }}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--sd-muted)',
+                          width: '44px',
+                          height: '44px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '8px',
+                          cursor: 'pointer'
+                        }}
                       >
                         <Icon name="close" />
                       </button>
@@ -757,6 +776,7 @@ export default function Dashboard({
                 onChange={(e) => setNewExamCourse(e.target.value)}
                 aria-label="Exam course title"
                 style={{
+                  minHeight: '44px',
                   padding: '0.5rem 0.65rem',
                   borderRadius: '8px',
                   border: '1px solid var(--sd-line)',
@@ -773,6 +793,8 @@ export default function Dashboard({
                   aria-label="Exam date"
                   style={{
                     flex: 1,
+                    minHeight: '44px',
+                    minWidth: 0,
                     padding: '0.5rem 0.65rem',
                     borderRadius: '8px',
                     border: '1px solid var(--sd-line)',

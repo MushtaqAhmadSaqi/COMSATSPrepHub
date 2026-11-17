@@ -177,15 +177,19 @@ html.dark .auth-alert-success {
 
 .auth-eye-btn {
   position: absolute;
-  right: 0.75rem;
+  right: 0.25rem;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   color: var(--text-subtle);
-  padding: 0.25rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
+  cursor: pointer;
   transition: color 0.2s;
 }
 
@@ -284,6 +288,8 @@ html.dark .auth-alert-success {
   color: var(--brand);
   font-weight: 700;
   font-size: 0.875rem;
+  min-height: 2.75rem;
+  padding: 0.25rem 0.5rem;
   margin-left: 0.25rem;
   cursor: pointer;
   transition: color 0.2s;

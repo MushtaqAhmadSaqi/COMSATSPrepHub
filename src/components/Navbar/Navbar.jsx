@@ -10,12 +10,13 @@ const desktopNavItems = [
   { id: 'gpa',               label: 'GPA Calc',  icon: 'calculate' }
 ];
 
-// Mobile bottom navigation bar — core student study tabs: Papers, AI Quiz, Study Hub, GPA
+// Mobile bottom navigation bar — core student study tabs plus one-hand Dashboard access
 const mobileNavItems = [
   { id: 'subjects',          label: 'Papers',    icon: 'menu_book' },
   { id: 'ai-quiz-generator', label: 'AI Quiz',   icon: 'auto_awesome' },
   { id: 'study-hub',         label: 'Study Hub', icon: 'psychology' },
-  { id: 'gpa',               label: 'GPA',       icon: 'calculate' }
+  { id: 'gpa',               label: 'GPA',       icon: 'calculate' },
+  { id: 'dashboard',         label: 'Dashboard', icon: 'dashboard' }
 ];
 
 export default function Navbar({

@@ -128,7 +128,7 @@ export default function FaqContact() {
 
         {sent ? (
           <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '3rem', color: '#10b981' }}>check_circle</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '3rem', color: 'var(--success)' }}>check_circle</span>
             <h3 style={{ margin: '0.5rem 0' }}>Thank you!</h3>
             <p style={{ color: 'var(--text-subtle)' }}>Your message is in the support queue. You can also email us using the links in the footer.</p>
           </div>
@@ -142,7 +142,7 @@ export default function FaqContact() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your Name"
-                style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-strong)', background: 'var(--surface-2)', color: 'var(--text)' }}
+                style={{ width: '100%', minHeight: '44px', padding: '0.625rem 0.875rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-strong)', background: 'var(--surface-2)', color: 'var(--text)' }}
                 required
               />
             </div>
@@ -154,7 +154,7 @@ export default function FaqContact() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="student@comsats.edu.pk"
-                style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-strong)', background: 'var(--surface-2)', color: 'var(--text)' }}
+                style={{ width: '100%', minHeight: '44px', padding: '0.625rem 0.875rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-strong)', background: 'var(--surface-2)', color: 'var(--text)' }}
                 required
               />
             </div>
@@ -166,7 +166,7 @@ export default function FaqContact() {
                 onChange={(e) => setMessage(e.target.value)}
                 rows={4}
                 placeholder="How can we help?"
-                style={{ width: '100%', padding: '0.625rem 0.875rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-strong)', background: 'var(--surface-2)', color: 'var(--text)' }}
+                style={{ width: '100%', minHeight: '44px', padding: '0.625rem 0.875rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-strong)', background: 'var(--surface-2)', color: 'var(--text)' }}
                 required
               />
             </div>
@@ -175,6 +175,7 @@ export default function FaqContact() {
               disabled={submitting}
               style={{
                 alignSelf: 'flex-start',
+                minHeight: '44px',
                 padding: '0.625rem 1.5rem',
                 borderRadius: '9999px',
                 background: 'var(--brand)',

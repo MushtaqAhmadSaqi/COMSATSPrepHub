@@ -410,9 +410,11 @@ export default function TakeAiQuiz({
               color: 'var(--on-brand)',
               border: 'none',
               borderRadius: '9999px',
-              padding: '0.35rem 0.75rem',
+              minHeight: '44px',
+              padding: '0.35rem 0.9rem',
               fontSize: '0.75rem',
-              fontWeight: 700
+              fontWeight: 700,
+              cursor: 'pointer'
             }}
           >
             Export

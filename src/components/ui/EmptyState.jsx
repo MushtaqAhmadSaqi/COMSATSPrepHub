@@ -54,6 +54,7 @@ export default function EmptyState({ icon = 'inbox', title, description, actionL
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.625rem 1.5rem',
+            minHeight: '44px',
             borderRadius: '9999px',
             border: 'none',
             background: 'var(--brand)',

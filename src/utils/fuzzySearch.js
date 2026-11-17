@@ -1,4 +1,5 @@
 import { DEFAULT_SUBJECTS } from '../constants/subjects.js';
+import { normalizeCourseCode } from './paperSearch.js';
 
 /**
  * Scoring logic for fuzzy search in Command Palette & Global Search.
@@ -64,7 +65,7 @@ export function getCommandPaletteResults(query = '', { isLoggedIn = false } = {}
     ...DEFAULT_SUBJECTS.slice(0, 12).map((subj) => ({
       id: `paper_${subj.code}_term`,
       group: 'Papers',
-      label: `${subj.code} Terminal & Midterm Past Papers (${subj.name})`,
+      label: `${subj.code} Past Papers (${subj.name})`,
       icon: 'description',
       path: 'subject-papers',
       subjectCode: subj.code,
@@ -91,11 +92,17 @@ export function getCommandPaletteResults(query = '', { isLoggedIn = false } = {}
     return allItems.filter((item) => item.group === 'Pages' || item.group === 'Actions').slice(0, 12);
   }
 
+  const normalizedQuery = normalizeCourseCode(trimmed);
+
   const scored = allItems
     .map((item) => {
       const labelScore = calculateScore(trimmed, item.label);
       const codeScore = item.subjectCode ? calculateScore(trimmed, item.subjectCode) : 0;
-      const finalScore = Math.max(labelScore, codeScore);
+      const normalizedCodeScore =
+        item.subjectCode && normalizedQuery && normalizeCourseCode(item.subjectCode).includes(normalizedQuery)
+          ? 95
+          : 0;
+      const finalScore = Math.max(labelScore, codeScore, normalizedCodeScore);
       return { ...item, score: finalScore };
     })
     .filter((item) => item.score > 0);

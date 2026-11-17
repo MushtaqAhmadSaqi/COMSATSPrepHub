@@ -26,7 +26,7 @@ html.dark .study-dashboard {
   --sd-line: #2b3749;
   --sd-brand: #9bb9ff;
   --sd-soft: #1d2d49;
-  --sd-note: #25251f;
+  --sd-note: var(--surface-2);
 }
 
 .study-dashboard,
@@ -86,7 +86,7 @@ html.dark .study-dashboard {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 42px;
+  min-height: 44px;
   padding: 0 14px;
   flex-shrink: 0;
   border: 1px solid var(--sd-line);
@@ -131,12 +131,12 @@ html.dark .study-dashboard {
 }
 
 .study-dashboard__error {
-  color: #b42318;
+  color: var(--danger);
   font-size: 13px;
 }
 
 html.dark .study-dashboard__error {
-  color: #fda29b;
+  color: #ef4444;
 }
 
 /* Overview: a single structured strip, not three floating tiles */
@@ -255,8 +255,8 @@ html.dark .study-dashboard__error {
   padding: 0 17px;
   border: 0;
   border-radius: 7px;
-  background: #2859ce;
-  color: white;
+  background: var(--brand);
+  color: var(--on-brand);
   font-size: 13px !important;
   font-weight: 600 !important;
   cursor: pointer;
@@ -264,7 +264,7 @@ html.dark .study-dashboard__error {
 }
 
 .study-dashboard__primary:hover {
-  background: #2049ac;
+  background: var(--brand-hover);
 }
 
 .study-dashboard__primary .material-symbols-outlined {
@@ -321,7 +321,7 @@ html.dark .study-dashboard__error {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  color: #16803c;
+  color: var(--text);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -332,12 +332,12 @@ html.dark .study-dashboard__error {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #20a653;
-  box-shadow: 0 0 0 4px rgba(32, 166, 83, 0.14);
+  background: var(--success);
+  box-shadow: 0 0 0 4px var(--success-soft);
 }
 
 html.dark .study-dashboard__live-label {
-  color: #77d99a;
+  color: var(--text);
 }
 
 .study-dashboard__activity-list {
@@ -634,8 +634,8 @@ html.dark .study-dashboard__live-label {
   max-width: 1280px;
   padding: 48px 32px 42px;
   background:
-    radial-gradient(circle at 88% 4%, rgba(86, 173, 255, 0.13), transparent 28rem),
-    radial-gradient(circle at 8% 32%, rgba(112, 218, 210, 0.1), transparent 25rem);
+    radial-gradient(circle at 88% 4%, var(--brand-soft-2), transparent 28rem),
+    radial-gradient(circle at 8% 32%, var(--success-soft), transparent 25rem);
 }
 
 .study-dashboard__header {
@@ -645,7 +645,7 @@ html.dark .study-dashboard__live-label {
 
 .study-dashboard__eyebrow,
 .study-dashboard__section-label {
-  color: #2859ce;
+  color: var(--brand);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.11em;
@@ -678,14 +678,14 @@ html.dark .study-dashboard__live-label {
 
 .study-dashboard__metric {
   padding: 22px 22px 20px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
+  border: 1px solid var(--border);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.84);
-  box-shadow: 0 12px 30px rgba(31, 70, 120, 0.08);
+  background: var(--surface);
+  box-shadow: var(--shadow-2);
 }
 
 .study-dashboard__metric + .study-dashboard__metric {
-  border-left: 1px solid rgba(148, 163, 184, 0.22);
+  border-left: 1px solid var(--border);
 }
 
 .study-dashboard__metric-top .material-symbols-outlined {
@@ -694,7 +694,8 @@ html.dark .study-dashboard__live-label {
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: #e8f0ff;
+  background: var(--brand-soft-2);
+  color: var(--brand);
 }
 
 .study-dashboard__metric-value {
@@ -707,8 +708,8 @@ html.dark .study-dashboard__live-label {
   padding: 34px;
   border: 0;
   border-radius: 26px;
-  background: linear-gradient(135deg, rgba(226, 239, 255, 0.98), rgba(235, 250, 249, 0.95));
-  box-shadow: 0 18px 42px rgba(44, 91, 150, 0.11);
+  background: linear-gradient(135deg, var(--brand-soft-2), var(--success-soft));
+  box-shadow: var(--shadow-2);
 }
 
 .study-dashboard__feature h2 {
@@ -725,16 +726,16 @@ html.dark .study-dashboard__live-label {
 .study-dashboard__primary {
   min-height: 48px;
   border-radius: 14px;
-  box-shadow: 0 8px 18px rgba(40, 89, 206, 0.2);
+  box-shadow: var(--shadow-brand);
 }
 
 .study-dashboard__activity,
 .study-dashboard__tools {
   padding: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  border: 1px solid var(--border);
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 12px 30px rgba(31, 70, 120, 0.06);
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
 }
 
 .study-dashboard__activity-icon {
@@ -742,12 +743,12 @@ html.dark .study-dashboard__live-label {
   height: 42px;
   border: 0;
   border-radius: 13px;
-  background: #edf3ff;
-  color: #2859ce;
+  background: var(--brand-soft-2);
+  color: var(--brand);
 }
 
 html.dark .study-dashboard {
-  background: radial-gradient(circle at 88% 4%, rgba(52, 112, 197, 0.2), transparent 28rem), var(--sd-bg);
+  background: radial-gradient(circle at 88% 4%, var(--brand-soft-2), transparent 28rem), var(--sd-bg);
 }
 
 html.dark .study-dashboard__preview {
@@ -758,12 +759,8 @@ html.dark .study-dashboard__preview {
 html.dark .study-dashboard__metric,
 html.dark .study-dashboard__activity,
 html.dark .study-dashboard__tools {
-  background: rgba(21, 31, 46, 0.88);
+  background: var(--sd-surface);
   border-color: var(--sd-line);
-}
-
-html.dark .study-dashboard__feature {
-  background: linear-gradient(135deg, #1d3556, #173c43);
 }
 
 @media (max-width: 720px) {

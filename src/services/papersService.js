@@ -145,6 +145,22 @@ function buildFallbackPapers(subjectCode, subjectName) {
   return [sample('terminal-2024', 'A'), sample('midterm-2024', 'B'), sample('terminal-2023', 'C')];
 }
 
+function mapPaperRow(item, subjectCode, subjectName) {
+  return {
+    id: item.id,
+    title: item.title || item.paper_title || buildPaperTitle(item),
+    term: item.term || item.exam_type || 'Exam',
+    year: item.year || new Date().getFullYear(),
+    semester: item.semester || '',
+    file_url: item.file_url || item.pdf_url || item.url || null,
+    subjectCode: item.subject_code || subjectCode || '',
+    subjectName: item.subject_name || subjectName || '',
+    totalMarks: item.total_marks || null,
+    instructorName: item.instructor_name || item.instructor || item.teacher_name || item.teacher || item.faculty || null,
+    createdAt: item.created_at || null
+  };
+}
+
 /**
  * Fetches past papers for a specific subject from Supabase 'past_papers' table with 5-minute caching.
  */
@@ -191,25 +207,57 @@ export async function fetchPapersForSubjectFromSupabase(subjectCode, subjectName
       return fallback;
     }
 
-    const mapped = data.map((item) => ({
-      id: item.id,
-      title: item.title || item.paper_title || buildPaperTitle(item),
-      term: item.term || item.exam_type || 'Exam',
-      year: item.year || new Date().getFullYear(),
-      semester: item.semester || '',
-      file_url: item.file_url || item.pdf_url || item.url || null,
-      subjectCode: item.subject_code || subjectCode || '',
-      subjectName: item.subject_name || subjectName || '',
-      totalMarks: item.total_marks || null,
-      instructorName: item.instructor_name || item.instructor || item.teacher_name || item.teacher || item.faculty || null,
-      createdAt: item.created_at || null
-    }));
+    const mapped = data.map((item) => mapPaperRow(item, subjectCode, subjectName));
 
     setCached(cacheKey, mapped);
     return mapped;
   } catch (err) {
     logger.warn('papersService.fetchPapers', err?.message || err);
     return buildFallbackPapers(subjectCode, subjectName);
+  }
+}
+
+/**
+ * Global paper search source: loads papers across all subjects for the
+ * course-code / exam-type / semester / year search on the Subjects page.
+ * Falls back to clearly-labelled sample practice sets in guest/offline mode.
+ */
+export async function fetchAllPapersFromSupabase() {
+  const cached = getCached('papers_all');
+  if (cached) return cached;
+
+  const buildAllFallbackPapers = () =>
+    DEFAULT_SUBJECTS.flatMap((subj) => buildFallbackPapers(subj.code, subj.name));
+
+  if (!isSupabaseConfigured) {
+    const fallback = buildAllFallbackPapers();
+    setCached('papers_all', fallback);
+    return fallback;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('past_papers')
+      .select('*')
+      .order('year', { ascending: false })
+      .limit(400)
+      .retry(false);
+
+    if (error || !data || data.length === 0) {
+      if (error) logger.warn('papersService.fetchAllPapers', error.message);
+      const fallback = buildAllFallbackPapers();
+      setCached('papers_all', fallback, error ? SUBJECTS_FALLBACK_TTL_MS : CACHE_TTL_MS);
+      return fallback;
+    }
+
+    const mapped = data.map((item) => mapPaperRow(item));
+    setCached('papers_all', mapped);
+    return mapped;
+  } catch (err) {
+    logger.warn('papersService.fetchAllPapers', err?.message || err);
+    const fallback = buildAllFallbackPapers();
+    setCached('papers_all', fallback, SUBJECTS_FALLBACK_TTL_MS);
+    return fallback;
   }
 }
 
