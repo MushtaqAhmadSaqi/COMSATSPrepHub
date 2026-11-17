@@ -1,0 +1,149 @@
+{
+  "browser": "Isolated headless Microsoft Edge",
+  "checks": [
+    {
+      "name": "Timed quiz remains visible while reviewing long content",
+      "passed": false,
+      "error": "Expected values to be strictly equal:\n\nfalse !== true\n",
+      "diagnostics": {
+        "hash": "#quiz",
+        "heading": "Introduction to ICT",
+        "activeElement": {
+          "tag": "BODY",
+          "id": "",
+          "label": null
+        },
+        "documentFocused": true,
+        "homePresent": false,
+        "searchFocused": false,
+        "suggestionsPresent": false,
+        "outline": null
+      }
+    },
+    {
+      "name": "Curated-bank fallback is identified",
+      "passed": true
+    },
+    {
+      "name": "GPA course table remains usable with many courses",
+      "passed": true
+    },
+    {
+      "name": "Long display math scrolls inside its container",
+      "passed": true
+    }
+  ],
+  "screenshots": [
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-refinement-2026-11-16\\scenarios-functional\\curated-bank-functional-360.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-refinement-2026-11-16\\scenarios-functional\\gpa-many-courses-functional-360.png",
+    "D:\\PastPaperPrep\\Full front end\\tests\\ui-refinement-2026-11-16\\scenarios-functional\\long-latex-functional-360.png"
+  ],
+  "blockedRequests": [
+    {
+      "method": "OPTIONS",
+      "host": "uicfxrfxjffyuxfqszhs.supabase.co",
+      "path": "/rest/v1/past_papers"
+    },
+    {
+      "method": "POST",
+      "host": "127.0.0.1",
+      "path": "/api/generate-quiz"
+    },
+    {
+      "method": "POST",
+      "host": "127.0.0.1",
+      "path": "/api/generate-quiz"
+    }
+  ],
+  "networkErrors": [
+    {
+      "host": "uicfxrfxjffyuxfqszhs.supabase.co",
+      "path": "/rest/v1/past_papers",
+      "status": 503
+    },
+    {
+      "host": "uicfxrfxjffyuxfqszhs.supabase.co",
+      "path": "/rest/v1/past_papers",
+      "error": "net::ERR_FAILED"
+    },
+    {
+      "host": "127.0.0.1",
+      "path": "/api/generate-quiz",
+      "status": 503
+    },
+    {
+      "host": "127.0.0.1",
+      "path": "/api/generate-quiz",
+      "status": 503
+    }
+  ],
+  "consoleErrors": [],
+  "exceptions": [],
+  "stage": "functional",
+  "target": "critical-scenarios",
+  "measurements": [
+    {
+      "area": "timed-quiz",
+      "beforeScroll": {
+        "timer": {
+          "top": 267.5,
+          "bottom": 302.5,
+          "width": 100
+        },
+        "header": {
+          "top": 142,
+          "bottom": 320
+        },
+        "time": "timer7:30"
+      },
+      "afterScroll": {
+        "timer": {
+          "top": -1208.5,
+          "bottom": -1173.5,
+          "width": 100
+        },
+        "visible": false,
+        "time": "timer7:30"
+      }
+    },
+    {
+      "area": "curated-bank-fallback",
+      "badge": "✨ Curated Bank · Medium",
+      "hasExplanatoryNotice": false
+    },
+    {
+      "area": "gpa-many-courses",
+      "rows": 8,
+      "documentScrollWidth": 354,
+      "viewportWidth": 360,
+      "panel": {
+        "left": 16,
+        "right": 338
+      },
+      "inputModes": [
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric",
+        "numeric"
+      ]
+    },
+    {
+      "area": "long-latex",
+      "clientWidth": 320,
+      "scrollWidth": 320,
+      "overflowX": "auto",
+      "documentScrollWidth": 354,
+      "viewportWidth": 360
+    }
+  ],
+  "fontStatus": {
+    "inter": true,
+    "display": true,
+    "icons": true
+  },
+  "completed": true
+}

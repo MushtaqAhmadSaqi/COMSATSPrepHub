@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { createClient } from '@supabase/supabase-js';
-import { GRADING_SCALE, getGradeInfo, calcSessionalCourseResult, isValidCourseCredits } from '../src/services/gpaEngine.js';
+import { GRADING_SCALE, getGradeInfo, calcSessionalCourseResult, isValidCourseCredits, calculateRequiredSgpa, calculateNtsAggregate, NTS_NAT_WEIGHTS } from '../src/services/gpaEngine.js';
 import { isSafeRedirectUrl, isSafePdfUrl, sanitizePlainText } from '../src/utils/sanitize.js';
 import { getCommandPaletteResults } from '../src/utils/fuzzySearch.js';
 import generateQuizHandler, { parseAndValidateQuiz } from '../api/generate-quiz.js';

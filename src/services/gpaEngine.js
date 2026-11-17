@@ -21,6 +21,45 @@ export const DEFAULT_SCHEME = {
   lab: { assignmentWeight: 25, midWeight: 25, finalWeight: 50 }
 };
 
+export const NTS_NAT_WEIGHTS = Object.freeze({ matric: 0.10, hssc: 0.40, nat: 0.50 });
+
+export function calculateRequiredSgpa({ currentCgpa, completedCredits, remainingCredits, targetCgpa }) {
+  const errors = {};
+  for (const [field, value] of Object.entries({ currentCgpa, targetCgpa })) {
+    if (!Number.isFinite(value) || value < 0 || value > 4) errors[field] = 'Enter a CGPA between 0.00 and 4.00.';
+  }
+  for (const [field, value] of Object.entries({ completedCredits, remainingCredits })) {
+    if (!Number.isSafeInteger(value) || value <= 0) errors[field] = 'Enter positive whole-number credit hours.';
+  }
+  if (Object.keys(errors).length) return { status: 'invalid', errors };
+  const totalCredits = completedCredits + remainingCredits;
+  const requiredSgpa = targetCgpa + (targetCgpa - currentCgpa) * (completedCredits / remainingCredits);
+  const maximumCgpa = currentCgpa + (4 - currentCgpa) * (remainingCredits / totalCredits);
+  return {
+    status: requiredSgpa > 4 ? 'impossible' : requiredSgpa <= 0 ? 'achieved' : 'feasible',
+    requiredSgpa: Math.max(0, requiredSgpa),
+    maximumCgpa,
+    errors
+  };
+}
+
+export function calculateNtsAggregate(inputs) {
+  const errors = {};
+  const contributions = {};
+  for (const [exam, weight] of Object.entries(NTS_NAT_WEIGHTS)) {
+    const obtainedKey = `${exam}Obtained`;
+    const totalKey = `${exam}Total`;
+    const obtained = inputs[obtainedKey];
+    const total = inputs[totalKey];
+    if (!Number.isFinite(total) || total <= 0) errors[totalKey] = 'Enter total marks greater than zero.';
+    if (!Number.isFinite(obtained) || obtained < 0) errors[obtainedKey] = 'Enter obtained marks of zero or more.';
+    else if (!errors[totalKey] && obtained > total) errors[obtainedKey] = 'Obtained marks cannot exceed total marks.';
+    if (!errors[obtainedKey] && !errors[totalKey]) contributions[exam] = (obtained / total) * weight * 100;
+  }
+  if (Object.keys(errors).length) return { status: 'invalid', errors };
+  return { status: 'valid', aggregate: Object.values(contributions).reduce((sum, value) => sum + value, 0), contributions, errors };
+}
+
 export const COURSE_CREDIT_MIN = 1;
 export const COURSE_CREDIT_MAX = 6;
 

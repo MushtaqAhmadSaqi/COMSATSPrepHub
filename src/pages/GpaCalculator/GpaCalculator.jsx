@@ -1,5 +1,5 @@
 import React, { useId, useRef, useState } from 'react';
-import { GRADING_SCALE, calcSessionalCourseResult, COURSE_CREDIT_MIN, COURSE_CREDIT_MAX, isValidCourseCredits } from '../../services/gpaEngine';
+import { GRADING_SCALE, calcSessionalCourseResult, COURSE_CREDIT_MIN, COURSE_CREDIT_MAX, isValidCourseCredits, calculateRequiredSgpa, calculateNtsAggregate, NTS_NAT_WEIGHTS } from '../../services/gpaEngine';
 import { getSemesterGpaHistory, saveSemesterGpaEntry } from '../../utils/studyTracker';
 import { useToast } from '../../utils/toast';
 import './GpaCalculator.css';
@@ -43,9 +43,18 @@ export default function GpaCalculator() {
   const [prevCgpa, setPrevCgpa] = useState('');
   const [prevCredits, setPrevCredits] = useState('');
 
-  // Target CGPA planner state
   const [targetCgpa, setTargetCgpa] = useState('3.50');
   const [upcomingCredits, setUpcomingCredits] = useState('15');
+  const [remainingSemesters, setRemainingSemesters] = useState('1');
+  const [creditPlanMode, setCreditPlanMode] = useState('semesters');
+  const [natInputs, setNatInputs] = useState({
+    matricObtained: '', matricTotal: '1100',
+    hsscObtained: '', hsscTotal: '1100',
+    natObtained: '', natTotal: '100'
+  });
+  const natResult = calculateNtsAggregate(Object.fromEntries(
+    Object.entries(natInputs).map(([field, value]) => [field, parseNumber(value)])
+  ));
 
   // Semester history chart state
   const [semesterHistory, setSemesterHistory] = useState(() => getSemesterGpaHistory());
@@ -154,20 +163,25 @@ export default function GpaCalculator() {
         )
       : null;
 
-  // Target CGPA planner calculation
   const parsedTarget = parseNumber(targetCgpa);
   const parsedUpcomingCr = parseNumber(upcomingCredits);
-  const requiredSgpaForTarget =
-    historyReady &&
-    parsedTarget !== null &&
-    parsedTarget > 0 &&
-    parsedTarget <= 4 &&
-    parsedUpcomingCr !== null &&
-    parsedUpcomingCr > 0
-      ? (parsedTarget * (previousCreditCount + parsedUpcomingCr) -
-          previousGpa * previousCreditCount) /
-        parsedUpcomingCr
-      : null;
+  const parsedSemesters = parseNumber(remainingSemesters);
+  const validSemesters = Number.isSafeInteger(parsedSemesters) && parsedSemesters > 0;
+  const validUpcomingCredits = Number.isSafeInteger(parsedUpcomingCr) && parsedUpcomingCr > 0;
+  const remainingCreditCount = creditPlanMode === 'semesters'
+    ? validSemesters && validUpcomingCredits ? parsedSemesters * parsedUpcomingCr : null
+    : parsedUpcomingCr;
+  const targetResult = calculateRequiredSgpa({
+    currentCgpa: previousGpa,
+    completedCredits: previousCreditCount,
+    remainingCredits: remainingCreditCount,
+    targetCgpa: parsedTarget
+  });
+  const plannerFields = [
+    { key: 'currentCgpa', id: 'previous-gpa', label: 'Current CGPA', value: prevCgpa, update: setPrevCgpa, min: 0, max: 4, step: '0.01', placeholder: 'e.g. 3.25' },
+    { key: 'completedCredits', id: 'previous-credits', label: 'Completed credit hours', value: prevCredits, update: setPrevCredits, min: 1, step: '1', placeholder: 'e.g. 60' },
+    { key: 'targetCgpa', id: 'target-cgpa', label: 'Target CGPA', value: targetCgpa, update: setTargetCgpa, min: 0, max: 4, step: '0.01' }
+  ];
 
   const progress = sgpa === null ? 0 : (sgpa / 4) * 100;
 
@@ -474,9 +488,9 @@ export default function GpaCalculator() {
                   02 / THE BIGGER PICTURE &amp; TARGET CGPA
                 </p>
                 <h2 id={`${componentId}-history-title`}>
-                  Include previous semesters &amp; Target CGPA Planner
+                  Target CGPA planner
                 </h2>
-                <p>Add your previous record to estimate your new CGPA and calculate required future SGPA.</p>
+                <p>Plan across all remaining credits. The switch also includes your previous record in this semester’s CGPA estimate.</p>
               </div>
 
               <label className="grade-workspace__switch">
@@ -490,117 +504,82 @@ export default function GpaCalculator() {
               </label>
             </div>
 
-            {includeHistory && (
-              <div className="grade-workspace__history-inputs">
+            <div className="grade-workspace__history-inputs">
+              {plannerFields.map((field) => {
+                const error = field.value !== '' ? targetResult.errors[field.key] : undefined;
+                const fieldId = `${componentId}-${field.id}`;
+                return (
+                  <div key={field.key}>
+                    <label htmlFor={fieldId}>{field.label}</label>
+                    <input
+                      id={fieldId}
+                      type="number"
+                      inputMode={field.step === '1' ? 'numeric' : 'decimal'}
+                      min={field.min}
+                      max={field.max}
+                      step={field.step}
+                      placeholder={field.placeholder}
+                      value={field.value}
+                      onChange={(event) => field.update(event.target.value)}
+                      aria-invalid={Boolean(error)}
+                      aria-describedby={error ? `${fieldId}-error` : undefined}
+                    />
+                    {error && <p className="grade-workspace__field-error" id={`${fieldId}-error`}>{error}</p>}
+                  </div>
+                );
+              })}
+              <div>
+                <label htmlFor={`${componentId}-credit-plan`}>Plan remaining credits by</label>
+                <select id={`${componentId}-credit-plan`} value={creditPlanMode} onChange={(event) => setCreditPlanMode(event.target.value)}>
+                  <option value="semesters">Semesters × credits per semester</option>
+                  <option value="credits">Total remaining credit hours</option>
+                </select>
+              </div>
+              {creditPlanMode === 'semesters' && (
                 <div>
-                  <label htmlFor={`${componentId}-previous-gpa`}>
-                    Previous CGPA
-                  </label>
-
+                  <label htmlFor={`${componentId}-remaining-semesters`}>Remaining semesters</label>
                   <input
-                    id={`${componentId}-previous-gpa`}
-                    type="number"
-                    min="0"
-                    max="4"
-                    step="0.01"
-                    placeholder="e.g. 3.25"
-                    value={prevCgpa}
-                    onChange={(event) => setPrevCgpa(event.target.value)}
-                    aria-invalid={prevCgpa !== '' && !validPreviousGpa}
-                    aria-describedby={
-                      prevCgpa !== '' && !validPreviousGpa
-                        ? `${componentId}-previous-gpa-error`
-                        : undefined
-                    }
+                    id={`${componentId}-remaining-semesters`}
+                    type="number" inputMode="numeric" min="1" step="1"
+                    value={remainingSemesters}
+                    onChange={(event) => setRemainingSemesters(event.target.value)}
+                    aria-invalid={remainingSemesters !== '' && !validSemesters}
+                    aria-describedby={remainingSemesters !== '' && !validSemesters ? `${componentId}-semesters-error` : undefined}
                   />
-
-                  {prevCgpa !== '' && !validPreviousGpa && (
-                    <p
-                      className="grade-workspace__field-error"
-                      id={`${componentId}-previous-gpa-error`}
-                    >
-                      Enter a CGPA between 0 and 4.
+                  {remainingSemesters !== '' && !validSemesters && <p className="grade-workspace__field-error" id={`${componentId}-semesters-error`}>Enter a positive whole number of semesters.</p>}
+                </div>
+              )}
+              <div>
+                <label htmlFor={`${componentId}-upcoming-cr`}>{creditPlanMode === 'semesters' ? 'Credits per remaining semester' : 'Total remaining credit hours'}</label>
+                <input
+                  id={`${componentId}-upcoming-cr`}
+                  type="number" inputMode="numeric" min="1" step="1"
+                  value={upcomingCredits}
+                  onChange={(event) => setUpcomingCredits(event.target.value)}
+                  aria-invalid={upcomingCredits !== '' && (!validUpcomingCredits || (validSemesters && Boolean(targetResult.errors.remainingCredits)))}
+                  aria-describedby={upcomingCredits !== '' && (!validUpcomingCredits || (validSemesters && Boolean(targetResult.errors.remainingCredits))) ? `${componentId}-remaining-credits-error` : undefined}
+                />
+                {upcomingCredits !== '' && (!validUpcomingCredits || (validSemesters && targetResult.errors.remainingCredits)) && <p className="grade-workspace__field-error" id={`${componentId}-remaining-credits-error`}>Enter positive whole-number credit hours within the supported numeric range.</p>}
+              </div>
+              <div className="grade-workspace__planner-result" data-status={targetResult.status} role="status" aria-atomic="true">
+                {targetResult.status === 'invalid' ? (
+                  <p>Complete a valid academic record, target, and remaining-credit plan to see your required future SGPA.</p>
+                ) : (
+                  <>
+                    <span>{targetResult.status === 'impossible' ? 'Target exceeds the 4.00 scale' : targetResult.status === 'achieved' ? 'Target already secured' : 'Required future average SGPA'}</span>
+                    <strong>{targetResult.status === 'impossible' ? targetResult.requiredSgpa.toFixed(2) : (Math.ceil(targetResult.requiredSgpa * 100 - 1e-9) / 100).toFixed(2)} <small>/ 4.00</small></strong>
+                    <p>
+                      {targetResult.status === 'impossible'
+                        ? `A ${parsedTarget.toFixed(2)} target is not achievable within these ${remainingCreditCount} remaining credits. Even a 4.00 future average gives a maximum CGPA of ${targetResult.maximumCgpa.toFixed(2)}.`
+                        : targetResult.status === 'achieved'
+                          ? `Your existing quality points already secure a ${parsedTarget.toFixed(2)} target across these ${remainingCreditCount} remaining credits, even with a 0.00 future average.`
+                          : `${previousGpa >= parsedTarget ? 'Your current CGPA meets the target, but you must maintain' : 'To reach the target, aim for'} at least this credit-weighted average across ${remainingCreditCount} remaining credits.`}
                     </p>
-                  )}
-                </div>
-
-                <div>
-                  <label htmlFor={`${componentId}-previous-credits`}>
-                    Previous GPA credit hours
-                  </label>
-
-                  <input
-                    id={`${componentId}-previous-credits`}
-                    type="number"
-                    min="1"
-                    step="1"
-                    placeholder="e.g. 60"
-                    value={prevCredits}
-                    onChange={(event) => setPrevCredits(event.target.value)}
-                    aria-invalid={
-                      prevCredits !== '' && !validPreviousCredits
-                    }
-                    aria-describedby={
-                      prevCredits !== '' && !validPreviousCredits
-                        ? `${componentId}-previous-credits-error`
-                        : undefined
-                    }
-                  />
-
-                  {prevCredits !== '' && !validPreviousCredits && (
-                    <p
-                      className="grade-workspace__field-error"
-                      id={`${componentId}-previous-credits-error`}
-                    >
-                      Enter a positive whole number.
-                    </p>
-                  )}
-                </div>
-
-                {/* Target GPA Calculator */}
-                <div>
-                  <label htmlFor={`${componentId}-target-cgpa`}>
-                    Desired Target CGPA
-                  </label>
-                  <input
-                    id={`${componentId}-target-cgpa`}
-                    type="number"
-                    min="0"
-                    max="4"
-                    step="0.01"
-                    value={targetCgpa}
-                    onChange={(e) => setTargetCgpa(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor={`${componentId}-upcoming-cr`}>
-                    Target Semester Credits
-                  </label>
-                  <input
-                    id={`${componentId}-upcoming-cr`}
-                    type="number"
-                    min="1"
-                    max="24"
-                    step="1"
-                    value={upcomingCredits}
-                    onChange={(e) => setUpcomingCredits(e.target.value)}
-                  />
-                </div>
-
-                {requiredSgpaForTarget !== null && (
-                  <p className="grade-workspace__history-help" style={{ fontWeight: 700, color: 'var(--gw-brand)' }}>
-                    🎯 Target GPA Planner: To reach a {Number(targetCgpa).toFixed(2)} CGPA over the next {upcomingCredits} credit hours, you need an SGPA of{' '}
-                    <strong>{requiredSgpaForTarget.toFixed(2)}</strong>
-                    {requiredSgpaForTarget > 4
-                      ? ' (exceeds 4.00 max — achievable across 2+ semesters).'
-                      : requiredSgpaForTarget <= 0
-                        ? ' (already achieved!).'
-                        : '.'}
-                  </p>
+                  </>
                 )}
               </div>
-            )}
+              <p className="grade-workspace__planner-note">Required SGPA is rounded up to two decimals. Assumes all remaining credits are new, counted courses; retakes or excluded credits need separate planning.</p>
+            </div>
           </section>
 
           {/* Semester History Chart */}
@@ -852,6 +831,67 @@ export default function GpaCalculator() {
                 </div>
               </div>
             )}
+          </section>
+
+          <section className="grade-workspace__panel grade-workspace__nat" aria-labelledby={`${componentId}-nat-title`}>
+            <div className="grade-workspace__panel-heading">
+              <div>
+                <p className="grade-workspace__section-label">05 / ADMISSION ESTIMATE</p>
+                <h2 id={`${componentId}-nat-title`}>COMSATS NTS NAT aggregate</h2>
+                <p>SSC / Matric 10% + HSSC / Intermediate 40% + NTS NAT 50%. Use your actual obtained and total marks.</p>
+              </div>
+            </div>
+            <div className="grade-workspace__nat-inputs">
+              {[
+                ['matric', 'SSC / Matric'],
+                ['hssc', 'HSSC / Intermediate'],
+                ['nat', 'NTS NAT']
+              ].map(([exam, label]) => (
+                <fieldset key={exam}>
+                  <legend>{label} <span>· {NTS_NAT_WEIGHTS[exam] * 100}% weight</span></legend>
+                  <div>
+                    {['Obtained', 'Total'].map((kind) => {
+                      const field = `${exam}${kind}`;
+                      const fieldId = `${componentId}-${field}`;
+                      const error = natInputs[field] !== '' ? natResult.errors[field] : undefined;
+                      return (
+                        <div key={field}>
+                          <label htmlFor={fieldId}>{kind} marks</label>
+                          <input
+                            id={fieldId} type="number" inputMode="decimal" min={kind === 'Total' ? '0.01' : '0'} step="any"
+                            value={natInputs[field]}
+                            placeholder={kind === 'Obtained' ? 'Your marks' : undefined}
+                            onChange={(event) => setNatInputs((current) => ({ ...current, [field]: event.target.value }))}
+                            aria-invalid={Boolean(error)}
+                            aria-describedby={error ? `${fieldId}-error` : undefined}
+                          />
+                          {error && <p className="grade-workspace__field-error" id={`${fieldId}-error`}>{error}</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+              ))}
+            </div>
+            <div className="grade-workspace__nat-result" role="status" aria-atomic="true">
+              <span>Estimated admission aggregate</span>
+              <strong>{natResult.status === 'valid' ? `${natResult.aggregate.toFixed(2)}%` : '—'}</strong>
+              <p>{natResult.status === 'valid' ? 'Weighted percentage, not a merit-list guarantee.' : 'Enter valid marks for all three components to see your aggregate.'}</p>
+            </div>
+            {natResult.status === 'valid' && (
+              <dl className="grade-workspace__nat-breakdown">
+                {[
+                  ['matric', 'SSC / Matric'], ['hssc', 'HSSC / Intermediate'], ['nat', 'NTS NAT']
+                ].map(([exam, label]) => (
+                  <div key={exam}>
+                    <dt>{label} · {NTS_NAT_WEIGHTS[exam] * 100}% weight</dt>
+                    <dd>{natResult.contributions[exam].toFixed(2)} percentage points</dd>
+                    <progress max={NTS_NAT_WEIGHTS[exam] * 100} value={natResult.contributions[exam]} aria-label={`${label} contribution out of ${NTS_NAT_WEIGHTS[exam] * 100} percentage points`} />
+                  </div>
+                ))}
+              </dl>
+            )}
+            <p className="grade-workspace__admission-note"><Icon name="info" /> Architecture and Design use different admission weights; this NAT formula does not apply to those programmes. This is an estimate only. Closing merit varies by campus, programme, and admission round; confirm current rules with COMSATS admissions.</p>
           </section>
 
           <details className="grade-workspace__reference">
