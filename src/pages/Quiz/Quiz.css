@@ -957,3 +957,12 @@ html.dark .quiz-review-status--incorrect .material-symbols-outlined {
 html.dark .quiz-review-wrong {
   color: #ef4444;
 }
+
+.quiz-revision-review { text-align: left; margin-top: 2rem; }
+.quiz-revision-review h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+.quiz-revision-review > p { font-size: 0.85rem; color: var(--text-subtle); line-height: 1.6; }
+.quiz-revision-review article { display: flex; gap: 0.75rem; padding: 0.75rem 0; border-top: 1px solid var(--border); }
+.quiz-revision-review details { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.quiz-revision-review summary { cursor: pointer; min-height: 44px; padding: 0.5rem 0; font-size: 0.875rem; font-weight: 700; }
+.quiz-revision-review details p { font-size: 0.875rem; line-height: 1.6; margin-top: 0.5rem; }
+.quiz-revision-review summary:focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; }

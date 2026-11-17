@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateQuizWithGemini } from '../../services/aiQuizService';
-import { recordAiQuizGeneration, recordQuizAttempt } from '../../utils/studyTracker';
+import { recordAiQuizGeneration, recordQuizAttempt, getRevisionDeckIds, toggleRevisionCard, quizQuestionToFlashcard } from '../../utils/studyTracker';
 import { fireConfetti } from '../../utils/confetti';
 import { useToast } from '../../utils/toast';
 import './TakeAiQuiz.css';
@@ -31,6 +31,7 @@ export default function TakeAiQuiz({
   const [userAnswers, setUserAnswers] = useState({});
   const [error, setError] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [revisionIds, setRevisionIds] = useState(() => getRevisionDeckIds());
 
   const toast = useToast();
   const prevStreakRef = useRef(0);
@@ -334,6 +335,27 @@ export default function TakeAiQuiz({
               <span className="quiz-stat-label">Incorrect</span>
             </div>
           </div>
+
+          <section className="quiz-revision-review" aria-label="Answer review and Revision Deck">
+            <h3>Review &amp; Save for Revision</h3>
+            <p>Star questions to review as flashcards in Study Hub. Saved on this device, including for guests.</p>
+            {questions.map((question, index) => {
+              const card = quizQuestionToFlashcard(question, quizParams.subjectCode);
+              return (
+                <article key={card.id}>
+                  <details>
+                    <summary>Q{index + 1}. {question.question}</summary>
+                    <p>Your answer: {userAnswers[index] ? question.options[userAnswers[index].selected] : 'Not answered'}</p>
+                    <p><strong>Correct answer:</strong> {question.options[question.correct]}</p>
+                    {question.hint && <p>{question.hint}</p>}
+                  </details>
+                  <button type="button" className="revision-star-btn" aria-pressed={revisionIds.includes(card.id)} aria-label={`Star question ${index + 1} for Revision`} onClick={() => setRevisionIds(toggleRevisionCard(card))}>
+                    <span className="material-symbols-outlined" aria-hidden="true">{revisionIds.includes(card.id) ? 'star' : 'star_border'}</span>
+                  </button>
+                </article>
+              );
+            })}
+          </section>
 
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '2.25rem' }}>
             <button

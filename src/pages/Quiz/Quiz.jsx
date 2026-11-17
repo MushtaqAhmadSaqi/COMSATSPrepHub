@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchSubjectsFromSupabase } from '../../services/papersService';
 import { generateQuizWithGemini } from '../../services/aiQuizService';
-import { recordQuizAttempt, getStudentPrefs } from '../../utils/studyTracker';
+import { recordQuizAttempt, getStudentPrefs, getRevisionDeckIds, toggleRevisionCard, quizQuestionToFlashcard } from '../../utils/studyTracker';
 import { canSubmitAnswer, scoreAnswers, getAnswerState } from '../../utils/quizSession';
 import { fireConfetti } from '../../utils/confetti';
 import { useToast } from '../../utils/toast';
@@ -104,6 +104,7 @@ export default function Quiz({ onExamActiveChange }) {
   const [confirmExit, setConfirmExit] = useState(false);
   const [confirmFinish, setConfirmFinish] = useState(false);
   const [elapsedSec, setElapsedSec] = useState(null);
+  const [revisionIds, setRevisionIds] = useState(() => getRevisionDeckIds());
 
   const toast = useToast();
   const prevStreakRef = useRef(0);
@@ -1009,6 +1010,7 @@ export default function Quiz({ onExamActiveChange }) {
       ...q,
       idx,
       userAns: userAnswers[idx]?.selected,
+      revisionCard: quizQuestionToFlashcard(q, selectedSubject?.code),
       status: userAnswers[idx] == null ? 'skipped' : userAnswers[idx].isCorrect ? 'correct' : 'incorrect'
     }));
     const missedCount = reviewItems.filter((item) => item.status !== 'correct').length;
@@ -1127,6 +1129,15 @@ export default function Quiz({ onExamActiveChange }) {
                       {item.status === 'correct' ? 'Correct' : item.status === 'incorrect' ? 'Incorrect' : 'Skipped'}
                     </span>
                     <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-subtle)' }}>Q{item.idx + 1}</span>
+                    <button
+                      type="button"
+                      className="revision-star-btn"
+                      aria-pressed={revisionIds.includes(item.revisionCard.id)}
+                      onClick={() => setRevisionIds(toggleRevisionCard(item.revisionCard))}
+                    >
+                      <span className="material-symbols-outlined" aria-hidden="true">{revisionIds.includes(item.revisionCard.id) ? 'star' : 'star_border'}</span>
+                      {revisionIds.includes(item.revisionCard.id) ? 'Saved for Revision' : 'Star for Revision'}
+                    </button>
                   </div>
                   <p style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text)', marginBottom: '0.35rem' }}>
                     {item.question}

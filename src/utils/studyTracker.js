@@ -5,6 +5,7 @@ const STORAGE_KEY = 'pph_study_history';
 const BOOKMARKS_KEY = 'pph_bookmarks';
 const NOTES_KEY = 'pph_paper_notes';
 const FLASHCARDS_KEY = 'pph_flashcards_srs';
+const REVISION_DECK_KEY = 'pph_revision_deck';
 const DAILY_KEY = 'pph_daily_challenge';
 const EXAMS_KEY = 'pph_exam_countdowns';
 const PREFS_KEY = 'pph_student_prefs';
@@ -17,6 +18,7 @@ const WORKSPACE_KEYS = [
   BOOKMARKS_KEY,
   NOTES_KEY,
   FLASHCARDS_KEY,
+  REVISION_DECK_KEY,
   DAILY_KEY,
   EXAMS_KEY,
   PREFS_KEY,
@@ -570,6 +572,38 @@ export function addCustomFlashcard({ subjectCode, front, back }) {
   return updated;
 }
 
+export function getRevisionDeckIds() {
+  const saved = safeReadJson(REVISION_DECK_KEY, []);
+  return Array.isArray(saved) ? saved.filter((id) => typeof id === 'string') : [];
+}
+
+export function toggleRevisionCard(card) {
+  const ids = getRevisionDeckIds();
+  if (ids.includes(card.id)) {
+    const next = ids.filter((id) => id !== card.id);
+    return safeWriteJson(REVISION_DECK_KEY, next) ? next : ids;
+  }
+  const cards = getFlashcardsQueue();
+  const nextCards = cards.some((item) => item.id === card.id)
+    ? cards
+    : [{ ...card, box: 1, nextReview: Date.now() }, ...cards];
+  if (!safeWriteJson(FLASHCARDS_KEY, nextCards)) return ids;
+  const next = [...ids, card.id];
+  return safeWriteJson(REVISION_DECK_KEY, next) ? next : ids;
+}
+
+export function quizQuestionToFlashcard(question, subjectCode) {
+  const code = String(subjectCode || 'GENERAL').toUpperCase().slice(0, 12);
+  const front = String(question.question || '').trim().slice(0, 300);
+  const answer = question.options[question.correct];
+  const back = `${answer}${question.hint ? ` — ${question.hint}` : ''}`.slice(0, 600);
+  let hash = 2166136261;
+  for (const char of `${code}|${front}|${back}`) {
+    hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
+  }
+  return { id: `fc-quiz-${(hash >>> 0).toString(16)}`, subjectCode: code, front, back };
+}
+
 /* ── Student Preferences (Campus, Department, Language, Leaderboard Opt-in) ── */
 export function getStudentPrefs() {
   const defaults = {
@@ -714,6 +748,7 @@ export function exportAllStudentData() {
     gpaHistory: getSemesterGpaHistory(),
     exams: getExamCountdowns(),
     flashcards: safeReadJson(FLASHCARDS_KEY, []),
+    revisionDeck: getRevisionDeckIds(),
     dailyChallenge: safeReadJson(DAILY_KEY, {}),
     moderationSubmissions: safeReadJson(SUBMISSIONS_KEY, []),
     analyticsConsent: getAnalyticsConsent()

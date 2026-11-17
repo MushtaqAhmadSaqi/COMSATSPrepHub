@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import {
   getDailyChallengeStatus,
@@ -6,7 +6,9 @@ import {
   getFlashcardsQueue,
   getDueFlashcards,
   reviewFlashcard,
-  addCustomFlashcard
+  addCustomFlashcard,
+  getRevisionDeckIds,
+  toggleRevisionCard
 } from '../../utils/studyTracker';
 import { toast } from '../../utils/toast';
 import './StudyHub.css';
@@ -108,6 +110,16 @@ export default function StudyHub() {
   const [newCourse, setNewCourse] = useState('CSC211');
   const [newFront, setNewFront] = useState('');
   const [newBack, setNewBack] = useState('');
+  const [revisionIds, setRevisionIds] = useState(() => getRevisionDeckIds());
+  const [ratings, setRatings] = useState({ again: 0, hard: 0, good: 0, easy: 0 });
+  const swipeStartRef = useRef(null);
+  const swipedRef = useRef(false);
+
+  useEffect(() => {
+    setCardIndex(0);
+    setFlipped(false);
+    setRatings({ again: 0, hard: 0, good: 0, easy: 0 });
+  }, [activeTab]);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 30000);
@@ -117,6 +129,8 @@ export default function StudyHub() {
   useEffect(() => {
     const handleOwnerChange = () => {
       setCards(getFlashcardsQueue());
+      setRevisionIds(getRevisionDeckIds());
+      setRatings({ again: 0, hard: 0, good: 0, easy: 0 });
       setChallengeStatus(getDailyChallengeStatus());
       setCardIndex(0);
       setFlipped(false);
@@ -127,10 +141,13 @@ export default function StudyHub() {
   }, []);
 
   const dueCards = getDueFlashcards(cards, now);
-  const safeCardIndex = dueCards.length > 0 ? Math.min(cardIndex, dueCards.length - 1) : 0;
+  const revisionCards = cards.filter((card) => revisionIds.includes(card.id));
+  const reviewCards = activeTab === 'revision' ? getDueFlashcards(revisionCards, now) : dueCards;
+  const safeCardIndex = reviewCards.length > 0 ? Math.min(cardIndex, reviewCards.length - 1) : 0;
+  const reviewed = Object.values(ratings).reduce((sum, count) => sum + count, 0);
 
   const currentQ = SAMPLE_DAILY_QUESTIONS[qIndex];
-  const currentCard = dueCards[safeCardIndex] || null;
+  const currentCard = reviewCards[safeCardIndex] || null;
 
   const handleOptionSelect = (idx) => {
     if (selectedOpt !== null) return;
@@ -153,18 +170,57 @@ export default function StudyHub() {
   };
 
   const handleFlashcardRating = (rating) => {
-    if (!currentCard) return;
+    if (!currentCard || !flipped) return;
     const updated = reviewFlashcard(currentCard.id, rating);
     setCards(updated);
+    setRatings((prev) => ({ ...prev, [rating]: prev[rating] + 1 }));
     setNow(Date.now());
     setFlipped(false);
 
-    const remainingDue = getDueFlashcards(updated, Date.now());
+    const remainingDue = activeTab === 'revision'
+      ? getDueFlashcards(updated.filter((card) => revisionIds.includes(card.id)), Date.now())
+      : getDueFlashcards(updated, Date.now());
     if (remainingDue.length === 0) {
       setCardIndex(0);
       toast.success('All caught up! No flashcards are due right now.');
     } else {
       setCardIndex((i) => Math.min(i, remainingDue.length - 1));
+    }
+  };
+
+  const handleStarCard = (card) => {
+    setRevisionIds(toggleRevisionCard(card));
+    setCards(getFlashcardsQueue());
+  };
+
+  useEffect(() => {
+    if (!['flashcards', 'revision'].includes(activeTab) || !currentCard) return undefined;
+    const handleFlashcardKeyDown = (event) => {
+      if (event.defaultPrevented || event.repeat || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+      const active = document.activeElement;
+      if (active?.isContentEditable || active?.closest('input, textarea, select, [role="dialog"], [role="tab"]')) return;
+      if (event.key === ' ') {
+        if (active?.closest('button, a[href], [role="button"]') && !active?.closest('.flashcard-box')) return;
+        event.preventDefault();
+        setFlipped((value) => !value);
+      } else if (flipped && ['1', '2', '3'].includes(event.key)) {
+        event.preventDefault();
+        handleFlashcardRating({ 1: 'hard', 2: 'good', 3: 'easy' }[event.key]);
+      }
+    };
+    window.addEventListener('keydown', handleFlashcardKeyDown);
+    return () => window.removeEventListener('keydown', handleFlashcardKeyDown);
+  });
+
+  const handleSwipeEnd = (event) => {
+    const start = swipeStartRef.current;
+    swipeStartRef.current = null;
+    if (!start) return;
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    if (Math.abs(dx) >= 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      swipedRef.current = true;
+      setFlipped((value) => !value);
     }
   };
 
@@ -248,6 +304,19 @@ export default function StudyHub() {
           <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">menu_book</span>
           Course Cheat-Sheets
         </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'revision'}
+          id="study-tab-revision"
+          aria-controls="study-hub-panel"
+          tabIndex={activeTab === 'revision' ? 0 : -1}
+          onClick={() => setActiveTab('revision')}
+          className={`study-hub-tab ${activeTab === 'revision' ? 'active' : ''}`}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">star</span>
+          Revision Deck ({revisionCards.length})
+        </button>
       </div>
 
       {activeTab === 'daily' && (
@@ -329,13 +398,18 @@ export default function StudyHub() {
         </div>
       )}
 
-      {activeTab === 'flashcards' && (
+      {['flashcards', 'revision'].includes(activeTab) && (
         <div className="study-hub-card" id="study-hub-panel" role="tabpanel" aria-labelledby={`study-tab-${activeTab}`} tabIndex={0}>
+          <div className="flashcard-session" aria-live="polite">
+            <div><strong>{reviewed} reviewed</strong><span>{reviewCards.length} remaining</span></div>
+            <progress value={reviewed} max={Math.max(1, reviewed + reviewCards.length)} aria-label="Flashcard session progress" />
+            <p>Again {ratings.again} · Hard {ratings.hard} · Good {ratings.good} · Easy {ratings.easy}</p>
+          </div>
           {currentCard ? (
             <div>
               <div className="flashcard-meta-row">
                 <span className="leitner-badge">
-                  {currentCard.subjectCode} · Card {safeCardIndex + 1} of {dueCards.length}
+                  {currentCard.subjectCode} · Card {safeCardIndex + 1} of {reviewCards.length}
                 </span>
                 <span className="leitner-badge">
                   <span className="material-symbols-outlined" style={{ fontSize: '15px' }} aria-hidden="true">inventory_2</span>
@@ -349,67 +423,98 @@ export default function StudyHub() {
                   tabIndex={0}
                   aria-pressed={flipped}
                   aria-label={flipped ? 'Flashcard answer shown. Activate to flip to question.' : 'Flashcard question shown. Activate to reveal answer.'}
-                  onClick={() => setFlipped(!flipped)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setFlipped(!flipped);
+                  aria-describedby={flipped ? 'flashcard-answer' : 'flashcard-prompt'}
+                  onClick={() => {
+                    if (swipedRef.current) { swipedRef.current = false; return; }
+                    setFlipped((value) => !value);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      setFlipped((value) => !value);
                     }
                   }}
+                  onPointerDown={(event) => {
+                    if (event.pointerType === 'mouse') return;
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                    swipedRef.current = false;
+                    swipeStartRef.current = { x: event.clientX, y: event.clientY };
+                  }}
+                  onPointerUp={handleSwipeEnd}
+                  onPointerCancel={() => { swipeStartRef.current = null; }}
                   className={`flashcard-box ${flipped ? 'is-flipped' : ''}`}
                 >
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-subtle)', marginBottom: '0.6rem' }}>
-                    {flipped ? 'Model Answer (Back)' : 'Prompt (Front) — Click or Press Space to Flip'}
-                  </span>
-                  <p style={{ fontSize: '1.15rem', fontWeight: 700, lineHeight: 1.55, maxWidth: '42rem' }}>
-                    {flipped ? currentCard.back : currentCard.front}
-                  </p>
+                  <div id="flashcard-prompt" className="flashcard-face flashcard-face--front" aria-hidden={flipped}>
+                    <span>Prompt</span>
+                    <p>{currentCard.front}</p>
+                  </div>
+                  <div id="flashcard-answer" className="flashcard-face flashcard-face--back" aria-hidden={!flipped}>
+                    <span>Model Answer</span>
+                    <p>{currentCard.back}</p>
+                  </div>
                 </div>
               </div>
-
-              {flipped && (
-                <div className="flashcard-rating-row" role="group" aria-label="Rate flashcard recall difficulty">
+              <div className="flashcard-actions">
+                <button type="button" className="flashcard-rate-btn" onClick={() => setFlipped((value) => !value)}>
+                  <span className="material-symbols-outlined" aria-hidden="true">flip</span>
+                  {flipped ? 'Show Question' : 'Reveal Answer'}
+                </button>
+                <button type="button" className="revision-star-btn" aria-pressed={revisionIds.includes(currentCard.id)} onClick={() => handleStarCard(currentCard)}>
+                  <span className="material-symbols-outlined" aria-hidden="true">{revisionIds.includes(currentCard.id) ? 'star' : 'star_border'}</span>
+                  {revisionIds.includes(currentCard.id) ? 'Saved to Revision Deck' : 'Star for Revision'}
+                </button>
+              </div>
+              <p className="flashcard-shortcuts">Space flips · 1 Hard · 2 Good · 3 Easy · Swipe left or right to flip</p>
+              <div className="flashcard-rating-row" role="group" aria-label="Rate flashcard recall difficulty">
+                {[
+                  ['again', 'Again · 1m'], ['hard', '1 · Hard · 10m'],
+                  ['good', '2 · Good · 1d'], ['easy', '3 · Easy · 3d']
+                ].map(([rating, label]) => (
                   <button
+                    key={rating}
                     type="button"
-                    className="flashcard-rate-btn"
-                    onClick={() => handleFlashcardRating('again')}
-                    style={{ border: '1.5px solid var(--danger)', color: 'var(--danger)', background: 'var(--danger-soft)' }}
+                    disabled={!flipped}
+                    className={`flashcard-rate-btn flashcard-rate-btn--${rating}`}
+                    onClick={() => handleFlashcardRating(rating)}
                   >
-                    Again (Reset to Box 1)
+                    {label}
                   </button>
-                  <button
-                    type="button"
-                    className="flashcard-rate-btn"
-                    onClick={() => handleFlashcardRating('hard')}
-                    style={{ border: '1.5px solid var(--warning)', color: 'var(--warning)', background: 'var(--warning-soft)' }}
-                  >
-                    Hard (10m)
-                  </button>
-                  <button
-                    type="button"
-                    className="flashcard-rate-btn"
-                    onClick={() => handleFlashcardRating('good')}
-                    style={{ border: 'none', color: 'var(--on-brand)', background: 'var(--brand)' }}
-                  >
-                    Good (+1 Box)
-                  </button>
-                  <button
-                    type="button"
-                    className="flashcard-rate-btn"
-                    onClick={() => handleFlashcardRating('easy')}
-                    style={{ border: '1.5px solid var(--success)', color: 'var(--success)', background: 'var(--success-soft)' }}
-                  >
-                    Easy (3d)
-                  </button>
-                </div>
-              )}
+                ))}
+              </div>
+              {!flipped && <p className="flashcard-shortcuts">Reveal the answer before rating your recall.</p>}
             </div>
           ) : (
-            <p style={{ textAlign: 'center' }}>
-              All caught up! No flashcards are due right now. Cards return when their review interval elapses.
-            </p>
+            <div className="flashcard-empty">
+              <span className="material-symbols-outlined" aria-hidden="true">{activeTab === 'revision' && revisionCards.length === 0 ? 'star_border' : 'task_alt'}</span>
+              <h2>{activeTab === 'revision' && revisionCards.length === 0 ? 'Build your Revision Deck' : 'All caught up!'}</h2>
+              <p>{activeTab === 'revision' && revisionCards.length === 0
+                ? 'Star a flashcard or a question in a quiz summary. Your deck stays saved on this device — no account needed.'
+                : 'No cards are due right now. They return when the existing review interval elapses.'}</p>
+              {activeTab === 'revision' && revisionCards.length === 0 && (
+                <button type="button" className="flashcard-rate-btn" onClick={() => setActiveTab('flashcards')}>Browse Flashcards</button>
+              )}
+            </div>
           )}
 
+          {activeTab === 'revision' && revisionCards.length > 0 && (
+            <div className="revision-card-list">
+              <h3>Saved Cards ({revisionCards.length})</h3>
+              {revisionCards.map((card) => (
+                <article key={card.id}>
+                  <details>
+                    <summary>{card.subjectCode} · {card.front}</summary>
+                    <p>{card.back}</p>
+                    <small>{card.nextReview > now ? `Next review: ${new Date(card.nextReview).toLocaleString()}` : 'Due now'}</small>
+                  </details>
+                  <button type="button" className="revision-star-btn" aria-label={`Remove ${card.front} from Revision Deck`} onClick={() => handleStarCard(card)}>
+                    <span className="material-symbols-outlined" aria-hidden="true">star</span>
+                  </button>
+                </article>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'flashcards' && <>
           {/* Create Custom Flashcard */}
           <form onSubmit={handleAddCard} style={{ marginTop: '2.25rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '0.875rem' }}>
@@ -463,6 +568,7 @@ export default function StudyHub() {
               </button>
             </div>
           </form>
+          </>}
         </div>
       )}
 

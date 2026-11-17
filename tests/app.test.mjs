@@ -14,7 +14,7 @@ import { canSubmitAnswer, scoreAnswers, getAnswerState } from '../src/utils/quiz
 import { getPaperKey, hasPaperIdentity } from '../src/utils/paperSelection.js';
 import { resolveSubjectFromRoute, getRouteSubjectCode, isPasswordRecoveryUrl } from '../src/utils/routeState.js';
 import { DEFAULT_SUBJECTS } from '../src/constants/subjects.js';
-import { mergeRemoteActivity, getStudyStreak, getSemesterGpaHistory, getDueFlashcards, exportAllStudentData } from '../src/utils/studyTracker.js';
+import { mergeRemoteActivity, getStudyStreak, getSemesterGpaHistory, getDueFlashcards, exportAllStudentData, getFlashcardsQueue, getRevisionDeckIds, toggleRevisionCard, quizQuestionToFlashcard, reviewFlashcard, setStudentWorkspaceOwner, clearAllStudentData } from '../src/utils/studyTracker.js';
 import { getAnalyticsConsent, setAnalyticsConsent, disableAnalytics } from '../src/utils/analytics.js';
 import { updatePassword, getSignupOutcome } from '../src/services/auth.js';
 
@@ -604,6 +604,99 @@ await runTest('Study Tracker: Flashcard queue only surfaces cards whose review i
   assert.ok(source.includes('getDueFlashcards(updated, Date.now())'), 'Rating must re-check the due queue');
 });
 
+await runTest('Revision Deck: stars reuse SRS cards and survive export and workspace switches', () => {
+  installMemoryStorage();
+  setStudentWorkspaceOwner(null);
+  assert.deepEqual(getRevisionDeckIds(), []);
+  const card = getFlashcardsQueue()[0];
+  assert.deepEqual(toggleRevisionCard(card), [card.id]);
+  const savedCard = getFlashcardsQueue().find((item) => item.id === card.id);
+  reviewFlashcard(card.id, 'good');
+  const scheduled = getFlashcardsQueue().find((item) => item.id === card.id);
+  toggleRevisionCard(card);
+  assert.deepEqual(getRevisionDeckIds(), []);
+  toggleRevisionCard(card);
+  assert.deepEqual(getFlashcardsQueue().find((item) => item.id === card.id), scheduled, 'Re-starring must not reset the review schedule');
+  assert.equal(savedCard.box, 1);
+  assert.deepEqual(exportAllStudentData().revisionDeck, [card.id]);
+  setStudentWorkspaceOwner('revision-test-user');
+  assert.deepEqual(getRevisionDeckIds(), []);
+  setStudentWorkspaceOwner(null);
+  assert.deepEqual(getRevisionDeckIds(), [card.id], 'Returning to guest must restore the guest deck');
+  clearAllStudentData();
+  assert.deepEqual(getRevisionDeckIds(), []);
+  assert.equal(localStorage.getItem('pph_revision_deck'), null);
+});
+
+await runTest('Revision Deck: quiz questions have stable IDs and deduplicate without changing stored card shapes', () => {
+  installMemoryStorage();
+  const question = { question: 'What is a queue?', options: ['FIFO', 'LIFO', 'Tree', 'Graph'], correct: 0, hint: 'First in, first out.' };
+  const card = quizQuestionToFlashcard(question, 'csc211');
+  assert.equal(card.id, quizQuestionToFlashcard(question, 'CSC211').id);
+  assert.equal(card.back, 'FIFO — First in, first out.');
+  toggleRevisionCard(card);
+  const queue = getFlashcardsQueue();
+  assert.equal(queue.filter((item) => item.id === card.id).length, 1);
+  assert.equal(queue[0].box, 1);
+  assert.ok(queue[0].nextReview > 0);
+  assert.deepEqual(Object.keys(queue[0]).sort(), ['back', 'box', 'front', 'id', 'nextReview', 'subjectCode']);
+  toggleRevisionCard(card);
+  toggleRevisionCard(card);
+  assert.equal(getFlashcardsQueue().filter((item) => item.id === card.id).length, 1);
+});
+
+await runTest('Flashcards: all recall ratings preserve the original intervals and boxes', () => {
+  const originalNow = Date.now;
+  const now = 1700000000000;
+  Date.now = () => now;
+  try {
+    for (const [rating, interval, box] of [['again', 60000, 1], ['hard', 600000, 1], ['good', 86400000, 3], ['easy', 259200000, 3]]) {
+      installMemoryStorage();
+      localStorage.setItem('pph_flashcards_srs', JSON.stringify([{ id: 'existing', front: 'Q', back: 'A', box: 2, nextReview: 0 }]));
+      const result = reviewFlashcard('existing', rating)[0];
+      assert.equal(result.nextReview, now + interval);
+      assert.equal(result.box, box);
+      assert.equal(result.lastRating, rating);
+    }
+  } finally { Date.now = originalNow; }
+});
+
+await runTest('Flashcards: Space flips and 1/2/3 rate without hijacking typing', () => {
+  const source = readFileSync(new URL('../src/pages/StudyHub/StudyHub.jsx', import.meta.url), 'utf8');
+  const handlerSource = source.match(/const handleFlashcardKeyDown = (\(event\) => \{[\s\S]*?\n    \});/)[1];
+  let flipped = false;
+  let rating = null;
+  const context = {
+    document: { activeElement: { closest: () => null } },
+    flipped: true,
+    setFlipped: (updater) => { flipped = updater(flipped); },
+    handleFlashcardRating: (value) => { rating = value; }
+  };
+  const handler = runInNewContext(`(${handlerSource})`, context);
+  const event = (key, extra = {}) => ({ key, preventDefault() {}, ...extra });
+  handler(event(' '));
+  assert.equal(flipped, true);
+  for (const [key, expected] of [['1', 'hard'], ['2', 'good'], ['3', 'easy']]) {
+    handler(event(key));
+    assert.equal(rating, expected);
+  }
+  rating = null;
+  context.document.activeElement.closest = () => ({});
+  handler(event('1'));
+  assert.equal(rating, null);
+  context.document.activeElement.closest = () => null;
+  handler(event('1', { ctrlKey: true }));
+  assert.equal(rating, null);
+  context.flipped = false;
+  handler(event('1'));
+  assert.equal(rating, null, 'Rating requires the answer to be revealed');
+  const css = readFileSync(new URL('../src/pages/StudyHub/StudyHub.css', import.meta.url), 'utf8');
+  assert.ok(css.includes('transform: rotateY(180deg)'));
+  assert.ok(css.includes('@media (prefers-reduced-motion: reduce)'));
+  assert.ok(source.includes('onPointerUp={handleSwipeEnd}'));
+  assert.ok(source.includes('disabled={!flipped}'));
+});
+
 await runTest('Study Tracker: New users start with no fabricated GPA history', () => {
   const storage = installMemoryStorage();
   assert.deepEqual(getSemesterGpaHistory(), []);
@@ -1186,7 +1279,7 @@ await runTest('UI: study and upload tabs link panels and wrap keyboard navigatio
     const handlerSource = source.match(/const handleTabKeyDown = (\(e\) => \{[\s\S]*?\n  \});/)[1];
     let selected = -1;
     let focused = -1;
-    const tabs = Array.from({ length: page.startsWith('StudyHub') ? 3 : 2 }, (_, index) => ({
+    const tabs = Array.from({ length: page.startsWith('StudyHub') ? 4 : 2 }, (_, index) => ({
       focus: () => { focused = index; },
       click: () => { selected = index; }
     }));
