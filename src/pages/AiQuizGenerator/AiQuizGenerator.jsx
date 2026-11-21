@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { DEFAULT_SUBJECTS } from '../../constants/subjects';
 import PageHeader from '../../components/PageHeader/PageHeader';
@@ -323,6 +323,41 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [honeypot, setHoneypot] = useState('');
   const [topicError, setTopicError] = useState('');
+  const [coursePickerOpen, setCoursePickerOpen] = useState(false);
+  const [courseSearch, setCourseSearch] = useState('');
+  const coursePickerRef = useRef(null);
+  const courseSearchRef = useRef(null);
+
+  useEffect(() => {
+    if (!coursePickerOpen) return undefined;
+    courseSearchRef.current?.focus();
+
+    const handlePointerDown = (event) => {
+      if (!coursePickerRef.current?.contains(event.target)) {
+        setCoursePickerOpen(false);
+      }
+    };
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setCoursePickerOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [coursePickerOpen]);
+
+  const filteredCourses = useMemo(() => {
+    const query = courseSearch.trim().toLowerCase();
+    if (!query) return DEFAULT_SUBJECTS;
+    return DEFAULT_SUBJECTS.filter((course) =>
+      `${course.code} ${course.name} ${course.department}`.toLowerCase().includes(query)
+    );
+  }, [courseSearch]);
 
   // Course topics dynamic list
   const suggestedTopics = useMemo(() => {
@@ -467,23 +502,122 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
               Choose COMSATS Course
             </label>
           </div>
-          <div className="ai-select-wrapper">
-            <select
+          <div className="ai-select-wrapper" ref={coursePickerRef}>
+            <button
               id="ai-course-select"
-              className="ai-modern-select"
-              value={selectedCourseCode}
-              onChange={(e) => handleCourseChange(e.target.value)}
+              type="button"
+              className={`ai-course-trigger ${coursePickerOpen ? 'open' : ''}`}
+              aria-haspopup="listbox"
+              aria-expanded={coursePickerOpen}
+              onClick={() => setCoursePickerOpen((open) => !open)}
             >
-              <option value="">Custom Topic / General Computer Science</option>
-              {DEFAULT_SUBJECTS.map((subj) => (
-                <option key={subj.code} value={subj.code}>
-                  {subj.code} — {subj.name} ({subj.department})
-                </option>
-              ))}
-            </select>
-            <span className="material-symbols-outlined ai-select-arrow" aria-hidden="true">
-              expand_more
-            </span>
+              <span className="ai-course-trigger-icon" aria-hidden="true">
+                <span className="material-symbols-outlined">
+                  {selectedCourse?.icon || 'category'}
+                </span>
+              </span>
+              <span className="ai-course-trigger-copy">
+                {selectedCourse ? (
+                  <>
+                    <strong>{selectedCourse.code}</strong>
+                    <span>{selectedCourse.name}</span>
+                  </>
+                ) : (
+                  <>
+                    <strong>Custom topic</strong>
+                    <span>General Computer Science</span>
+                  </>
+                )}
+              </span>
+              <span className="ai-course-trigger-meta">
+                {selectedCourse?.department || 'General'}
+              </span>
+              <span className="material-symbols-outlined ai-select-arrow" aria-hidden="true">
+                expand_more
+              </span>
+            </button>
+
+            {coursePickerOpen && (
+              <div className="ai-course-popover" role="dialog" aria-label="Choose a course">
+                <div className="ai-course-search-wrap">
+                  <span className="material-symbols-outlined" aria-hidden="true">search</span>
+                  <input
+                    ref={courseSearchRef}
+                    type="search"
+                    value={courseSearch}
+                    onChange={(event) => setCourseSearch(event.target.value)}
+                    placeholder="Search course or code"
+                    aria-label="Search courses"
+                  />
+                  {courseSearch && (
+                    <button
+                      type="button"
+                      className="ai-course-search-clear"
+                      onClick={() => setCourseSearch('')}
+                      aria-label="Clear course search"
+                    >
+                      <span className="material-symbols-outlined" aria-hidden="true">close</span>
+                    </button>
+                  )}
+                </div>
+                <div className="ai-course-list" role="listbox" aria-label="COMSATS courses">
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={!selectedCourseCode}
+                    className={`ai-course-option ${!selectedCourseCode ? 'selected' : ''}`}
+                    onClick={() => {
+                      handleCourseChange('');
+                      setCoursePickerOpen(false);
+                      setCourseSearch('');
+                    }}
+                  >
+                    <span className="ai-course-option-icon" aria-hidden="true">
+                      <span className="material-symbols-outlined">category</span>
+                    </span>
+                    <span className="ai-course-option-copy">
+                      <strong>Custom topic</strong>
+                      <span>General Computer Science</span>
+                    </span>
+                    {!selectedCourseCode && (
+                      <span className="material-symbols-outlined ai-course-check" aria-hidden="true">check</span>
+                    )}
+                  </button>
+                  {filteredCourses.map((course) => (
+                    <button
+                      key={course.code}
+                      type="button"
+                      role="option"
+                      aria-selected={selectedCourseCode === course.code}
+                      className={`ai-course-option ${selectedCourseCode === course.code ? 'selected' : ''}`}
+                      onClick={() => {
+                        handleCourseChange(course.code);
+                        setCoursePickerOpen(false);
+                        setCourseSearch('');
+                      }}
+                    >
+                      <span className="ai-course-option-icon" aria-hidden="true">
+                        <span className="material-symbols-outlined">{course.icon}</span>
+                      </span>
+                      <span className="ai-course-option-copy">
+                        <strong>{course.code}</strong>
+                        <span>{course.name}</span>
+                      </span>
+                      <span className="ai-course-department">{course.department}</span>
+                      {selectedCourseCode === course.code && (
+                        <span className="material-symbols-outlined ai-course-check" aria-hidden="true">check</span>
+                      )}
+                    </button>
+                  ))}
+                  {filteredCourses.length === 0 && (
+                    <div className="ai-course-empty">
+                      <span className="material-symbols-outlined" aria-hidden="true">search_off</span>
+                      <span>No matching courses</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           {selectedCourse && (
             <p className="ai-field-hint">
