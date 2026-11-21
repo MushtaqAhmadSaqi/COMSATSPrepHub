@@ -8,9 +8,9 @@
   --gw-brand: var(--brand);
   --gw-soft: var(--brand-soft);
   --gw-error: var(--danger);
-  width: min(100%, 1240px);
+  width: min(100%, 1180px);
   margin: 0 auto;
-  padding: clamp(1.5rem, 4vw, 3.25rem) clamp(1rem, 3vw, 2rem) 4rem;
+  padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1rem, 3vw, 1.5rem) 4rem;
   color: var(--gw-text);
   font-family: var(--font-body);
 }
@@ -43,7 +43,8 @@
   justify-content: space-between;
   gap: 2rem;
   flex-wrap: wrap;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  padding: 0.25rem 0;
 }
 
 .grade-workspace__eyebrow,
@@ -61,7 +62,7 @@
   max-width: 42rem;
   margin: 0;
   color: var(--gw-text);
-  font-size: clamp(2rem, 4vw, 3.15rem);
+  font-size: clamp(2.25rem, 4vw, 3.35rem);
   font-weight: 850;
   letter-spacing: -0.055em;
   line-height: 1.05;
@@ -104,7 +105,7 @@
 
 .grade-workspace__layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 21rem;
+  grid-template-columns: minmax(0, 1fr) 22.5rem;
   align-items: start;
   gap: 1.25rem;
 }
@@ -119,14 +120,18 @@
 .grade-workspace__panel,
 .grade-workspace__result-card,
 .grade-workspace__reference {
-  border: 1px solid var(--gw-line);
-  border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--gw-line) 78%, transparent);
+  border-radius: 18px;
   background: var(--gw-surface);
-  box-shadow: var(--shadow-1);
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.055);
 }
 
 .grade-workspace__panel {
-  padding: clamp(1.1rem, 3vw, 1.7rem);
+  padding: clamp(1.1rem, 3vw, 1.5rem);
+}
+
+.grade-workspace__panel:first-child {
+  border-top: 3px solid var(--gw-brand);
 }
 
 .grade-workspace__panel-heading,
@@ -190,8 +195,17 @@
 }
 
 .grade-workspace__course {
-  padding: 0.85rem 0;
-  border-bottom: 1px solid var(--gw-line);
+  margin-bottom: 0.55rem;
+  padding: 0.75rem;
+  border: 1px solid var(--gw-line);
+  border-radius: 14px;
+  background: var(--gw-subtle);
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+
+.grade-workspace__course:focus-within {
+  border-color: color-mix(in srgb, var(--gw-brand) 55%, var(--gw-line));
+  box-shadow: 0 0 0 3px var(--gw-soft);
 }
 
 .grade-workspace input:not([type="checkbox"]),
@@ -269,7 +283,7 @@
   height: 2.75rem;
   padding: 0;
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: 10px;
   background: transparent;
   color: var(--gw-muted);
   cursor: pointer;
@@ -290,6 +304,40 @@
   color: var(--gw-error);
   font-size: 0.72rem;
   line-height: 1.5;
+}
+
+.grade-workspace__retake {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-top: 0.65rem;
+  color: var(--gw-muted);
+  font-size: 0.76rem;
+}
+
+.grade-workspace__retake-toggle,
+.grade-workspace__previous-grade {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+.grade-workspace__previous-grade {
+  padding: 0.35rem 0.45rem 0.35rem 0.65rem;
+  border: 1px solid var(--gw-line);
+  border-radius: 9px;
+  background: var(--gw-surface);
+}
+
+.grade-workspace__previous-grade select {
+  width: 6.5rem;
+  height: 2.25rem;
+  border: 0;
+  background: var(--gw-subtle);
+  border-radius: 7px;
+  font-size: 0.72rem;
 }
 
 .grade-workspace__editor-footer {
@@ -504,8 +552,13 @@
 }
 
 .grade-workspace__result-card {
-  padding: 1.35rem;
+  overflow: hidden;
+  padding: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--gw-brand) 22%, var(--gw-line));
   border-top: 3px solid var(--gw-brand);
+  background:
+    radial-gradient(circle at 100% 0%, var(--gw-soft), transparent 42%),
+    var(--gw-surface);
 }
 
 .grade-workspace__result-top {
@@ -553,12 +606,14 @@
   display: flex;
   align-items: baseline;
   gap: 0.45rem;
-  margin-bottom: 1rem;
+  margin: 0.25rem 0 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--gw-line);
 }
 
 .grade-workspace__score strong {
   color: var(--gw-brand);
-  font-size: clamp(3rem, 7vw, 4rem);
+  font-size: clamp(3.25rem, 6vw, 4.25rem);
   font-variant-numeric: tabular-nums;
   font-weight: 850;
   letter-spacing: -0.08em;

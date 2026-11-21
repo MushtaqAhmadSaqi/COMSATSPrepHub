@@ -397,18 +397,8 @@ export default function GpaCalculator() {
                     </div>
 
                     {/* Retake / Course Repeat Option */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.75rem',
-                        flexWrap: 'wrap',
-                        marginTop: '0.5rem',
-                        fontSize: '0.78rem',
-                        color: 'var(--gw-muted)'
-                      }}
-                    >
-                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer' }}>
+                    <div className="grade-workspace__retake">
+                      <label className="grade-workspace__retake-toggle">
                         <input
                           type="checkbox"
                           checked={Boolean(course.isRetake)}
@@ -418,7 +408,7 @@ export default function GpaCalculator() {
                       </label>
 
                       {course.isRetake && (
-                        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <label className="grade-workspace__previous-grade">
                           Previous grade replaced:
                           <select
                             value={course.oldGrade}
