@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { addModerationSubmission } from '../../utils/studyTracker';
 import { toast } from '../../utils/toast';
+import AppIcon from '../../components/ui/AppIcon';
 
 const FAQS = [
   {
@@ -106,9 +107,7 @@ export default function FaqContact() {
                 }}
               >
                 <span>{faq.q}</span>
-                <span className="material-symbols-outlined" style={{ fontSize: '20px', transition: 'transform 0.2s', transform: openIdx === i ? 'rotate(180deg)' : 'none' }}>
-                  expand_more
-                </span>
+                <AppIcon name="expand_more" size={20} style={{ transition: 'transform 0.2s', transform: openIdx === i ? 'rotate(180deg)' : 'none' }} />
               </button>
               {openIdx === i && (
                 <div id={`faq-answer-${i}`} style={{ padding: '0 1.25rem 1.25rem', color: 'var(--text-subtle)', fontSize: '0.9rem', lineHeight: 1.6 }}>
@@ -128,7 +127,7 @@ export default function FaqContact() {
 
         {sent ? (
           <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '3rem', color: 'var(--success)' }}>check_circle</span>
+            <AppIcon name="check_circle" size={48} style={{ color: 'var(--success)' }} />
             <h3 style={{ margin: '0.5rem 0' }}>Thank you!</h3>
             <p style={{ color: 'var(--text-subtle)' }}>Your message is in the support queue. You can also email us using the links in the footer.</p>
           </div>
@@ -151,6 +150,7 @@ export default function FaqContact() {
               <input
                 id="contact-email"
                 type="email"
+                spellCheck={false}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="student@comsats.edu.pk"

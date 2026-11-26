@@ -9,6 +9,7 @@ import { useToast } from '../../utils/toast';
 import { SubjectCardSkeleton } from '../../components/ui/Skeleton';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import Modal from '../../components/ui/Modal';
+import AppIcon from '../../components/ui/AppIcon';
 import './Quiz.css';
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
@@ -55,24 +56,13 @@ function AnimatedOption({ letter, opt, index, selectedOption, revealed, correct,
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.04 }}
     >
-      <span className="quiz-option-letter">{letter}</span>
+      <span className="quiz-option-letter mono-code">{letter}</span>
       <span style={{ flex: 1 }}>{opt}</span>
       {revealed && index === correct && (
-        <motion.span
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 300 }}
-          className="material-symbols-outlined"
-          style={{ fontSize: '20px', color: '#10b981' }}
-          aria-hidden="true"
-        >
-          check_circle
-        </motion.span>
+        <AppIcon name="check_circle" size={20} style={{ color: '#10b981' }} />
       )}
       {revealed && selectedOption === index && index !== correct && (
-        <span className="material-symbols-outlined" style={{ fontSize: '20px', color: '#ef4444' }} aria-hidden="true">
-          cancel
-        </span>
+        <AppIcon name="cancel" size={20} style={{ color: '#ef4444' }} />
       )}
     </motion.button>
   );
@@ -342,8 +332,10 @@ export default function Quiz({ onExamActiveChange }) {
       if (activeElement?.isContentEditable || activeElement?.closest('button, a[href], input, textarea, select, [role="button"], [role="dialog"]')) return;
 
       const key = e.key;
-      if (['1', '2', '3', '4'].includes(key)) {
-        const optionIdx = parseInt(key, 10) - 1;
+      const lowerKey = String(key).toLowerCase();
+      const letterIdx = ['a', 'b', 'c', 'd'].indexOf(lowerKey);
+      if (['1', '2', '3', '4'].includes(key) || letterIdx !== -1) {
+        const optionIdx = letterIdx !== -1 ? letterIdx : parseInt(key, 10) - 1;
         const currentQ = questions[currentIdx];
         if (currentQ && currentQ.options && currentQ.options[optionIdx] !== undefined && !revealed) {
           setSelectedOption(optionIdx);
@@ -403,8 +395,10 @@ export default function Quiz({ onExamActiveChange }) {
           <input
             id="quiz-subject-search"
             type="text"
+            spellCheck={false}
+            autoComplete="off"
             className="quiz-search-input"
-            placeholder="Search by name or code (e.g. CSC211)..."
+            placeholder="Search by course name or code (e.g. CSC211)…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search subjects"
@@ -426,7 +420,7 @@ export default function Quiz({ onExamActiveChange }) {
               onClick={loadSubjects}
               style={{ marginBottom: 0 }}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">refresh</span>
+              <AppIcon name="refresh" size={18} />
               Try again
             </button>
           </div>
@@ -446,12 +440,12 @@ export default function Quiz({ onExamActiveChange }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25, delay: idx * 0.03 }}
               >
-                <div className="quiz-subject-code">{subj.code}</div>
+                <div className="quiz-subject-code mono-code" translate="no">{subj.code}</div>
                 <div className="quiz-subject-name">{subj.name}</div>
                 <div className="quiz-subject-meta">
                   <span>{subj.department}</span>
-                  <span className="quiz-subject-papers">
-                    <span className="material-symbols-outlined" style={{ fontSize: '14px' }} aria-hidden="true">description</span>
+                  <span className="quiz-subject-papers tabular-nums">
+                    <AppIcon name="description" size={14} />
                     {subj.papers} Papers
                   </span>
                 </div>
@@ -474,14 +468,14 @@ export default function Quiz({ onExamActiveChange }) {
       >
         <div className="quiz-config-card">
           <button type="button" className="quiz-back-btn" onClick={() => { setSelectedSubject(null); setStep('select'); }}>
-            <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            <AppIcon name="arrow_back" size={18} />
             Change Subject
           </button>
 
           <div className="quiz-selected-subject">
             <div className="quiz-selected-badge">
-              <span className="material-symbols-outlined" aria-hidden="true">menu_book</span>
-              {selectedSubject?.code}
+              <AppIcon name="menu_book" size={16} />
+              <span className="mono-code" translate="no">{selectedSubject?.code}</span>
             </div>
             <h2>{selectedSubject?.name}</h2>
           </div>
@@ -552,7 +546,7 @@ export default function Quiz({ onExamActiveChange }) {
 
           {error && (
             <div className="quiz-error-alert" role="alert">
-              <span className="material-symbols-outlined" aria-hidden="true">error</span>
+              <AppIcon name="error" size={18} />
               {error}
             </div>
           )}
@@ -564,7 +558,7 @@ export default function Quiz({ onExamActiveChange }) {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <span className="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
+            <AppIcon name="auto_awesome" size={18} />
             Start {quizMode === 'timed' ? 'Timed Exam' : 'Practice'} Quiz
           </motion.button>
         </div>
@@ -582,17 +576,13 @@ export default function Quiz({ onExamActiveChange }) {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.25 }}
         >
-          <motion.div
-            className="quiz-loading-icon"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '3rem' }} aria-hidden="true">
-              auto_awesome
-            </span>
-          </motion.div>
-          <h2>Generating Your Quiz...</h2>
-          <p>Preparing {numQuestions} {difficulty.toLowerCase()} questions for {selectedSubject?.name}</p>
+          <div className="quiz-loading-icon">
+            <AppIcon name="auto_awesome" size={44} />
+          </div>
+          <h2>Generating Your Quiz…</h2>
+          <p role="status" aria-live="polite">
+            Preparing {numQuestions} {difficulty.toLowerCase()} questions for {selectedSubject?.name}
+          </p>
           <div className="quiz-loading-bar">
             <motion.div
               className="quiz-loading-bar-fill"
@@ -630,14 +620,14 @@ export default function Quiz({ onExamActiveChange }) {
               <span
                 role="timer"
                 aria-label="Time remaining"
-                className={`quiz-counter ${timeLeftSec < 30 ? "quiz-timer--urgent" : ""}`}
+                className={`quiz-counter mono-code tabular-nums ${timeLeftSec < 30 ? 'quiz-timer--urgent' : ''}`}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.25rem'
                 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">timer</span>
+                <AppIcon name="timer" size={16} />
                 {mins}:{secs}
               </span>
             )}
@@ -660,9 +650,12 @@ export default function Quiz({ onExamActiveChange }) {
                 cursor: 'pointer'
               }}
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '16px', color: isMarked ? 'var(--accent)' : undefined }} aria-hidden="true">
-                {isMarked ? 'bookmark_flag' : 'flag'}
-              </span>
+              <AppIcon
+                name={isMarked ? 'bookmark_flag' : 'flag'}
+                size={16}
+                filled={isMarked}
+                style={{ color: isMarked ? 'var(--accent)' : undefined }}
+              />
               {isMarked ? 'Marked for Review' : 'Mark for Review'}
             </button>
             {quizMode === 'timed' && (
@@ -671,7 +664,7 @@ export default function Quiz({ onExamActiveChange }) {
                 className="quiz-exit-btn"
                 onClick={() => setConfirmExit(true)}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">logout</span>
+                <AppIcon name="logout" size={16} />
                 Exit Exam
               </button>
             )}
@@ -700,13 +693,11 @@ export default function Quiz({ onExamActiveChange }) {
                 aria-label={`Question ${idx + 1}: ${statusLabel}`}
                 aria-current={isCurr ? 'step' : undefined}
               >
-                <span className="quiz-nav-number">{idx + 1}</span>
+                <span className="quiz-nav-number tabular-nums">{idx + 1}</span>
                 {marked ? (
-                  <span className="material-symbols-outlined quiz-nav-icon" aria-hidden="true">flag</span>
+                  <AppIcon name="flag" className="quiz-nav-icon" size={12} />
                 ) : ans ? (
-                  <span className="material-symbols-outlined quiz-nav-icon" aria-hidden="true">
-                    {ans.isCorrect ? 'check' : 'close'}
-                  </span>
+                  <AppIcon name={ans.isCorrect ? 'check' : 'close'} className="quiz-nav-icon" size={12} />
                 ) : (
                   <span className="quiz-nav-dot" aria-hidden="true" />
                 )}
@@ -715,24 +706,22 @@ export default function Quiz({ onExamActiveChange }) {
           })}
         </nav>
         <div className="quiz-nav-legend" aria-hidden="true">
-          <span><span className="material-symbols-outlined quiz-nav-icon">check</span> Answered</span>
-          <span><span className="material-symbols-outlined quiz-nav-icon">flag</span> Flagged</span>
+          <span><AppIcon name="check" className="quiz-nav-icon" size={12} /> Answered</span>
+          <span><AppIcon name="flag" className="quiz-nav-icon" size={12} /> Flagged</span>
           <span><span className="quiz-nav-dot" /> Unanswered</span>
         </div>
 
         <div className="quiz-progress-meta">
-          <span className="quiz-counter-text">Question {currentIdx + 1} of {questions.length}</span>
+          <span className="quiz-counter-text tabular-nums">Question {currentIdx + 1} of {questions.length}</span>
           {streak >= 3 && (
-            <span className="quiz-streak-indicator">
-              <span className="material-symbols-outlined" style={{ fontSize: '1rem', verticalAlign: 'middle' }} aria-hidden="true">
-                local_fire_department
-              </span>
+            <span className="quiz-streak-indicator tabular-nums">
+              <AppIcon name="local_fire_department" size={16} />
               {streak} streak
             </span>
           )}
           {quizMode === 'timed' && (
             <button type="button" className="quiz-finish-link" onClick={requestFinish}>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">task_alt</span>
+              <AppIcon name="task_alt" size={16} />
               Finish Exam
             </button>
           )}
@@ -772,7 +761,7 @@ export default function Quiz({ onExamActiveChange }) {
           </div>
 
           <div className="quiz-keyboard-tip">
-            Tip: press 1–4 to answer, Enter to submit/continue, ← → to move between questions
+            Tip: press 1–4 (or A–D) to select, Enter to submit/continue, ← → to move between questions
           </div>
 
           {q.hint && !revealed && (
@@ -783,7 +772,7 @@ export default function Quiz({ onExamActiveChange }) {
                 className="quiz-hint-toggle"
                 aria-expanded={showHint}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">lightbulb</span>
+                <AppIcon name="lightbulb" size={16} />
                 {showHint ? 'Hide Hint' : 'Need a Hint?'}
               </button>
 
@@ -796,7 +785,7 @@ export default function Quiz({ onExamActiveChange }) {
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.22 }}
                   >
-                    💡 <strong>Hint:</strong> {q.hint}
+                    <strong>Hint:</strong> {q.hint}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -807,6 +796,7 @@ export default function Quiz({ onExamActiveChange }) {
             <motion.div
               className="quiz-explanation-box"
               role="status"
+              aria-live="polite"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
@@ -814,8 +804,8 @@ export default function Quiz({ onExamActiveChange }) {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'wrap', gap: '0.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">info</span>
-                  <strong>{isCorrect ? '✅ Correct!' : '❌ Incorrect'}</strong>
+                  <AppIcon name="info" size={18} />
+                  <strong>{isCorrect ? 'Correct!' : 'Incorrect'}</strong>
                 </div>
                 <div style={{ display: 'flex', gap: '0.4rem' }}>
                   <button
@@ -891,7 +881,7 @@ export default function Quiz({ onExamActiveChange }) {
                 whileTap={{ scale: 0.98 }}
               >
                 Submit Answer
-                <span className="material-symbols-outlined" aria-hidden="true">check</span>
+                <AppIcon name="check" size={18} />
               </motion.button>
             ) : (
               <motion.button
@@ -903,7 +893,7 @@ export default function Quiz({ onExamActiveChange }) {
                 whileTap={{ scale: 0.98 }}
               >
                 {currentIdx + 1 === questions.length ? 'View Results' : 'Next Question'}
-                <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                <AppIcon name="arrow_forward" size={18} />
               </motion.button>
             )}
           </div>
@@ -1023,30 +1013,27 @@ export default function Quiz({ onExamActiveChange }) {
         transition={{ duration: 0.35 }}
       >
         <div className="quiz-card" style={{ textAlign: 'center', padding: '3rem 1.75rem' }}>
-          <motion.div
-            className="quiz-finish-badge"
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '3.5rem', color: pct >= 60 ? 'var(--success)' : 'var(--accent)' }} aria-hidden="true">
-              {pct >= 75 ? 'military_tech' : pct >= 50 ? 'emoji_events' : 'school'}
-            </span>
-          </motion.div>
+          <div className="quiz-finish-badge">
+            <AppIcon
+              name={pct >= 75 ? 'military_tech' : pct >= 50 ? 'emoji_events' : 'school'}
+              size={52}
+              style={{ color: pct >= 60 ? 'var(--success)' : 'var(--accent)' }}
+            />
+          </div>
 
           <h2 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.5rem', letterSpacing: '-0.03em' }}>
-            {pct >= 75 ? 'Outstanding Performance! 🎉' : pct >= 50 ? 'Great Job! 👍' : 'Keep Practicing! 💪'}
+            {pct >= 75 ? 'Outstanding Performance!' : pct >= 50 ? 'Great Job!' : 'Keep Practicing!'}
           </h2>
 
           <p style={{ color: 'var(--text-subtle)', marginBottom: '0.5rem', fontSize: '1.0625rem' }}>
-            {selectedSubject?.name} ({selectedSubject?.code})
+            {selectedSubject?.name} (<span className="mono-code" translate="no">{selectedSubject?.code}</span>)
           </p>
 
-          <p style={{ color: 'var(--text-subtle)', marginBottom: '2rem', fontSize: '1.0625rem' }}>
+          <p className="tabular-nums" style={{ color: 'var(--text-subtle)', marginBottom: '2rem', fontSize: '1.0625rem' }}>
             You scored <strong style={{ color: 'var(--brand)', fontSize: '1.25rem' }}>{score}/{questions.length}</strong> ({pct}%)
           </p>
 
-          <div className="quiz-stats-row">
+          <div className="quiz-stats-row tabular-nums">
             <div className="quiz-stat-item">
               <span className="quiz-stat-value">{questions.length}</span>
               <span className="quiz-stat-label">Questions</span>
@@ -1123,9 +1110,10 @@ export default function Quiz({ onExamActiveChange }) {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem', flexWrap: 'wrap' }}>
                     <span className={`quiz-review-status quiz-review-status--${item.status}`}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '14px' }} aria-hidden="true">
-                        {item.status === 'correct' ? 'check_circle' : item.status === 'incorrect' ? 'cancel' : 'remove_circle'}
-                      </span>
+                      <AppIcon
+                        name={item.status === 'correct' ? 'check_circle' : item.status === 'incorrect' ? 'cancel' : 'remove_circle'}
+                        size={14}
+                      />
                       {item.status === 'correct' ? 'Correct' : item.status === 'incorrect' ? 'Incorrect' : 'Skipped'}
                     </span>
                     <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-subtle)' }}>Q{item.idx + 1}</span>
@@ -1135,7 +1123,11 @@ export default function Quiz({ onExamActiveChange }) {
                       aria-pressed={revisionIds.includes(item.revisionCard.id)}
                       onClick={() => setRevisionIds(toggleRevisionCard(item.revisionCard))}
                     >
-                      <span className="material-symbols-outlined" aria-hidden="true">{revisionIds.includes(item.revisionCard.id) ? 'star' : 'star_border'}</span>
+                      <AppIcon
+                        name={revisionIds.includes(item.revisionCard.id) ? 'star' : 'star_border'}
+                        filled={revisionIds.includes(item.revisionCard.id)}
+                        size={16}
+                      />
                       {revisionIds.includes(item.revisionCard.id) ? 'Saved for Revision' : 'Star for Revision'}
                     </button>
                   </div>
@@ -1146,12 +1138,12 @@ export default function Quiz({ onExamActiveChange }) {
                     Your answer: {item.userAns != null ? `${LETTERS[item.userAns]}. ${item.options[item.userAns]}` : 'Not answered'}
                   </p>
                   <p style={{ fontSize: '0.8125rem', color: 'var(--text)', fontWeight: 700, marginBottom: '0.25rem' }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '14px', color: 'var(--success)', verticalAlign: 'text-bottom' }} aria-hidden="true">check</span>{' '}
+                    <AppIcon name="check" size={14} style={{ color: 'var(--success)', verticalAlign: 'text-bottom', marginRight: '0.25rem' }} />
                     Correct answer: {LETTERS[item.correct]}. {item.options[item.correct]}
                   </p>
                   {item.hint && (
                     <p style={{ fontSize: '0.78rem', color: 'var(--text-subtle)', margin: 0 }}>
-                      💡 {item.hint}
+                      {item.hint}
                     </p>
                   )}
                 </div>
@@ -1166,7 +1158,7 @@ export default function Quiz({ onExamActiveChange }) {
               onClick={handleGenerateQuiz}
               style={{ background: 'var(--brand)' }}
             >
-              <span className="material-symbols-outlined" aria-hidden="true">refresh</span>
+              <AppIcon name="refresh" size={18} />
               New Quiz
             </button>
 
@@ -1176,7 +1168,7 @@ export default function Quiz({ onExamActiveChange }) {
               onClick={handleShareResult}
               style={{ background: '#10b981', color: '#0f172a' }}
             >
-              <span className="material-symbols-outlined" aria-hidden="true">share</span>
+              <AppIcon name="share" size={18} />
               Share on WhatsApp
             </button>
 
@@ -1186,7 +1178,7 @@ export default function Quiz({ onExamActiveChange }) {
               onClick={handleRestart}
               style={{ background: 'var(--surface-2)', color: 'var(--text)', border: '1.5px solid var(--border)' }}
             >
-              <span className="material-symbols-outlined" aria-hidden="true">menu_book</span>
+              <AppIcon name="menu_book" size={18} />
               Change Subject
             </button>
           </div>

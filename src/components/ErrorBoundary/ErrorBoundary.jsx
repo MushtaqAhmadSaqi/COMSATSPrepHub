@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { logger } from '../../utils/logger';
+import AppIcon from '../ui/AppIcon';
 import './ErrorBoundary.css';
 
 const isDev =
@@ -44,9 +45,7 @@ export default class ErrorBoundary extends Component {
         <div className="error-boundary" role="alert">
           <div className="error-boundary__card">
             <div className="error-boundary__icon">
-              <span className="material-symbols-outlined" style={{ fontSize: '3rem' }} aria-hidden="true">
-                warning
-              </span>
+              <AppIcon name="warning" size={48} />
             </div>
             <h2 className="error-boundary__title">Something went wrong</h2>
             <p className="error-boundary__message">
@@ -65,7 +64,7 @@ export default class ErrorBoundary extends Component {
                 className="error-boundary__btn error-boundary__btn--primary"
                 onClick={this.handleReset}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">restart_alt</span>
+                <AppIcon name="restart_alt" size={18} />
                 Try Again
               </button>
               <button
@@ -73,7 +72,7 @@ export default class ErrorBoundary extends Component {
                 className="error-boundary__btn error-boundary__btn--secondary"
                 onClick={this.handleReload}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">refresh</span>
+                <AppIcon name="refresh" size={18} />
                 Reload Page
               </button>
               <button
@@ -81,7 +80,7 @@ export default class ErrorBoundary extends Component {
                 className="error-boundary__btn error-boundary__btn--secondary"
                 onClick={this.handleGoHome}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">home</span>
+                <AppIcon name="home" size={18} />
                 Go Home
               </button>
             </div>

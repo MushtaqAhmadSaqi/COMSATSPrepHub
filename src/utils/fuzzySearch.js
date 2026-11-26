@@ -19,7 +19,7 @@ function calculateScore(query, text) {
     return 85;
   }
 
-  const words = t.split(/[\s\-_\/()]+/);
+  const words = t.split(/[\s\-_/()]+/);
   if (words.some((w) => w.startsWith(q))) return 80;
 
   let qIdx = 0;
@@ -32,13 +32,52 @@ function calculateScore(query, text) {
 }
 
 /**
- * Returns filtered and sorted command palette items across Pages, Subjects, Papers, and Actions.
+ * Returns filtered and sorted command palette items across Subjects, Papers, Pages, and Actions.
  */
-export function getCommandPaletteResults(query = '', { isLoggedIn = false } = {}) {
+export function getCommandPaletteResults(
+  query = '',
+  { isLoggedIn = false, subjects = DEFAULT_SUBJECTS, papers = [] } = {}
+) {
+  const subjectList = Array.isArray(subjects) && subjects.length > 0 ? subjects : DEFAULT_SUBJECTS;
+  const paperList = Array.isArray(papers) ? papers : [];
+
+  const dynamicPapers = paperList.length > 0
+    ? paperList.map((paper, idx) => {
+        const parts = [
+          paper.courseCode,
+          paper.examType,
+          paper.semester,
+          paper.year,
+          paper.teacher,
+        ].filter(Boolean);
+        return {
+          id: `paper_${paper.id || idx}`,
+          group: 'Papers',
+          label: `${paper.courseCode || 'Paper'} — ${paper.title || parts.join(' ')}`,
+          meta: [paper.examType, paper.semester || paper.year, paper.teacher].filter(Boolean).join(' · '),
+          icon: 'description',
+          path: 'paper-view',
+          subjectCode: paper.courseCode,
+          searchText: parts.join(' ') + ' ' + (paper.title || ''),
+          paper,
+        };
+      })
+    : subjectList.slice(0, 12).map((subj) => ({
+        id: `paper_${subj.code}_term`,
+        group: 'Papers',
+        label: `${subj.code} Past Papers (${subj.name})`,
+        icon: 'description',
+        path: 'subject-papers',
+        subjectCode: subj.code,
+        subject: subj,
+      }));
+
   const allItems = [
     // Pages Group
     { id: 'page_home', group: 'Pages', label: 'Home', icon: 'home', path: 'home' },
     { id: 'page_subjects', group: 'Pages', label: 'Subjects & Past Papers', icon: 'menu_book', path: 'subjects' },
+    { id: 'page_midterm_papers', group: 'Pages', label: 'Midterm Past Papers Library', icon: 'description', path: 'subjects?exam=Midterm', searchText: 'midterm past papers exam' },
+    { id: 'page_terminal_papers', group: 'Pages', label: 'Terminal Past Papers Library', icon: 'library_books', path: 'subjects?exam=Terminal', searchText: 'terminal final past papers exam' },
     { id: 'page_quiz', group: 'Pages', label: 'Practice Quiz', icon: 'quiz', path: 'quiz' },
     { id: 'page_ai_quiz', group: 'Pages', label: 'AI Quiz Generator', icon: 'auto_awesome', path: 'ai-quiz-generator' },
     { id: 'page_study_hub', group: 'Pages', label: 'Study Hub — Daily Challenge, Flashcards & AI Helper', icon: 'psychology', path: 'study-hub' },
@@ -50,27 +89,20 @@ export function getCommandPaletteResults(query = '', { isLoggedIn = false } = {}
     { id: 'page_about', group: 'Pages', label: 'About & Our Team', icon: 'groups', path: 'about' },
     { id: 'page_terms', group: 'Pages', label: 'Terms, Privacy Policy & Disclaimer', icon: 'gavel', path: 'terms' },
 
-    // Subjects Group (includes full subject object for direct deep-linking to subject-papers)
-    ...DEFAULT_SUBJECTS.map((subj) => ({
+    // Subjects Group
+    ...subjectList.map((subj) => ({
       id: `subj_${subj.code}`,
       group: 'Subjects',
       label: `${subj.code} — ${subj.name}`,
+      meta: `${subj.department || 'COMSATS'} · ${subj.papers || 0} papers`,
       icon: subj.icon || 'menu_book',
       path: 'subject-papers',
       subjectCode: subj.code,
-      subject: subj
+      subject: subj,
     })),
 
-    // Past Papers Quick-Access Group
-    ...DEFAULT_SUBJECTS.slice(0, 12).map((subj) => ({
-      id: `paper_${subj.code}_term`,
-      group: 'Papers',
-      label: `${subj.code} Past Papers (${subj.name})`,
-      icon: 'description',
-      path: 'subject-papers',
-      subjectCode: subj.code,
-      subject: subj
-    })),
+    // Past Papers Group
+    ...dynamicPapers,
 
     // Actions Group
     { id: 'action_daily', group: 'Actions', label: 'Start Today’s 5-Question Daily Challenge', icon: 'local_fire_department', path: 'study-hub' },
@@ -83,7 +115,7 @@ export function getCommandPaletteResults(query = '', { isLoggedIn = false } = {}
           { id: 'action_sign_out', group: 'Actions', label: 'Sign out', icon: 'logout', actionId: 'sign_out' }
         ]
       : [{ id: 'action_sign_in', group: 'Actions', label: 'Sign in or Create Account', icon: 'login', actionId: 'open_auth' }]
-    )
+    ),
   ];
 
   const trimmed = query.trim();
@@ -97,12 +129,13 @@ export function getCommandPaletteResults(query = '', { isLoggedIn = false } = {}
   const scored = allItems
     .map((item) => {
       const labelScore = calculateScore(trimmed, item.label);
+      const extraScore = item.searchText ? calculateScore(trimmed, item.searchText) : 0;
       const codeScore = item.subjectCode ? calculateScore(trimmed, item.subjectCode) : 0;
       const normalizedCodeScore =
         item.subjectCode && normalizedQuery && normalizeCourseCode(item.subjectCode).includes(normalizedQuery)
           ? 95
           : 0;
-      const finalScore = Math.max(labelScore, codeScore, normalizedCodeScore);
+      const finalScore = Math.max(labelScore, extraScore, codeScore, normalizedCodeScore);
       return { ...item, score: finalScore };
     })
     .filter((item) => item.score > 0);
@@ -117,5 +150,5 @@ export function getCommandPaletteResults(query = '', { isLoggedIn = false } = {}
     results = results.concat(groupItems);
   }
 
-  return results.slice(0, 14);
+  return results.slice(0, 16);
 }

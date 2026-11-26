@@ -154,7 +154,9 @@ html.dark .founder-role-badge {
   gap: 1rem;
   border: 1.5px solid var(--border);
   box-shadow: var(--shadow-1);
-  transition: all 0.3s var(--ease-spring);
+  transition: transform 0.3s var(--ease-spring),
+              box-shadow 0.3s var(--ease-spring),
+              border-color 0.3s var(--ease-spring);
   animation: fadeInUp 0.4s var(--ease) both;
 }
 

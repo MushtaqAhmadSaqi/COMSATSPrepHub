@@ -1,4 +1,5 @@
 import React from 'react';
+import AppIcon from '../ui/AppIcon';
 import './Breadcrumbs.css';
 
 /**
@@ -22,9 +23,7 @@ export default function Breadcrumbs({ items = [] }) {
           return (
             <li key={idx} className="breadcrumbs-item">
               {idx > 0 && (
-                <span className="material-symbols-outlined breadcrumbs-separator" aria-hidden="true">
-                  chevron_right
-                </span>
+                <AppIcon name="chevron_right" className="breadcrumbs-separator" size={16} />
               )}
               {isLast ? (
                 <span

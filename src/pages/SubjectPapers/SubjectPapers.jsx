@@ -8,7 +8,29 @@ import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
+import AppIcon from '../../components/ui/AppIcon';
 import './SubjectPapers.css';
+
+function readInitialSubjectFilters() {
+  const defaults = { exam: 'All', sem: 'All', year: 'All', teacher: 'All', sort: 'newest', q: '' };
+  if (typeof window === 'undefined') return defaults;
+  const hash = window.location.hash || '';
+  const idx = hash.indexOf('?');
+  if (idx === -1) return defaults;
+  try {
+    const p = new URLSearchParams(hash.slice(idx + 1));
+    return {
+      exam: p.get('exam') || 'All',
+      sem: p.get('sem') || 'All',
+      year: p.get('year') || 'All',
+      teacher: p.get('teacher') || 'All',
+      sort: p.get('sort') || 'newest',
+      q: p.get('q') || ''
+    };
+  } catch {
+    return defaults;
+  }
+}
 
 export default function SubjectPapers({
   subject = { name: 'Data Structures & Algorithms', code: 'CSC211' },
@@ -16,18 +38,19 @@ export default function SubjectPapers({
   onBack = () => {},
   onNavigate
 }) {
+  const initialFilters = useMemo(readInitialSubjectFilters, []);
   const [papers, setPapers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
 
   // Filters, search, sorting & pagination
-  const [examFilter, setExamFilter] = useState('All');
-  const [semesterFilter, setSemesterFilter] = useState('All');
-  const [yearFilter, setYearFilter] = useState('All');
-  const [teacherFilter, setTeacherFilter] = useState('All');
-  const [sortBy, setSortBy] = useState('newest');
-  const [searchText, setSearchText] = useState('');
+  const [examFilter, setExamFilter] = useState(initialFilters.exam);
+  const [semesterFilter, setSemesterFilter] = useState(initialFilters.sem);
+  const [yearFilter, setYearFilter] = useState(initialFilters.year);
+  const [teacherFilter, setTeacherFilter] = useState(initialFilters.teacher);
+  const [sortBy, setSortBy] = useState(initialFilters.sort);
+  const [searchText, setSearchText] = useState(initialFilters.q);
   const [visibleCount, setVisibleCount] = useState(8);
   const [, setBookmarkTick] = useState(0);
 
@@ -77,13 +100,33 @@ export default function SubjectPapers({
   }, [subject.code, subject.name, reloadKey]);
 
   useEffect(() => {
-    setExamFilter('All');
-    setSemesterFilter('All');
-    setYearFilter('All');
-    setTeacherFilter('All');
-    setSearchText('');
-    setVisibleCount(8);
+    const hash = typeof window !== 'undefined' ? window.location.hash : '';
+    const idx = hash.indexOf('?');
+    const hashCode = idx !== -1 ? new URLSearchParams(hash.slice(idx + 1)).get('code') : '';
+    if (hashCode && subject?.code && hashCode.toLowerCase() !== subject.code.toLowerCase()) {
+      setExamFilter('All');
+      setSemesterFilter('All');
+      setYearFilter('All');
+      setTeacherFilter('All');
+      setSearchText('');
+      setVisibleCount(8);
+    }
   }, [subject.code]);
+
+  // Sync subject filter controls into URL query parameters
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams();
+    if (subject?.code) params.set('code', subject.code);
+    if (examFilter !== 'All') params.set('exam', examFilter);
+    if (semesterFilter !== 'All') params.set('sem', semesterFilter);
+    if (yearFilter !== 'All') params.set('year', yearFilter);
+    if (teacherFilter !== 'All') params.set('teacher', teacherFilter);
+    if (sortBy !== 'newest') params.set('sort', sortBy);
+    if (searchText.trim()) params.set('q', searchText.trim());
+    const qs = params.toString();
+    window.history.replaceState({ path: 'subject-papers', code: subject?.code }, '', `#subject-papers${qs ? `?${qs}` : ''}`);
+  }, [subject?.code, examFilter, semesterFilter, yearFilter, teacherFilter, sortBy, searchText]);
 
   const availableExamTypes = useMemo(() => {
     const terms = Array.from(
@@ -180,15 +223,19 @@ export default function SubjectPapers({
 
       <header className="papers-intro">
         <div className="papers-eyebrow">
-          <span className="material-symbols-outlined" aria-hidden="true">
-            library_books
-          </span>
+          <AppIcon name="library_books" size={18} />
           Past paper library
         </div>
 
         <PageHeader
           title={subject.name}
-          subtitle={`${subject.code} · ${subject.department || 'COMSATS Course'}`}
+          subtitle={(
+            <span>
+              <span className="mono-code" translate="no">{subject.code}</span>
+              {' · '}
+              {subject.department || 'COMSATS Course'}
+            </span>
+          )}
         />
 
         <p className="papers-intro-description">
@@ -199,59 +246,32 @@ export default function SubjectPapers({
       {/* Filters, Search & Sort Controls */}
       <section
         aria-label="Filter and sort past papers"
-        style={{
-          background: 'var(--surface)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '1.125rem',
-          marginBottom: '1.5rem',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(140px, 100%), 1fr))',
-          gap: '0.75rem',
-          alignItems: 'end'
-        }}
+        className="papers-filter-bar"
       >
         <div>
-          <label htmlFor="paper-search-input" style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-subtle)', marginBottom: '0.25rem' }}>
+          <label htmlFor="paper-search-input" className="papers-filter-label">
             Search paper
           </label>
           <input
             id="paper-search-input"
             type="search"
+            spellCheck={false}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             placeholder="Search by exam, teacher (e.g. Dr. Naveed), or year…"
-            style={{
-              width: '100%',
-              minHeight: '44px',
-              padding: '0.5rem 0.75rem',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--border-strong)',
-              background: 'var(--surface-2)',
-              color: 'var(--text)',
-              fontSize: '0.875rem'
-            }}
+            className="papers-filter-control"
           />
         </div>
 
         <div>
-          <label htmlFor="paper-exam-filter" style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-subtle)', marginBottom: '0.25rem' }}>
+          <label htmlFor="paper-exam-filter" className="papers-filter-label">
             Exam Type
           </label>
           <select
             id="paper-exam-filter"
             value={examFilter}
             onChange={(e) => setExamFilter(e.target.value)}
-            style={{
-              width: '100%',
-              minHeight: '44px',
-              padding: '0.5rem 0.75rem',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--border-strong)',
-              background: 'var(--surface-2)',
-              color: 'var(--text)',
-              fontSize: '0.875rem'
-            }}
+            className="papers-filter-control"
           >
             {availableExamTypes.map((t) => (
               <option key={t} value={t}>{t}</option>
@@ -260,23 +280,14 @@ export default function SubjectPapers({
         </div>
 
         <div>
-          <label htmlFor="paper-semester-filter" style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-subtle)', marginBottom: '0.25rem' }}>
+          <label htmlFor="paper-semester-filter" className="papers-filter-label">
             Semester
           </label>
           <select
             id="paper-semester-filter"
             value={semesterFilter}
             onChange={(e) => setSemesterFilter(e.target.value)}
-            style={{
-              width: '100%',
-              minHeight: '44px',
-              padding: '0.5rem 0.75rem',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--border-strong)',
-              background: 'var(--surface-2)',
-              color: 'var(--text)',
-              fontSize: '0.875rem'
-            }}
+            className="papers-filter-control"
           >
             {availableSemesters.map((s) => (
               <option key={s} value={s}>{s}</option>
@@ -285,23 +296,14 @@ export default function SubjectPapers({
         </div>
 
         <div>
-          <label htmlFor="paper-year-filter" style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-subtle)', marginBottom: '0.25rem' }}>
+          <label htmlFor="paper-year-filter" className="papers-filter-label">
             Year
           </label>
           <select
             id="paper-year-filter"
             value={yearFilter}
             onChange={(e) => setYearFilter(e.target.value)}
-            style={{
-              width: '100%',
-              minHeight: '44px',
-              padding: '0.5rem 0.75rem',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--border-strong)',
-              background: 'var(--surface-2)',
-              color: 'var(--text)',
-              fontSize: '0.875rem'
-            }}
+            className="papers-filter-control"
           >
             {availableYears.map((y) => (
               <option key={y} value={y}>{y}</option>
@@ -311,23 +313,14 @@ export default function SubjectPapers({
 
         {availableTeachers.length > 2 && (
           <div>
-            <label htmlFor="paper-teacher-filter" style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-subtle)', marginBottom: '0.25rem' }}>
+            <label htmlFor="paper-teacher-filter" className="papers-filter-label">
               Teacher / Instructor
             </label>
             <select
               id="paper-teacher-filter"
               value={teacherFilter}
               onChange={(e) => setTeacherFilter(e.target.value)}
-              style={{
-                width: '100%',
-                minHeight: '44px',
-                padding: '0.5rem 0.75rem',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--border-strong)',
-                background: 'var(--surface-2)',
-                color: 'var(--text)',
-                fontSize: '0.875rem'
-              }}
+              className="papers-filter-control"
             >
               {availableTeachers.map((t) => (
                 <option key={t} value={t}>{t}</option>
@@ -337,23 +330,14 @@ export default function SubjectPapers({
         )}
 
         <div>
-          <label htmlFor="paper-sort-select" style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-subtle)', marginBottom: '0.25rem' }}>
+          <label htmlFor="paper-sort-select" className="papers-filter-label">
             Sort By
           </label>
           <select
             id="paper-sort-select"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            style={{
-              width: '100%',
-              minHeight: '44px',
-              padding: '0.5rem 0.75rem',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px solid var(--border-strong)',
-              background: 'var(--surface-2)',
-              color: 'var(--text)',
-              fontSize: '0.875rem'
-            }}
+            className="papers-filter-control"
           >
             <option value="newest">Newest first</option>
             <option value="oldest">Oldest first</option>
@@ -366,7 +350,7 @@ export default function SubjectPapers({
         <h2>Available papers</h2>
 
         {!loading && !error && (
-          <span className="papers-count" role="status">
+          <span className="papers-count tabular-nums" role="status">
             {filteredPapers.length} {filteredPapers.length === 1 ? 'paper' : 'papers'}
           </span>
         )}
@@ -403,14 +387,19 @@ export default function SubjectPapers({
                 <article
                   key={paper.id}
                   className="paper-item-card"
-                  onClick={() => onViewPaper(paper)}
                 >
                   <div className="paper-item-icon" aria-hidden="true">
-                    <span className="material-symbols-outlined">description</span>
+                    <AppIcon name="description" size={24} />
                   </div>
 
                   <div className="paper-item-copy">
-                    <span className="paper-title">{paper.title}</span>
+                    <button
+                      type="button"
+                      className="paper-title-btn"
+                      onClick={() => onViewPaper(paper)}
+                    >
+                      {paper.title}
+                    </button>
 
                     <div className="paper-item-meta">
                       <span className="paper-badge">{paper.term || 'Exam'}</span>
@@ -423,18 +412,14 @@ export default function SubjectPapers({
 
                       {(paper.instructorName || paper.teacher) && (
                         <span className="paper-meta-detail" title={`Instructor: ${paper.instructorName || paper.teacher}`}>
-                          <span className="material-symbols-outlined" aria-hidden="true">
-                            person
-                          </span>
+                          <AppIcon name="person" size={16} />
                           {paper.instructorName || paper.teacher}
                         </span>
                       )}
 
                       {paper.year && (
-                        <span className="paper-meta-detail">
-                          <span className="material-symbols-outlined" aria-hidden="true">
-                            calendar_month
-                          </span>
+                        <span className="paper-meta-detail tabular-nums">
+                          <AppIcon name="calendar_month" size={16} />
                           {paper.year}
                         </span>
                       )}
@@ -444,7 +429,7 @@ export default function SubjectPapers({
                       )}
 
                       {paper.totalMarks && (
-                        <span className="paper-meta-detail">{paper.totalMarks} Marks</span>
+                        <span className="paper-meta-detail tabular-nums">{paper.totalMarks} Marks</span>
                       )}
                     </div>
                   </div>
@@ -452,16 +437,11 @@ export default function SubjectPapers({
                   <button
                     type="button"
                     className="btn-view-paper"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onViewPaper(paper);
-                    }}
+                    onClick={() => onViewPaper(paper)}
                     aria-label={`Open past paper ${paper.title}`}
                   >
                     <span>View paper</span>
-                    <span className="material-symbols-outlined" aria-hidden="true">
-                      arrow_forward
-                    </span>
+                    <AppIcon name="arrow_forward" size={18} />
                   </button>
 
                   <button
@@ -472,9 +452,7 @@ export default function SubjectPapers({
                     aria-pressed={bookmarked}
                     title={bookmarked ? 'Bookmarked' : 'Save paper'}
                   >
-                    <span className="material-symbols-outlined" aria-hidden="true">
-                      {bookmarked ? 'bookmark_added' : 'bookmark_add'}
-                    </span>
+                    <AppIcon name={bookmarked ? 'bookmark_added' : 'bookmark_add'} size={20} />
                   </button>
                 </article>
               );
@@ -493,7 +471,7 @@ export default function SubjectPapers({
                   background: 'var(--surface)',
                   color: 'var(--text)',
                   fontWeight: 700,
-                  minHeight: '44px'
+                  cursor: 'pointer'
                 }}
               >
                 Load More Papers ({filteredPapers.length - visibleCount} remaining)

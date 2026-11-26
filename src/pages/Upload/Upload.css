@@ -32,7 +32,10 @@
   text-align: center;
   margin-bottom: 2rem;
   cursor: pointer;
-  transition: all 0.25s var(--ease-spring);
+  transition: transform 0.25s var(--ease-spring),
+              border-color 0.25s var(--ease-spring),
+              background-color 0.25s var(--ease-spring),
+              box-shadow 0.25s var(--ease-spring);
   background: var(--surface-2);
 }
 

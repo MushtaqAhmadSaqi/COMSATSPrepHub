@@ -74,6 +74,7 @@ html.dark .cmd-palette-panel {
 .cmd-palette__list {
   max-height: 320px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: var(--space-2);
 }
 
@@ -115,8 +116,23 @@ html.dark .cmd-palette-panel {
   transition: color var(--dur-fast) var(--ease);
 }
 
-.cmd-palette__item-label {
+.cmd-palette__item-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   flex: 1;
+}
+
+.cmd-palette__item-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cmd-palette__item-meta {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-subtle);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

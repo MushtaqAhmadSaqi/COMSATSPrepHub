@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import AppIcon from '../ui/AppIcon';
 import './Navbar.css';
 
-// Desktop navigation items
+// Desktop navigation items (6 core student destinations — single-tier)
 const desktopNavItems = [
   { id: 'home',              label: 'Home',      icon: 'home' },
   { id: 'subjects',          label: 'Papers',    icon: 'menu_book' },
   { id: 'ai-quiz-generator', label: 'AI Quiz',   icon: 'auto_awesome' },
   { id: 'study-hub',         label: 'Study Hub', icon: 'psychology' },
-  { id: 'gpa',               label: 'GPA Calc',  icon: 'calculate' }
+  { id: 'gpa',               label: 'GPA Calc',  icon: 'calculate' },
+  { id: 'dashboard',         label: 'Dashboard', icon: 'dashboard' }
 ];
 
 // Mobile bottom navigation bar — core student study tabs plus one-hand Dashboard access
@@ -36,7 +38,6 @@ export default function Navbar({
     user?.email?.split('@')[0] ||
     null;
 
-  /* Scroll shadow effect */
   const handleScroll = useCallback(() => {
     setScrolled(window.scrollY > 12);
   }, []);
@@ -72,20 +73,21 @@ export default function Navbar({
               type="button"
               onClick={() => onNavigate('home')}
               className="brand-logo"
-              aria-label="COMSATS Prep Hub home"
+              aria-label="COMSATSPrepHub home"
               style={{ background: 'none', border: 'none', padding: 0 }}
             >
               <img
                 src="/logo.png"
-                alt="COMSATS Prep Hub logo"
+                alt="COMSATSPrepHub logo"
                 width="32"
                 height="32"
                 decoding="async"
+                fetchPriority="high"
                 onError={(e) => {
                   e.target.style.display = 'none';
                 }}
               />
-              <div>
+              <div translate="no">
                 <span className="brand-title">COMSATS</span>
                 <span className="brand-highlight">PrepHub</span>
               </div>
@@ -109,20 +111,18 @@ export default function Navbar({
 
             {/* Right Side Controls */}
             <div className="nav-right-actions">
-              {/* Command Palette Trigger (Ctrl/Cmd+K hint) */}
               <button
                 type="button"
                 onClick={onOpenCommandPalette}
                 className="cmd-trigger-btn"
-                aria-label="Search papers, subjects, pages (Ctrl+K or Cmd+K)"
+                aria-label="Search papers, courses, exam types, and pages (Ctrl+K or Cmd+K)"
                 title="Quick search (Ctrl+K / ⌘K)"
               >
-                <span className="material-symbols-outlined" aria-hidden="true">search</span>
+                <AppIcon name="search" size={18} />
                 <span className="cmd-trigger-text">Search</span>
                 <kbd className="cmd-trigger-kbd">Ctrl K</kbd>
               </button>
 
-              {/* Language Toggle (EN / اردو) */}
               <button
                 type="button"
                 onClick={onToggleLanguage}
@@ -130,10 +130,9 @@ export default function Navbar({
                 aria-label={lang === 'ur' ? 'Switch explanations to English' : 'Switch explanations to Urdu'}
                 title={lang === 'ur' ? 'Language: اردو (Click for EN)' : 'Language: EN (Click for اردو)'}
               >
-                {lang === 'ur' ? 'اردو' : 'EN'}
+                <span translate="no">{lang === 'ur' ? 'اردو' : 'EN'}</span>
               </button>
 
-              {/* Dark Mode Toggle */}
               <button
                 type="button"
                 onClick={onToggleDarkMode}
@@ -142,12 +141,9 @@ export default function Navbar({
                 aria-pressed={isDark}
                 title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
               >
-                <span className="material-symbols-outlined" aria-hidden="true">
-                  {isDark ? 'light_mode' : 'dark_mode'}
-                </span>
+                <AppIcon name={isDark ? 'light_mode' : 'dark_mode'} size={18} />
               </button>
 
-              {/* User / Sign In Button */}
               {user ? (
                 <button
                   type="button"
@@ -156,7 +152,7 @@ export default function Navbar({
                   aria-label="Go to student dashboard"
                   title={firstName || 'Dashboard'}
                 >
-                  <span className="material-symbols-outlined" aria-hidden="true">account_circle</span>
+                  <AppIcon name="account_circle" size={19} />
                   <span className="signin-btn-text">{firstName || 'Dashboard'}</span>
                 </button>
               ) : (
@@ -167,7 +163,7 @@ export default function Navbar({
                   aria-label="Sign in to your account"
                   title="Sign In"
                 >
-                  <span className="material-symbols-outlined" aria-hidden="true">person</span>
+                  <AppIcon name="person" size={19} />
                   <span className="signin-btn-text">Sign In</span>
                 </button>
               )}
@@ -176,7 +172,7 @@ export default function Navbar({
         </div>
       </header>
 
-      {/* Mobile Bottom Navigation Bar — Papers, AI Quiz, GPA, Profile */}
+      {/* Mobile Bottom Navigation Bar — Papers, AI Quiz, Study Hub, GPA, Dashboard */}
       <nav className="mobile-bottom-nav" aria-label="Mobile primary navigation">
         <div className="mobile-grid">
           {mobileNavItems.map((item) => (
@@ -188,7 +184,7 @@ export default function Navbar({
               aria-label={item.label}
               aria-current={isNavItemActive(item.id) ? 'page' : undefined}
             >
-              <span className="material-symbols-outlined" aria-hidden="true">{item.icon}</span>
+              <AppIcon name={item.icon} size={22} />
               <span className="text-label">{item.label}</span>
             </button>
           ))}

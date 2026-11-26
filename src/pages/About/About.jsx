@@ -1,5 +1,6 @@
 import React from 'react';
 import PageHeader from '../../components/PageHeader/PageHeader';
+import AppIcon from '../../components/ui/AppIcon';
 import { getInitialsAvatarDataUri } from '../../utils/sanitize';
 import './About.css';
 
@@ -32,6 +33,7 @@ export default function About() {
           width={FOUNDER_SIZE.width}
           height={FOUNDER_SIZE.height}
           decoding="async"
+          fetchPriority="high"
           onError={(e) => {
             e.target.onerror = null;
             e.target.src = getInitialsAvatarDataUri('Mushtaq Ahmad');
@@ -39,7 +41,7 @@ export default function About() {
         />
         <div className="founder-info">
           <div className="founder-role-badge">
-            <span className="material-symbols-outlined" style={{ fontSize: '12px' }}>star</span>
+            <AppIcon name="star" filled size={12} />
             Founder &amp; Lead Developer
           </div>
           <h3>Mushtaq Ahmad Saqi</h3>

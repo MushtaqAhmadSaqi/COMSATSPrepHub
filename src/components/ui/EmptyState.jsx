@@ -1,15 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import AppIcon from './AppIcon';
 
 /**
  * EmptyState — friendly placeholder when a list/page has no data.
  *
  * @param {object}   props
- * @param {string}   props.icon          — Material Symbol name
- * @param {string}   props.title         — Primary message
- * @param {string}   [props.description] — Secondary text
- * @param {string}   [props.actionLabel] — CTA button text
- * @param {function} [props.onAction]    — CTA click handler
+ * @param {string}   [props.icon='inbox'] — AppIcon key
+ * @param {string}   props.title          — Primary message
+ * @param {string}   [props.description]  — Secondary text
+ * @param {string}   [props.actionLabel]  — CTA button text
+ * @param {function} [props.onAction]     — CTA click handler
  */
 export default function EmptyState({ icon = 'inbox', title, description, actionLabel, onAction }) {
   return (
@@ -17,24 +18,16 @@ export default function EmptyState({ icon = 'inbox', title, description, actionL
       className="empty-state"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.35 }}
       style={{
         textAlign: 'center',
-        padding: '3.5rem 1.5rem',
+        padding: '3rem 1.5rem',
         color: 'var(--text-subtle)',
       }}
     >
-      <span
-        className="material-symbols-outlined"
-        style={{
-          fontSize: '3rem',
-          color: 'var(--border-strong)',
-          display: 'block',
-          marginBottom: '1rem',
-        }}
-      >
-        {icon}
-      </span>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem', color: 'var(--border-strong)' }}>
+        <AppIcon name={icon} size={46} />
+      </div>
       <p style={{ fontWeight: 700, fontSize: '1.125rem', color: 'var(--text)', marginBottom: '0.25rem' }}>
         {title}
       </p>

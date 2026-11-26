@@ -17,6 +17,7 @@ import Breadcrumbs from '../../components/Breadcrumbs/Breadcrumbs';
 import Modal from '../../components/ui/Modal';
 import { SkeletonListItem } from '../../components/ui/Skeleton';
 import MathText from '../../components/MathText/MathText';
+import AppIcon from '../../components/ui/AppIcon';
 import './PaperView.css';
 
 /* ── Question text renderer ─────────────────────────────── */
@@ -233,15 +234,15 @@ export default function PaperView({
     return (
       <div className="paperview-container">
         <div className="paperview-exam-sheet" style={{ padding: '2.5rem 1.5rem', textAlign: 'center' }}>
-          <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', color: 'var(--text-subtle)' }} aria-hidden="true">
-            description
-          </span>
+          <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--text-subtle)' }}>
+            <AppIcon name="description" size={40} />
+          </div>
           <h2 style={{ margin: '0.75rem 0 0.5rem', color: 'var(--text)' }}>No paper selected</h2>
           <p style={{ color: 'var(--text-subtle)', marginBottom: '1.25rem' }}>
             Choose a course and paper to view its questions and model answers.
           </p>
           <button type="button" className="paperview-btn-secondary" onClick={onBack}>
-            <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+            <AppIcon name="arrow_back" size={18} />
             Back to papers
           </button>
         </div>
@@ -311,7 +312,7 @@ export default function PaperView({
             >
               A-
             </button>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0 0.35rem', color: 'var(--text-subtle)' }}>
+            <span className="tabular-nums" style={{ fontSize: '0.75rem', fontWeight: 700, padding: '0 0.35rem', color: 'var(--text-subtle)' }}>
               {Math.round(zoomScale * 100)}%
             </span>
             <button
@@ -330,9 +331,7 @@ export default function PaperView({
             onClick={handleBookmark}
             aria-pressed={bookmarked}
           >
-            <span className="material-symbols-outlined" aria-hidden="true">
-              {bookmarked ? 'bookmark_added' : 'bookmark_add'}
-            </span>
+            <AppIcon name={bookmarked ? 'bookmark_added' : 'bookmark_add'} size={18} />
             {bookmarked ? 'Saved' : 'Bookmark'}
           </button>
 
@@ -342,7 +341,7 @@ export default function PaperView({
             onClick={() => setShowNotesPanel((v) => !v)}
             aria-expanded={showNotesPanel}
           >
-            <span className="material-symbols-outlined" aria-hidden="true">edit_note</span>
+            <AppIcon name="edit_note" size={18} />
             My Notes
           </button>
 
@@ -351,7 +350,7 @@ export default function PaperView({
             className="paperview-btn-secondary"
             onClick={handleQuizFromPaper}
           >
-            <span className="material-symbols-outlined" aria-hidden="true">quiz</span>
+            <AppIcon name="quiz" size={18} />
             Quiz From This Paper
           </button>
 
@@ -361,9 +360,7 @@ export default function PaperView({
             onClick={toggleAll}
             disabled={loading || questions.length === 0}
           >
-            <span className="material-symbols-outlined" aria-hidden="true">
-              {allExpanded ? 'visibility_off' : 'visibility'}
-            </span>
+            <AppIcon name={allExpanded ? 'visibility_off' : 'visibility'} size={18} />
             {allExpanded ? 'Hide all answers' : 'Show all answers'}
           </button>
 
@@ -372,7 +369,7 @@ export default function PaperView({
             className="btn-download"
             onClick={handleDownload}
           >
-            <span className="material-symbols-outlined" aria-hidden="true">download</span>
+            <AppIcon name="download" size={18} />
             Download / Print
           </button>
         </div>
@@ -417,7 +414,7 @@ export default function PaperView({
           />
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
             <button type="button" className="paperview-btn-secondary" onClick={handleSaveNote}>
-              <span className="material-symbols-outlined" aria-hidden="true">save</span>
+              <AppIcon name="save" size={18} />
               Save Note
             </button>
           </div>
@@ -441,7 +438,13 @@ export default function PaperView({
               <span>
                 {displaySubject}
                 {paper.subjectCode && paper.subjectName
-                  ? ` (${paper.subjectCode})`
+                  ? (
+                    <>
+                      {' ('}
+                      <span className="mono-code" translate="no">{paper.subjectCode}</span>
+                      {')'}
+                    </>
+                  )
                   : ''}
               </span>
             </div>
@@ -469,7 +472,7 @@ export default function PaperView({
 
           {(isSamplePaper || usesCuratedQuestions) && (
             <div className="paperview-provenance" role="note">
-              <span className="material-symbols-outlined" aria-hidden="true">info</span>
+              <AppIcon name="info" size={20} style={{ color: 'var(--warning)', flexShrink: 0, marginTop: '0.1rem' }} />
               <div>
                 {isSamplePaper && (
                   <p>
@@ -616,13 +619,9 @@ export default function PaperView({
                       aria-expanded={isExpanded}
                       aria-controls={answerId}
                     >
-                      <span className="material-symbols-outlined" aria-hidden="true">
-                        {isExpanded ? 'expand_less' : 'lightbulb'}
-                      </span>
+                      <AppIcon name={isExpanded ? 'expand_less' : 'lightbulb'} size={18} />
                       {isExpanded ? 'Hide model answer' : 'View model answer'}
-                      <span className="material-symbols-outlined" aria-hidden="true">
-                        {isExpanded ? 'remove' : 'add'}
-                      </span>
+                      <AppIcon name={isExpanded ? 'remove' : 'add'} size={18} />
                     </button>
 
                     <span className="paperview-answer-tip">
@@ -637,9 +636,7 @@ export default function PaperView({
                     aria-label={`Model answer for ${q.number || `Question ${index + 1}`}`}
                   >
                     <div className="paperview-answer-heading">
-                      <span className="material-symbols-outlined" aria-hidden="true">
-                        school
-                      </span>
+                      <AppIcon name="school" size={20} />
                       <h4>Model answer</h4>
                     </div>
 
@@ -665,9 +662,9 @@ export default function PaperView({
               background: 'var(--brand-soft)'
             }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '2.5rem', color: 'var(--brand)' }} aria-hidden="true">
-              lock_open
-            </span>
+            <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--brand)' }}>
+              <AppIcon name="lock_open" size={40} />
+            </div>
             <h3 style={{ margin: '0.5rem 0', fontSize: '1.25rem', fontWeight: 800 }}>
               Sign in for free to unlock all {questions.length} questions &amp; solutions
             </h3>
@@ -675,7 +672,7 @@ export default function PaperView({
               You are viewing a 2-question guest preview. Sign in to view the complete exam paper, save personal notes, and bookmark papers across devices.
             </p>
             <button type="button" className="btn-download" onClick={onRequireAuth}>
-              <span className="material-symbols-outlined" aria-hidden="true">login</span>
+              <AppIcon name="login" size={18} />
               Sign In to Unlock Full Paper
             </button>
           </div>
@@ -705,11 +702,11 @@ export default function PaperView({
                 className="paperview-btn-secondary"
                 onClick={() => setReportModalOpen(true)}
               >
-                <span className="material-symbols-outlined" aria-hidden="true">flag</span>
+                <AppIcon name="flag" size={18} />
                 Report a problem
               </button>
               <button type="button" className="btn-download" onClick={handleDownload}>
-                <span className="material-symbols-outlined" aria-hidden="true">download</span>
+                <AppIcon name="download" size={18} />
                 Download / Print
               </button>
             </div>

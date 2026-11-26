@@ -85,6 +85,7 @@
   cursor: not-allowed;
 }
 
+.paperview-container button .app-icon,
 .paperview-container button .material-symbols-outlined {
   flex-shrink: 0;
   font-size: 1.125rem;
@@ -442,6 +443,7 @@
   margin-bottom: 1rem;
 }
 
+.paperview-container .paperview-answer-heading .app-icon,
 .paperview-container .paperview-answer-heading .material-symbols-outlined {
   font-size: 1.25rem;
   color: var(--brand, #2543a1);
@@ -750,6 +752,7 @@
   margin-top: 0.4rem;
 }
 
+.paperview-container .paperview-provenance .app-icon,
 .paperview-container .paperview-provenance .material-symbols-outlined {
   color: var(--warning, #d97706);
   font-size: 1.25rem;

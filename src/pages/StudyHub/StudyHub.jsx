@@ -11,6 +11,7 @@ import {
   toggleRevisionCard
 } from '../../utils/studyTracker';
 import { toast } from '../../utils/toast';
+import AppIcon from '../../components/ui/AppIcon';
 import './StudyHub.css';
 
 const SAMPLE_DAILY_QUESTIONS = [
@@ -275,7 +276,7 @@ export default function StudyHub() {
           onClick={() => setActiveTab('daily')}
           className={`study-hub-tab ${activeTab === 'daily' ? 'active' : ''}`}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">local_fire_department</span>
+          <AppIcon name="local_fire_department" size={18} />
           Daily 5-Q Challenge
         </button>
         <button
@@ -288,7 +289,7 @@ export default function StudyHub() {
           onClick={() => setActiveTab('flashcards')}
           className={`study-hub-tab ${activeTab === 'flashcards' ? 'active' : ''}`}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">style</span>
+          <AppIcon name="style" size={18} />
           Leitner Flashcards ({dueCards.length} due)
         </button>
         <button
@@ -301,7 +302,7 @@ export default function StudyHub() {
           onClick={() => setActiveTab('cheatsheets')}
           className={`study-hub-tab ${activeTab === 'cheatsheets' ? 'active' : ''}`}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">menu_book</span>
+          <AppIcon name="menu_book" size={18} />
           Course Cheat-Sheets
         </button>
         <button
@@ -314,7 +315,7 @@ export default function StudyHub() {
           onClick={() => setActiveTab('revision')}
           className={`study-hub-tab ${activeTab === 'revision' ? 'active' : ''}`}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">star</span>
+          <AppIcon name="star" size={18} filled={activeTab === 'revision'} />
           Revision Deck ({revisionCards.length})
         </button>
       </div>
@@ -323,17 +324,21 @@ export default function StudyHub() {
         <div className="study-hub-card" id="study-hub-panel" role="tabpanel" aria-labelledby={`study-tab-${activeTab}`} tabIndex={0}>
           {challengeStatus.completedToday && !isFinished ? (
             <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '3.25rem', color: 'var(--success)' }} aria-hidden="true">check_circle</span>
+              <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--success)' }}>
+                <AppIcon name="check_circle" size={52} />
+              </div>
               <h2 style={{ margin: '1rem 0 0.5rem', fontSize: '1.5rem', fontWeight: 800 }}>You completed today&apos;s challenge!</h2>
-              <p style={{ color: 'var(--text-subtle)' }}>
-                Today&apos;s Score: <strong>{challengeStatus.todayScore}</strong> · Current Streak: <strong>{challengeStatus.dailyStreak || 1} days 🔥</strong>
+              <p className="tabular-nums" style={{ color: 'var(--text-subtle)' }}>
+                Today&apos;s Score: <strong>{challengeStatus.todayScore}</strong> · Current Streak: <strong>{challengeStatus.dailyStreak || 1} days</strong>
               </p>
             </div>
           ) : isFinished ? (
             <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '3.25rem', color: 'var(--success)' }} aria-hidden="true">emoji_events</span>
+              <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--success)' }}>
+                <AppIcon name="emoji_events" size={52} />
+              </div>
               <h2 style={{ margin: '1rem 0 0.5rem', fontSize: '1.5rem', fontWeight: 800 }}>Challenge Finished!</h2>
-              <p style={{ color: 'var(--text-subtle)', marginBottom: '1rem' }}>
+              <p className="tabular-nums" style={{ color: 'var(--text-subtle)', marginBottom: '1rem' }}>
                 You scored <strong>{score}</strong> out of {SAMPLE_DAILY_QUESTIONS.length}. Come back tomorrow to grow your streak!
               </p>
             </div>
@@ -408,31 +413,26 @@ export default function StudyHub() {
           {currentCard ? (
             <div>
               <div className="flashcard-meta-row">
-                <span className="leitner-badge">
-                  {currentCard.subjectCode} · Card {safeCardIndex + 1} of {reviewCards.length}
+                <span className="leitner-badge tabular-nums">
+                  <span className="mono-code" translate="no">{currentCard.subjectCode}</span>
+                  {' · Card '}
+                  {safeCardIndex + 1} of {reviewCards.length}
                 </span>
-                <span className="leitner-badge">
-                  <span className="material-symbols-outlined" style={{ fontSize: '15px' }} aria-hidden="true">inventory_2</span>
+                <span className="leitner-badge tabular-nums">
+                  <AppIcon name="inventory_2" size={15} />
                   Leitner Box {currentCard.box || 1} / 5
                 </span>
               </div>
 
               <div className="flashcard-stage">
-                <div
-                  role="button"
-                  tabIndex={0}
+                <button
+                  type="button"
                   aria-pressed={flipped}
                   aria-label={flipped ? 'Flashcard answer shown. Activate to flip to question.' : 'Flashcard question shown. Activate to reveal answer.'}
                   aria-describedby={flipped ? 'flashcard-answer' : 'flashcard-prompt'}
                   onClick={() => {
                     if (swipedRef.current) { swipedRef.current = false; return; }
                     setFlipped((value) => !value);
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      event.preventDefault();
-                      setFlipped((value) => !value);
-                    }
                   }}
                   onPointerDown={(event) => {
                     if (event.pointerType === 'mouse') return;
@@ -452,15 +452,15 @@ export default function StudyHub() {
                     <span>Model Answer</span>
                     <p>{currentCard.back}</p>
                   </div>
-                </div>
+                </button>
               </div>
               <div className="flashcard-actions">
                 <button type="button" className="flashcard-rate-btn" onClick={() => setFlipped((value) => !value)}>
-                  <span className="material-symbols-outlined" aria-hidden="true">flip</span>
+                  <AppIcon name="flip" size={18} />
                   {flipped ? 'Show Question' : 'Reveal Answer'}
                 </button>
                 <button type="button" className="revision-star-btn" aria-pressed={revisionIds.includes(currentCard.id)} onClick={() => handleStarCard(currentCard)}>
-                  <span className="material-symbols-outlined" aria-hidden="true">{revisionIds.includes(currentCard.id) ? 'star' : 'star_border'}</span>
+                  <AppIcon name={revisionIds.includes(currentCard.id) ? 'star' : 'star_border'} filled={revisionIds.includes(currentCard.id)} size={18} />
                   {revisionIds.includes(currentCard.id) ? 'Saved to Revision Deck' : 'Star for Revision'}
                 </button>
               </div>
@@ -485,7 +485,9 @@ export default function StudyHub() {
             </div>
           ) : (
             <div className="flashcard-empty">
-              <span className="material-symbols-outlined" aria-hidden="true">{activeTab === 'revision' && revisionCards.length === 0 ? 'star_border' : 'task_alt'}</span>
+              <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--brand)' }}>
+                <AppIcon name={activeTab === 'revision' && revisionCards.length === 0 ? 'star_border' : 'task_alt'} size={42} />
+              </div>
               <h2>{activeTab === 'revision' && revisionCards.length === 0 ? 'Build your Revision Deck' : 'All caught up!'}</h2>
               <p>{activeTab === 'revision' && revisionCards.length === 0
                 ? 'Star a flashcard or a question in a quiz summary. Your deck stays saved on this device — no account needed.'
@@ -502,12 +504,12 @@ export default function StudyHub() {
               {revisionCards.map((card) => (
                 <article key={card.id}>
                   <details>
-                    <summary>{card.subjectCode} · {card.front}</summary>
+                    <summary><span className="mono-code" translate="no">{card.subjectCode}</span> · {card.front}</summary>
                     <p>{card.back}</p>
                     <small>{card.nextReview > now ? `Next review: ${new Date(card.nextReview).toLocaleString()}` : 'Due now'}</small>
                   </details>
                   <button type="button" className="revision-star-btn" aria-label={`Remove ${card.front} from Revision Deck`} onClick={() => handleStarCard(card)}>
-                    <span className="material-symbols-outlined" aria-hidden="true">star</span>
+                    <AppIcon name="star" filled size={18} />
                   </button>
                 </article>
               ))}
@@ -523,6 +525,7 @@ export default function StudyHub() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
               <input
                 type="text"
+                spellCheck={false}
                 className="ai-input"
                 value={newCourse}
                 onChange={(e) => setNewCourse(e.target.value)}
@@ -577,7 +580,7 @@ export default function StudyHub() {
           <div className="cheatsheet-grid">
             {HIGH_YIELD_CHEATSHEETS.map((sheet) => (
               <article key={sheet.code} className="cheatsheet-item">
-                <span className="leitner-badge">{sheet.code}</span>
+                <span className="leitner-badge mono-code" translate="no">{sheet.code}</span>
                 <h3>{sheet.title}</h3>
                 <ul>
                   {sheet.points.map((pt, i) => (

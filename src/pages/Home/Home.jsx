@@ -1,23 +1,26 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useCounter } from '../../utils/useCounter';
 import { DEFAULT_SUBJECTS } from '../../constants/subjects';
+import { computePlatformStats } from '../../constants/platformStats';
+import { fetchSubjectsFromSupabase } from '../../services/papersService';
 import { normalizeCourseCode } from '../../utils/paperSearch';
 import {
   getRecentActivity,
   getRecentlyViewedPapers,
   getDailyChallengeStatus
 } from '../../utils/studyTracker';
+import AppIcon from '../../components/ui/AppIcon';
 import './Home.css';
 
 /* ── Animated Stat Item ── */
 function StatItem({ num, label, suffix }) {
-  const target = parseInt(num.replace(/\D/g, ''), 10);
-  const { ref, display } = useCounter(target, { duration: 1600, suffix });
+  const target = typeof num === 'number' ? num : parseInt(String(num).replace(/\D/g, ''), 10);
+  const { ref, display } = useCounter(target, { duration: 1000, suffix });
 
   return (
     <div className="stat-item" ref={ref}>
-      <div className="stat-num">{display}</div>
+      <div className="stat-num tabular-nums">{display}</div>
       <div className="stat-label">{label}</div>
     </div>
   );
@@ -105,7 +108,7 @@ function AnimatedButton({ children, onClick, variant = 'primary', className = ''
       whileTap={{ scale: 0.96 }}
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}
     >
-      {icon && <span className="material-symbols-outlined" aria-hidden="true">{icon}</span>}
+      {icon && <AppIcon name={icon} size={18} />}
       {children}
     </motion.button>
   );
@@ -139,13 +142,28 @@ export default function Home({
 }) {
   const [heroQuery, setHeroQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
+  const [subjects, setSubjects] = useState(DEFAULT_SUBJECTS);
+
+  useEffect(() => {
+    let active = true;
+    fetchSubjectsFromSupabase()
+      .then((rows) => {
+        if (active && Array.isArray(rows) && rows.length > 0) {
+          setSubjects(rows);
+        }
+      })
+      .catch(() => { /* keep DEFAULT_SUBJECTS fallback */ });
+    return () => { active = false; };
+  }, []);
+
+  const platformStats = useMemo(() => computePlatformStats(subjects), [subjects]);
 
   const features = [
     {
       icon: 'picture_as_pdf',
       title: 'Past Paper Library',
       desc: 'Search every COMSATS past paper by course code, teacher, or exam type — with model answers.',
-      hint: `${DEFAULT_SUBJECTS.length} courses · code search like "csc 103"`,
+      hint: `${platformStats.courseCount} courses · code search like "csc 211"`,
       path: 'subjects',
       wide: true
     },
@@ -184,23 +202,23 @@ export default function Home({
   ];
 
   const stats = [
-    { num: '203+', label: 'Past Papers', suffix: '+' },
-    { num: `${DEFAULT_SUBJECTS.length}+`,  label: 'COMSATS Courses', suffix: '+' },
-    { num: '500+', label: 'Active Students', suffix: '+' }
+    { num: platformStats.paperCount, label: 'Past Papers', suffix: '+' },
+    { num: platformStats.courseCount, label: 'COMSATS Courses', suffix: '' },
+    { num: platformStats.departmentCount, label: 'Academic Departments', suffix: '' }
   ];
 
   const suggestions = useMemo(() => {
     const q = heroQuery.trim().toLowerCase();
-    if (!q) return DEFAULT_SUBJECTS.slice(0, 5);
+    if (!q) return subjects.slice(0, 5);
     const normalized = normalizeCourseCode(heroQuery);
-    return DEFAULT_SUBJECTS.filter(
+    return subjects.filter(
       (s) =>
         s.code.toLowerCase().includes(q) ||
         (normalized && normalizeCourseCode(s.code).includes(normalized)) ||
         s.name.toLowerCase().includes(q) ||
         s.department.toLowerCase().includes(q)
     ).slice(0, 6);
-  }, [heroQuery]);
+  }, [heroQuery, subjects]);
 
   const recentActivity = useMemo(() => getRecentActivity(3), []);
   const recentPapers = useMemo(() => getRecentlyViewedPapers(3), []);
@@ -234,7 +252,7 @@ export default function Home({
           transition={{ duration: 0.5, delay: 0.08 }}
         >
           <div className="home-badge-pill">
-            <span className="material-symbols-outlined" style={{ fontSize: '15px' }} aria-hidden="true">school</span>
+            <AppIcon name="school" size={15} />
             Built for COMSATS Students
           </div>
         </motion.div>
@@ -247,7 +265,7 @@ export default function Home({
           transition={{ duration: 0.5, delay: 0.15 }}
         >
           Ace Your Exams at <br />
-          <span className="home-title-highlight">COMSATS University</span>
+          <span className="home-title-highlight" translate="no">COMSATS University</span>
         </motion.h1>
 
         {/* Subtitle */}
@@ -288,11 +306,10 @@ export default function Home({
                 gap: '0.5rem'
               }}
             >
-              <span className="material-symbols-outlined" style={{ color: 'var(--brand)', fontSize: '20px' }} aria-hidden="true">
-                search
-              </span>
+              <AppIcon name="search" size={20} style={{ color: 'var(--brand)' }} />
               <input
                 type="search"
+                spellCheck={false}
                 value={heroQuery}
                 onChange={(e) => setHeroQuery(e.target.value)}
                 placeholder="Search by course code or subject (e.g. CSC211, OOP, MTH104)…"
@@ -369,7 +386,7 @@ export default function Home({
                     }}
                   >
                     <span>
-                      <strong style={{ color: 'var(--brand)', marginRight: '0.5rem' }}>{subj.code}</strong>
+                      <strong translate="no" style={{ color: 'var(--brand)', marginRight: '0.5rem' }}>{subj.code}</strong>
                       {subj.name}
                     </span>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-subtle)' }}>
@@ -420,7 +437,7 @@ export default function Home({
               ariaLabel={`Open ${f.title}: ${f.desc}`}
             >
               <div className="home-feature-icon">
-                <span className="material-symbols-outlined" style={{ fontSize: '22px' }} aria-hidden="true">{f.icon}</span>
+                <AppIcon name={f.icon} size={22} />
               </div>
               <div className="home-feature-title">{f.title}</div>
               <p className="home-feature-desc">{f.desc}</p>
@@ -508,13 +525,11 @@ export default function Home({
                     textAlign: 'left'
                   }}
                 >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ color: 'var(--brand)', fontSize: '22px', flexShrink: 0 }}
-                    aria-hidden="true"
-                  >
-                    {item.icon || 'history'}
-                  </span>
+                  <AppIcon
+                    name={item.icon || 'history'}
+                    size={22}
+                    style={{ color: 'var(--brand)', flexShrink: 0 }}
+                  />
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: '0.875rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {item.title}
@@ -569,9 +584,7 @@ export default function Home({
                   <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--brand)', background: 'var(--brand-soft)', padding: '0.25rem 0.65rem', borderRadius: '9999px' }}>
                     STEP {item.step}
                   </span>
-                  <span className="material-symbols-outlined" style={{ color: 'var(--brand)', fontSize: '22px' }} aria-hidden="true">
-                    {item.icon}
-                  </span>
+                  <AppIcon name={item.icon} size={22} style={{ color: 'var(--brand)' }} />
                 </div>
                 <h3 style={{ fontSize: '1.0625rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.375rem' }}>
                   {item.title}
@@ -694,7 +707,7 @@ function ComingSoonBanner() {
             marginBottom: '0.875rem'
           }}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: '15px' }} aria-hidden="true">rocket_launch</span>
+          <AppIcon name="rocket_launch" size={15} />
           What's Coming Next
         </div>
         <h2
@@ -732,9 +745,7 @@ function ComingSoonBanner() {
             boxShadow: 'var(--shadow-1)'
           }}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">
-            {expanded ? 'expand_less' : 'expand_more'}
-          </span>
+          <AppIcon name={expanded ? 'expand_less' : 'expand_more'} size={18} />
           {expanded ? 'Hide upcoming features' : `Preview ${COMING_SOON_FEATURES.length} upcoming features`}
         </button>
       </div>
@@ -795,9 +806,7 @@ function ComingSoonBanner() {
                       boxShadow: `0 4px 12px ${f.glow}`
                     }}
                   >
-                    <span className="material-symbols-outlined" style={{ fontSize: '22px', color: 'var(--on-brand)' }} aria-hidden="true">
-                      {f.icon}
-                    </span>
+                    <AppIcon name={f.icon} size={22} style={{ color: 'var(--on-brand)' }} />
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem' }}>
@@ -887,7 +896,7 @@ function ComingSoonBanner() {
                     paddingTop: '0.875rem'
                   }}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }} aria-hidden="true">schedule</span>
+                  <AppIcon name="schedule" size={14} />
                   {f.eta}
                 </div>
               </motion.div>
@@ -905,9 +914,7 @@ function ComingSoonBanner() {
               border: '1px dashed var(--border-strong)'
             }}
           >
-        <span className="material-symbols-outlined" style={{ fontSize: '28px', color: 'var(--brand)', display: 'block', marginBottom: '0.5rem' }} aria-hidden="true">
-          campaign
-        </span>
+        <AppIcon name="campaign" size={28} style={{ color: 'var(--brand)', display: 'block', margin: '0 auto 0.5rem' }} />
         <p style={{ fontWeight: 700, fontSize: '0.9375rem', color: 'var(--text)', marginBottom: '0.25rem' }}>
           Want to shape what gets built next?
         </p>
@@ -919,7 +926,7 @@ function ComingSoonBanner() {
             href="mailto:mushtaqahmedsaqi1234@gmail.com?subject=Feature%20Suggestion%20for%20COMSATSPrepHub"
             className="btn-suggest-email"
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '17px' }} aria-hidden="true">mail</span>
+            <AppIcon name="mail" size={17} />
             Suggest via Email
           </a>
           <a

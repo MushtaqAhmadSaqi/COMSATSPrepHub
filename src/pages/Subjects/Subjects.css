@@ -167,6 +167,7 @@ html.dark .subject-match-mark {
   border-color: var(--brand);
 }
 
+.active-filter-chip .app-icon,
 .active-filter-chip .material-symbols-outlined {
   font-size: 1rem;
 }
@@ -218,6 +219,7 @@ html.dark .subject-match-mark {
   letter-spacing: -0.02em;
 }
 
+.paper-results-title .app-icon,
 .paper-results-title .material-symbols-outlined {
   color: var(--brand);
   font-size: 1.25rem;
@@ -415,6 +417,8 @@ html.dark .subject-match-mark {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.25rem;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 560px;
 }
 
 /* ─── Subject Card ──────────────────────────────────────────────── */

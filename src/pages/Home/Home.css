@@ -211,7 +211,8 @@ html.dark .home-badge-pill {
   justify-content: center;
   gap: 0.5rem;
   box-shadow: 0 8px 24px -4px rgba(37, 99, 235, 0.45);
-  transition: all 0.3s var(--ease-spring);
+  transition: transform 0.3s var(--ease-spring),
+              box-shadow 0.3s var(--ease-spring);
   letter-spacing: -0.01em;
 }
 
@@ -233,7 +234,9 @@ html.dark .home-badge-pill {
   justify-content: center;
   gap: 0.5rem;
   box-shadow: var(--shadow-1);
-  transition: all 0.3s var(--ease-spring);
+  transition: transform 0.3s var(--ease-spring),
+              border-color 0.3s var(--ease-spring),
+              color 0.3s var(--ease-spring);
   letter-spacing: -0.01em;
 }
 
@@ -348,7 +351,9 @@ html.dark .home-badge-pill {
   text-align: center;
   box-shadow: var(--shadow-1);
   overflow: hidden;
-  transition: all 0.3s var(--ease-spring);
+  transition: transform 0.3s var(--ease-spring),
+              border-color 0.3s var(--ease-spring),
+              box-shadow 0.3s var(--ease-spring);
 }
 
 @media (min-width: 480px) {
@@ -527,7 +532,9 @@ html.dark .home-badge-pill {
   padding: 1.25rem 0.875rem;
   text-align: center;
   box-shadow: var(--shadow-1);
-  transition: all 0.3s var(--ease-spring);
+  transition: transform 0.3s var(--ease-spring),
+              border-color 0.3s var(--ease-spring),
+              box-shadow 0.3s var(--ease-spring);
 }
 
 @media (min-width: 640px) {
@@ -590,7 +597,9 @@ html.dark .home-badge-pill {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  transition: all 0.3s var(--ease-spring);
+  transition: transform 0.3s var(--ease-spring),
+              box-shadow 0.3s var(--ease-spring),
+              border-color 0.3s var(--ease-spring);
   letter-spacing: -0.01em;
 }
 
@@ -644,7 +653,9 @@ html.dark .home-badge-pill {
   font-weight: 700;
   font-size: 0.875rem;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease,
+              transform 0.2s ease,
+              border-color 0.2s ease;
 }
 
 .btn-suggest-email:hover {
@@ -665,7 +676,9 @@ html.dark .home-badge-pill {
   font-weight: 700;
   font-size: 0.875rem;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease,
+              border-color 0.2s ease,
+              transform 0.2s ease;
 }
 
 .btn-suggest-whatsapp:hover {

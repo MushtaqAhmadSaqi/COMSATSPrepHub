@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AppIcon from './AppIcon';
 
 /**
  * Generic accessible Modal dialog component with focus trap and focus restoration.
@@ -101,7 +102,10 @@ export default function Modal({
               border: '1px solid var(--border)',
               boxShadow: 'var(--shadow-3)',
               padding: '1.75rem',
-              color: 'var(--text)'
+              color: 'var(--text)',
+              maxHeight: 'calc(100vh - 2rem)',
+              overflowY: 'auto',
+              overscrollBehavior: 'contain'
             }}
           >
             <div
@@ -143,9 +147,7 @@ export default function Modal({
                   borderRadius: '9999px'
                 }}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '20px' }} aria-hidden="true">
-                  close
-                </span>
+                <AppIcon name="close" size={20} />
               </button>
             </div>
             {children}

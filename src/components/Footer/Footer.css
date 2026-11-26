@@ -159,7 +159,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s var(--ease-spring);
+  transition: border-color 0.2s var(--ease),
+              background-color 0.2s var(--ease),
+              color 0.2s var(--ease),
+              transform 0.2s var(--ease-spring);
   font-family: inherit;
 }
 
@@ -186,7 +189,10 @@
   font-family: inherit;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s var(--ease-spring);
+  transition: border-color 0.25s var(--ease),
+              background-color 0.25s var(--ease),
+              color 0.25s var(--ease),
+              transform 0.25s var(--ease-spring);
   letter-spacing: 0.01em;
 }
 

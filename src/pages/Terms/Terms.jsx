@@ -1,4 +1,5 @@
 import React from 'react';
+import AppIcon from '../../components/ui/AppIcon';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import './Terms.css';
 
@@ -59,7 +60,7 @@ export default function Terms({ section = 'terms' }) {
         {orderedSections.map((policySection, index) => (
           <section key={policySection.title}>
             <h2 className="terms-section-title">
-              <span className="material-symbols-outlined" aria-hidden="true">{policySection.icon}</span>
+              <AppIcon name={policySection.icon} size={20} />
               {index + 1}. {policySection.title}
             </h2>
             <p className="terms-body">{policySection.body}</p>

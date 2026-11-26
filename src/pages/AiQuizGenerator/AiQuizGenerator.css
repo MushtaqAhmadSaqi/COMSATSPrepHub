@@ -300,6 +300,7 @@
   background: var(--surface-2);
 }
 
+.ai-course-search-wrap > .app-icon,
 .ai-course-search-wrap > .material-symbols-outlined {
   position: absolute;
   left: 0.75rem;
@@ -334,6 +335,7 @@
   cursor: pointer;
 }
 
+.ai-course-search-clear .app-icon,
 .ai-course-search-clear .material-symbols-outlined {
   font-size: 1rem;
 }
@@ -371,6 +373,7 @@
   height: 2.35rem;
 }
 
+.ai-course-option-icon .app-icon,
 .ai-course-option-icon .material-symbols-outlined {
   font-size: 1.15rem;
 }

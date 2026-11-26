@@ -12,6 +12,7 @@ import {
   mapRemoteActivity,
   mergeRemoteActivity
 } from '../../utils/studyTracker';
+import AppIcon from '../../components/ui/AppIcon';
 import './Dashboard.css';
 
 const DEFAULT_ROUTES = {
@@ -41,14 +42,7 @@ const DEMO_ACTIVITY = [
 ];
 
 function Icon({ name, className = '' }) {
-  return (
-    <span
-      className={`material-symbols-outlined ${className}`}
-      aria-hidden="true"
-    >
-      {name}
-    </span>
-  );
+  return <AppIcon name={name} className={className} size={20} />;
 }
 
 export default function Dashboard({
@@ -542,18 +536,18 @@ export default function Dashboard({
           </section>
 
           {/* Bookmarked Papers */}
-          {bookmarkedPapers.length > 0 && (
-            <section
-              className="study-dashboard__activity"
-              aria-label="Bookmarked past papers"
-              style={{ marginBottom: '24px' }}
-            >
-              <div className="study-dashboard__section-heading">
-                <div>
-                  <p className="study-dashboard__section-label">SAVED COLLECTION</p>
-                  <h2>Bookmarked Papers ({bookmarkedPapers.length})</h2>
-                </div>
+          <section
+            className="study-dashboard__activity"
+            aria-label="Bookmarked past papers"
+            style={{ marginBottom: '24px' }}
+          >
+            <div className="study-dashboard__section-heading">
+              <div>
+                <p className="study-dashboard__section-label">SAVED COLLECTION</p>
+                <h2>Bookmarked Papers ({bookmarkedPapers.length})</h2>
               </div>
+            </div>
+            {bookmarkedPapers.length > 0 ? (
               <ul className="study-dashboard__activity-list">
                 {bookmarkedPapers.slice(0, 5).map((bp) => (
                   <li key={bp.id}>
@@ -562,7 +556,11 @@ export default function Dashboard({
                     </div>
                     <div className="study-dashboard__activity-copy">
                       <h3>{bp.title}</h3>
-                      <p>{bp.subjectCode} · {bp.term} {bp.year}</p>
+                      <p>
+                        <span className="mono-code" translate="no">{bp.subjectCode}</span>
+                        {' · '}
+                        {bp.term} {bp.year}
+                      </p>
                     </div>
                     <button
                       type="button"
@@ -574,8 +572,24 @@ export default function Dashboard({
                   </li>
                 ))}
               </ul>
-            </section>
-          )}
+            ) : (
+              <div className="study-dashboard__empty">
+                <Icon name="bookmark_add" />
+                <h3>No bookmarked papers yet</h3>
+                <p>
+                  Open any COMSATS past paper and tap Bookmark to keep it handy here for exam night.
+                </p>
+                <button
+                  type="button"
+                  className="study-dashboard__signout"
+                  style={{ marginTop: '10px' }}
+                  onClick={() => onNavigate(destinations.papers)}
+                >
+                  Browse Past Papers
+                </button>
+              </div>
+            )}
+          </section>
 
           <section
             className="study-dashboard__activity"

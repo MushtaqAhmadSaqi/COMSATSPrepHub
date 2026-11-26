@@ -123,11 +123,43 @@
     background-color var(--gw-dur-fast) var(--gw-ease);
 }
 
+.grade-workspace__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.grade-workspace__action-btn,
+.grade-workspace__print-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0 0.9rem;
+  border: 1px solid var(--gw-line);
+  border-radius: var(--gw-radius-sm);
+  background: var(--gw-surface);
+  color: var(--gw-text);
+  font-size: var(--gw-text-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: var(--gw-shadow-sm);
+  transition:
+    border-color var(--gw-dur-fast) var(--gw-ease),
+    background-color var(--gw-dur-fast) var(--gw-ease);
+}
+
+.grade-workspace__action-btn:hover,
 .grade-workspace__print-btn:hover {
   border-color: color-mix(in srgb, var(--gw-brand) 45%, var(--gw-line));
   background: var(--gw-subtle);
 }
 
+.grade-workspace__action-btn .app-icon,
+.grade-workspace__print-btn .app-icon,
 .grade-workspace__print-btn .material-symbols-outlined {
   font-size: 1.125rem;
   color: var(--gw-muted);
@@ -182,12 +214,14 @@
   box-shadow: var(--gw-shadow-sm);
 }
 
+.grade-workspace__tab .app-icon,
 .grade-workspace__tab .material-symbols-outlined {
   font-size: 1.125rem;
   color: var(--gw-muted);
   transition: color var(--gw-dur-fast) var(--gw-ease);
 }
 
+.grade-workspace__tab.is-active .app-icon,
 .grade-workspace__tab.is-active .material-symbols-outlined {
   color: var(--gw-brand);
 }
@@ -433,6 +467,7 @@
   color: var(--gw-error);
 }
 
+.grade-workspace__icon-btn .app-icon,
 .grade-workspace__icon-btn .material-symbols-outlined {
   font-size: 1.2rem;
 }
@@ -518,12 +553,12 @@
 .grade-workspace__btn-primary {
   border: 1px solid var(--gw-brand);
   background: var(--gw-brand);
-  color: #ffffff;
+  color: var(--on-brand, #ffffff);
 }
 
 .grade-workspace__btn-primary:hover {
-  background: color-mix(in srgb, var(--gw-brand) 88%, #000000);
-  border-color: color-mix(in srgb, var(--gw-brand) 88%, #000000);
+  background: var(--brand-hover, color-mix(in srgb, var(--gw-brand) 88%, #000000));
+  border-color: var(--brand-hover, color-mix(in srgb, var(--gw-brand) 88%, #000000));
 }
 
 .grade-workspace__btn-secondary {
@@ -554,6 +589,9 @@
   width: 100%;
 }
 
+.grade-workspace__btn-primary .app-icon,
+.grade-workspace__btn-secondary .app-icon,
+.grade-workspace__btn-ghost .app-icon,
 .grade-workspace__btn-primary .material-symbols-outlined,
 .grade-workspace__btn-secondary .material-symbols-outlined,
 .grade-workspace__btn-ghost .material-symbols-outlined {
@@ -570,9 +608,10 @@
   text-align: center;
 }
 
+.grade-workspace__empty .app-icon,
 .grade-workspace__empty .material-symbols-outlined {
   display: block;
-  margin-bottom: 0.45rem;
+  margin: 0 auto 0.45rem;
   color: var(--gw-brand);
   font-size: 1.75rem;
 }
@@ -817,6 +856,7 @@
   line-height: 1.55;
 }
 
+.grade-workspace__info-banner .app-icon,
 .grade-workspace__info-banner .material-symbols-outlined {
   flex-shrink: 0;
   margin-top: 0.1rem;
@@ -950,6 +990,7 @@
   gap: 0.5rem;
 }
 
+.grade-workspace__reference-title .app-icon,
 .grade-workspace__reference-title .material-symbols-outlined {
   color: var(--gw-brand);
   font-size: 1.2rem;
@@ -1229,10 +1270,29 @@
   background: var(--gw-subtle);
 }
 
+.grade-workspace__formula .app-icon,
 .grade-workspace__formula .material-symbols-outlined {
   flex-shrink: 0;
   color: var(--gw-brand);
   font-size: 1.25rem;
+}
+
+.grade-workspace__file-name {
+  display: inline-block;
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grade-workspace .is-spinning {
+  animation: gw-spin 0.9s linear infinite;
+}
+
+@keyframes gw-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .grade-workspace__formula strong {

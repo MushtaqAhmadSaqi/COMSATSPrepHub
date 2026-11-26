@@ -1,40 +1,52 @@
 import { useEffect, useRef, useState } from 'react';
 
 /**
- * useCounter — animates a number from 0 to `target` when the element enters viewport.
- * @param {number} target — final number value (e.g. 500)
- * @param {number} duration — animation duration in ms. Default 1500
- * @param {string} suffix — text after number, e.g. "+" or "K+". Default ""
- * @returns {{ ref, display }} — attach ref to element, display is the formatted string
+ * useCounter — smoothly counts up to `target` without flashing 0 on first paint
+ * and stays reactive when live catalog data updates `target`.
+ * @param {number} target — final numeric value
+ * @param {object} [options]
+ * @param {number} [options.duration=1100] — animation duration in ms
+ * @param {string} [options.suffix=''] — suffix appended to number (e.g. "+")
+ * @param {number} [options.decimals=0] — fractional precision
+ * @returns {{ ref: import('react').RefObject<any>, display: string }}
  */
-export function useCounter(target, { duration = 1500, suffix = '', decimals = 0 } = {}) {
+export function useCounter(target, { duration = 1100, suffix = '', decimals = 0 } = {}) {
+  const numericTarget = Number(target) || 0;
   const ref = useRef(null);
-  const [count, setCount] = useState(0);
-  const hasStarted = useRef(false);
+  const [count, setCount] = useState(numericTarget);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    setCount(numericTarget);
+  }, [numericTarget]);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || typeof window === 'undefined') return undefined;
 
-    // Respect reduced-motion — show final value immediately
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setCount(target);
-      return;
+    if (
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      typeof IntersectionObserver === 'undefined' ||
+      hasAnimated.current
+    ) {
+      setCount(numericTarget);
+      return undefined;
     }
 
+    const startValue = Math.round(numericTarget * 0.72);
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasStarted.current) {
-          hasStarted.current = true;
+        if (entry.isIntersecting && !hasAnimated.current) {
+          hasAnimated.current = true;
           observer.disconnect();
 
           const startTime = performance.now();
-          const easeOut = (t) => 1 - Math.pow(1 - t, 3); // cubic ease-out
+          const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 
           const tick = (now) => {
             const elapsed = now - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            const current = easeOut(progress) * target;
+            const current = startValue + easeOut(progress) * (numericTarget - startValue);
             setCount(current);
             if (progress < 1) requestAnimationFrame(tick);
           };
@@ -42,12 +54,12 @@ export function useCounter(target, { duration = 1500, suffix = '', decimals = 0 
           requestAnimationFrame(tick);
         }
       },
-      { threshold: 0.2 }
+      { threshold: 0.15 }
     );
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [target, duration]);
+  }, [numericTarget, duration]);
 
   const formatted = decimals > 0 ? count.toFixed(decimals) : Math.round(count).toString();
   return { ref, display: `${formatted}${suffix}` };

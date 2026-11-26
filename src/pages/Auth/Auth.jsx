@@ -8,6 +8,7 @@ import {
   getSignupOutcome
 } from '../../services/auth';
 import { useToast } from '../../utils/toast';
+import AppIcon from '../../components/ui/AppIcon';
 import '../../components/AuthModal/AuthModal.css';
 import './Auth.css';
 
@@ -111,9 +112,7 @@ export default function Auth({ onLoginSuccess = () => {} }) {
       <div className="auth-page-card">
         <div className="auth-header">
           <div className="auth-icon-badge">
-            <span className="material-symbols-outlined" style={{ fontSize: '24px' }} aria-hidden="true">
-              {isReset ? 'lock_reset' : isSignUp ? 'person_add' : 'login'}
-            </span>
+            <AppIcon name={isReset ? 'lock_reset' : isSignUp ? 'person_add' : 'login'} size={24} />
           </div>
           <h1 className="auth-title">
             {isReset ? 'Reset Password' : isSignUp ? 'Create Account' : 'Student Sign In'}
@@ -129,14 +128,14 @@ export default function Auth({ onLoginSuccess = () => {} }) {
 
         {errorMsg && (
           <div className="auth-alert auth-alert-error" role="alert">
-            <span className="material-symbols-outlined" style={{ fontSize: '18px', flexShrink: 0 }} aria-hidden="true">error</span>
+            <AppIcon name="error" size={18} style={{ flexShrink: 0 }} />
             {errorMsg}
           </div>
         )}
 
         {successMsg && (
           <div className="auth-alert auth-alert-success" role="status">
-            <span className="material-symbols-outlined" style={{ fontSize: '18px', flexShrink: 0 }} aria-hidden="true">check_circle</span>
+            <AppIcon name="check_circle" size={18} style={{ flexShrink: 0 }} />
             {successMsg}
           </div>
         )}
@@ -179,6 +178,7 @@ export default function Auth({ onLoginSuccess = () => {} }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
+              spellCheck={false}
               required
             />
           </div>
@@ -215,9 +215,7 @@ export default function Auth({ onLoginSuccess = () => {} }) {
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }} aria-hidden="true">
-                    {showPassword ? 'visibility_off' : 'visibility'}
-                  </span>
+                  <AppIcon name={showPassword ? 'visibility_off' : 'visibility'} size={20} />
                 </button>
               </div>
               {isSignUp && (
@@ -230,12 +228,10 @@ export default function Auth({ onLoginSuccess = () => {} }) {
 
           <button type="submit" className="auth-submit-btn" disabled={loading}>
             {loading && (
-              <span className="material-symbols-outlined auth-submit-spinner" style={{ fontSize: '18px' }} aria-hidden="true">
-                progress_activity
-              </span>
+              <AppIcon name="progress_activity" className="auth-submit-spinner" size={18} />
             )}
             {loading
-              ? 'Processing...'
+              ? 'Processing…'
               : isReset
                 ? 'Send Reset Link'
                 : isSignUp
@@ -248,9 +244,7 @@ export default function Auth({ onLoginSuccess = () => {} }) {
           <>
             <div className="auth-divider">or continue with</div>
             <button type="button" className="auth-google-btn" onClick={handleGoogleSignIn}>
-              <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--brand)' }} aria-hidden="true">
-                account_circle
-              </span>
+              <AppIcon name="account_circle" size={18} style={{ color: 'var(--brand)' }} />
               Sign in with Google
             </button>
           </>

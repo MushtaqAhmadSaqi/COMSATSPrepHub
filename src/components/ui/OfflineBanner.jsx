@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AppIcon from './AppIcon';
 
 /**
  * OfflineBanner — Displays a friendly, non-intrusive banner when the device loses network connectivity.
@@ -8,14 +9,15 @@ export default function OfflineBanner() {
   const [showReconnected, setShowReconnected] = useState(false);
 
   useEffect(() => {
+    let timer;
     const handleOnline = () => {
       setIsOffline(false);
       setShowReconnected(true);
-      const timer = setTimeout(() => setShowReconnected(false), 3000);
-      return () => clearTimeout(timer);
+      timer = setTimeout(() => setShowReconnected(false), 3000);
     };
 
     const handleOffline = () => {
+      clearTimeout(timer);
       setIsOffline(true);
       setShowReconnected(false);
     };
@@ -24,6 +26,7 @@ export default function OfflineBanner() {
     window.addEventListener('offline', handleOffline);
 
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
@@ -48,12 +51,10 @@ export default function OfflineBanner() {
         zIndex: 9999,
         background: isOffline ? '#ef4444' : '#10b981',
         color: '#0f172a',
-        transition: 'all 0.3s ease'
+        transition: 'background-color 0.25s ease, color 0.25s ease'
       }}
     >
-      <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">
-        {isOffline ? 'wifi_off' : 'wifi'}
-      </span>
+      <AppIcon name={isOffline ? 'wifi_off' : 'wifi'} size={18} />
       <span>
         {isOffline
           ? 'You are currently offline. Viewing cached content where available.'
@@ -62,4 +63,3 @@ export default function OfflineBanner() {
     </div>
   );
 }
-

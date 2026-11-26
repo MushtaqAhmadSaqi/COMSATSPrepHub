@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import AppIcon from './AppIcon';
 
 /**
  * ErrorState — displayed when a fetch/operation fails. Includes retry button.
@@ -14,23 +15,15 @@ export default function ErrorState({ message = 'Something went wrong. Please try
       className="error-state"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: 0.35 }}
       style={{
         textAlign: 'center',
-        padding: '3.5rem 1.5rem',
+        padding: '3rem 1.5rem',
       }}
     >
-      <span
-        className="material-symbols-outlined"
-        style={{
-          fontSize: '3rem',
-          color: 'var(--danger)',
-          display: 'block',
-          marginBottom: '1rem',
-        }}
-      >
-        error_outline
-      </span>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem', color: 'var(--danger)' }}>
+        <AppIcon name="error_outline" size={46} />
+      </div>
       <p style={{ fontWeight: 700, fontSize: '1.125rem', color: 'var(--text)', marginBottom: '0.375rem' }}>
         Oops! Something went wrong
       </p>
@@ -48,6 +41,7 @@ export default function ErrorState({ message = 'Something went wrong. Please try
             alignItems: 'center',
             gap: '0.5rem',
             padding: '0.625rem 1.5rem',
+            minHeight: '44px',
             borderRadius: '9999px',
             border: '1.5px solid var(--border)',
             background: 'var(--surface)',
@@ -57,7 +51,7 @@ export default function ErrorState({ message = 'Something went wrong. Please try
             cursor: 'pointer',
           }}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>refresh</span>
+          <AppIcon name="refresh" size={18} />
           Try Again
         </motion.button>
       )}

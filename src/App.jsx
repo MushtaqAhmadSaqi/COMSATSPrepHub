@@ -196,12 +196,19 @@ export default function App() {
     updatePageSeo(activePath, { selectedSubject, selectedPaper });
   }, [activePath, selectedSubject, selectedPaper]);
 
-  // Initialize Dark Mode
+  // Initialize Dark Mode + sync document color-scheme & browser theme-color
   useEffect(() => {
+    const root = document.documentElement;
     if (isDark) {
-      document.documentElement.classList.add('dark');
+      root.classList.add('dark');
+      root.style.colorScheme = 'dark';
     } else {
-      document.documentElement.classList.remove('dark');
+      root.classList.remove('dark');
+      root.style.colorScheme = 'light';
+    }
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+      metaTheme.setAttribute('content', isDark ? '#090e1a' : '#f7f8fa');
     }
     try { localStorage.setItem('pph_dark', isDark); } catch { /* quota exceeded */ }
   }, [isDark]);
@@ -335,6 +342,7 @@ export default function App() {
           <Home
             onNavigate={handleNavigate}
             onSelectSubject={handleSelectSubject}
+            onOpenCommandPalette={() => setIsCmdPaletteOpen(true)}
             user={user}
           />
         );
@@ -594,6 +602,10 @@ export default function App() {
           onClose={() => setIsCmdPaletteOpen(false)}
           onNavigate={handleNavigate}
           onSelectSubject={handleSelectSubject}
+          onSelectPaper={(paper) => {
+            setSelectedPaper(paper);
+            handleNavigate('paper-view');
+          }}
           onExecuteAction={handleExecuteCmdAction}
           isLoggedIn={!!user}
         />

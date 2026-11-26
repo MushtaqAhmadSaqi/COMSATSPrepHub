@@ -7,6 +7,7 @@ import { SubjectCardSkeleton } from '../../components/ui/Skeleton';
 import EmptyState from '../../components/ui/EmptyState';
 import ErrorState from '../../components/ui/ErrorState';
 import PageHeader from '../../components/PageHeader/PageHeader';
+import AppIcon from '../../components/ui/AppIcon';
 import './Subjects.css';
 
 /* ── Highlight Matched Substring ── */
@@ -32,25 +33,21 @@ function SubjectCard({ subject, idx, searchQuery = '', onSelect }) {
       className="subject-card"
       onClick={() => onSelect(subject)}
       aria-label={`Browse ${subject.name} papers`}
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, delay: Math.min(idx * 0.03, 0.3) }}
+      transition={{ duration: 0.22, delay: Math.min(idx * 0.02, 0.2) }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.625rem' }}>
-        <div className="subject-code">{subject.code}</div>
-        <span
-          className="material-symbols-outlined"
-          style={{ color: 'var(--brand)', opacity: 0.7, fontSize: '20px' }}
-          aria-hidden="true"
-        >
-          {subject.icon || 'menu_book'}
+        <div className="subject-code mono-code" translate="no">{subject.code}</div>
+        <span style={{ color: 'var(--brand)', opacity: 0.8 }}>
+          <AppIcon name={subject.icon || 'menu_book'} size={20} />
         </span>
       </div>
       <div className="subject-name">{highlightMatch(subject.name, searchQuery)}</div>
       <div className="subject-meta">
         <span>{subject.department}</span>
-        <span className="subject-papers-count">
-          <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">description</span>
+        <span className="subject-papers-count tabular-nums">
+          <AppIcon name="description" size={16} />
           {subject.papers} Papers
         </span>
       </div>
@@ -61,14 +58,11 @@ function SubjectCard({ subject, idx, searchQuery = '', onSelect }) {
 /* ── Animated Department Chip ── */
 function DepartmentChip({ dept, isSelected, onClick }) {
   return (
-    <motion.button
+    <button
       type="button"
       onClick={onClick}
       aria-pressed={isSelected}
       className={`department-chip ${isSelected ? 'selected' : ''}`}
-      initial={{ opacity: 0, scale: 0.94 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.2 }}
       style={{
         padding: '0.45rem 1rem',
         minHeight: '44px',
@@ -79,12 +73,12 @@ function DepartmentChip({ dept, isSelected, onClick }) {
         fontWeight: 700,
         fontSize: '0.8125rem',
         cursor: 'pointer',
-        transition: 'all 0.2s ease',
+        transition: 'background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease',
         boxShadow: isSelected ? 'var(--shadow-brand)' : 'none'
       }}
     >
       {dept}
-    </motion.button>
+    </button>
   );
 }
 
@@ -104,9 +98,9 @@ function PaperResultCard({ paper, onOpen }) {
       aria-label={`Open ${paper.title}`}
     >
       <div className="paper-result-top">
-        <span className="subject-code">{paper.subjectCode || 'Paper'}</span>
+        <span className="subject-code mono-code" translate="no">{paper.subjectCode || 'Paper'}</span>
         {paper.isSample && <span className="paper-sample-badge">Sample</span>}
-        <span className="material-symbols-outlined paper-result-arrow" aria-hidden="true">arrow_forward</span>
+        <AppIcon name="arrow_forward" className="paper-result-arrow" size={18} />
       </div>
       <div className="paper-result-title">{paper.title}</div>
       <div className="paper-result-meta">{metaBits.join(' · ') || 'Past paper'}</div>
@@ -134,15 +128,24 @@ function FacetSelect({ id, label, value, options, onChange }) {
   );
 }
 
-function readInitialQuery() {
-  if (typeof window === 'undefined') return '';
+function readInitialFilters() {
+  const defaults = { q: '', dept: 'All', examType: 'All', department: 'All', semester: 'All', year: 'All' };
+  if (typeof window === 'undefined') return defaults;
   const hash = window.location.hash || '';
   const queryIndex = hash.indexOf('?');
-  if (queryIndex === -1) return '';
+  if (queryIndex === -1) return defaults;
   try {
-    return new URLSearchParams(hash.slice(queryIndex + 1)).get('q') || '';
+    const params = new URLSearchParams(hash.slice(queryIndex + 1));
+    return {
+      q: params.get('q') || '',
+      dept: params.get('dept') || 'All',
+      examType: params.get('exam') || 'All',
+      department: params.get('pdept') || 'All',
+      semester: params.get('sem') || 'All',
+      year: params.get('year') || 'All'
+    };
   } catch {
-    return '';
+    return defaults;
   }
 }
 
@@ -150,18 +153,24 @@ const EMPTY_PAPER_FILTERS = { examType: 'All', department: 'All', semester: 'All
 const PAPERS_PAGE_SIZE = 12;
 
 export default function Subjects({ onSelectSubject = () => {}, onViewPaper = () => {} }) {
+  const initialState = useMemo(readInitialFilters, []);
   const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchQuery, setSearchQuery] = useState(readInitialQuery);
-  const [debouncedQuery, setDebouncedQuery] = useState(() => readInitialQuery().trim());
-  const [selectedDept, setSelectedDept] = useState('All');
+  const [searchQuery, setSearchQuery] = useState(initialState.q);
+  const [debouncedQuery, setDebouncedQuery] = useState(() => initialState.q.trim());
+  const [selectedDept, setSelectedDept] = useState(initialState.dept);
 
   const [allPapers, setAllPapers] = useState([]);
   const [papersLoading, setPapersLoading] = useState(false);
   const [papersError, setPapersError] = useState(null);
   const [papersLoaded, setPapersLoaded] = useState(false);
-  const [paperFilters, setPaperFilters] = useState(EMPTY_PAPER_FILTERS);
+  const [paperFilters, setPaperFilters] = useState({
+    examType: initialState.examType,
+    department: initialState.department,
+    semester: initialState.semester,
+    year: initialState.year
+  });
   const [visiblePapers, setVisiblePapers] = useState(PAPERS_PAGE_SIZE);
 
   // 180ms search debounce for smooth typing on mobile devices
@@ -172,12 +181,19 @@ export default function Subjects({ onSelectSubject = () => {}, onViewPaper = () 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Keep the shareable ?q= in the URL without adding history entries
+  // Sync active filters to shareable hash query parameters
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const suffix = debouncedQuery ? `?q=${encodeURIComponent(debouncedQuery)}` : '';
-    window.history.replaceState({ path: 'subjects' }, '', `#subjects${suffix}`);
-  }, [debouncedQuery]);
+    const params = new URLSearchParams();
+    if (debouncedQuery) params.set('q', debouncedQuery);
+    if (selectedDept !== 'All') params.set('dept', selectedDept);
+    if (paperFilters.examType !== 'All') params.set('exam', paperFilters.examType);
+    if (paperFilters.department !== 'All') params.set('pdept', paperFilters.department);
+    if (paperFilters.semester !== 'All') params.set('sem', paperFilters.semester);
+    if (paperFilters.year !== 'All') params.set('year', paperFilters.year);
+    const qs = params.toString();
+    window.history.replaceState({ path: 'subjects' }, '', `#subjects${qs ? `?${qs}` : ''}`);
+  }, [debouncedQuery, selectedDept, paperFilters]);
 
   const loadSubjects = async () => {
     setLoading(true);
@@ -210,12 +226,16 @@ export default function Subjects({ onSelectSubject = () => {}, onViewPaper = () 
     }
   };
 
-  // Load the full paper library once, the first time a search is active
+  const activePaperFilters = Object.entries(paperFilters).filter(([, value]) => value !== 'All');
+  const hasPaperFilters = activePaperFilters.length > 0;
+  const shouldShowPaperResults = debouncedQuery.length > 0 || hasPaperFilters;
+
+  // Load the full paper library once a search or paper facet filter is active
   useEffect(() => {
-    if (debouncedQuery && !papersLoaded && !papersLoading) {
+    if (shouldShowPaperResults && !papersLoaded && !papersLoading) {
       loadAllPapers();
     }
-  }, [debouncedQuery, papersLoaded, papersLoading]);
+  }, [shouldShowPaperResults, papersLoaded, papersLoading]);
 
   useEffect(() => {
     setVisiblePapers(PAPERS_PAGE_SIZE);
@@ -224,9 +244,9 @@ export default function Subjects({ onSelectSubject = () => {}, onViewPaper = () 
   const facets = useMemo(() => getPaperFacets(allPapers), [allPapers]);
 
   const paperResults = useMemo(() => {
-    if (!debouncedQuery) return [];
+    if (!shouldShowPaperResults) return [];
     return filterPapers(allPapers, { query: debouncedQuery, ...paperFilters });
-  }, [allPapers, debouncedQuery, paperFilters]);
+  }, [allPapers, shouldShowPaperResults, debouncedQuery, paperFilters]);
 
   const filtered = subjects.filter((s) => {
     const matchesDept = selectedDept === 'All' || s.department === selectedDept;
@@ -243,8 +263,6 @@ export default function Subjects({ onSelectSubject = () => {}, onViewPaper = () 
 
   const hasActiveFilters = selectedDept !== 'All';
   const hasSearch = debouncedQuery.length > 0;
-  const activePaperFilters = Object.entries(paperFilters).filter(([, value]) => value !== 'All');
-  const hasPaperFilters = activePaperFilters.length > 0;
   const showingSamples = paperResults.some((paper) => paper.isSample);
 
   const clearSearch = () => {
@@ -270,7 +288,7 @@ export default function Subjects({ onSelectSubject = () => {}, onViewPaper = () 
       className="subjects-container"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.25 }}
     >
       <PageHeader
         badge="Live catalog"
@@ -284,17 +302,16 @@ export default function Subjects({ onSelectSubject = () => {}, onViewPaper = () 
           Search subjects &amp; past papers
         </label>
         <div className="subjects-search-wrapper">
-          <motion.input
+          <input
             id="subject-search"
             type="search"
+            spellCheck={false}
+            autoComplete="off"
             className="subjects-search-bar"
-            placeholder='Try "csc 103", "Calculus", or a teacher name'
+            placeholder='Try "CSC211", "Calculus", or a teacher name'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             aria-label="Search subjects and past papers"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25 }}
           />
           {searchQuery && (
             <button
@@ -303,7 +320,7 @@ export default function Subjects({ onSelectSubject = () => {}, onViewPaper = () 
               onClick={clearSearch}
               aria-label="Clear search"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '1.125rem' }} aria-hidden="true">close</span>
+              <AppIcon name="close" size={18} />
             </button>
           )}
         </div>
@@ -332,13 +349,13 @@ export default function Subjects({ onSelectSubject = () => {}, onViewPaper = () 
             {hasSearch && (
               <button type="button" className="active-filter-chip" onClick={clearSearch}>
                 Search: &ldquo;{debouncedQuery}&rdquo;
-                <span className="material-symbols-outlined" aria-hidden="true">close</span>
+                <AppIcon name="close" size={16} />
               </button>
             )}
             {hasActiveFilters && (
               <button type="button" className="active-filter-chip" onClick={() => setSelectedDept('All')}>
                 Subject department: {selectedDept}
-                <span className="material-symbols-outlined" aria-hidden="true">close</span>
+                <AppIcon name="close" size={16} />
               </button>
             )}
             {activePaperFilters.map(([key, value]) => (
@@ -349,24 +366,24 @@ export default function Subjects({ onSelectSubject = () => {}, onViewPaper = () 
                 onClick={() => setPaperFilters((prev) => ({ ...prev, [key]: 'All' }))}
               >
                 {paperFilterLabels[key]}: {value}
-                <span className="material-symbols-outlined" aria-hidden="true">close</span>
+                <AppIcon name="close" size={16} />
               </button>
             ))}
           </div>
         )}
       </div>
 
-      {/* ── Global past-paper results (only while searching) ── */}
-      {hasSearch && (
+      {/* ── Global past-paper results (while searching or facet filtering) ── */}
+      {shouldShowPaperResults && (
         <section className="paper-results-panel" aria-label="Past paper search results">
           <div className="paper-results-heading">
             <h2 className="paper-results-title">
-              <span className="material-symbols-outlined" aria-hidden="true">description</span>
+              <AppIcon name="description" size={20} />
               Past papers
             </h2>
-            <p className="subjects-result-count" aria-live="polite">
+            <p className="subjects-result-count tabular-nums" aria-live="polite">
               {papersLoading
-                ? 'Searching the paper library...'
+                ? 'Searching the paper library…'
                 : papersError
                   ? 'Paper search unavailable'
                   : `${paperResults.length} ${paperResults.length === 1 ? 'paper' : 'papers'} found`}
@@ -424,7 +441,7 @@ export default function Subjects({ onSelectSubject = () => {}, onViewPaper = () 
 
               {showingSamples && (
                 <p className="paper-sample-note">
-                  <span className="material-symbols-outlined" aria-hidden="true">info</span>
+                  <AppIcon name="info" size={16} />
                   Sample practice sets are shown when the live library is unavailable. They are clearly labelled and never imitate a real exam.
                 </p>
               )}
@@ -450,10 +467,10 @@ export default function Subjects({ onSelectSubject = () => {}, onViewPaper = () 
       )}
 
       {/* ── Subject catalog ── */}
-      {hasSearch && <h2 className="subjects-section-title">Matching subjects</h2>}
-      <p className="subjects-result-count subjects-catalog-count" aria-live="polite">
+      {shouldShowPaperResults && <h2 className="subjects-section-title">Matching subjects</h2>}
+      <p className="subjects-result-count subjects-catalog-count tabular-nums" aria-live="polite">
         {loading
-          ? 'Loading subjects...'
+          ? 'Loading subjects…'
           : filtered.length === 0 && hasSearch
             ? `No subjects match "${debouncedQuery}"`
             : `${filtered.length} ${filtered.length === 1 ? 'subject' : 'subjects'}`}

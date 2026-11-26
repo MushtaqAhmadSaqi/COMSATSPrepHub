@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getCommandPaletteResults } from '../../utils/fuzzySearch';
+import { fetchSubjectsFromSupabase, fetchAllPapersFromSupabase } from '../../services/papersService';
+import { DEFAULT_SUBJECTS } from '../../constants/subjects';
 import { usePrefersReducedMotion } from '../../utils/usePrefersReducedMotion';
+import AppIcon from '../ui/AppIcon';
 import './CommandPalette.css';
 
 /**
@@ -12,12 +15,16 @@ export default function CommandPalette({
   onClose,
   onNavigate,
   onSelectSubject,
+  onSelectPaper,
   onExecuteAction,
   isLoggedIn = false
 }) {
   const prefersReduced = usePrefersReducedMotion();
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [subjects, setSubjects] = useState(DEFAULT_SUBJECTS);
+  const [papers, setPapers] = useState([]);
+  const hasLoadedCatalog = useRef(false);
   const inputRef = useRef(null);
   const previousFocusRef = useRef(null);
   const listRef = useRef(null);
@@ -27,9 +34,28 @@ export default function CommandPalette({
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
     : { initial: { opacity: 0, y: 8, scale: 0.98 }, animate: { opacity: 1, y: 0, scale: 1 }, exit: { opacity: 0, y: 8, scale: 0.98 } };
 
+  useEffect(() => {
+    if (!isOpen || hasLoadedCatalog.current) return undefined;
+    let active = true;
+    hasLoadedCatalog.current = true;
+    Promise.all([
+      fetchSubjectsFromSupabase().catch(() => DEFAULT_SUBJECTS),
+      fetchAllPapersFromSupabase().catch(() => [])
+    ]).then(([loadedSubjects, loadedPapers]) => {
+      if (!active) return;
+      if (Array.isArray(loadedSubjects) && loadedSubjects.length > 0) {
+        setSubjects(loadedSubjects);
+      }
+      if (Array.isArray(loadedPapers)) {
+        setPapers(loadedPapers);
+      }
+    });
+    return () => { active = false; };
+  }, [isOpen]);
+
   const results = useMemo(() => {
-    return getCommandPaletteResults(query, { isLoggedIn });
-  }, [query, isLoggedIn]);
+    return getCommandPaletteResults(query, { isLoggedIn, subjects, papers });
+  }, [query, isLoggedIn, subjects, papers]);
 
   useEffect(() => {
     setSelectedIndex(0);
@@ -45,12 +71,12 @@ export default function CommandPalette({
         if (inputRef.current) inputRef.current.focus();
       }, 50);
       return () => clearTimeout(timer);
-    } else {
-      document.body.style.overflow = '';
-      if (previousFocusRef.current && typeof previousFocusRef.current.focus === 'function') {
-        previousFocusRef.current.focus();
-      }
     }
+    document.body.style.overflow = '';
+    if (previousFocusRef.current && typeof previousFocusRef.current.focus === 'function') {
+      previousFocusRef.current.focus();
+    }
+    return undefined;
   }, [isOpen]);
 
   useEffect(() => {
@@ -65,6 +91,8 @@ export default function CommandPalette({
     onClose();
     if (item.actionId) {
       onExecuteAction(item.actionId);
+    } else if (item.paper && typeof onSelectPaper === 'function') {
+      onSelectPaper(item.paper);
     } else if (item.subject && typeof onSelectSubject === 'function') {
       onSelectSubject(item.subject);
     } else if (item.path) {
@@ -158,17 +186,17 @@ export default function CommandPalette({
           >
             {/* Input Row */}
             <div className="cmd-palette__input-row">
-              <span className="material-symbols-outlined cmd-palette__search-icon" aria-hidden="true">
-                search
-              </span>
+              <AppIcon name="search" className="cmd-palette__search-icon" size={20} />
               <input
                 ref={inputRef}
                 type="text"
+                spellCheck={false}
+                autoComplete="off"
                 className="cmd-palette__input"
-                placeholder="Search pages, subjects, actions…"
+                placeholder="Search course codes (CSC211), teachers, Midterm, Terminal…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                aria-label="Search pages, subjects, actions"
+                aria-label="Search courses, papers, teachers, and pages"
                 role="combobox"
                 aria-autocomplete="list"
                 aria-expanded={isOpen}
@@ -181,10 +209,10 @@ export default function CommandPalette({
             <div className="cmd-palette__list" ref={listRef} id={`${listId}-results`} role="listbox" aria-label="Search results">
               {results.length === 0 ? (
                 <div className="cmd-palette__empty">
-                  <span className="material-symbols-outlined cmd-palette__empty-icon" aria-hidden="true">
-                    search_off
-                  </span>
-                  <p className="cmd-palette__empty-text">No results for "{query}"</p>
+                  <div className="cmd-palette__empty-icon">
+                    <AppIcon name="search_off" size={28} />
+                  </div>
+                  <p className="cmd-palette__empty-text">No results for &ldquo;{query}&rdquo;</p>
                 </div>
               ) : (
                 groupedResults.map((group) => (
@@ -204,14 +232,17 @@ export default function CommandPalette({
                           onClick={() => handleSelect(item)}
                           onMouseEnter={() => setSelectedIndex(item.flatIndex)}
                         >
-                          <span className="material-symbols-outlined cmd-palette__item-icon" aria-hidden="true">
-                            {item.icon}
-                          </span>
-                          <span className="cmd-palette__item-label">{item.label}</span>
-                          {isSelected && (
-                            <span className="material-symbols-outlined cmd-palette__enter-icon" aria-hidden="true">
-                              keyboard_return
+                          <AppIcon name={item.icon} className="cmd-palette__item-icon" size={18} />
+                          <span className="cmd-palette__item-text">
+                            <span className="cmd-palette__item-label" translate={item.subjectCode ? 'no' : undefined}>
+                              {item.label}
                             </span>
+                            {item.meta && (
+                              <span className="cmd-palette__item-meta">{item.meta}</span>
+                            )}
+                          </span>
+                          {isSelected && (
+                            <AppIcon name="keyboard_return" className="cmd-palette__enter-icon" size={16} />
                           )}
                         </button>
                       );

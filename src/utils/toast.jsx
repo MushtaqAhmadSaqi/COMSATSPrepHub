@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AppIcon from '../components/ui/AppIcon';
 import './toast.css';
 
 /* ─────────────────────────────────────────────────────────────────
@@ -95,9 +96,7 @@ export function ToastProvider({ children }) {
               exit={variants.exit}
               transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
             >
-              <span className="material-symbols-outlined toast__icon" aria-hidden="true">
-                {ICONS[t.type]}
-              </span>
+              <AppIcon name={ICONS[t.type]} className="toast__icon" size={18} />
               <span className="toast__content">{t.message}</span>
               <button
                 type="button"
@@ -105,7 +104,7 @@ export function ToastProvider({ children }) {
                 onClick={() => removeToast(t.id)}
                 aria-label="Dismiss notification"
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">close</span>
+                <AppIcon name="close" size={16} />
               </button>
             </motion.div>
           ))}

@@ -8,6 +8,7 @@ import {
   getSignupOutcome
 } from '../../services/auth';
 import { useToast } from '../../utils/toast';
+import AppIcon from '../ui/AppIcon';
 import './AuthModal.css';
 
 /* Inline Google icon — avoids external svgrepo.com dependency */
@@ -218,14 +219,12 @@ export default function AuthModal({
         aria-labelledby="auth-modal-title"
       >
         <button type="button" className="auth-close-btn" onClick={onClose} aria-label="Close modal">
-          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
+          <AppIcon name="close" size={18} />
         </button>
 
         <div className="auth-header">
           <div className="auth-icon-badge">
-            <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>
-              {isReset ? 'lock_reset' : isSignUp ? 'person_add' : 'login'}
-            </span>
+            <AppIcon name={isReset ? 'lock_reset' : isSignUp ? 'person_add' : 'login'} size={24} />
           </div>
           <h3 className="auth-title" id="auth-modal-title">
             {isReset ? 'Reset Password' : isSignUp ? 'Create Account' : 'Welcome Back'}
@@ -241,13 +240,13 @@ export default function AuthModal({
 
         {errorMsg && (
           <div className="auth-alert auth-alert-error" role="alert">
-            <span className="material-symbols-outlined" style={{ fontSize: '18px', flexShrink: 0 }}>error</span>
+            <AppIcon name="error" size={18} style={{ flexShrink: 0 }} />
             {errorMsg}
           </div>
         )}
         {successMsg && (
           <div className="auth-alert auth-alert-success" role="status">
-            <span className="material-symbols-outlined" style={{ fontSize: '18px', flexShrink: 0 }}>check_circle</span>
+            <AppIcon name="check_circle" size={18} style={{ flexShrink: 0 }} />
             {successMsg}
           </div>
         )}
@@ -291,6 +290,7 @@ export default function AuthModal({
               ref={isSignUp ? undefined : firstInputRef}
               id="auth-email"
               type="email"
+              spellCheck={false}
               className={`auth-input${fieldErrors.email ? ' auth-input--error' : ''}`}
               placeholder="student@comsats.edu.pk"
               value={email}
@@ -344,9 +344,7 @@ export default function AuthModal({
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
-                    {showPassword ? 'visibility_off' : 'visibility'}
-                  </span>
+                  <AppIcon name={showPassword ? 'visibility_off' : 'visibility'} size={20} />
                 </button>
               </div>
               {isSignUp && !fieldErrors.password && (
@@ -360,12 +358,10 @@ export default function AuthModal({
 
           <button type="submit" className="auth-submit-btn" disabled={loading}>
             {loading && (
-              <span className="material-symbols-outlined auth-submit-spinner" style={{ fontSize: '18px' }}>
-                progress_activity
-              </span>
+              <AppIcon name="progress_activity" className="auth-submit-spinner" size={18} />
             )}
             {loading
-              ? 'Processing...'
+              ? 'Processing…'
               : isReset
                 ? 'Send Reset Link'
                 : isSignUp

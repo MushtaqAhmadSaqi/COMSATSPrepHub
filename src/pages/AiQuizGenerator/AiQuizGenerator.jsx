@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { DEFAULT_SUBJECTS } from '../../constants/subjects';
 import PageHeader from '../../components/PageHeader/PageHeader';
+import AppIcon from '../../components/ui/AppIcon';
 import './AiQuizGenerator.css';
 
 /* ── Pre-configured quick presets ── */
@@ -451,9 +452,7 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
       {/* ── Quick Presets Bar (1-Click Start) ── */}
       <section className="ai-presets-section" aria-label="Quick quiz presets">
         <div className="ai-presets-header">
-          <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--brand)' }}>
-            flash_on
-          </span>
+          <AppIcon name="flash_on" size={18} style={{ color: 'var(--brand)' }} />
           <span className="ai-presets-title">Start with a preset</span>
         </div>
         <div className="ai-presets-grid">
@@ -468,12 +467,12 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
                 aria-pressed={isSelected}
               >
                 <div className="ai-preset-top">
-                  <span className="material-symbols-outlined ai-preset-icon">{p.icon}</span>
+                  <AppIcon name={p.icon} className="ai-preset-icon" size={20} />
                   <span className="ai-preset-badge">{p.badge}</span>
                 </div>
                 <div className="ai-preset-name">{p.label}</div>
                 <div className="ai-preset-desc">{p.desc}</div>
-                <div className="ai-preset-time">⏱️ {p.time}</div>
+                <div className="ai-preset-time">{p.time}</div>
               </button>
             );
           })}
@@ -512,14 +511,12 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
               onClick={() => setCoursePickerOpen((open) => !open)}
             >
               <span className="ai-course-trigger-icon" aria-hidden="true">
-                <span className="material-symbols-outlined">
-                  {selectedCourse?.icon || 'category'}
-                </span>
+                <AppIcon name={selectedCourse?.icon || 'category'} size={20} />
               </span>
               <span className="ai-course-trigger-copy">
                 {selectedCourse ? (
                   <>
-                    <strong>{selectedCourse.code}</strong>
+                    <strong className="mono-code" translate="no">{selectedCourse.code}</strong>
                     <span>{selectedCourse.name}</span>
                   </>
                 ) : (
@@ -532,18 +529,18 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
               <span className="ai-course-trigger-meta">
                 {selectedCourse?.department || 'General'}
               </span>
-              <span className="material-symbols-outlined ai-select-arrow" aria-hidden="true">
-                expand_more
-              </span>
+              <AppIcon name="expand_more" className="ai-select-arrow" size={20} />
             </button>
 
             {coursePickerOpen && (
               <div className="ai-course-popover" role="dialog" aria-label="Choose a course">
                 <div className="ai-course-search-wrap">
-                  <span className="material-symbols-outlined" aria-hidden="true">search</span>
+                  <AppIcon name="search" size={18} />
                   <input
                     ref={courseSearchRef}
                     type="search"
+                    spellCheck={false}
+                    autoComplete="off"
                     value={courseSearch}
                     onChange={(event) => setCourseSearch(event.target.value)}
                     placeholder="Search course or code"
@@ -556,7 +553,7 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
                       onClick={() => setCourseSearch('')}
                       aria-label="Clear course search"
                     >
-                      <span className="material-symbols-outlined" aria-hidden="true">close</span>
+                      <AppIcon name="close" size={16} />
                     </button>
                   )}
                 </div>
@@ -573,14 +570,14 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
                     }}
                   >
                     <span className="ai-course-option-icon" aria-hidden="true">
-                      <span className="material-symbols-outlined">category</span>
+                      <AppIcon name="category" size={18} />
                     </span>
                     <span className="ai-course-option-copy">
                       <strong>Custom topic</strong>
                       <span>General Computer Science</span>
                     </span>
                     {!selectedCourseCode && (
-                      <span className="material-symbols-outlined ai-course-check" aria-hidden="true">check</span>
+                      <AppIcon name="check" className="ai-course-check" size={18} />
                     )}
                   </button>
                   {filteredCourses.map((course) => (
@@ -597,21 +594,21 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
                       }}
                     >
                       <span className="ai-course-option-icon" aria-hidden="true">
-                        <span className="material-symbols-outlined">{course.icon}</span>
+                        <AppIcon name={course.icon} size={18} />
                       </span>
                       <span className="ai-course-option-copy">
-                        <strong>{course.code}</strong>
+                        <strong className="mono-code" translate="no">{course.code}</strong>
                         <span>{course.name}</span>
                       </span>
                       <span className="ai-course-department">{course.department}</span>
                       {selectedCourseCode === course.code && (
-                        <span className="material-symbols-outlined ai-course-check" aria-hidden="true">check</span>
+                        <AppIcon name="check" className="ai-course-check" size={18} />
                       )}
                     </button>
                   ))}
                   {filteredCourses.length === 0 && (
                     <div className="ai-course-empty">
-                      <span className="material-symbols-outlined" aria-hidden="true">search_off</span>
+                      <AppIcon name="search_off" size={20} />
                       <span>No matching courses</span>
                     </div>
                   )}
@@ -621,8 +618,8 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
           </div>
           {selectedCourse && (
             <p className="ai-field-hint">
-              <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>verified</span>
-              Aligned with COMSATS {selectedCourse.code} curriculum
+              <AppIcon name="verified" size={15} />
+              Aligned with COMSATS <span className="mono-code" translate="no">{selectedCourse.code}</span> curriculum
             </p>
           )}
         </div>
@@ -642,13 +639,13 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
               className="btn-surprise-me"
               title="Pick a random high-yield exam topic"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>casino</span>
+              <AppIcon name="casino" size={15} />
               <span>Random Topic</span>
             </button>
           </div>
 
           <div className="ai-topic-input-wrapper">
-            <span className="material-symbols-outlined ai-input-icon">topic</span>
+            <AppIcon name="topic" className="ai-input-icon" size={18} />
             <input
               id="ai-topic-input"
               type="text"
@@ -661,7 +658,7 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
                 setTopic(e.target.value);
                 if (topicError) setTopicError('');
               }}
-              placeholder="e.g. AVL Tree Rotations, SQL Normalization, Deadlocks..."
+              placeholder="e.g. AVL Tree Rotations, SQL Normalization, Deadlocks…"
               required
             />
             {topic && (
@@ -672,14 +669,14 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
                 aria-label="Clear topic"
                 title="Clear"
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>close</span>
+                <AppIcon name="close" size={16} />
               </button>
             )}
           </div>
 
           {topicError && (
             <p id="ai-topic-error" className="ai-error-text" role="alert">
-              <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>error</span>
+              <AppIcon name="error" size={15} />
               {topicError}
             </p>
           )}
@@ -752,7 +749,7 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
                   className={`ai-style-tile ${isSelected ? 'selected' : ''}`}
                 >
                   <div className="ai-style-icon-box">
-                    <span className="material-symbols-outlined">{st.icon}</span>
+                    <AppIcon name={st.icon} size={20} />
                   </div>
                   <div className="ai-style-content">
                     <div className="ai-style-title">{st.title}</div>
@@ -834,7 +831,7 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
         <div className="ai-summary-bar">
           <div className="ai-summary-left">
             <span className="ai-summary-icon-wrap">
-              <span className="material-symbols-outlined">auto_awesome</span>
+              <AppIcon name="auto_awesome" size={20} />
             </span>
             <div className="ai-summary-text">
               <div className="ai-summary-title">
@@ -842,7 +839,7 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
                 <strong>{topic || 'Custom Topic'}</strong>
               </div>
               <div className="ai-summary-meta">
-                <span>⏱️ {estimatedTime}</span>
+                <span>{estimatedTime}</span>
                 <span>•</span>
                 <span>{QUESTION_STYLES.find((s) => s.id === questionType)?.title}</span>
                 <span>•</span>
@@ -859,9 +856,9 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
           whileHover={{ y: -2, scale: 1.01 }}
           whileTap={{ scale: 0.98 }}
         >
-          <span className="material-symbols-outlined" aria-hidden="true">rocket_launch</span>
+          <AppIcon name="rocket_launch" size={19} />
           <span>Generate Practice Quiz</span>
-          <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          <AppIcon name="arrow_forward" size={19} />
         </motion.button>
       </form>
     </div>

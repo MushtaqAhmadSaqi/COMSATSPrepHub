@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AppIcon from '../ui/AppIcon';
 import './InstallPrompt.css';
 
 /**
@@ -11,7 +12,6 @@ export default function InstallPrompt() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    // Only show on second+ visit
     try {
       const visits = Number(sessionStorage.getItem('pph_visits') || '0') + 1;
       sessionStorage.setItem('pph_visits', String(visits));
@@ -54,11 +54,9 @@ export default function InstallPrompt() {
           transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
         >
           <div className="install-prompt__content">
-            <span className="material-symbols-outlined install-prompt__icon">
-              install_mobile
-            </span>
+            <AppIcon name="install_mobile" className="install-prompt__icon" size={24} />
             <div className="install-prompt__text">
-              <strong>Install COMSATSPrepHub</strong>
+              <strong>Install <span translate="no">COMSATSPrepHub</span></strong>
               <span>Quick access from your home screen</span>
             </div>
           </div>
@@ -76,7 +74,7 @@ export default function InstallPrompt() {
               onClick={handleDismiss}
               aria-label="Dismiss install prompt"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>close</span>
+              <AppIcon name="close" size={18} />
             </button>
           </div>
         </motion.div>

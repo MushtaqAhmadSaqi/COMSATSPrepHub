@@ -2,24 +2,23 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { resolveDisplayMath } from './mathRenderSafety.js';
+import AppIcon from '../ui/AppIcon';
 import './MathText.css';
 
 // Lazy-load and initialize mermaid with strict security only when a diagram is rendered
-let mermaidPromise = null;
-async function getMermaid() {
-  if (!mermaidPromise) {
-    mermaidPromise = import('mermaid').then((m) => {
-      const instance = m.default || m;
-      instance.initialize({
-        startOnLoad: false,
-        theme: 'neutral',
-        securityLevel: 'strict',
-        fontFamily: 'Inter, system-ui, sans-serif'
-      });
-      return instance;
-    });
+let mermaidModulePromise = null;
+async function getMermaid(isDark = false) {
+  if (!mermaidModulePromise) {
+    mermaidModulePromise = import('mermaid').then((m) => m.default || m);
   }
-  return mermaidPromise;
+  const instance = await mermaidModulePromise;
+  instance.initialize({
+    startOnLoad: false,
+    theme: isDark ? 'dark' : 'neutral',
+    securityLevel: 'strict',
+    fontFamily: 'Inter, system-ui, sans-serif'
+  });
+  return instance;
 }
 
 /**
@@ -257,12 +256,24 @@ function MermaidDiagram({ chart }) {
   const containerRef = useRef(null);
   const [svgContent, setSvgContent] = useState('');
   const [renderFailed, setRenderFailed] = useState(false);
+  const [isDark, setIsDark] = useState(() =>
+    typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+  );
+
+  useEffect(() => {
+    if (typeof MutationObserver === 'undefined' || typeof document === 'undefined') return undefined;
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
     const uniqueId = `mermaid-svg-${Math.random().toString(36).slice(2, 9)}`;
 
-    getMermaid()
+    getMermaid(isDark)
       .then((mermaid) => mermaid.render(uniqueId, chart.trim()))
       .then(({ svg }) => {
         if (isMounted) {
@@ -277,13 +288,13 @@ function MermaidDiagram({ chart }) {
     return () => {
       isMounted = false;
     };
-  }, [chart]);
+  }, [chart, isDark]);
 
   if (renderFailed) {
     return (
       <div className="diagram-box">
         <div className="diagram-header">
-          <span className="material-symbols-outlined" aria-hidden="true">account_tree</span>
+          <AppIcon name="account_tree" size={18} />
           <span>System Diagram (Source View)</span>
         </div>
         <pre className="diagram-code">{chart}</pre>
@@ -294,12 +305,12 @@ function MermaidDiagram({ chart }) {
   return (
     <div className="diagram-box" ref={containerRef}>
       <div className="diagram-header">
-        <span className="material-symbols-outlined" aria-hidden="true">schema</span>
+        <AppIcon name="schema" size={18} />
         <span>Interactive System Diagram / Architecture</span>
       </div>
       <div
         className="mermaid-svg-container"
-        dangerouslySetInnerHTML={{ __html: svgContent || '<div class="diagram-loading">Generating diagram...</div>' }}
+        dangerouslySetInnerHTML={{ __html: svgContent || '<div class="diagram-loading">Generating diagram…</div>' }}
       />
     </div>
   );
@@ -327,9 +338,7 @@ function CodeBlock({ code, language = '' }) {
     <div className={`code-block-card ${isDiagramText ? 'is-ascii-diagram' : ''}`}>
       <div className="code-block-header">
         <span className="code-lang-tag">
-          <span className="material-symbols-outlined" aria-hidden="true">
-            {isDiagramText ? 'account_tree' : 'code'}
-          </span>
+          <AppIcon name={isDiagramText ? 'account_tree' : 'code'} size={15} />
           {language ? language.toUpperCase() : 'SOURCE CODE'}
         </span>
         <button
@@ -338,9 +347,7 @@ function CodeBlock({ code, language = '' }) {
           onClick={handleCopy}
           title="Copy to clipboard"
         >
-          <span className="material-symbols-outlined" aria-hidden="true">
-            {copied ? 'check' : 'content_copy'}
-          </span>
+          <AppIcon name={copied ? 'check' : 'content_copy'} size={14} />
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
@@ -600,7 +607,7 @@ export default function MathText({ text, className = '' }) {
         elements.push(
           <div key={`final-ans-${i}`} className="math-final-answer-card">
             <div className="final-ans-header">
-              <span className="material-symbols-outlined" aria-hidden="true">check_circle</span>
+              <AppIcon name="check_circle" size={18} />
               <span>{finalAnsMatch[1].replace(/[:*]/g, '').trim()}</span>
             </div>
             <div className="final-ans-body">
@@ -632,7 +639,7 @@ export default function MathText({ text, className = '' }) {
         flushList();
         elements.push(
           <div key={`note-card-${i}`} className="math-note-callout">
-            <span className="material-symbols-outlined note-icon" aria-hidden="true">info</span>
+            <AppIcon name="info" className="note-icon" size={18} />
             <div>
               <strong>{noteMatch[1].replace(/\*/g, '').trim()} </strong>
               <span>{renderInlineWithMath(noteMatch[2], `note-text-${i}`)}</span>

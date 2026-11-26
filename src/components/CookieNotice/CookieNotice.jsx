@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAnalyticsConsent, setAnalyticsConsent, initConsentGatedAnalytics } from '../../utils/analytics';
+import AppIcon from '../ui/AppIcon';
 import './CookieNotice.css';
 
 export default function CookieNotice({ onNavigate }) {
@@ -27,20 +28,17 @@ export default function CookieNotice({ onNavigate }) {
           role="dialog"
           aria-labelledby="cookie-notice-title"
           aria-describedby="cookie-notice-description"
-          initial={{ opacity: 0, y: 32 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 32 }}
-          transition={{ duration: 0.25 }}
+          exit={{ opacity: 0, y: 24 }}
+          transition={{ duration: 0.22 }}
         >
           <div className="cookie-notice__content">
-            <span className="material-symbols-outlined cookie-notice__icon" aria-hidden="true">
-              cookie
-            </span>
+            <AppIcon name="cookie" className="cookie-notice__icon" size={22} />
             <div>
               <h2 id="cookie-notice-title">Privacy and analytics</h2>
               <p id="cookie-notice-description">
-                We use essential browser storage to keep COMSATSPrepHub working. Optional,
-                anonymous analytics help us improve the site and are only enabled if you accept.
+                Essential browser storage keeps <span translate="no">COMSATSPrepHub</span> working. Optional analytics help improve exam tools only if accepted.
               </p>
               <button
                 type="button"

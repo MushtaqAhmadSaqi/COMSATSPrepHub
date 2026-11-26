@@ -3,6 +3,8 @@ import { exportAllStudentData, clearAllStudentData, clearCloudStudyActivity, get
 import { getAnalyticsConsent, setAnalyticsConsent } from '../../utils/analytics';
 import { updatePassword, validatePasswordStrength } from '../../services/auth';
 import { toast } from '../../utils/toast';
+import AppIcon from '../../components/ui/AppIcon';
+import Modal from '../../components/ui/Modal';
 
 export default function Account({
   user,
@@ -34,18 +36,28 @@ export default function Account({
     toast.success('Downloaded student data backup!');
   };
 
-  const handleClear = async () => {
-    if (!window.confirm('Are you sure you want to delete all local study history, bookmarks, and quiz attempts? This cannot be undone.')) {
-      return;
-    }
-    const cloud = user ? await clearCloudStudyActivity() : { ok: true, reason: 'guest' };
-    clearAllStudentData();
-    if (cloud.ok) {
-      toast.info(user ? 'All local and synced study data cleared.' : 'All local study data cleared.');
-    } else {
-      toast.error(
-        'Local study data cleared, but your synced activity could not be deleted. Please retry or email us from the footer.'
-      );
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+  const [clearingData, setClearingData] = useState(false);
+
+  const handleClear = () => {
+    setConfirmClearOpen(true);
+  };
+
+  const confirmClearLocalData = async () => {
+    setClearingData(true);
+    try {
+      const cloud = user ? await clearCloudStudyActivity() : { ok: true, reason: 'guest' };
+      clearAllStudentData();
+      setConfirmClearOpen(false);
+      if (cloud.ok) {
+        toast.info(user ? 'All local and synced study data cleared.' : 'All local study data cleared.');
+      } else {
+        toast.error(
+          'Local study data cleared, but your synced activity could not be deleted. Please retry or email us from the footer.'
+        );
+      }
+    } finally {
+      setClearingData(false);
     }
   };
 
@@ -103,7 +115,7 @@ export default function Account({
 
       <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-2)', marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span className="material-symbols-outlined" style={{ color: 'var(--brand)' }} aria-hidden="true">person</span>
+          <AppIcon name="person" size={20} style={{ color: 'var(--brand)' }} />
           Profile
         </h2>
         {user ? (
@@ -142,7 +154,7 @@ export default function Account({
       {passwordRecovery && (
         <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: 'var(--radius-xl)', border: '2px solid var(--brand)', boxShadow: 'var(--shadow-2)', marginBottom: '1.5rem' }}>
           <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span className="material-symbols-outlined" style={{ color: 'var(--brand)' }} aria-hidden="true">lock_reset</span>
+            <AppIcon name="lock_reset" size={20} style={{ color: 'var(--brand)' }} />
             Set a New Password
           </h2>
 
@@ -231,7 +243,7 @@ export default function Account({
 
       <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-2)', marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span className="material-symbols-outlined" style={{ color: 'var(--brand)' }} aria-hidden="true">school</span>
+          <AppIcon name="school" size={20} style={{ color: 'var(--brand)' }} />
           Campus Preference
         </h2>
         <label htmlFor="account-campus-select" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem' }}>
@@ -261,7 +273,7 @@ export default function Account({
 
       <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-2)' }}>
         <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span className="material-symbols-outlined" style={{ color: 'var(--brand)' }} aria-hidden="true">dataset</span>
+          <AppIcon name="dataset" size={20} style={{ color: 'var(--brand)' }} />
           Data &amp; Privacy Control
         </h2>
         <p style={{ fontSize: '0.875rem', color: 'var(--text-subtle)', marginBottom: '1rem' }}>
@@ -295,7 +307,7 @@ export default function Account({
               gap: '0.5rem'
             }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">download</span>
+            <AppIcon name="download" size={18} />
             Export All Data (JSON)
           </button>
           <button
@@ -315,9 +327,62 @@ export default function Account({
               gap: '0.5rem'
             }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">delete_forever</span>
+            <AppIcon name="delete_forever" size={18} />
             Clear Local Data
           </button>
+
+          <Modal
+            isOpen={confirmClearOpen}
+            onClose={() => {
+              if (!clearingData) setConfirmClearOpen(false);
+            }}
+            title="Clear Study Data?"
+          >
+            <p style={{ color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+              This permanently deletes all local study history, bookmarks, notes, flashcards, and quiz attempts
+              {user ? ' (as well as your synced cloud study activity)' : ' stored on this device'}. This action cannot be undone.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => setConfirmClearOpen(false)}
+                disabled={clearingData}
+                style={{
+                  minHeight: '44px',
+                  padding: '0.625rem 1.125rem',
+                  borderRadius: '9999px',
+                  border: '1px solid var(--border-strong)',
+                  background: 'var(--surface-2)',
+                  color: 'var(--text)',
+                  fontWeight: 600,
+                  cursor: clearingData ? 'not-allowed' : 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmClearLocalData}
+                disabled={clearingData}
+                style={{
+                  minHeight: '44px',
+                  padding: '0.625rem 1.25rem',
+                  borderRadius: '9999px',
+                  border: 'none',
+                  background: 'var(--danger)',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  cursor: clearingData ? 'not-allowed' : 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem'
+                }}
+              >
+                <AppIcon name={clearingData ? 'progress_activity' : 'delete_forever'} size={18} />
+                {clearingData ? 'Clearing…' : 'Yes, Clear Everything'}
+              </button>
+            </div>
+          </Modal>
         </div>
       </div>
     </div>

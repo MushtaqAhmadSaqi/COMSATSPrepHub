@@ -147,22 +147,27 @@ html.dark .desktop-nav-links {
 
 /* ─── Nav Link Button ──────────────────────────────────────────── */
 .nav-link-btn {
-  min-height: 2.75rem;
-  padding: 0.5rem 0.875rem;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.725rem;
   border-radius: 9999px;
-  font-size: 0.875rem;
+  font-size: 0.84rem;
   font-weight: 600;
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
   color: var(--text-muted);
-  transition: all 0.2s var(--ease);
+  transition: color 0.2s var(--ease),
+              background-color 0.2s var(--ease),
+              border-color 0.2s var(--ease),
+              box-shadow 0.2s var(--ease);
   position: relative;
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 @media (min-width: 1280px) {
   .nav-link-btn {
-    padding: 0.5rem 1.125rem;
+    padding: 0.45rem 0.95rem;
+    font-size: 0.875rem;
   }
 }
 
@@ -257,7 +262,10 @@ html.dark .icon-circle-btn {
   background: var(--surface-3);
   color: var(--text-muted);
   border: 1px solid var(--border);
-  transition: all 0.2s var(--ease-spring);
+  transition: background-color 0.2s var(--ease),
+              color 0.2s var(--ease),
+              border-color 0.2s var(--ease),
+              transform 0.2s var(--ease-spring);
   cursor: pointer;
   font-family: inherit;
 }
@@ -341,15 +349,18 @@ html.dark .cmd-trigger-btn {
   font-size: 0.8125rem;
   border: none;
   box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
-  transition: all 0.25s var(--ease-spring);
+  transition: transform 0.25s var(--ease-spring),
+              box-shadow 0.25s var(--ease),
+              background-color 0.2s var(--ease);
   letter-spacing: -0.01em;
   white-space: nowrap;
   flex-shrink: 0;
   cursor: pointer;
 }
 
+.signin-gradient-btn .app-icon,
 .signin-gradient-btn .material-symbols-outlined {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
 }
 
 .signin-btn-text {
@@ -432,7 +443,10 @@ html.dark .cmd-trigger-btn {
   border: none;
   background: transparent;
   color: #94a3b8;
-  transition: all 0.22s var(--ease-spring);
+  transition: color 0.22s var(--ease),
+              background-color 0.22s var(--ease),
+              transform 0.22s var(--ease-spring),
+              box-shadow 0.22s var(--ease);
   gap: 0.125rem;
   width: 100%;
   cursor: pointer;
@@ -456,12 +470,14 @@ html.dark .cmd-trigger-btn {
   transform: scale(0.88);
 }
 
+.mobile-nav-item .app-icon,
 .mobile-nav-item .material-symbols-outlined {
   transition: transform 0.2s var(--ease-spring);
 }
 
+.mobile-nav-item.active .app-icon,
 .mobile-nav-item.active .material-symbols-outlined {
-  transform: scale(1.2);
+  transform: scale(1.12);
 }
 
 

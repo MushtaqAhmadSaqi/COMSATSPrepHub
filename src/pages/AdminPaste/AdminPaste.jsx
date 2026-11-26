@@ -5,6 +5,7 @@ import { supabase, isSupabaseConfigured } from '../../services/supabase';
 import { clearPapersCache } from '../../services/papersService';
 import { DEFAULT_SUBJECTS } from '../../constants/subjects';
 import { useToast } from '../../utils/toast';
+import AppIcon from '../../components/ui/AppIcon';
 import './AdminPaste.css';
 
 const RLS_FIX_SQL = `-- 1. Ensure Row-Level Security is enabled
@@ -718,7 +719,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
         <div className="ai-prompt-helper-header">
           <div className="ai-prompt-helper-info">
             <div className="ai-prompt-tag">
-              <span className="material-symbols-outlined" aria-hidden="true">psychology</span>
+              <AppIcon name="psychology" size={15} />
               Universal AI Master Prompt (All COMSATS Subjects)
             </div>
             <h3 className="ai-prompt-helper-title">Step 1: Get structured JSON from your AI</h3>
@@ -734,9 +735,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
               onClick={handleCopyPrompt}
               title="Copy universal prompt for ChatGPT, Claude, or Gemini"
             >
-              <span className="material-symbols-outlined" aria-hidden="true">
-                {hasCopiedPrompt ? 'check_circle' : 'content_copy'}
-              </span>
+              <AppIcon name={hasCopiedPrompt ? 'check_circle' : 'content_copy'} size={18} />
               {hasCopiedPrompt ? 'Copied Universal Prompt!' : 'Copy AI Master Prompt'}
             </button>
             <button
@@ -744,9 +743,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
               className="btn-toggle-prompt"
               onClick={() => setIsPromptExpanded(!isPromptExpanded)}
             >
-              <span className="material-symbols-outlined" aria-hidden="true">
-                {isPromptExpanded ? 'visibility_off' : 'visibility'}
-              </span>
+              <AppIcon name={isPromptExpanded ? 'visibility_off' : 'visibility'} size={18} />
               {isPromptExpanded ? 'Hide Prompt' : 'View Prompt'}
             </button>
           </div>
@@ -775,7 +772,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
             onClick={handleLoadSample}
             title="Load sample past paper JSON with formulas and tables"
           >
-            <span className="material-symbols-outlined" aria-hidden="true">table_chart</span>
+            <AppIcon name="table_chart" size={18} />
             Load Sample (Tables & Math)
           </button>
         </div>
@@ -784,7 +781,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
           id="admin-raw-paper-textarea"
           aria-label="Past paper AI JSON output"
           className="admin-textarea"
-          placeholder="Paste AI JSON output here... e.g. { 'subject_code': 'CSC322', 'questions': [...] }"
+          placeholder="Paste AI JSON output here… e.g. { 'subject_code': 'CSC322', 'questions': [...] }"
           value={rawText}
           onChange={(e) => {
             setRawText(e.target.value);
@@ -799,7 +796,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
             className="btn-parse"
             onClick={handleParse}
           >
-            <span className="material-symbols-outlined" aria-hidden="true">find_in_page</span>
+            <AppIcon name="find_in_page" size={18} />
             Validate & Preview Paper
           </button>
 
@@ -809,7 +806,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
               className="btn-clear"
               onClick={handleResetForm}
             >
-              <span className="material-symbols-outlined" aria-hidden="true">delete_sweep</span>
+              <AppIcon name="delete_sweep" size={18} />
               Clear Input
             </button>
           )}
@@ -817,7 +814,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
 
         {errorMsg && (
           <div className="admin-alert admin-alert-danger" role="alert">
-            <span className="material-symbols-outlined" aria-hidden="true">error</span>
+            <AppIcon name="error" size={20} />
             <div>
               <strong>Parsing Error:</strong> {errorMsg}
             </div>
@@ -829,7 +826,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
       {uploadResults && (
         <div className="admin-success-card" role="status">
           <div className="admin-success-icon">
-            <span className="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            <AppIcon name="check_circle" size={32} />
           </div>
           <div className="admin-success-body">
             <h3 className="admin-success-title">Database Sync Successful!</h3>
@@ -842,9 +839,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                 <div key={i} className="admin-result-item">
                   <div className="result-badge-wrap">
                     <span className={`result-tag ${r.action === 'replaced' ? 'tag-replaced' : 'tag-created'}`}>
-                      <span className="material-symbols-outlined" aria-hidden="true">
-                        {r.action === 'replaced' ? 'sync' : 'add_circle'}
-                      </span>
+                      <AppIcon name={r.action === 'replaced' ? 'sync' : 'add_circle'} size={14} />
                       {r.action === 'replaced' ? 'Replaced Existing' : 'Added New'}
                     </span>
                     <span className="result-subject-tag">{r.subjectCode}</span>
@@ -853,7 +848,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                   <div className="result-title-line">
                     <strong>{r.paperTitle}</strong>
                     <span className="result-sub-info">
-                      ({r.questionCount} questions uploaded, ID: {r.paperId.slice(0, 8)}...)
+                      ({r.questionCount} questions uploaded, ID: {r.paperId.slice(0, 8)}…)
                     </span>
                   </div>
 
@@ -863,7 +858,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                       className="btn-result-action primary"
                       onClick={() => handleOpenPaper(r)}
                     >
-                      <span className="material-symbols-outlined" aria-hidden="true">visibility</span>
+                      <AppIcon name="visibility" size={16} />
                       View Paper in App
                     </button>
                     <button
@@ -871,7 +866,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                       className="btn-result-action secondary"
                       onClick={() => handleGoToSubject(r)}
                     >
-                      <span className="material-symbols-outlined" aria-hidden="true">folder_open</span>
+                      <AppIcon name="folder_open" size={16} />
                       Subject Papers
                     </button>
                   </div>
@@ -885,7 +880,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                 className="btn-parse"
                 onClick={handleResetForm}
               >
-                <span className="material-symbols-outlined" aria-hidden="true">add</span>
+                <AppIcon name="add" size={18} />
                 Upload Another Paper
               </button>
             </div>
@@ -899,7 +894,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
           <div className="admin-rls-error-card" role="alert">
             <div className="rls-error-header">
               <div className="rls-error-icon-wrap">
-                <span className="material-symbols-outlined rls-error-icon" aria-hidden="true">lock_reset</span>
+                <AppIcon name="lock_reset" className="rls-error-icon" size={24} />
               </div>
               <div className="rls-error-header-text">
                 <h3 className="rls-error-title">Supabase Blocked Upload (Row Level Security Policy)</h3>
@@ -930,9 +925,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                   className={`btn-copy-prompt ${hasCopiedSql ? 'copied' : ''}`}
                   onClick={handleCopySql}
                 >
-                  <span className="material-symbols-outlined" aria-hidden="true">
-                    {hasCopiedSql ? 'check_circle' : 'content_copy'}
-                  </span>
+                  <AppIcon name={hasCopiedSql ? 'check_circle' : 'content_copy'} size={18} />
                   {hasCopiedSql ? 'Copied SQL Script!' : 'Copy Supabase SQL Script'}
                 </button>
               </div>
@@ -942,7 +935,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
           </div>
         ) : (
           <div className="admin-alert admin-alert-danger" role="alert">
-            <span className="material-symbols-outlined" aria-hidden="true">dangerous</span>
+            <AppIcon name="dangerous" size={20} />
             <div>
               <strong>Database Upload Failed:</strong> {uploadError}
             </div>
@@ -956,7 +949,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
           <div className="preview-section-header">
             <div>
               <div className="preview-kicker-tag">
-                <span className="material-symbols-outlined" aria-hidden="true">preview</span>
+                <AppIcon name="preview" size={14} />
                 Exact Subject Page Preview
               </div>
               <h2 className="preview-heading">
@@ -975,12 +968,12 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
             >
               {isUploading ? (
                 <>
-                  <span className="spinner-icon material-symbols-outlined" aria-hidden="true">progress_activity</span>
-                  Syncing to Supabase...
+                  <AppIcon name="progress_activity" className="spinner-icon" size={18} />
+                  Syncing to Supabase…
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined" aria-hidden="true">cloud_upload</span>
+                  <AppIcon name="cloud_upload" size={18} />
                   Save & Sync to Supabase
                 </>
               )}
@@ -999,17 +992,17 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                     <span>How this paper card will appear on the <strong>{paper.subject_code}</strong> page:</span>
                     {checkingDuplicates ? (
                       <span className="badge-checking">
-                        <span className="spinner-icon material-symbols-outlined" aria-hidden="true">progress_activity</span>
-                        Checking Supabase...
+                        <AppIcon name="progress_activity" className="spinner-icon" size={14} />
+                        Checking Supabase…
                       </span>
                     ) : isReplaced ? (
                       <span className="badge-mode-replace" title={`Matches ID: ${ dup.existingId } `}>
-                        <span className="material-symbols-outlined" aria-hidden="true">sync</span>
+                        <AppIcon name="sync" size={14} />
                         Will REPLACE existing record
                       </span>
                     ) : (
                       <span className="badge-mode-add">
-                        <span className="material-symbols-outlined" aria-hidden="true">add_circle</span>
+                        <AppIcon name="add_circle" size={14} />
                         Will ADD as NEW record
                       </span>
                     )}
@@ -1017,7 +1010,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
 
                   <div className="paper-item-card-preview">
                     <div className="paper-item-icon" aria-hidden="true">
-                      <span className="material-symbols-outlined">description</span>
+                      <AppIcon name="description" size={26} />
                     </div>
 
                     <div className="paper-item-copy">
@@ -1028,14 +1021,14 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
 
                         {paper.instructor_name && (
                           <span className="paper-meta-detail" title={`Instructor: ${ paper.instructor_name } `}>
-                            <span className="material-symbols-outlined" aria-hidden="true">person</span>
+                            <AppIcon name="person" size={16} />
                             {paper.instructor_name}
                           </span>
                         )}
 
                         {paper.year && (
                           <span className="paper-meta-detail">
-                            <span className="material-symbols-outlined" aria-hidden="true">calendar_month</span>
+                            <AppIcon name="calendar_month" size={16} />
                             {paper.year}
                           </span>
                         )}
@@ -1049,14 +1042,14 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                         )}
 
                         <span className="paper-meta-detail">
-                          <span className="material-symbols-outlined" aria-hidden="true">quiz</span>
+                          <AppIcon name="quiz" size={16} />
                           {paper.questions.length} Questions
                         </span>
                       </div>
                     </div>
 
                     <div className="paper-item-preview-tag">
-                      <span className="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                      <AppIcon name="check_circle" size={16} />
                       Validated
                     </div>
                   </div>
@@ -1065,7 +1058,7 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                 {/* Replacement Notice Banner */}
                 {isReplaced && dup?.existingTitle && (
                   <div className="replace-notice-banner">
-                    <span className="material-symbols-outlined" aria-hidden="true">info</span>
+                    <AppIcon name="info" size={20} />
                     <div>
                       <strong>Existing Paper Found:</strong> A paper matching <em>{paper.subject_code} ({paper.term} {paper.year})</em> already exists in Supabase.
                       Uploading will automatically update its title & details, clear its old questions, and replace them with these <strong>{paper.questions.length}</strong> questions.
@@ -1121,16 +1114,14 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                               className="paperview-mock-toggle-btn"
                               onClick={() => toggleAnswer(ansKey)}
                             >
-                              <span className="material-symbols-outlined" aria-hidden="true">
-                                {isAnsOpen ? 'expand_less' : 'lightbulb'}
-                              </span>
+                              <AppIcon name={isAnsOpen ? 'expand_less' : 'lightbulb'} size={16} />
                               <span>{isAnsOpen ? 'Hide Model Answer' : 'View Model Answer'}</span>
                             </button>
 
                             {isAnsOpen && (
                               <div className="paperview-mock-solution-box">
                                 <div className="paperview-mock-solution-header">
-                                  <span className="material-symbols-outlined" aria-hidden="true">verified</span>
+                                  <AppIcon name="verified" size={16} />
                                   Model Answer (COMSATS Marking Standard)
                                 </div>
                                 <div className="paperview-mock-solution-content">
@@ -1158,12 +1149,12 @@ export default function AdminPaste({ user, onNavigate, onSelectSubject, onSelect
                   >
                     {isUploading ? (
                       <>
-                        <span className="spinner-icon material-symbols-outlined" aria-hidden="true">progress_activity</span>
-                        Syncing to Supabase...
+                        <AppIcon name="progress_activity" className="spinner-icon" size={18} />
+                        Syncing to Supabase…
                       </>
                     ) : (
                       <>
-                        <span className="material-symbols-outlined" aria-hidden="true">cloud_upload</span>
+                        <AppIcon name="cloud_upload" size={18} />
                         {isReplaced ? 'Confirm & Replace Paper in Supabase' : 'Confirm & Add New Paper to Supabase'}
                       </>
                     )}

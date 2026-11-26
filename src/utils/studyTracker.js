@@ -469,9 +469,17 @@ export function savePaperNote(paperId, noteText) {
   return safeWriteJson(NOTES_KEY, map);
 }
 
+/* ── Local Calendar Date Helper (avoids UTC midnight drift in PKT/UTC+5) ── */
+function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 /* ── Daily Challenge (5 Qs / day) ── */
 export function getDailyChallengeStatus() {
-  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayKey = getLocalDateKey();
   const state = safeReadJson(DAILY_KEY, {});
   return {
     todayKey,
@@ -482,9 +490,9 @@ export function getDailyChallengeStatus() {
 }
 
 export function recordDailyChallengeCompletion(score, total = 5) {
-  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayKey = getLocalDateKey();
   const state = safeReadJson(DAILY_KEY, {});
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const yesterday = getLocalDateKey(new Date(Date.now() - 86400000));
 
   let nextStreak = 1;
   if (state.lastCompletedDate === todayKey) {

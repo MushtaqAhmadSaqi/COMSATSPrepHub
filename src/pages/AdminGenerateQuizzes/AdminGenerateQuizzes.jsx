@@ -6,6 +6,7 @@ import {
 } from '../../utils/studyTracker';
 import { DEFAULT_SUBJECTS } from '../../constants/subjects';
 import PageHeader from '../../components/PageHeader/PageHeader';
+import AppIcon from '../../components/ui/AppIcon';
 import './AdminGenerateQuizzes.css';
 
 export default function AdminGenerateQuizzes() {
@@ -26,7 +27,7 @@ export default function AdminGenerateQuizzes() {
     }
     setLoading(true);
     setError('');
-    setStatus('Generating batch questions...');
+    setStatus('Generating batch questions…');
     try {
       const questions = await generateQuizWithGemini({
         subject: subject.trim(),
@@ -185,6 +186,7 @@ export default function AdminGenerateQuizzes() {
             type="text"
             className="ai-input"
             value={subject}
+            spellCheck={false}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="e.g. CSC211 — Data Structures"
             required
@@ -223,7 +225,7 @@ export default function AdminGenerateQuizzes() {
         </div>
 
         <button type="submit" className="btn-generate-ai" disabled={loading}>
-          <span className="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
+          <AppIcon name="auto_awesome" size={18} />
           {loading ? 'Generating Batch…' : 'Batch Generate Course Quiz'}
         </button>
 

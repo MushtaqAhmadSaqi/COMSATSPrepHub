@@ -17,6 +17,9 @@
 .auth-modal-card {
   width: 100%;
   max-width: 460px;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--surface);
   border-radius: var(--radius-xl);
   padding: 2.25rem;
@@ -25,7 +28,6 @@
   position: relative;
   animation: scaleIn 0.3s var(--ease-spring) both;
   border: 1.5px solid var(--border);
-  overflow: hidden;
 }
 
 /* Gradient top stripe */
@@ -51,7 +53,10 @@
   align-items: center;
   justify-content: center;
   color: var(--text-subtle);
-  transition: all 0.2s var(--ease-spring);
+  transition: background-color 0.2s var(--ease),
+              color 0.2s var(--ease),
+              border-color 0.2s var(--ease),
+              transform 0.2s var(--ease-spring);
 }
 
 .auth-close-btn:hover {
@@ -211,7 +216,9 @@ html.dark .auth-alert-success {
   cursor: pointer;
   margin-top: 0.5rem;
   box-shadow: 0 6px 18px rgba(14, 165, 233, 0.4);
-  transition: all 0.25s var(--ease-spring);
+  transition: transform 0.25s var(--ease-spring),
+              box-shadow 0.25s var(--ease),
+              background-color 0.2s var(--ease);
 }
 
 .auth-submit-btn:hover:not(:disabled) {
@@ -264,7 +271,9 @@ html.dark .auth-alert-success {
   justify-content: center;
   gap: 0.625rem;
   cursor: pointer;
-  transition: all 0.22s var(--ease-spring);
+  transition: border-color 0.22s var(--ease),
+              box-shadow 0.22s var(--ease),
+              transform 0.22s var(--ease-spring);
   box-shadow: var(--shadow-1);
 }
 

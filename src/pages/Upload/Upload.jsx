@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PageHeader from '../../components/PageHeader/PageHeader';
+import AppIcon from '../../components/ui/AppIcon';
 import { fireConfetti } from '../../utils/confetti';
 import { addModerationSubmission } from '../../utils/studyTracker';
 import { useToast } from '../../utils/toast';
@@ -175,7 +176,7 @@ export default function Upload() {
         {submitted ? (
           <div className="upload-success">
             <div className="upload-success-icon">
-              <span className="material-symbols-outlined" style={{ fontSize: '2.5rem' }}>check_circle</span>
+              <AppIcon name="check_circle" size={40} />
             </div>
             <h3 className="upload-success-title">
               Thank You, {uploaderName || 'Contributor'}! 🎉
@@ -223,9 +224,7 @@ export default function Upload() {
                     aria-describedby={fileError ? 'upload-file-error' : undefined}
                   />
                   <div className="upload-dropzone-icon">
-                    <span className="material-symbols-outlined" style={{ fontSize: '2.25rem' }}>
-                      {selectedFile ? 'description' : 'cloud_upload'}
-                    </span>
+                    <AppIcon name={selectedFile ? 'description' : 'cloud_upload'} size={36} />
                   </div>
                   {selectedFile ? (
                     <>
@@ -246,7 +245,7 @@ export default function Upload() {
 
                 {fileError && (
                   <div id="upload-file-error" role="alert" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--danger)', fontSize: '0.875rem', marginBottom: '1rem', fontWeight: 600 }}>
-                    <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>error</span>
+                    <AppIcon name="error" size={18} />
                     {fileError}
                   </div>
                 )}
@@ -261,6 +260,7 @@ export default function Upload() {
                 className={`ai-input${fieldErrors.subjectCode ? ' auth-input--error' : ''}`}
                 placeholder="e.g. CSC211 — Data Structures & Algorithms"
                 value={subjectCode}
+                spellCheck={false}
                 onChange={(e) => setSubjectCode(e.target.value)}
                 onBlur={(e) => validateFieldOnBlur('subjectCode', e.target.value)}
                 required
@@ -312,12 +312,12 @@ export default function Upload() {
             <button type="submit" className="btn-generate-ai" disabled={submitting}>
               {submitting ? (
                 <>
-                  <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite', fontSize: '18px' }}>progress_activity</span>
-                  Submitting...
+                  <AppIcon name="progress_activity" size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                  Submitting…
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined">{activeTab === 'upload' ? 'upload' : 'campaign'}</span>
+                  <AppIcon name={activeTab === 'upload' ? 'upload' : 'campaign'} size={18} />
                   {activeTab === 'upload' ? 'Submit Paper for Moderation' : 'Submit Paper Request'}
                 </>
               )}

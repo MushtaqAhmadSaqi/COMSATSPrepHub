@@ -4,6 +4,7 @@ import { generateQuizWithGemini } from '../../services/aiQuizService';
 import { recordAiQuizGeneration, recordQuizAttempt, getRevisionDeckIds, toggleRevisionCard, quizQuestionToFlashcard } from '../../utils/studyTracker';
 import { fireConfetti } from '../../utils/confetti';
 import { useToast } from '../../utils/toast';
+import AppIcon from '../../components/ui/AppIcon';
 import './TakeAiQuiz.css';
 import '../Quiz/Quiz.css';
 
@@ -198,8 +199,10 @@ export default function TakeAiQuiz({
       if (activeElement?.isContentEditable || activeElement?.closest('button, a[href], input, textarea, select, [role="button"], [role="dialog"]')) return;
 
       const key = e.key;
-      if (['1', '2', '3', '4'].includes(key)) {
-        const optionIdx = parseInt(key, 10) - 1;
+      const lowerKey = String(key).toLowerCase();
+      const letterIdx = ['a', 'b', 'c', 'd'].indexOf(lowerKey);
+      if (['1', '2', '3', '4'].includes(key) || letterIdx !== -1) {
+        const optionIdx = letterIdx !== -1 ? letterIdx : parseInt(key, 10) - 1;
         const currentQ = questions[currentIdx];
         if (currentQ && currentQ.options && currentQ.options[optionIdx] !== undefined && !revealed) {
           setSelectedOption(optionIdx);
@@ -223,26 +226,20 @@ export default function TakeAiQuiz({
   if (loading) {
     return (
       <div className="take-ai-container" aria-busy="true" aria-label="Generating AI practice quiz">
-        <motion.div
-          className="quiz-loading-card"
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.25 }}
-        >
-          <motion.div
-            className="quiz-loading-icon"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '3rem', color: '#ffffff' }} aria-hidden="true">
-              auto_awesome
-            </span>
-          </motion.div>
-          <h2>Generating AI Practice Quiz...</h2>
+        <div className="quiz-loading-card">
+          <div className="quiz-loading-icon">
+            <AppIcon name="auto_awesome" size={44} style={{ color: '#ffffff' }} />
+          </div>
+          <h2>Generating AI Practice Quiz…</h2>
           <p>
-            Preparing {quizParams.numQuestions || 10} {quizParams.difficulty || 'Medium'} level questions for <strong>&ldquo;{quizParams.topic || 'General'}&rdquo;</strong>
+            Preparing {quizParams.numQuestions || 10} {quizParams.difficulty || 'Medium'} level questions for{' '}
+            <strong>&ldquo;{quizParams.topic || 'General'}&rdquo;</strong>
           </p>
-          <p style={{ fontSize: '0.8125rem', color: 'var(--brand)', fontWeight: 700, marginTop: '0.5rem' }} role="status">
+          <p
+            style={{ fontSize: '0.8125rem', color: 'var(--brand)', fontWeight: 700, marginTop: '0.5rem' }}
+            role="status"
+            aria-live="polite"
+          >
             {PROGRESS_MESSAGES[progressStep]}
           </p>
           <div className="quiz-loading-bar">
@@ -253,7 +250,7 @@ export default function TakeAiQuiz({
               transition={{ duration: 2.2, ease: 'easeInOut' }}
             />
           </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
@@ -262,16 +259,23 @@ export default function TakeAiQuiz({
     return (
       <div className="take-ai-container">
         <div className="quiz-card" role="alert">
-          <h2>Could not generate your quiz</h2>
-          <p>{error || 'No questions were returned.'}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--danger)', marginBottom: '0.5rem' }}>
+            <AppIcon name="wifi_off" size={22} />
+            <h2 style={{ margin: 0 }}>Could not generate your quiz</h2>
+          </div>
+          <p style={{ color: 'var(--text-muted)', lineHeight: 1.55 }}>
+            {error || 'No questions were returned.'} Check your campus Wi-Fi or try a shorter question count.
+          </p>
 
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '1.25rem' }}>
             <button
               type="button"
               className="btn-quiz-next"
               onClick={() => setReloadKey((value) => value + 1)}
+              style={{ background: 'var(--brand)' }}
             >
-              Try again
+              <AppIcon name="refresh" size={18} />
+              Retry Generation
             </button>
 
             <button
@@ -280,7 +284,8 @@ export default function TakeAiQuiz({
               style={{ background: 'var(--surface-2)', color: 'var(--text)', border: '1.5px solid var(--border)' }}
               onClick={onFinish}
             >
-              Change topic
+              <AppIcon name="arrow_back" size={18} />
+              Change Topic
             </button>
           </div>
         </div>
@@ -295,19 +300,16 @@ export default function TakeAiQuiz({
         className="take-ai-container"
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.35 }}
+        transition={{ duration: 0.3 }}
       >
-        <div className="quiz-card" style={{ textAlign: 'center', padding: '3rem 1.75rem' }}>
-          <motion.div
-            className="quiz-finish-badge"
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '3.5rem', color: pct >= 60 ? '#10b981' : '#f59e0b' }} aria-hidden="true">
-              {pct >= 75 ? 'military_tech' : pct >= 50 ? 'emoji_events' : 'school'}
-            </span>
-          </motion.div>
+        <div className="quiz-card" style={{ textAlign: 'center', padding: '2.5rem 1.75rem' }}>
+          <div className="quiz-finish-badge" style={{ display: 'flex', justifyContent: 'center' }}>
+            <AppIcon
+              name={pct >= 75 ? 'military_tech' : pct >= 50 ? 'emoji_events' : 'school'}
+              size={52}
+              style={{ color: pct >= 60 ? '#10b981' : '#f59e0b' }}
+            />
+          </div>
 
           <h2 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.5rem' }}>
             {pct >= 75 ? 'Awesome Work! 🎉' : pct >= 50 ? 'Well Done! 👍' : 'Keep Learning! 💪'}
@@ -321,7 +323,7 @@ export default function TakeAiQuiz({
             You scored <strong style={{ color: 'var(--brand)', fontSize: '1.25rem' }}>{score}/{questions.length}</strong> ({pct}%)
           </p>
 
-          <div className="quiz-stats-row">
+          <div className="quiz-stats-row tabular-nums">
             <div className="quiz-stat-item">
               <span className="quiz-stat-value">{questions.length}</span>
               <span className="quiz-stat-label">Total Qs</span>
@@ -341,6 +343,7 @@ export default function TakeAiQuiz({
             <p>Star questions to review as flashcards in Study Hub. Saved on this device, including for guests.</p>
             {questions.map((question, index) => {
               const card = quizQuestionToFlashcard(question, quizParams.subjectCode);
+              const starred = revisionIds.includes(card.id);
               return (
                 <article key={card.id}>
                   <details>
@@ -349,8 +352,14 @@ export default function TakeAiQuiz({
                     <p><strong>Correct answer:</strong> {question.options[question.correct]}</p>
                     {question.hint && <p>{question.hint}</p>}
                   </details>
-                  <button type="button" className="revision-star-btn" aria-pressed={revisionIds.includes(card.id)} aria-label={`Star question ${index + 1} for Revision`} onClick={() => setRevisionIds(toggleRevisionCard(card))}>
-                    <span className="material-symbols-outlined" aria-hidden="true">{revisionIds.includes(card.id) ? 'star' : 'star_border'}</span>
+                  <button
+                    type="button"
+                    className="revision-star-btn"
+                    aria-pressed={starred}
+                    aria-label={`Star question ${index + 1} for Revision`}
+                    onClick={() => setRevisionIds(toggleRevisionCard(card))}
+                  >
+                    <AppIcon name={starred ? 'star' : 'star_border'} filled={starred} size={18} />
                   </button>
                 </article>
               );
@@ -364,7 +373,7 @@ export default function TakeAiQuiz({
               onClick={handleRestartQuiz}
               style={{ background: 'var(--brand)' }}
             >
-              <span className="material-symbols-outlined" aria-hidden="true">refresh</span>
+              <AppIcon name="refresh" size={18} />
               Retry Quiz
             </button>
 
@@ -374,7 +383,7 @@ export default function TakeAiQuiz({
               onClick={handleExportQuizJson}
               style={{ background: 'var(--surface-2)', color: 'var(--text)', border: '1.5px solid var(--border)' }}
             >
-              <span className="material-symbols-outlined" aria-hidden="true">download</span>
+              <AppIcon name="download" size={18} />
               Export Quiz JSON
             </button>
 
@@ -382,9 +391,9 @@ export default function TakeAiQuiz({
               type="button"
               className="btn-quiz-next"
               onClick={handleShareWhatsApp}
-              style={{ background: '#10b981' }}
+              style={{ background: '#10b981', color: '#0f172a' }}
             >
-              <span className="material-symbols-outlined" aria-hidden="true">share</span>
+              <AppIcon name="share" size={18} />
               Share on WhatsApp
             </button>
 
@@ -394,7 +403,7 @@ export default function TakeAiQuiz({
               onClick={onFinish}
               style={{ background: 'var(--surface-2)', color: 'var(--text)', border: '1.5px solid var(--border)' }}
             >
-              <span className="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
+              <AppIcon name="auto_awesome" size={18} />
               New Topic
             </button>
           </div>
@@ -403,7 +412,7 @@ export default function TakeAiQuiz({
     );
   }
 
-  const q = questions[currentIdx] || { question: 'Question loading...', options: [], correct: 0, hint: '' };
+  const q = questions[currentIdx] || { question: 'Question loading…', options: [], correct: 0, hint: '' };
   const progress = ((currentIdx + 1) / questions.length) * 100;
   const isCorrect = selectedOption === q.correct;
 
@@ -446,7 +455,7 @@ export default function TakeAiQuiz({
               🔥 {streak} Streak!
             </span>
           )}
-          <div className="ai-quiz-counter">
+          <div className="ai-quiz-counter tabular-nums">
             {currentIdx + 1} / {questions.length}
           </div>
         </div>
@@ -486,14 +495,10 @@ export default function TakeAiQuiz({
                 <span className="quiz-option-letter">{LETTERS[i]}</span>
                 <span style={{ flex: 1 }}>{opt}</span>
                 {revealed && i === q.correct && (
-                  <span className="material-symbols-outlined" style={{ color: '#10b981', fontSize: '20px' }} aria-hidden="true">
-                    check_circle
-                  </span>
+                  <AppIcon name="check_circle" size={20} style={{ color: '#10b981' }} />
                 )}
                 {revealed && selectedOption === i && i !== q.correct && (
-                  <span className="material-symbols-outlined" style={{ color: '#ef4444', fontSize: '20px' }} aria-hidden="true">
-                    cancel
-                  </span>
+                  <AppIcon name="cancel" size={20} style={{ color: '#ef4444' }} />
                 )}
               </button>
             );
@@ -501,7 +506,7 @@ export default function TakeAiQuiz({
         </div>
 
         <div className="quiz-keyboard-tip">
-          Tip: press 1–4 to answer, Enter to continue
+          Tip: press 1–4 (or A–D) to select, Enter to confirm/continue
         </div>
 
         {q.hint && !revealed && (
@@ -512,7 +517,7 @@ export default function TakeAiQuiz({
               aria-expanded={showHint}
               className="quiz-hint-toggle"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }} aria-hidden="true">lightbulb</span>
+              <AppIcon name="lightbulb" size={16} />
               {showHint ? 'Hide Hint' : 'Need a Hint?'}
             </button>
 
@@ -525,7 +530,7 @@ export default function TakeAiQuiz({
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.22 }}
                 >
-                  💡 <strong>Hint:</strong> {q.hint}
+                  <strong>Hint:</strong> {q.hint}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -536,13 +541,14 @@ export default function TakeAiQuiz({
           <motion.div
             className="quiz-explanation-box"
             role="status"
+            aria-live="polite"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }} aria-hidden="true">info</span>
+            <AppIcon name="info" size={18} />
             <div>
-              <strong>{isCorrect ? '✅ Correct Answer!' : '❌ Incorrect Answer'}</strong>
+              <strong>{isCorrect ? 'Correct Answer!' : 'Incorrect Answer'}</strong>
               <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', opacity: 0.9 }}>
                 {q.hint}
               </p>
@@ -563,7 +569,7 @@ export default function TakeAiQuiz({
               }}
             >
               Submit Answer
-              <span className="material-symbols-outlined" aria-hidden="true">check</span>
+              <AppIcon name="check" size={18} />
             </button>
           ) : (
             <button
@@ -573,7 +579,7 @@ export default function TakeAiQuiz({
               style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#0f172a' }}
             >
               {currentIdx + 1 === questions.length ? 'View Final Score' : 'Next Question'}
-              <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+              <AppIcon name="arrow_forward" size={18} />
             </button>
           )}
         </div>

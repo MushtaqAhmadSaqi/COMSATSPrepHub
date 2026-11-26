@@ -40,8 +40,40 @@
   text-transform: uppercase;
 }
 
+.papers-container .papers-eyebrow .app-icon,
 .papers-container .papers-eyebrow .material-symbols-outlined {
   font-size: 1.125rem;
+}
+
+.papers-container .papers-filter-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.125rem;
+  margin-bottom: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.papers-container .papers-filter-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-subtle);
+  margin-bottom: 0.25rem;
+}
+
+.papers-container .papers-filter-control {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.875rem;
 }
 
 .papers-container .papers-intro-description {
@@ -85,6 +117,8 @@
 .papers-container .papers-list {
   display: grid;
   gap: 1rem;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 540px;
 }
 
 .papers-container .paper-item-card {
@@ -104,13 +138,35 @@
   color: var(--text, #172033);
   font: inherit;
   text-align: left;
-  cursor: pointer;
 
   box-shadow: 0 3px 12px rgba(15, 23, 42, 0.035);
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,
     transform 180ms ease;
+}
+
+.papers-container .paper-title-btn {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text, #172033);
+  font: inherit;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: -0.015em;
+  text-align: left;
+  cursor: pointer;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.papers-container .paper-title-btn:hover {
+  color: var(--brand);
 }
 
 .papers-container .paper-item-card:focus-visible {
@@ -221,15 +277,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1px solid var(--border, #dfe5ef);
   background: var(--surface-2, #f8fafc);
   color: var(--text-subtle, #475569);
   cursor: pointer;
   flex-shrink: 0;
-  transition: all 180ms ease;
+  transition:
+    border-color 180ms ease,
+    color 180ms ease,
+    background-color 180ms ease,
+    transform 180ms ease;
 }
 
 .papers-container .btn-bookmark-paper:hover {

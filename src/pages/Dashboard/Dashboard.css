@@ -97,6 +97,7 @@ html.dark .study-dashboard {
   cursor: pointer;
 }
 
+.study-dashboard__signout .app-icon,
 .study-dashboard__signout .material-symbols-outlined {
   font-size: 18px;
 }
@@ -113,6 +114,7 @@ html.dark .study-dashboard {
   color: var(--sd-muted);
 }
 
+.study-dashboard__preview > .app-icon,
 .study-dashboard__preview > span {
   font-size: 18px;
   flex-shrink: 0;
@@ -170,6 +172,7 @@ html.dark .study-dashboard__error {
   font-weight: 500;
 }
 
+.study-dashboard__metric-top .app-icon,
 .study-dashboard__metric-top .material-symbols-outlined {
   color: var(--sd-brand);
   font-size: 20px;
@@ -485,12 +488,14 @@ html.dark .study-dashboard__live-label {
   color: var(--sd-muted);
 }
 
+.study-dashboard__tool > .app-icon,
 .study-dashboard__tool > .material-symbols-outlined {
   color: var(--sd-muted);
   font-size: 17px;
   transition: transform 160ms ease;
 }
 
+.study-dashboard__tool:hover > .app-icon,
 .study-dashboard__tool:hover > .material-symbols-outlined {
   transform: translateX(3px);
   color: var(--sd-brand);
@@ -504,6 +509,7 @@ html.dark .study-dashboard__live-label {
   background: var(--sd-note);
 }
 
+.study-dashboard__note > .app-icon,
 .study-dashboard__note > .material-symbols-outlined {
   margin-bottom: 18px;
   font-size: 27px;
@@ -688,9 +694,12 @@ html.dark .study-dashboard__live-label {
   border-left: 1px solid var(--border);
 }
 
+.study-dashboard__metric-top .app-icon,
 .study-dashboard__metric-top .material-symbols-outlined {
   width: 36px;
   height: 36px;
+  padding: 8px;
+  box-sizing: border-box;
   display: grid;
   place-items: center;
   border-radius: 12px;

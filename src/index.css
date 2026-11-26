@@ -28,8 +28,8 @@
   --accent-bright: #fbbf24;
   --accent-soft:   rgba(217, 119, 6, 0.12);
 
-  /* Surfaces (light mode) */
-  --bg:            #f8fafc;
+  /* Surfaces (light mode — calm academic paper) */
+  --bg:            #f7f8fa;
   --surface:       #ffffff;
   --surface-2:     #f1f5f9;
   --surface-3:     #e2e8f0;
@@ -102,9 +102,9 @@
   --container-max: 80rem;
 }
 
-/* Dark Mode Tokens */
+/* Dark Mode Tokens (Low-glare exam study surface) */
 html.dark {
-  --bg:            #090d16;
+  --bg:            #090e1a;
   --surface:       #111827;
   --surface-2:     #1e293b;
   --surface-3:     #334155;
@@ -196,8 +196,9 @@ html.dark {
   background: var(--brand-soft);
 }
 
+.revision-star-btn .app-icon,
 .revision-star-btn .material-symbols-outlined { font-size: 1.1rem; color: var(--brand); }
-.revision-star-btn[aria-pressed="true"] .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+.revision-star-btn[aria-pressed="true"] .app-icon path { fill: currentColor; }
 .revision-star-btn:focus-visible { outline: 3px solid var(--ring); outline-offset: 3px; }
 
 html, body {
@@ -220,6 +221,14 @@ body {
               color var(--dur-base) var(--ease);
 }
 
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
+h1, h2, h3, [id] {
+  scroll-margin-top: calc(var(--nav-height) + 1rem);
+}
+
 img { max-width: 100%; display: block; }
 
 a { color: inherit; text-decoration: none; }
@@ -229,23 +238,36 @@ button {
   cursor: pointer;
 }
 
-.material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
+button, [role="button"], a, input, select, textarea, summary {
+  touch-action: manipulation;
+}
+
+select,
+select option,
+select optgroup {
+  background-color: var(--surface);
+  color: var(--text);
+}
+
+html.dark select {
+  color-scheme: dark;
+}
+
+.app-icon {
   display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  flex-shrink: 0;
   vertical-align: middle;
   user-select: none;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+.mono-code {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 *:focus-visible {

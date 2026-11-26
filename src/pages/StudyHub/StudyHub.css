@@ -26,7 +26,10 @@
   font-weight: 700;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all var(--dur-fast) var(--ease);
+  transition: border-color var(--dur-fast) var(--ease),
+              background-color var(--dur-fast) var(--ease),
+              color var(--dur-fast) var(--ease),
+              box-shadow var(--dur-fast) var(--ease);
 }
 
 .study-hub-tab:hover {
@@ -57,7 +60,13 @@
 
 .flashcard-box {
   display: grid;
+  width: 100%;
   min-height: 230px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
   text-align: center;
   transform-style: preserve-3d;
