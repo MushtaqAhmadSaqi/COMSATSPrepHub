@@ -2,21 +2,19 @@
    COMMAND PALETTE COMPONENT (Ctrl/Cmd+K)
 ───────────────────────────────────────────────────────────────── */
 
-.cmd-palette-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.45);
+.cmd-palette-dialog {
+  width: min(560px, calc(100vw - 2rem));
+  margin: 12vh auto auto;
+}
+
+.cmd-palette-dialog[open]::backdrop {
+  background: var(--backdrop-scrim);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  z-index: 200;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
 }
 
 .cmd-palette-panel {
-  width: min(560px, calc(100vw - 2rem));
-  margin-top: 12vh;
+  width: 100%;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
@@ -42,7 +40,7 @@ html.dark .cmd-palette-panel {
 .cmd-palette__search-icon {
   position: absolute;
   left: 1.125rem;
-  font-size: 1.25rem;
+  font-size: var(--fs-heading);
   color: var(--text-subtle);
   pointer-events: none;
 }
@@ -50,7 +48,7 @@ html.dark .cmd-palette-panel {
 .cmd-palette__input {
   width: 100%;
   padding: 1rem 1.25rem 1rem 3rem;
-  font-size: 1rem;
+  font-size: var(--fs-body);
   font-family: inherit;
   border: none;
   border-bottom: 1px solid var(--border);
@@ -83,10 +81,9 @@ html.dark .cmd-palette-panel {
 }
 
 .cmd-palette__group-title {
-  font-size: 0.6875rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-size: var(--fs-data);
+  font-weight: 700;
+  letter-spacing: 0.01em;
   color: var(--text-subtle);
   padding: 0.75rem 0.75rem 0.375rem;
 }
@@ -98,19 +95,19 @@ html.dark .cmd-palette-panel {
   gap: var(--space-3);
   padding: 0.625rem 0.875rem;
   border-radius: var(--radius-md);
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   font-weight: 600;
   color: var(--text);
   background: transparent;
   border: none;
   cursor: pointer;
   text-align: left;
-  transition: background var(--dur-fast) var(--ease),
+  transition: background-color var(--dur-fast) var(--ease),
               color var(--dur-fast) var(--ease);
 }
 
 .cmd-palette__item-icon {
-  font-size: 1.25rem;
+  font-size: var(--fs-heading);
   color: var(--text-subtle);
   flex-shrink: 0;
   transition: color var(--dur-fast) var(--ease);
@@ -130,7 +127,7 @@ html.dark .cmd-palette-panel {
 }
 
 .cmd-palette__item-meta {
-  font-size: 0.72rem;
+  font-size: var(--fs-data);
   font-weight: 500;
   color: var(--text-subtle);
   white-space: nowrap;
@@ -139,7 +136,7 @@ html.dark .cmd-palette-panel {
 }
 
 .cmd-palette__enter-icon {
-  font-size: 1rem;
+  font-size: var(--fs-body);
   color: var(--text-subtle);
   flex-shrink: 0;
 }
@@ -159,6 +156,14 @@ html.dark .cmd-palette__item--selected {
   color: var(--brand);
 }
 
+.cmd-palette__mark {
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+  border-radius: 2px;
+  padding: 0 1px;
+  font-weight: 700;
+}
+
 /* Empty State */
 .cmd-palette__empty {
   padding: 2rem;
@@ -167,13 +172,13 @@ html.dark .cmd-palette__item--selected {
 }
 
 .cmd-palette__empty-icon {
-  font-size: 1.5rem;
+  font-size: var(--fs-heading);
   color: var(--border-strong);
   margin-bottom: 0.5rem;
 }
 
 .cmd-palette__empty-text {
-  font-size: 0.875rem;
+  font-size: var(--fs-sm);
   color: var(--text-subtle);
 }
 
@@ -181,7 +186,7 @@ html.dark .cmd-palette__item--selected {
 .cmd-palette__footer {
   border-top: 1px solid var(--border);
   padding: 0.5rem 1rem;
-  font-size: 0.6875rem;
+  font-size: var(--fs-data);
   color: var(--text-subtle);
   display: flex;
   align-items: center;
@@ -197,7 +202,7 @@ html.dark .cmd-palette__item--selected {
 
 .cmd-palette__kbd {
   font-family: inherit;
-  font-size: 0.6875rem;
+  font-size: var(--fs-data);
   font-weight: 700;
   padding: 0.125rem 0.375rem;
   border-radius: var(--radius-sm);

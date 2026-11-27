@@ -1,0 +1,57 @@
+.ui-modal-dialog {
+  width: min(32rem, calc(100vw - 2rem));
+  margin: auto;
+}
+
+.ui-modal-panel {
+  position: relative;
+  width: 100%;
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-3);
+  padding: 1.75rem;
+  color: var(--text);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ui-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.ui-modal-title {
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  margin: 0;
+  color: var(--text);
+}
+
+.ui-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-subtle);
+  padding: 0.5rem;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease;
+}
+
+.ui-modal-close:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.ui-modal-close:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}

@@ -221,12 +221,7 @@ export default function SubjectPapers({
     >
       <Breadcrumbs items={breadcrumbItems} />
 
-      <header className="papers-intro">
-        <div className="papers-eyebrow">
-          <AppIcon name="library_books" size={18} />
-          Past paper library
-        </div>
-
+      <header className="papers-intro" data-vt="subject-hero">
         <PageHeader
           title={subject.name}
           subtitle={(
@@ -460,19 +455,11 @@ export default function SubjectPapers({
           </div>
 
           {filteredPapers.length > visibleCount && (
-            <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+            <div className="papers-load-more-wrap">
               <button
                 type="button"
                 onClick={() => setVisibleCount((c) => c + 8)}
-                style={{
-                  padding: '0.7rem 1.5rem',
-                  borderRadius: '9999px',
-                  border: '1.5px solid var(--border-strong)',
-                  background: 'var(--surface)',
-                  color: 'var(--text)',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
+                className="papers-load-more-btn"
               >
                 Load More Papers ({filteredPapers.length - visibleCount} remaining)
               </button>

@@ -140,7 +140,7 @@ function renderInlineWithMath(rawText, keyPrefix = '') {
     const html = renderKaTeX(formula, isDisplay);
 
     if (html) {
-      segments.push({ type: 'math', html, isDisplay });
+      segments.push({ type: 'math', html, isDisplay, formula });
     } else {
       segments.push({ type: 'text', content: raw });
     }
@@ -158,6 +158,8 @@ function renderInlineWithMath(rawText, keyPrefix = '') {
       return (
         <span
           key={k}
+          role="math"
+          aria-label={seg.formula ? `Mathematical formula: ${seg.formula.trim().slice(0, 120)}` : 'Mathematical formula'}
           className={seg.isDisplay ? 'katex-inline-display' : 'katex-inline-math'}
           dangerouslySetInnerHTML={{ __html: seg.html }}
         />
@@ -236,6 +238,8 @@ function DisplayMath({ html, formula }) {
   if (resolved.mode === 'html') {
     return (
       <div
+        role="math"
+        aria-label={formula ? `Display formula: ${String(formula).trim().slice(0, 140)}` : 'Display mathematical formula'}
         className="math-display-container"
         dangerouslySetInnerHTML={{ __html: resolved.value }}
       />
@@ -243,7 +247,11 @@ function DisplayMath({ html, formula }) {
   }
 
   return (
-    <div className="math-display-container math-render-fallback">
+    <div
+      role="math"
+      aria-label="Formula source fallback"
+      className="math-display-container math-render-fallback"
+    >
       <span className="math-fallback-text">{resolved.value}</span>
     </div>
   );
@@ -303,7 +311,13 @@ function MermaidDiagram({ chart }) {
   }
 
   return (
-    <div className="diagram-box" ref={containerRef}>
+    <div
+      className="diagram-box"
+      ref={containerRef}
+      role="figure"
+      aria-label="Interactive system architecture diagram"
+      tabIndex={0}
+    >
       <div className="diagram-header">
         <AppIcon name="schema" size={18} />
         <span>Interactive System Diagram / Architecture</span>
@@ -351,7 +365,12 @@ function CodeBlock({ code, language = '' }) {
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <pre className="code-content">
+      <pre
+        className="code-content"
+        tabIndex={0}
+        role="region"
+        aria-label={language ? `${language} source code block` : 'Source code block'}
+      >
         <code>{code}</code>
       </pre>
     </div>
@@ -390,7 +409,12 @@ function MarkdownTable({ lines }) {
 
   return (
     <div className="table-wrapper-card">
-      <div className="table-scroll-container">
+      <div
+        className="table-scroll-container"
+        tabIndex={0}
+        role="region"
+        aria-label="Formatted data table"
+      >
         <table className="math-table">
           <thead>
             <tr>

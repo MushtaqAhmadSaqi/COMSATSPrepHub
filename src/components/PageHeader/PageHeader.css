@@ -37,10 +37,6 @@
   margin: 0 auto;
 }
 
-.page-header__badge {
-  margin-bottom: var(--space-4);
-}
-
 .page-header__title {
   font-size: 2rem;
   font-weight: 900;
@@ -57,7 +53,7 @@
 }
 
 .page-header__subtitle {
-  font-size: 1rem;
+  font-size: var(--fs-body);
   color: var(--text-subtle);
   max-width: 36rem;
   line-height: 1.6;
@@ -66,7 +62,7 @@
 
 @media (max-width: 767px) {
   .page-header__subtitle {
-    font-size: 0.9375rem;
+    font-size: var(--fs-body);
   }
 }
 

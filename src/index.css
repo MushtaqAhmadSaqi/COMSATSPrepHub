@@ -44,14 +44,91 @@
   /* Semantic Colors */
   --success:      #059669;
   --success-soft: rgba(5, 150, 105, 0.12);
+  --success-ink:  #047857;
+  --success-bright: #10b981;
+  --on-success:   #0f172a;
+  --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
   --warning:      #d97706;
   --warning-soft: rgba(217, 119, 6, 0.12);
   --danger:       #dc2626;
+  --on-danger:    #ffffff;
   --danger-soft:  rgba(220, 38, 38, 0.12);
+  --danger-ink:   #991b1b;
+  --danger-bright: #ef4444;
+  --danger-border: rgba(220, 38, 38, 0.35);
   --info:         #2563eb;
+  --accent-ink:   #b45309;
+  --print-ink:    #000000;
+
+  /* Math, Code & Paper Reader Tokens */
+  --paper-ink:          #0f172a;
+  --math-surface:       #f8fafc;
+  --code-bg:            #0f172a;
+  --code-header-bg:     #1e293b;
+  --code-border:        #1e293b;
+  --code-text:          #e2e8f0;
+  --code-accent:        #38bdf8;
+  --code-btn-bg:        rgba(255, 255, 255, 0.08);
+  --code-btn-hover:     rgba(255, 255, 255, 0.16);
+  --code-btn-hover-ink: #ffffff;
+  --math-formula-bg:    rgba(139, 92, 246, 0.08);
+  --math-formula-border:#8b5cf6;
+  --math-formula-pill:  #6d28d9;
+  --math-formula-ink:   #ffffff;
+  --math-diagram-bg:    rgba(99, 102, 241, 0.08);
+  --math-diagram-border:rgba(99, 102, 241, 0.25);
+  --math-diagram-text:  #4338ca;
+  --math-note-bg:       rgba(245, 158, 11, 0.08);
+  --math-note-border:   #d97706;
+  --math-note-text:     #92400e;
+
+  /* Shell, Navigation, Footer & Backdrop Tokens */
+  --backdrop-scrim:        rgba(15, 23, 42, 0.58);
+  --backdrop-scrim-strong: rgba(5, 10, 25, 0.82);
+  --nav-glass-bg:          rgba(255, 255, 255, 0.88);
+  --nav-glass-border:      rgba(226, 232, 240, 0.7);
+  --nav-pill-bg:           rgba(241, 245, 249, 0.88);
+  --nav-pill-border:       rgba(226, 232, 240, 0.85);
+  --nav-active-bg:         #ffffff;
+  --nav-active-text:       #1d4ed8;
+  --nav-active-border:     rgba(191, 219, 254, 0.9);
+  --nav-mobile-bg:         rgba(10, 18, 35, 0.95);
+  --nav-mobile-border:     rgba(255, 255, 255, 0.12);
+  --nav-mobile-text:       #cbd5e1;
+  --nav-mobile-active-bg:  linear-gradient(135deg, #0ea5e9, #0d9488);
+  --nav-mobile-active-ink: #0f172a;
+  --btn-gradient:          linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+  --btn-gradient-ink:      #ffffff;
+  --brand-highlight-grad:  linear-gradient(135deg, #0ea5e9 0%, #2563eb 55%, #0d9488 100%);
+  --footer-bg:             #0a1628;
+  --footer-bg-end:         #0f172a;
+  --footer-text:           #94a3b8;
+  --footer-heading:        #e2e8f0;
+  --footer-accent:         #38bdf8;
+  --footer-brand-ink:      #ffffff;
+  --footer-brand-grad:     linear-gradient(135deg, #38bdf8, #60a5fa);
+  --footer-link-surface:   rgba(56, 189, 248, 0.08);
+  --footer-link-border:    rgba(56, 189, 248, 0.25);
+  --banner-offline-bg:     #ef4444;
+  --banner-online-bg:      #10b981;
+  --banner-ink:            #0f172a;
+  --preview-gradient:      linear-gradient(110deg, #eff6ff, #f0fdfa);
+  --preview-border:        #bfdbfe;
+  --alert-error-bg:        #fef2f2;
+  --alert-error-border:    #fecaca;
+  --alert-success-bg:      #f0fdf4;
+  --alert-success-border:  #86efac;
+  --switch-knob:           #ffffff;
 
   /* Focus ring */
   --ring: rgba(37, 99, 235, 0.28);
+
+  /* Z-Index Scale (5 Tiers + Native Top Layer for <dialog>) */
+  --z-base:    1;
+  --z-sticky:  40;
+  --z-nav:     60;
+  --z-popover: 80;
+  --z-toast:   100;
 
   /* Spacing Scale */
   --space-1:  0.25rem;
@@ -79,23 +156,28 @@
   --shadow-3: 0 14px 36px -4px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.05);
   --shadow-brand: 0 6px 20px -2px rgba(37, 99, 235, 0.3);
 
-  /* Typography Scale */
-  --text-xs:   0.75rem;
-  --text-sm:   0.875rem;
-  --text-base: 1rem;
-  --text-lg:   1.125rem;
-  --text-xl:   1.25rem;
+  /* Locked Body Typography Scale (3 Core Sizes + 1 Data Step) */
+  --fs-heading: 1.25rem;
+  --fs-body:    0.9375rem;
+  --fs-sm:      0.875rem;
+  --fs-data:    0.8125rem;
+
+  --text-xs:   var(--fs-data);
+  --text-sm:   var(--fs-sm);
+  --text-base: var(--fs-body);
+  --text-lg:   var(--fs-heading);
+  --text-xl:   var(--fs-heading);
   --text-2xl:  1.5rem;
   --text-3xl:  1.875rem;
   --text-4xl:  2.25rem;
   --text-5xl:  3rem;
 
   /* Motion */
-  --ease:        cubic-bezier(0.4, 0, 0.2, 1);
+  --ease:        cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --dur-fast:    150ms;
-  --dur-base:    240ms;
-  --dur-slow:    400ms;
+  --dur-fast:    160ms;
+  --dur-base:    220ms;
+  --dur-slow:    360ms;
 
   /* Layout */
   --nav-height: 3.5rem;
@@ -130,6 +212,27 @@ html.dark {
   --accent-hover:  #f59e0b;
   --accent-bright: #fcd34d;
   --accent-soft:   rgba(251, 191, 36, 0.15);
+
+  --success-ink:       #6ee7b7;
+  --danger-ink:        #fca5a5;
+  --accent-ink:        #fcd34d;
+  --paper-ink:         #f8fafc;
+  --math-surface:      #1e293b;
+  --math-diagram-text: #a5b4fc;
+  --math-note-text:    #fcd34d;
+  --nav-glass-bg:      rgba(15, 23, 42, 0.88);
+  --nav-glass-border:  rgba(255, 255, 255, 0.08);
+  --nav-pill-bg:       rgba(30, 41, 59, 0.72);
+  --nav-pill-border:   rgba(51, 65, 85, 0.6);
+  --nav-active-bg:     rgba(37, 99, 235, 0.25);
+  --nav-active-text:   #93c5fd;
+  --nav-active-border: rgba(96, 165, 250, 0.3);
+  --preview-gradient:  linear-gradient(110deg, #111827, #1e293b);
+  --preview-border:    rgba(255, 255, 255, 0.12);
+  --alert-error-bg:    rgba(239, 68, 68, 0.12);
+  --alert-error-border:rgba(239, 68, 68, 0.3);
+  --alert-success-bg:  rgba(16, 185, 129, 0.12);
+  --alert-success-border:rgba(16, 185, 129, 0.3);
 
   --ring: rgba(96, 165, 250, 0.35);
 
@@ -186,7 +289,7 @@ html.dark {
   border-radius: var(--radius-pill);
   background: var(--surface);
   color: var(--text);
-  font-size: 0.75rem;
+  font-size: var(--fs-data);
   font-weight: 700;
   cursor: pointer;
 }
@@ -212,6 +315,7 @@ html, body {
 
 body {
   font-family: var(--font-family);
+  font-size: var(--fs-body);
   background-color: var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -219,6 +323,89 @@ body {
   -webkit-font-smoothing: antialiased;
   transition: background-color var(--dur-base) var(--ease),
               color var(--dur-base) var(--ease);
+}
+
+body:has(dialog[open]) {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
+/* Native Top-Layer <dialog> reset, @starting-style transitions & View Transitions */
+dialog.native-dialog {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--text);
+  max-width: none;
+  max-height: none;
+  overflow: visible;
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transition:
+    opacity var(--dur-base) var(--ease),
+    transform var(--dur-base) var(--ease-spring),
+    display var(--dur-base) allow-discrete,
+    overlay var(--dur-base) allow-discrete;
+}
+
+dialog.native-dialog[open] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@starting-style {
+  dialog.native-dialog[open] {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+dialog.native-dialog::backdrop {
+  background: transparent;
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  transition:
+    background-color var(--dur-base) var(--ease),
+    backdrop-filter var(--dur-base) var(--ease),
+    display var(--dur-base) allow-discrete,
+    overlay var(--dur-base) allow-discrete;
+}
+
+dialog.native-dialog[open]::backdrop {
+  background: var(--backdrop-scrim);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+@starting-style {
+  dialog.native-dialog[open]::backdrop {
+    background: transparent;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+}
+
+[data-vt="subject-hero"] {
+  view-transition-name: subject-hero;
+}
+
+::view-transition-old(subject-hero),
+::view-transition-new(subject-hero) {
+  animation-duration: var(--dur-base);
+  animation-timing-function: var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog.native-dialog,
+  dialog.native-dialog::backdrop {
+    transition: none;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
+  }
 }
 
 h1, h2, h3 {
@@ -285,12 +472,12 @@ html.dark select {
   top: -100%;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 10000;
+  z-index: var(--z-toast);
   padding: 0.625rem 1.25rem;
   background: var(--brand);
   color: var(--on-brand);
   font-weight: 700;
-  font-size: 0.875rem;
+  font-size: var(--fs-sm);
   border-radius: 0 0 var(--radius-sm) var(--radius-sm);
   text-decoration: none;
   transition: top var(--dur-fast) var(--ease);
@@ -431,12 +618,10 @@ html.dark select {
 ───────────────────────────────────────────────────────────────── */
 .ai-label {
   display: block;
-  font-size: 0.8125rem;
-  font-weight: 700;
+  font-size: var(--fs-data);
+  font-weight: 600;
   color: var(--text-muted);
   margin-bottom: 0.5rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
 }
 
 .ai-input,
@@ -446,7 +631,7 @@ html.dark select {
   border-radius: var(--radius-md);
   border: 1.5px solid var(--border-strong);
   background: var(--surface-2);
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
   font-family: var(--font-family);
   color: var(--text);
   outline: none;
@@ -478,8 +663,8 @@ html.dark select {
   color: var(--on-brand);
   cursor: pointer;
   font: inherit;
-  font-size: 0.95rem;
-  font-weight: 800;
+  font-size: var(--fs-body);
+  font-weight: 700;
   box-shadow: var(--shadow-brand);
   transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
 }
@@ -493,7 +678,7 @@ html.dark select {
 }
 
 html.dark .account-clear-data {
-  color: #ef4444;
+  color: var(--danger-bright);
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -524,36 +709,7 @@ html.dark .account-clear-data {
    BUTTON PRESS
 ───────────────────────────────────────────────────────────────── */
 .btn-press:active {
-  transform: scale(0.96) !important;
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   SHIMMER BUTTON SWEEP
-───────────────────────────────────────────────────────────────── */
-.btn-shimmer {
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-shimmer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 40%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.35) 50%,
-    transparent 100%
-  );
-  transform: translateX(-100%) skewX(-15deg);
-  pointer-events: none;
-}
-
-.btn-shimmer:hover::after {
-  animation: shimmer-sweep 0.6s ease forwards;
+  transform: scale(0.96);
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -588,61 +744,18 @@ html.dark .account-clear-data {
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   RIPPLE CLICK EFFECT
-───────────────────────────────────────────────────────────────── */
-.ripple-host {
-  position: relative;
-  overflow: hidden;
-}
-
-.ripple-circle {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.4);
-  width: 60px;
-  height: 60px;
-  margin-top: -30px;
-  margin-left: -30px;
-  animation: ripple-expand 0.55s ease-out forwards;
-  pointer-events: none;
-}
-
-/* ─────────────────────────────────────────────────────────────────
    GLASSMORPHISM UTILITY
 ───────────────────────────────────────────────────────────────── */
 .glass {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--nav-glass-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--nav-glass-border);
 }
 
 html.dark .glass {
-  background: rgba(15, 23, 42, 0.8);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   SECTION LABEL BADGE
-───────────────────────────────────────────────────────────────── */
-.section-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.875rem;
-  border-radius: var(--radius-pill);
-  background: var(--brand-soft);
-  border: 1px solid rgba(14, 165, 233, 0.2);
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: var(--brand-deep);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-html.dark .section-badge {
-  background: var(--brand-soft-2);
-  color: var(--brand-deep);
+  background: var(--nav-glass-bg);
+  border-color: var(--nav-glass-border);
 }
 
 /* ─────────────────────────────────────────────────────────────────

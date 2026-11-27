@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { flushSync } from 'react-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
@@ -17,6 +18,7 @@ import { updatePageSeo } from './utils/seo';
 import { getStudentPrefs, saveStudentPrefs, setStudentWorkspaceOwner } from './utils/studyTracker';
 import { DEFAULT_SUBJECTS } from './constants/subjects';
 import { resolveSubjectFromRoute, getRouteSubjectCode, isPasswordRecoveryUrl } from './utils/routeState';
+import { recordRecentCourse } from './utils/fuzzySearch';
 import { supabase } from './services/supabase';
 
 import Home from './pages/Home/Home';
@@ -69,14 +71,7 @@ function getCourseCodeFromLocation() {
 function RouteLoadingFallback() {
   return (
     <div
-      style={{
-        maxWidth: '64rem',
-        margin: '2.5rem auto',
-        padding: '0 1.5rem',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-        gap: '1rem'
-      }}
+      className="route-loading-grid"
       role="status"
       aria-live="polite"
       aria-label="Loading page content"
@@ -91,8 +86,8 @@ function RouteLoadingFallback() {
 function AdminGuardView({ user, onOpenAuth, onNavigate, children }) {
   if (!user) {
     return (
-      <div style={{ maxWidth: '40rem', margin: '3rem auto', padding: '0 1.5rem' }}>
-        <div className="card" style={{ padding: '2rem' }}>
+      <div className="guard-shell">
+        <div className="card guard-card">
           <EmptyState
             icon="lock"
             title="Authentication Required"
@@ -107,8 +102,8 @@ function AdminGuardView({ user, onOpenAuth, onNavigate, children }) {
 
   if (!isAdminUser(user)) {
     return (
-      <div style={{ maxWidth: '40rem', margin: '3rem auto', padding: '0 1.5rem' }}>
-        <div className="card" style={{ padding: '2rem', textAlign: 'center' }}>
+      <div className="guard-shell">
+        <div className="card guard-card">
           <EmptyState
             icon="admin_panel_settings"
             title="Admin Access Restricted"
@@ -116,19 +111,11 @@ function AdminGuardView({ user, onOpenAuth, onNavigate, children }) {
             actionLabel="Switch Account"
             onAction={onOpenAuth}
           />
-          <div style={{ marginTop: '1rem' }}>
+          <div className="guard-return-row">
             <button
               type="button"
               onClick={() => onNavigate('home')}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--brand)',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                textDecoration: 'underline'
-              }}
+              className="guard-return-btn"
             >
               Return Home
             </button>
@@ -212,12 +199,6 @@ export default function App() {
     }
     try { localStorage.setItem('pph_dark', isDark); } catch { /* quota exceeded */ }
   }, [isDark]);
-
-  // Body scroll lock when auth modal is open
-  useEffect(() => {
-    document.body.style.overflow = isAuthOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [isAuthOpen]);
 
   // Persist sub-page navigation state across refreshes within the same tab
   useEffect(() => {
@@ -311,10 +292,28 @@ export default function App() {
     };
   }, []);
 
+  const reduceMotion = useReducedMotion();
+
+  const runViewTransition = (updateFn) => {
+    if (
+      typeof document !== 'undefined' &&
+      typeof document.startViewTransition === 'function' &&
+      !reduceMotion
+    ) {
+      document.startViewTransition(() => {
+        flushSync(updateFn);
+      });
+    } else {
+      updateFn();
+    }
+  };
+
   const handleNavigate = (path) => {
     const [rawPath, rawQuery] = String(path).split('?');
     const normalized = normalizeRoute(rawPath);
-    setActivePath(normalized);
+    runViewTransition(() => {
+      setActivePath(normalized);
+    });
     const querySuffix = rawQuery ? `?${rawQuery}` : '';
     const newUrl = normalized === 'home' ? '/' : `#${normalized}${querySuffix}`;
     window.history.pushState({ path: normalized }, '', newUrl);
@@ -322,8 +321,11 @@ export default function App() {
   };
 
   const handleSelectSubject = (subj) => {
-    setSelectedSubject(subj);
-    setActivePath('subject-papers');
+    recordRecentCourse(subj);
+    runViewTransition(() => {
+      setSelectedSubject(subj);
+      setActivePath('subject-papers');
+    });
     const codeParam = subj?.code ? `?code=${encodeURIComponent(subj.code)}` : '';
     window.history.pushState({ path: 'subject-papers', code: subj?.code }, '', `#subject-papers${codeParam}`);
     window.scrollTo({ top: 0, behavior: reduceMotion ? 'instant' : 'smooth' });
@@ -344,6 +346,7 @@ export default function App() {
             onSelectSubject={handleSelectSubject}
             onOpenCommandPalette={() => setIsCmdPaletteOpen(true)}
             user={user}
+            isDark={isDark}
           />
         );
       case 'about':
@@ -480,8 +483,8 @@ export default function App() {
         return <GpaCalculator />;
       default:
         return (
-          <div style={{ maxWidth: '40rem', margin: '4rem auto', padding: '0 1.5rem' }}>
-            <div className="card" style={{ padding: '2.5rem 1.5rem' }}>
+          <div className="notfound-shell">
+            <div className="card notfound-card">
               <EmptyState
                 icon="explore_off"
                 title="Page Not Found (404)"
@@ -508,16 +511,7 @@ export default function App() {
     }
   };
 
-  const reduceMotion = useReducedMotion();
-
-  const [routeDuration] = useState(() => {
-    if (typeof window === 'undefined') return 0.22;
-    const value = getComputedStyle(document.documentElement)
-      .getPropertyValue('--dur-base')
-      .trim();
-    if (!value) return 0.22;
-    return parseFloat(value) / (value.endsWith('ms') ? 1000 : 1);
-  });
+  const routeDuration = 0.22;
 
   const pageVariants = {
     initial: { opacity: reduceMotion ? 1 : 0 },
@@ -572,7 +566,7 @@ export default function App() {
                   exit="exit"
                   variants={pageVariants}
                   transition={pageTransition}
-                  style={{ width: '100%' }}
+                  className="main-motion-shell"
                 >
                   {renderCurrentPage()}
                 </motion.div>

@@ -74,7 +74,6 @@ export default function Navbar({
               onClick={() => onNavigate('home')}
               className="brand-logo"
               aria-label="COMSATSPrepHub home"
-              style={{ background: 'none', border: 'none', padding: 0 }}
             >
               <img
                 src="/logo.png"
@@ -148,7 +147,7 @@ export default function Navbar({
                 <button
                   type="button"
                   onClick={() => onNavigate('dashboard')}
-                  className="signin-gradient-btn btn-shimmer"
+                  className="signin-gradient-btn"
                   aria-label="Go to student dashboard"
                   title={firstName || 'Dashboard'}
                 >
@@ -159,7 +158,7 @@ export default function Navbar({
                 <button
                   type="button"
                   onClick={onOpenAuth}
-                  className="signin-gradient-btn btn-shimmer"
+                  className="signin-gradient-btn"
                   aria-label="Sign in to your account"
                   title="Sign In"
                 >

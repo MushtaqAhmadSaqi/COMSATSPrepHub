@@ -101,7 +101,7 @@ export default function Footer({ onNavigate = () => {} }) {
         </div>
 
         <div className="footer-bottom">
-          <p>© {new Date().getFullYear()} <span translate="no">COMSATSPrepHub</span>. Independent student educational project — not affiliated with official COMSATS administration.</p>
+          <p>© {new Date().getFullYear()} <span translate="no">COMSATSPrepHub</span>. Independent student educational project, not affiliated with official COMSATS administration.</p>
           <p>Created by Mushtaq Ahmad Saqi &amp; Contributors.</p>
         </div>
       </div>

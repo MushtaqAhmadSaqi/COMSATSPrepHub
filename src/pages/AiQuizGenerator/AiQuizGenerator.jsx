@@ -302,9 +302,9 @@ const QUESTION_STYLES = [
 ];
 
 const DIFFICULTIES = [
-  { id: 'Easy', label: 'Easy', color: '#10b981', icon: 'check_circle', desc: 'Warmup & basics' },
-  { id: 'Medium', label: 'Medium', color: '#f59e0b', icon: 'bolt', desc: 'Standard exam level' },
-  { id: 'Hard', label: 'Hard', color: '#ef4444', icon: 'local_fire_department', desc: 'A-grade challenge' }
+  { id: 'Easy', label: 'Easy', icon: 'check_circle', desc: 'Warmup & basics' },
+  { id: 'Medium', label: 'Medium', icon: 'bolt', desc: 'Standard exam level' },
+  { id: 'Hard', label: 'Hard', icon: 'local_fire_department', desc: 'A-grade challenge' }
 ];
 
 const QUESTION_COUNTS = [
@@ -326,11 +326,15 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
   const [topicError, setTopicError] = useState('');
   const [coursePickerOpen, setCoursePickerOpen] = useState(false);
   const [courseSearch, setCourseSearch] = useState('');
+  const [activeCourseIdx, setActiveCourseIdx] = useState(0);
   const coursePickerRef = useRef(null);
+  const courseTriggerRef = useRef(null);
   const courseSearchRef = useRef(null);
+  const courseListId = 'ai-course-listbox';
 
   useEffect(() => {
     if (!coursePickerOpen) return undefined;
+    setActiveCourseIdx(0);
     courseSearchRef.current?.focus();
 
     const handlePointerDown = (event) => {
@@ -341,6 +345,7 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
     const handleEscape = (event) => {
       if (event.key === 'Escape') {
         setCoursePickerOpen(false);
+        courseTriggerRef.current?.focus();
       }
     };
 
@@ -452,7 +457,7 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
       {/* ── Quick Presets Bar (1-Click Start) ── */}
       <section className="ai-presets-section" aria-label="Quick quiz presets">
         <div className="ai-presets-header">
-          <AppIcon name="flash_on" size={18} style={{ color: 'var(--brand)' }} />
+          <AppIcon name="flash_on" size={18} className="ai-presets-icon" />
           <span className="ai-presets-title">Start with a preset</span>
         </div>
         <div className="ai-presets-grid">
@@ -490,7 +495,7 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
           tabIndex={-1}
           autoComplete="off"
           aria-hidden="true"
-          style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+          className="ai-honeypot"
         />
 
         {/* Step 1: Select Course */}
@@ -503,11 +508,13 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
           </div>
           <div className="ai-select-wrapper" ref={coursePickerRef}>
             <button
+              ref={courseTriggerRef}
               id="ai-course-select"
               type="button"
               className={`ai-course-trigger ${coursePickerOpen ? 'open' : ''}`}
               aria-haspopup="listbox"
               aria-expanded={coursePickerOpen}
+              aria-controls={courseListId}
               onClick={() => setCoursePickerOpen((open) => !open)}
             >
               <span className="ai-course-trigger-icon" aria-hidden="true">
@@ -532,89 +539,137 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
               <AppIcon name="expand_more" className="ai-select-arrow" size={20} />
             </button>
 
-            {coursePickerOpen && (
-              <div className="ai-course-popover" role="dialog" aria-label="Choose a course">
-                <div className="ai-course-search-wrap">
-                  <AppIcon name="search" size={18} />
-                  <input
-                    ref={courseSearchRef}
-                    type="search"
-                    spellCheck={false}
-                    autoComplete="off"
-                    value={courseSearch}
-                    onChange={(event) => setCourseSearch(event.target.value)}
-                    placeholder="Search course or code"
-                    aria-label="Search courses"
-                  />
-                  {courseSearch && (
-                    <button
-                      type="button"
-                      className="ai-course-search-clear"
-                      onClick={() => setCourseSearch('')}
-                      aria-label="Clear course search"
-                    >
-                      <AppIcon name="close" size={16} />
-                    </button>
-                  )}
-                </div>
-                <div className="ai-course-list" role="listbox" aria-label="COMSATS courses">
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={!selectedCourseCode}
-                    className={`ai-course-option ${!selectedCourseCode ? 'selected' : ''}`}
-                    onClick={() => {
-                      handleCourseChange('');
-                      setCoursePickerOpen(false);
-                      setCourseSearch('');
-                    }}
-                  >
-                    <span className="ai-course-option-icon" aria-hidden="true">
-                      <AppIcon name="category" size={18} />
-                    </span>
-                    <span className="ai-course-option-copy">
-                      <strong>Custom topic</strong>
-                      <span>General Computer Science</span>
-                    </span>
-                    {!selectedCourseCode && (
-                      <AppIcon name="check" className="ai-course-check" size={18} />
+            {coursePickerOpen && (() => {
+              const pickerItems = [{ code: '', isCustom: true }, ...filteredCourses];
+              const clampedIdx = Math.min(Math.max(activeCourseIdx, 0), pickerItems.length - 1);
+              const activeOptionId = pickerItems[clampedIdx]
+                ? `${courseListId}-opt-${pickerItems[clampedIdx].code || 'custom'}`
+                : undefined;
+
+              const selectPickerItem = (item) => {
+                handleCourseChange(item.isCustom ? '' : item.code);
+                setCoursePickerOpen(false);
+                setCourseSearch('');
+                courseTriggerRef.current?.focus();
+              };
+
+              const handleCourseSearchKeyDown = (event) => {
+                if (event.key === 'ArrowDown') {
+                  event.preventDefault();
+                  setActiveCourseIdx((prev) => (prev + 1) % pickerItems.length);
+                } else if (event.key === 'ArrowUp') {
+                  event.preventDefault();
+                  setActiveCourseIdx((prev) => (prev - 1 + pickerItems.length) % pickerItems.length);
+                } else if (event.key === 'Home') {
+                  event.preventDefault();
+                  setActiveCourseIdx(0);
+                } else if (event.key === 'End') {
+                  event.preventDefault();
+                  setActiveCourseIdx(pickerItems.length - 1);
+                } else if (event.key === 'Enter') {
+                  event.preventDefault();
+                  if (pickerItems[clampedIdx]) selectPickerItem(pickerItems[clampedIdx]);
+                } else if (event.key === 'Escape') {
+                  event.preventDefault();
+                  setCoursePickerOpen(false);
+                  courseTriggerRef.current?.focus();
+                }
+              };
+
+              return (
+                <div className="ai-course-popover" role="region" aria-label="Choose a course">
+                  <div className="ai-course-search-wrap">
+                    <AppIcon name="search" size={18} />
+                    <input
+                      ref={courseSearchRef}
+                      type="search"
+                      spellCheck={false}
+                      autoComplete="off"
+                      value={courseSearch}
+                      onChange={(event) => {
+                        setCourseSearch(event.target.value);
+                        setActiveCourseIdx(0);
+                      }}
+                      onKeyDown={handleCourseSearchKeyDown}
+                      placeholder="Search course or code"
+                      aria-label="Search courses"
+                      role="combobox"
+                      aria-autocomplete="list"
+                      aria-expanded={coursePickerOpen}
+                      aria-controls={courseListId}
+                      aria-activedescendant={activeOptionId}
+                    />
+                    {courseSearch && (
+                      <button
+                        type="button"
+                        className="ai-course-search-clear"
+                        onClick={() => setCourseSearch('')}
+                        aria-label="Clear course search"
+                      >
+                        <AppIcon name="close" size={16} />
+                      </button>
                     )}
-                  </button>
-                  {filteredCourses.map((course) => (
+                  </div>
+                  <div id={courseListId} className="ai-course-list" role="listbox" aria-label="COMSATS courses">
                     <button
-                      key={course.code}
+                      id={`${courseListId}-opt-custom`}
                       type="button"
                       role="option"
-                      aria-selected={selectedCourseCode === course.code}
-                      className={`ai-course-option ${selectedCourseCode === course.code ? 'selected' : ''}`}
-                      onClick={() => {
-                        handleCourseChange(course.code);
-                        setCoursePickerOpen(false);
-                        setCourseSearch('');
-                      }}
+                      tabIndex={-1}
+                      aria-selected={!selectedCourseCode}
+                      className={`ai-course-option ${!selectedCourseCode ? 'selected' : ''} ${clampedIdx === 0 ? 'is-active' : ''}`}
+                      onMouseEnter={() => setActiveCourseIdx(0)}
+                      onClick={() => selectPickerItem({ isCustom: true })}
                     >
                       <span className="ai-course-option-icon" aria-hidden="true">
-                        <AppIcon name={course.icon} size={18} />
+                        <AppIcon name="category" size={18} />
                       </span>
                       <span className="ai-course-option-copy">
-                        <strong className="mono-code" translate="no">{course.code}</strong>
-                        <span>{course.name}</span>
+                        <strong>Custom topic</strong>
+                        <span>General Computer Science</span>
                       </span>
-                      <span className="ai-course-department">{course.department}</span>
-                      {selectedCourseCode === course.code && (
+                      {!selectedCourseCode && (
                         <AppIcon name="check" className="ai-course-check" size={18} />
                       )}
                     </button>
-                  ))}
-                  {filteredCourses.length === 0 && (
-                    <div className="ai-course-empty">
-                      <AppIcon name="search_off" size={20} />
-                      <span>No matching courses</span>
-                    </div>
-                  )}
+                    {filteredCourses.map((course, idx) => {
+                      const optIdx = idx + 1;
+                      return (
+                        <button
+                          id={`${courseListId}-opt-${course.code}`}
+                          key={course.code}
+                          type="button"
+                          role="option"
+                          tabIndex={-1}
+                          aria-selected={selectedCourseCode === course.code}
+                          className={`ai-course-option ${selectedCourseCode === course.code ? 'selected' : ''} ${clampedIdx === optIdx ? 'is-active' : ''}`}
+                          onMouseEnter={() => setActiveCourseIdx(optIdx)}
+                          onClick={() => selectPickerItem(course)}
+                        >
+                          <span className="ai-course-option-icon" aria-hidden="true">
+                            <AppIcon name={course.icon} size={18} />
+                          </span>
+                          <span className="ai-course-option-copy">
+                            <strong className="mono-code" translate="no">{course.code}</strong>
+                            <span>{course.name}</span>
+                          </span>
+                          <span className="ai-course-department">{course.department}</span>
+                          {selectedCourseCode === course.code && (
+                            <AppIcon name="check" className="ai-course-check" size={18} />
+                          )}
+                        </button>
+                      );
+                    })}
+                    {filteredCourses.length === 0 && (
+                      <div className="ai-course-empty">
+                        <AppIcon name="search_off" size={20} />
+                        <span>No matching courses</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
           {selectedCourse && (
             <p className="ai-field-hint">
@@ -626,8 +681,8 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
 
         {/* Step 2: Specific Topic */}
         <div className="ai-field-block">
-          <div className="ai-field-header" style={{ justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="ai-field-header ai-field-header--split">
+            <div className="ai-field-header-group">
               <span className="ai-step-indicator">2</span>
               <label className="ai-field-label" htmlFor="ai-topic-input">
                 Topic or Chapter
@@ -784,8 +839,7 @@ export default function AiQuizGenerator({ onStartAiQuiz = () => {} }) {
                       setDifficulty(d.id);
                       setActivePreset(null);
                     }}
-                    className={`ai-diff-pill ${isSelected ? 'selected' : ''}`}
-                    style={{ '--diff-color': d.color }}
+                    className={`ai-diff-pill ai-diff-pill--${d.id.toLowerCase()}${isSelected ? ' selected' : ''}`}
                   >
                     <span className="diff-indicator" />
                     <span className="diff-name">{d.label}</span>

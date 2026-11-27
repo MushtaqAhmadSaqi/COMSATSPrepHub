@@ -75,7 +75,7 @@ export default function Upload() {
       const { sync } = addModerationSubmission({
         type: activeTab,
         subjectCode: subjectCode.trim(),
-        title: `${subjectCode.trim()} — ${examType.trim()}`,
+        title: `${subjectCode.trim()} - ${examType.trim()}`,
         contributor: uploaderName.trim() || 'Student Contributor',
         details: activeTab === 'upload' ? selectedFile?.name : requestDetails.trim()
       });
@@ -127,7 +127,7 @@ export default function Upload() {
       />
 
       {/* Mode Switcher */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }} role="tablist" aria-label="Paper contribution mode" onKeyDown={handleTabKeyDown}>
+      <div className="upload-tabs" role="tablist" aria-label="Paper contribution mode" onKeyDown={handleTabKeyDown}>
         <button
           type="button"
           role="tab"
@@ -136,18 +136,10 @@ export default function Upload() {
           aria-controls="upload-panel"
           tabIndex={activeTab === 'upload' ? 0 : -1}
           onClick={() => { setActiveTab('upload'); setSubmitted(false); }}
-          style={{
-            padding: '0.6rem 1.25rem',
-            borderRadius: '9999px',
-            border: '1.5px solid var(--border)',
-            background: activeTab === 'upload' ? 'var(--brand)' : 'var(--surface)',
-            color: activeTab === 'upload' ? 'var(--on-brand)' : 'var(--text)',
-            fontWeight: 700,
-            fontSize: '0.875rem',
-            minHeight: '44px'
-          }}
+          className={`upload-tab-btn${activeTab === 'upload' ? ' upload-tab-btn--active' : ''}`}
         >
-          📤 Upload Past Paper
+          <AppIcon name="upload_file" size={18} />
+          Upload Past Paper
         </button>
         <button
           type="button"
@@ -157,18 +149,10 @@ export default function Upload() {
           aria-controls="upload-panel"
           tabIndex={activeTab === 'request' ? 0 : -1}
           onClick={() => { setActiveTab('request'); setSubmitted(false); }}
-          style={{
-            padding: '0.6rem 1.25rem',
-            borderRadius: '9999px',
-            border: '1.5px solid var(--border)',
-            background: activeTab === 'request' ? 'var(--brand)' : 'var(--surface)',
-            color: activeTab === 'request' ? 'var(--on-brand)' : 'var(--text)',
-            fontWeight: 700,
-            fontSize: '0.875rem',
-            minHeight: '44px'
-          }}
+          className={`upload-tab-btn${activeTab === 'request' ? ' upload-tab-btn--active' : ''}`}
         >
-          🙋 Request a Missing Paper
+          <AppIcon name="campaign" size={18} />
+          Request a Missing Paper
         </button>
       </div>
 
@@ -179,7 +163,7 @@ export default function Upload() {
               <AppIcon name="check_circle" size={40} />
             </div>
             <h3 className="upload-success-title">
-              Thank You, {uploaderName || 'Contributor'}! 🎉
+              Thank You, {uploaderName || 'Contributor'}
             </h3>
             <p className="upload-success-text">
               Your {activeTab === 'upload' ? 'upload' : 'paper request'} for <strong>{subjectCode || 'Past Paper'}</strong> has been placed in the moderation queue.
@@ -187,8 +171,7 @@ export default function Upload() {
             </p>
             <button
               type="button"
-              className="btn-primary-pill"
-              style={{ margin: '1.5rem auto 0 auto' }}
+              className="btn-primary-pill upload-reset-btn"
               onClick={() => {
                 setSubmitted(false);
                 setSubjectCode('');
@@ -207,11 +190,10 @@ export default function Upload() {
               <>
                 <label
                   htmlFor="paper-file-input"
-                  className={`upload-dropzone${dragOver ? ' drag-over' : ''}${selectedFile ? ' has-file' : ''}`}
+                  className={`upload-dropzone upload-dropzone--label${dragOver ? ' drag-over' : ''}${selectedFile ? ' has-file' : ''}`}
                   onDrop={handleDrop}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
-                  style={{ cursor: 'pointer', display: 'block' }}
                 >
                   <input
                     id="paper-file-input"
@@ -228,7 +210,7 @@ export default function Upload() {
                   </div>
                   {selectedFile ? (
                     <>
-                      <div className="upload-dropzone-title" style={{ color: 'var(--brand)' }}>
+                      <div className="upload-dropzone-title upload-dropzone-title--selected">
                         {selectedFile.name}
                       </div>
                       <div className="upload-dropzone-hint">
@@ -238,13 +220,13 @@ export default function Upload() {
                   ) : (
                     <>
                       <div className="upload-dropzone-title">Drag &amp; drop your paper file here</div>
-                      <div className="upload-dropzone-hint">Supports PDF, PNG, JPG — up to 15MB (Moderation required before publishing)</div>
+                      <div className="upload-dropzone-hint">Supports PDF, PNG, JPG, up to 15MB (Moderation required before publishing)</div>
                     </>
                   )}
                 </label>
 
                 {fileError && (
-                  <div id="upload-file-error" role="alert" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', color: 'var(--danger)', fontSize: '0.875rem', marginBottom: '1rem', fontWeight: 600 }}>
+                  <div id="upload-file-error" role="alert" className="upload-file-error">
                     <AppIcon name="error" size={18} />
                     {fileError}
                   </div>
@@ -258,7 +240,7 @@ export default function Upload() {
                 id="upload-subject-code"
                 type="text"
                 className={`ai-input${fieldErrors.subjectCode ? ' auth-input--error' : ''}`}
-                placeholder="e.g. CSC211 — Data Structures & Algorithms"
+                placeholder="e.g. CSC211 - Data Structures & Algorithms"
                 value={subjectCode}
                 spellCheck={false}
                 onChange={(e) => setSubjectCode(e.target.value)}
@@ -274,7 +256,7 @@ export default function Upload() {
                 id="upload-exam-type"
                 type="text"
                 className={`ai-input${fieldErrors.examType ? ' auth-input--error' : ''}`}
-                placeholder="e.g. Terminal Examination — Fall 2024"
+                placeholder="e.g. Terminal Examination, Fall 2024"
                 value={examType}
                 onChange={(e) => setExamType(e.target.value)}
                 onBlur={(e) => validateFieldOnBlur('examType', e.target.value)}
@@ -312,7 +294,7 @@ export default function Upload() {
             <button type="submit" className="btn-generate-ai" disabled={submitting}>
               {submitting ? (
                 <>
-                  <AppIcon name="progress_activity" size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                  <AppIcon name="progress_activity" size={18} className="upload-submit-spinner" />
                   Submitting…
                 </>
               ) : (

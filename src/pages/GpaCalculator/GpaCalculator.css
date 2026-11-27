@@ -1,34 +1,33 @@
 /* GPA & Academic Calculator — focused, high-craft academic workspace */
 .grade-workspace {
-  --gw-surface: var(--surface, #ffffff);
-  --gw-subtle: var(--surface-2, #f8fafc);
-  --gw-text: var(--text, #0f172a);
-  --gw-muted: var(--text-subtle, #475569);
-  --gw-line: var(--border, #e2e8f0);
-  --gw-brand: var(--brand, #1d4ed8);
-  --gw-soft: var(--brand-soft, #eff6ff);
-  --gw-error: var(--danger, #dc2626);
-  --gw-error-soft: var(--danger-soft, #fef2f2);
-  --gw-success: var(--success, #15803d);
-  --gw-success-soft: var(--success-soft, #f0fdf4);
-  --gw-accent: var(--accent, #b45309);
-  --gw-accent-soft: var(--accent-soft, #fffbeb);
-  --gw-ring: var(--ring, rgba(29, 78, 216, 0.32));
+  --gw-surface: var(--surface);
+  --gw-subtle: var(--surface-2);
+  --gw-text: var(--text);
+  --gw-muted: var(--text-subtle);
+  --gw-line: var(--border);
+  --gw-brand: var(--brand);
+  --gw-soft: var(--brand-soft);
+  --gw-error: var(--danger);
+  --gw-error-soft: var(--danger-soft);
+  --gw-success: var(--success);
+  --gw-success-soft: var(--success-soft);
+  --gw-accent: var(--accent);
+  --gw-accent-soft: var(--accent-soft);
+  --gw-ring: var(--ring);
   --gw-radius-sm: var(--radius-sm, 8px);
   --gw-radius-md: var(--radius-md, 12px);
   --gw-radius-lg: 16px;
   --gw-radius-pill: var(--radius-pill, 9999px);
-  --gw-shadow-sm: var(--shadow-1, 0 1px 2px rgba(15, 23, 42, 0.05));
-  --gw-shadow-card:
-    0 1px 3px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.08);
+  --gw-shadow-sm: var(--shadow-1);
+  --gw-shadow-card: var(--shadow-2);
   --gw-dur-fast: var(--dur-fast, 160ms);
   --gw-dur-base: var(--dur-base, 220ms);
   --gw-ease: var(--ease, cubic-bezier(0.22, 1, 0.36, 1));
 
-  /* 3-step body typography scale (all >= 13px / 0.8125rem) */
-  --gw-text-heading: 1.125rem;
-  --gw-text-body: 0.9375rem;
-  --gw-text-sm: 0.8125rem;
+  /* Locked compact data scale (all >= 13px / 0.8125rem) */
+  --gw-text-heading: var(--fs-heading);
+  --gw-text-body: var(--fs-body);
+  --gw-text-sm: var(--fs-data);
 
   width: min(100%, 1160px);
   margin: 0 auto;
@@ -235,10 +234,19 @@
 }
 
 .grade-workspace__main {
+  container-type: inline-size;
+  container-name: grade-main;
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+@container grade-main (max-width: 560px) {
+  .grade-workspace__form-grid,
+  .grade-workspace__pair-inputs {
+    grid-template-columns: 1fr;
+  }
 }
 
 .grade-workspace__tabpanel {
@@ -553,12 +561,12 @@
 .grade-workspace__btn-primary {
   border: 1px solid var(--gw-brand);
   background: var(--gw-brand);
-  color: var(--on-brand, #ffffff);
+  color: var(--on-brand);
 }
 
 .grade-workspace__btn-primary:hover {
-  background: var(--brand-hover, color-mix(in srgb, var(--gw-brand) 88%, #000000));
-  border-color: var(--brand-hover, color-mix(in srgb, var(--gw-brand) 88%, #000000));
+  background: var(--brand-hover);
+  border-color: var(--brand-hover);
 }
 
 .grade-workspace__btn-secondary {
@@ -655,7 +663,7 @@
   width: 1.2rem;
   height: 1.2rem;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--switch-knob);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.22);
   transition: transform var(--gw-dur-base) var(--gw-ease);
 }
@@ -1318,14 +1326,8 @@
 /* Dark Mode Refinements */
 html.dark .grade-workspace {
   color-scheme: dark;
-  --gw-surface: var(--surface, #0f172a);
-  --gw-subtle: var(--surface-2, #1e293b);
-  --gw-text: var(--text, #f8fafc);
-  --gw-muted: var(--text-subtle, #94a3b8);
-  --gw-line: var(--border, #334155);
-  --gw-error: #f87171;
-  --gw-shadow-card:
-    0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 24px -12px rgba(0, 0, 0, 0.55);
+  --gw-error: var(--danger-bright);
+  --gw-shadow-card: var(--shadow-2);
 }
 
 /* Responsive Breakpoints */
@@ -1430,8 +1432,8 @@ html.dark .grade-workspace {
   .grade-workspace *,
   .grade-workspace *::before,
   .grade-workspace *::after {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms;
+    animation-duration: 0.01ms;
   }
 }
 
@@ -1442,14 +1444,14 @@ html.dark .grade-workspace {
     padding: 0;
   }
 
-  .grade-workspace__print-btn,
-  .grade-workspace__nav,
-  .grade-workspace__btn-primary,
-  .grade-workspace__btn-secondary,
-  .grade-workspace__btn-ghost,
-  .grade-workspace__icon-btn,
-  .grade-workspace__save-bar {
-    display: none !important;
+  .grade-workspace .grade-workspace__print-btn,
+  .grade-workspace .grade-workspace__nav,
+  .grade-workspace .grade-workspace__btn-primary,
+  .grade-workspace .grade-workspace__btn-secondary,
+  .grade-workspace .grade-workspace__btn-ghost,
+  .grade-workspace .grade-workspace__icon-btn,
+  .grade-workspace .grade-workspace__save-bar {
+    display: none;
   }
 
   .grade-workspace__layout {

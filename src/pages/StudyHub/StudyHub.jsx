@@ -323,50 +323,44 @@ export default function StudyHub() {
       {activeTab === 'daily' && (
         <div className="study-hub-card" id="study-hub-panel" role="tabpanel" aria-labelledby={`study-tab-${activeTab}`} tabIndex={0}>
           {challengeStatus.completedToday && !isFinished ? (
-            <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--success)' }}>
+            <div className="daily-challenge-status">
+              <div className="daily-challenge-icon">
                 <AppIcon name="check_circle" size={52} />
               </div>
-              <h2 style={{ margin: '1rem 0 0.5rem', fontSize: '1.5rem', fontWeight: 800 }}>You completed today&apos;s challenge!</h2>
-              <p className="tabular-nums" style={{ color: 'var(--text-subtle)' }}>
+              <h2 className="daily-challenge-title">You completed today&apos;s challenge!</h2>
+              <p className="tabular-nums daily-challenge-summary">
                 Today&apos;s Score: <strong>{challengeStatus.todayScore}</strong> · Current Streak: <strong>{challengeStatus.dailyStreak || 1} days</strong>
               </p>
             </div>
           ) : isFinished ? (
-            <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--success)' }}>
+            <div className="daily-challenge-status">
+              <div className="daily-challenge-icon">
                 <AppIcon name="emoji_events" size={52} />
               </div>
-              <h2 style={{ margin: '1rem 0 0.5rem', fontSize: '1.5rem', fontWeight: 800 }}>Challenge Finished!</h2>
-              <p className="tabular-nums" style={{ color: 'var(--text-subtle)', marginBottom: '1rem' }}>
+              <h2 className="daily-challenge-title">Challenge Finished!</h2>
+              <p className="tabular-nums daily-challenge-summary">
                 You scored <strong>{score}</strong> out of {SAMPLE_DAILY_QUESTIONS.length}. Come back tomorrow to grow your streak!
               </p>
             </div>
           ) : (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div className="daily-question-head">
                 <span className="leitner-badge">
                   Question {qIndex + 1} of {SAMPLE_DAILY_QUESTIONS.length}
                 </span>
-                <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-subtle)' }}>
+                <span className="daily-question-score tabular-nums">
                   Score: {score}
                 </span>
               </div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.5rem' }}>{currentQ.q}</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <h2 className="daily-question-title">{currentQ.q}</h2>
+              <div className="daily-options-list">
                 {currentQ.options.map((opt, idx) => {
-                  let bg = 'var(--surface-2)';
-                  let color = 'var(--text)';
-                  let borderColor = 'var(--border)';
+                  let optionClass = 'daily-option-btn';
                   if (selectedOpt !== null) {
                     if (idx === currentQ.answer) {
-                      bg = 'var(--success)';
-                      color = '#ffffff';
-                      borderColor = 'var(--success)';
+                      optionClass += ' daily-option-btn--correct';
                     } else if (idx === selectedOpt) {
-                      bg = 'var(--danger)';
-                      color = '#ffffff';
-                      borderColor = 'var(--danger)';
+                      optionClass += ' daily-option-btn--incorrect';
                     }
                   }
                   return (
@@ -375,18 +369,7 @@ export default function StudyHub() {
                       type="button"
                       disabled={selectedOpt !== null}
                       onClick={() => handleOptionSelect(idx)}
-                      style={{
-                        minHeight: '48px',
-                        padding: '0.875rem 1.125rem',
-                        borderRadius: 'var(--radius-md)',
-                        border: `1.5px solid ${borderColor}`,
-                        background: bg,
-                        color,
-                        textAlign: 'left',
-                        cursor: selectedOpt !== null ? 'default' : 'pointer',
-                        fontWeight: 600,
-                        transition: 'all 0.2s'
-                      }}
+                      className={optionClass}
                     >
                       {opt}
                     </button>
@@ -394,8 +377,9 @@ export default function StudyHub() {
                 })}
               </div>
               {selectedOpt !== null && (
-                <p style={{ marginTop: '1rem', fontSize: '0.875rem', color: 'var(--text-muted)' }} role="status">
-                  💡 {currentQ.explanation}
+                <p className="daily-explanation" role="status">
+                  <AppIcon name="lightbulb" size={18} className="daily-explanation__icon" />
+                  <span>{currentQ.explanation}</span>
                 </p>
               )}
             </div>
@@ -485,12 +469,12 @@ export default function StudyHub() {
             </div>
           ) : (
             <div className="flashcard-empty">
-              <div style={{ display: 'flex', justifyContent: 'center', color: 'var(--brand)' }}>
+              <div className="flashcard-empty-icon">
                 <AppIcon name={activeTab === 'revision' && revisionCards.length === 0 ? 'star_border' : 'task_alt'} size={42} />
               </div>
               <h2>{activeTab === 'revision' && revisionCards.length === 0 ? 'Build your Revision Deck' : 'All caught up!'}</h2>
               <p>{activeTab === 'revision' && revisionCards.length === 0
-                ? 'Star a flashcard or a question in a quiz summary. Your deck stays saved on this device — no account needed.'
+                ? 'Star a flashcard or a question in a quiz summary. Your deck stays saved on this device with no account needed.'
                 : 'No cards are due right now. They return when the existing review interval elapses.'}</p>
               {activeTab === 'revision' && revisionCards.length === 0 && (
                 <button type="button" className="flashcard-rate-btn" onClick={() => setActiveTab('flashcards')}>Browse Flashcards</button>
@@ -518,11 +502,11 @@ export default function StudyHub() {
 
           {activeTab === 'flashcards' && <>
           {/* Create Custom Flashcard */}
-          <form onSubmit={handleAddCard} style={{ marginTop: '2.25rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '0.875rem' }}>
+          <form onSubmit={handleAddCard} className="custom-card-form">
+            <h3 className="custom-card-heading">
               + Add Your Own Study Flashcard
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
+            <div className="custom-card-row">
               <input
                 type="text"
                 spellCheck={false}
@@ -543,11 +527,10 @@ export default function StudyHub() {
                 maxLength={300}
               />
             </div>
-            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div className="custom-card-actions">
               <input
                 type="text"
-                className="ai-input"
-                style={{ flex: 1, minWidth: '220px' }}
+                className="ai-input custom-card-back-input"
                 value={newBack}
                 onChange={(e) => setNewBack(e.target.value)}
                 placeholder="Back: Concise answer or formula…"
@@ -556,16 +539,7 @@ export default function StudyHub() {
               />
               <button
                 type="submit"
-                style={{
-                  minHeight: '44px',
-                  padding: '0.65rem 1.35rem',
-                  borderRadius: 'var(--radius-md)',
-                  background: 'var(--brand)',
-                  color: 'var(--on-brand)',
-                  border: 'none',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
+                className="custom-card-submit"
               >
                 Add Flashcard
               </button>

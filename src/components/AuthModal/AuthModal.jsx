@@ -41,7 +41,7 @@ export default function AuthModal({
 
   const toast = useToast();
 
-  const cardRef = useRef(null);
+  const dialogRef = useRef(null);
   const firstInputRef = useRef(null);
   const triggerRef = useRef(null);
 
@@ -55,39 +55,20 @@ export default function AuthModal({
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen) return;
-    const frame = requestAnimationFrame(() => firstInputRef.current?.focus());
-    return () => cancelAnimationFrame(frame);
+    const dialog = dialogRef.current;
+    if (!dialog) return undefined;
+    if (isOpen) {
+      if (!dialog.open && typeof dialog.showModal === 'function') {
+        dialog.showModal();
+      }
+      const frame = requestAnimationFrame(() => firstInputRef.current?.focus());
+      return () => cancelAnimationFrame(frame);
+    }
+    if (dialog.open && typeof dialog.close === 'function') {
+      dialog.close();
+    }
+    return undefined;
   }, [isOpen, mode]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        onClose();
-        return;
-      }
-      if (e.key === 'Tab' && cardRef.current) {
-        const focusables = cardRef.current.querySelectorAll(
-          'button:not([disabled]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]), textarea:not([disabled])'
-        );
-        if (!focusables.length) return;
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -208,16 +189,19 @@ export default function AuthModal({
   };
 
   return (
-    <div className="auth-modal-backdrop" onClick={onClose}>
-      <div
-        className="auth-modal-card"
-        ref={cardRef}
-        tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="auth-modal-title"
-      >
+    <dialog
+      ref={dialogRef}
+      className="native-dialog auth-modal-dialog"
+      aria-labelledby="auth-modal-title"
+      onCancel={(e) => {
+        e.preventDefault();
+        onClose();
+      }}
+      onClick={(e) => {
+        if (e.target === dialogRef.current) onClose();
+      }}
+    >
+      <div className="auth-modal-card">
         <button type="button" className="auth-close-btn" onClick={onClose} aria-label="Close modal">
           <AppIcon name="close" size={18} />
         </button>
@@ -240,13 +224,13 @@ export default function AuthModal({
 
         {errorMsg && (
           <div className="auth-alert auth-alert-error" role="alert">
-            <AppIcon name="error" size={18} style={{ flexShrink: 0 }} />
+            <AppIcon name="error" size={18} className="auth-alert-icon" />
             {errorMsg}
           </div>
         )}
         {successMsg && (
           <div className="auth-alert auth-alert-success" role="status">
-            <AppIcon name="check_circle" size={18} style={{ flexShrink: 0 }} />
+            <AppIcon name="check_circle" size={18} className="auth-alert-icon" />
             {successMsg}
           </div>
         )}
@@ -261,7 +245,7 @@ export default function AuthModal({
             tabIndex={-1}
             autoComplete="off"
             aria-hidden="true"
-            style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+            className="auth-honeypot"
           />
 
           {isSignUp && (
@@ -305,20 +289,13 @@ export default function AuthModal({
 
           {!isReset && (
             <div className="auth-form-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="auth-label-row">
                 <label className="auth-label" htmlFor="auth-password">Password</label>
                 {!isSignUp && (
                   <button
                     type="button"
                     onClick={() => switchToMode('reset')}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      color: 'var(--brand)',
-                      cursor: 'pointer'
-                    }}
+                    className="auth-forgot-btn"
                   >
                     Forgot password?
                   </button>
@@ -328,7 +305,7 @@ export default function AuthModal({
                 <input
                   id="auth-password"
                   type={showPassword ? 'text' : 'password'}
-                  className={`auth-input${fieldErrors.password ? ' auth-input--error' : ''}`}
+                  className={`auth-input auth-input--with-eye${fieldErrors.password ? ' auth-input--error' : ''}`}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -336,7 +313,6 @@ export default function AuthModal({
                   autoComplete={isSignUp ? 'new-password' : 'current-password'}
                   enterKeyHint="done"
                   required
-                  style={{ paddingRight: '3rem' }}
                 />
                 <button
                   type="button"
@@ -348,7 +324,7 @@ export default function AuthModal({
                 </button>
               </div>
               {isSignUp && !fieldErrors.password && (
-                <span style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-subtle)', marginTop: '0.25rem' }}>
+                <span className="auth-password-hint">
                   Min 8 characters with uppercase, lowercase &amp; a number
                 </span>
               )}
@@ -405,6 +381,6 @@ export default function AuthModal({
           )}
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }

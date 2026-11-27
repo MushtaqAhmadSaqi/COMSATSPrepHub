@@ -57,12 +57,12 @@ function AnimatedOption({ letter, opt, index, selectedOption, revealed, correct,
       transition={{ duration: 0.2, delay: index * 0.04 }}
     >
       <span className="quiz-option-letter mono-code">{letter}</span>
-      <span style={{ flex: 1 }}>{opt}</span>
+      <span className="quiz-option-text">{opt}</span>
       {revealed && index === correct && (
-        <AppIcon name="check_circle" size={20} style={{ color: '#10b981' }} />
+        <AppIcon name="check_circle" size={20} className="quiz-opt-icon quiz-opt-icon--correct" />
       )}
       {revealed && selectedOption === index && index !== correct && (
-        <AppIcon name="cancel" size={20} style={{ color: '#ef4444' }} />
+        <AppIcon name="cancel" size={20} className="quiz-opt-icon quiz-opt-icon--incorrect" />
       )}
     </motion.button>
   );
@@ -355,6 +355,14 @@ export default function Quiz({ onExamActiveChange }) {
       } else if (key === 'ArrowLeft') {
         e.preventDefault();
         handlePrevQuestion();
+      } else if (lowerKey === 'f') {
+        e.preventDefault();
+        toggleMarkReview();
+      } else if (lowerKey === 'h') {
+        if (questions[currentIdx]?.hint && !revealed) {
+          e.preventDefault();
+          setShowHint((v) => !v);
+        }
       }
     };
 
@@ -413,12 +421,11 @@ export default function Quiz({ onExamActiveChange }) {
           </div>
         ) : subjectsError ? (
           <div className="quiz-loading-state" role="alert">
-            <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>{subjectsError}</p>
+            <p className="quiz-empty-copy quiz-empty-copy--spaced">{subjectsError}</p>
             <button
               type="button"
-              className="quiz-back-btn"
+              className="quiz-back-btn quiz-back-btn--flush"
               onClick={loadSubjects}
-              style={{ marginBottom: 0 }}
             >
               <AppIcon name="refresh" size={18} />
               Try again
@@ -426,7 +433,7 @@ export default function Quiz({ onExamActiveChange }) {
           </div>
         ) : filteredSubjects.length === 0 ? (
           <div className="quiz-loading-state">
-            <p style={{ color: 'var(--text-muted)' }}>No subjects match your search.</p>
+            <p className="quiz-empty-copy">No subjects match your search.</p>
           </div>
         ) : (
           <div className="quiz-subjects-grid">
@@ -490,7 +497,8 @@ export default function Quiz({ onExamActiveChange }) {
                 className={`quiz-chip ${quizMode === 'practice' ? 'selected' : ''}`}
                 onClick={() => setQuizMode('practice')}
               >
-                📖 Practice Mode (Untimed)
+                <AppIcon name="menu_book" size={16} />
+                Practice Mode (Untimed)
               </button>
               <button
                 type="button"
@@ -498,7 +506,8 @@ export default function Quiz({ onExamActiveChange }) {
                 className={`quiz-chip ${quizMode === 'timed' ? 'selected' : ''}`}
                 onClick={() => setQuizMode('timed')}
               >
-                ⏱️ Exam Timer (45s / Q)
+                <AppIcon name="timer" size={16} />
+                Exam Timer (45s / Q)
               </button>
             </div>
           </div>
@@ -516,9 +525,7 @@ export default function Quiz({ onExamActiveChange }) {
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                 >
-                  {d === 'Easy' && '🟢 '}
-                  {d === 'Medium' && '🟡 '}
-                  {d === 'Hard' && '🔴 '}
+                  <span className={`quiz-diff-dot quiz-diff-dot--${d.toLowerCase()}`} aria-hidden="true" />
                   {d}
                 </motion.button>
               ))}
@@ -613,19 +620,14 @@ export default function Quiz({ onExamActiveChange }) {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.22 }}
       >
-        <div className="quiz-header" style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div className="quiz-header quiz-header--wrap">
           <h1>{selectedSubject?.name}</h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <div className="quiz-header-actions">
             {quizMode === 'timed' && (
               <span
                 role="timer"
                 aria-label="Time remaining"
-                className={`quiz-counter mono-code tabular-nums ${timeLeftSec < 30 ? 'quiz-timer--urgent' : ''}`}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.25rem'
-                }}
+                className={`quiz-counter mono-code tabular-nums quiz-timer-chip ${timeLeftSec < 30 ? 'quiz-timer--urgent' : ''}`}
               >
                 <AppIcon name="timer" size={16} />
                 {mins}:{secs}
@@ -635,26 +637,13 @@ export default function Quiz({ onExamActiveChange }) {
               type="button"
               onClick={toggleMarkReview}
               aria-pressed={isMarked}
-              style={{
-                padding: '0.4rem 0.85rem',
-                borderRadius: '9999px',
-                border: '1px solid var(--border)',
-                background: isMarked ? 'var(--accent-soft)' : 'var(--surface)',
-                color: isMarked ? 'var(--text)' : 'var(--text-subtle)',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                minHeight: '44px',
-                cursor: 'pointer'
-              }}
+              className={`quiz-mark-btn${isMarked ? ' quiz-mark-btn--marked' : ''}`}
             >
               <AppIcon
                 name={isMarked ? 'bookmark_flag' : 'flag'}
                 size={16}
                 filled={isMarked}
-                style={{ color: isMarked ? 'var(--accent)' : undefined }}
+                className={isMarked ? 'quiz-mark-btn__icon--marked' : undefined}
               />
               {isMarked ? 'Marked for Review' : 'Mark for Review'}
             </button>
@@ -761,11 +750,11 @@ export default function Quiz({ onExamActiveChange }) {
           </div>
 
           <div className="quiz-keyboard-tip">
-            Tip: press 1–4 (or A–D) to select, Enter to submit/continue, ← → to move between questions
+            Tip: press 1–4 (or A–D) to select, Enter to submit/continue, ← → to navigate, F to flag, H for hint
           </div>
 
           {q.hint && !revealed && (
-            <div style={{ marginBottom: '1.5rem' }}>
+            <div className="quiz-hint-wrap">
               <button
                 type="button"
                 onClick={() => setShowHint(!showHint)}
@@ -794,73 +783,44 @@ export default function Quiz({ onExamActiveChange }) {
 
           {revealed && (
             <motion.div
-              className="quiz-explanation-box"
+              className="quiz-explanation-box quiz-explanation-box--stack"
               role="status"
               aria-live="polite"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
-              style={{ flexDirection: 'column', gap: '0.5rem' }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'wrap', gap: '0.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <div className="quiz-explanation-head">
+                <div className="quiz-explanation-status">
                   <AppIcon name="info" size={18} />
                   <strong>{isCorrect ? 'Correct!' : 'Incorrect'}</strong>
                 </div>
-                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                <div className="quiz-explanation-tools">
                   <button
                     type="button"
                     onClick={() => setShowStepByStep((s) => !s)}
-                    style={{
-                      background: 'var(--surface)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '9999px',
-                      padding: '0.4rem 0.85rem',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      color: 'var(--brand)',
-                      minHeight: '44px',
-                      cursor: 'pointer'
-                    }}
+                    className="quiz-explain-pill quiz-explain-pill--brand"
                   >
-                    {showStepByStep ? 'Hide Step-by-Step' : '✨ Explain Step-by-Step'}
+                    {!showStepByStep && <AppIcon name="auto_awesome" size={14} />}
+                    {showStepByStep ? 'Hide Step-by-Step' : 'Explain Step-by-Step'}
                   </button>
                   <button
                     type="button"
                     onClick={() => setExplainLang((l) => (l === 'en' ? 'ur' : 'en'))}
-                    style={{
-                      background: 'var(--surface)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '9999px',
-                      padding: '0.4rem 0.85rem',
-                      fontSize: '0.72rem',
-                      fontWeight: 700,
-                      color: 'var(--text)',
-                      minHeight: '44px',
-                      cursor: 'pointer'
-                    }}
+                    className="quiz-explain-pill"
                   >
                     {explainLang === 'en' ? 'اردو میں دیکھیں' : 'Switch to English'}
                   </button>
                 </div>
               </div>
 
-              <p style={{ margin: 0, fontSize: '0.875rem', opacity: 0.95 }}>
+              <p className="quiz-explanation-copy">
                 {q.hint || 'Review the correct option above.'}
               </p>
 
               {showStepByStep && (
                 <div
-                  style={{
-                    marginTop: '0.35rem',
-                    padding: '0.65rem 0.85rem',
-                    borderRadius: 'var(--radius-sm)',
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border)',
-                    fontSize: '0.8125rem',
-                    lineHeight: 1.55
-                  }}
-                  className={explainLang === 'ur' ? 'urdu-explanation' : ''}
+                  className={`quiz-step-box${explainLang === 'ur' ? ' urdu-explanation' : ''}`}
                   dir={explainLang === 'ur' ? 'rtl' : 'ltr'}
                 >
                   {buildStepByStepExplanation(q, explainLang)}
@@ -876,7 +836,6 @@ export default function Quiz({ onExamActiveChange }) {
                 className="btn-quiz-next"
                 onClick={handleSubmitAnswer}
                 disabled={selectedOption === null}
-                style={{ opacity: selectedOption === null ? 0.5 : 1 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -886,9 +845,8 @@ export default function Quiz({ onExamActiveChange }) {
             ) : (
               <motion.button
                 type="button"
-                className="btn-quiz-next"
+                className="btn-quiz-next btn-quiz-finish-next"
                 onClick={handleNextQuestion}
-                style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#0f172a' }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -900,41 +858,21 @@ export default function Quiz({ onExamActiveChange }) {
         </div>
 
         <Modal isOpen={confirmExit} onClose={() => setConfirmExit(false)} title="Exit this exam?">
-          <p style={{ margin: '0 0 1.25rem', color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+          <p className="quiz-modal-copy">
             Your answers so far will not be scored or saved. The exam timer keeps running while this dialog is open.
           </p>
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <div className="quiz-modal-actions">
             <button
               type="button"
               onClick={() => setConfirmExit(false)}
-              style={{
-                minHeight: '44px',
-                padding: '0.5rem 1.1rem',
-                borderRadius: '9999px',
-                border: '1.5px solid var(--border)',
-                background: 'var(--surface)',
-                color: 'var(--text)',
-                fontWeight: 700,
-                fontSize: '0.875rem',
-                cursor: 'pointer'
-              }}
+              className="quiz-modal-btn quiz-modal-btn--secondary"
             >
               Keep Going
             </button>
             <button
               type="button"
               onClick={() => { setConfirmExit(false); handleRestart(); }}
-              style={{
-                minHeight: '44px',
-                padding: '0.5rem 1.1rem',
-                borderRadius: '9999px',
-                border: 'none',
-                background: 'var(--danger)',
-                color: '#ffffff',
-                fontWeight: 700,
-                fontSize: '0.875rem',
-                cursor: 'pointer'
-              }}
+              className="quiz-modal-btn quiz-modal-btn--danger"
             >
               Exit Exam
             </button>
@@ -942,13 +880,13 @@ export default function Quiz({ onExamActiveChange }) {
         </Modal>
 
         <Modal isOpen={confirmFinish} onClose={() => setConfirmFinish(false)} title="Submit exam?">
-          <p style={{ margin: '0 0 1.25rem', color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+          <p className="quiz-modal-copy">
             You still have{' '}
-            <strong style={{ color: 'var(--text)' }}>{unansweredCount} unanswered</strong> and{' '}
-            <strong style={{ color: 'var(--text)' }}>{flaggedCount} flagged</strong>{' '}
+            <strong className="quiz-modal-emphasis">{unansweredCount} unanswered</strong> and{' '}
+            <strong className="quiz-modal-emphasis">{flaggedCount} flagged</strong>{' '}
             {unansweredCount + flaggedCount === 1 ? 'question' : 'questions'}. Unanswered questions count as incorrect.
           </p>
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <div className="quiz-modal-actions">
             <button
               type="button"
               onClick={() => {
@@ -956,34 +894,14 @@ export default function Quiz({ onExamActiveChange }) {
                 const target = questions.findIndex((_, idx) => !userAnswers[idx] || markedForReview[idx]);
                 if (target >= 0) handleJumpToQuestion(target);
               }}
-              style={{
-                minHeight: '44px',
-                padding: '0.5rem 1.1rem',
-                borderRadius: '9999px',
-                border: '1.5px solid var(--border)',
-                background: 'var(--surface)',
-                color: 'var(--text)',
-                fontWeight: 700,
-                fontSize: '0.875rem',
-                cursor: 'pointer'
-              }}
+              className="quiz-modal-btn quiz-modal-btn--secondary"
             >
               Review Remaining
             </button>
             <button
               type="button"
               onClick={() => { setConfirmFinish(false); finishQuiz(); }}
-              style={{
-                minHeight: '44px',
-                padding: '0.5rem 1.1rem',
-                borderRadius: '9999px',
-                border: 'none',
-                background: 'var(--brand)',
-                color: 'var(--on-brand)',
-                fontWeight: 700,
-                fontSize: '0.875rem',
-                cursor: 'pointer'
-              }}
+              className="quiz-modal-btn quiz-modal-btn--brand"
             >
               Submit Anyway
             </button>
@@ -1012,25 +930,25 @@ export default function Quiz({ onExamActiveChange }) {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.35 }}
       >
-        <div className="quiz-card" style={{ textAlign: 'center', padding: '3rem 1.75rem' }}>
+        <div className="quiz-card quiz-card--summary">
           <div className="quiz-finish-badge">
             <AppIcon
               name={pct >= 75 ? 'military_tech' : pct >= 50 ? 'emoji_events' : 'school'}
               size={52}
-              style={{ color: pct >= 60 ? 'var(--success)' : 'var(--accent)' }}
+              className={pct >= 60 ? 'quiz-finish-icon--pass' : 'quiz-finish-icon--warn'}
             />
           </div>
 
-          <h2 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text)', marginBottom: '0.5rem', letterSpacing: '-0.03em' }}>
+          <h2 className="quiz-finish-heading">
             {pct >= 75 ? 'Outstanding Performance!' : pct >= 50 ? 'Great Job!' : 'Keep Practicing!'}
           </h2>
 
-          <p style={{ color: 'var(--text-subtle)', marginBottom: '0.5rem', fontSize: '1.0625rem' }}>
+          <p className="quiz-finish-sub">
             {selectedSubject?.name} (<span className="mono-code" translate="no">{selectedSubject?.code}</span>)
           </p>
 
-          <p className="tabular-nums" style={{ color: 'var(--text-subtle)', marginBottom: '2rem', fontSize: '1.0625rem' }}>
-            You scored <strong style={{ color: 'var(--brand)', fontSize: '1.25rem' }}>{score}/{questions.length}</strong> ({pct}%)
+          <p className="tabular-nums quiz-finish-score">
+            You scored <strong>{score}/{questions.length}</strong> ({pct}%)
           </p>
 
           <div className="quiz-stats-row tabular-nums">
@@ -1039,11 +957,11 @@ export default function Quiz({ onExamActiveChange }) {
               <span className="quiz-stat-label">Questions</span>
             </div>
             <div className="quiz-stat-item">
-              <span className="quiz-stat-value" style={{ color: 'var(--success)' }}>{score}</span>
+              <span className="quiz-stat-value quiz-stat-value--success">{score}</span>
               <span className="quiz-stat-label">Correct</span>
             </div>
             <div className="quiz-stat-item">
-              <span className="quiz-stat-value" style={{ color: 'var(--danger)' }}>{questions.length - score}</span>
+              <span className="quiz-stat-value quiz-stat-value--danger">{questions.length - score}</span>
               <span className="quiz-stat-label">Incorrect</span>
             </div>
             {elapsedSec != null && (
@@ -1055,22 +973,13 @@ export default function Quiz({ onExamActiveChange }) {
           </div>
 
           {/* Per-question review with weak-topic detection and missed-question retry */}
-          <div
-            style={{
-              textAlign: 'left',
-              marginTop: '2rem',
-              padding: '1.25rem',
-              borderRadius: 'var(--radius-lg)',
-              background: 'var(--surface-2)',
-              border: '1px solid var(--border)'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.875rem' }}>
+          <div className="quiz-review-card">
+            <div className="quiz-review-header">
               <div>
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase' }}>
+                <span className="quiz-review-eyebrow">
                   Answer Review
                 </span>
-                <h3 style={{ fontSize: '1.0625rem', fontWeight: 800, color: 'var(--text)' }}>
+                <h3 className="quiz-review-title">
                   {missedCount > 0
                     ? `${missedCount} Missed ${missedCount === 1 ? 'Question' : 'Questions'} to Revisit`
                     : 'Every Question Answered Correctly'}
@@ -1080,35 +989,17 @@ export default function Quiz({ onExamActiveChange }) {
                 <button
                   type="button"
                   onClick={handleRetryWrongQuestions}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '9999px',
-                    border: 'none',
-                    background: 'var(--brand)',
-                    color: 'var(--on-brand)',
-                    fontSize: '0.8125rem',
-                    fontWeight: 700,
-                    minHeight: '44px',
-                    cursor: 'pointer'
-                  }}
+                  className="quiz-review-retry-btn"
                 >
                   Retry Missed Questions ({missedCount})
                 </button>
               )}
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div className="quiz-review-list">
               {reviewItems.map((item) => (
-                <div
-                  key={item.idx}
-                  style={{
-                    padding: '0.875rem',
-                    borderRadius: 'var(--radius-sm)',
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border)'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem', flexWrap: 'wrap' }}>
+                <div key={item.idx} className="quiz-review-item">
+                  <div className="quiz-review-item-head">
                     <span className={`quiz-review-status quiz-review-status--${item.status}`}>
                       <AppIcon
                         name={item.status === 'correct' ? 'check_circle' : item.status === 'incorrect' ? 'cancel' : 'remove_circle'}
@@ -1116,7 +1007,7 @@ export default function Quiz({ onExamActiveChange }) {
                       />
                       {item.status === 'correct' ? 'Correct' : item.status === 'incorrect' ? 'Incorrect' : 'Skipped'}
                     </span>
-                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-subtle)' }}>Q{item.idx + 1}</span>
+                    <span className="quiz-review-qnum tabular-nums">Q{item.idx + 1}</span>
                     <button
                       type="button"
                       className="revision-star-btn"
@@ -1131,18 +1022,18 @@ export default function Quiz({ onExamActiveChange }) {
                       {revisionIds.includes(item.revisionCard.id) ? 'Saved for Revision' : 'Star for Revision'}
                     </button>
                   </div>
-                  <p style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text)', marginBottom: '0.35rem' }}>
+                  <p className="quiz-review-question">
                     {item.question}
                   </p>
-                  <p className={item.status === 'correct' ? undefined : 'quiz-review-wrong'} style={{ fontSize: '0.8125rem', marginBottom: '0.2rem' }}>
+                  <p className={item.status === 'correct' ? 'quiz-review-answer' : 'quiz-review-answer quiz-review-wrong'}>
                     Your answer: {item.userAns != null ? `${LETTERS[item.userAns]}. ${item.options[item.userAns]}` : 'Not answered'}
                   </p>
-                  <p style={{ fontSize: '0.8125rem', color: 'var(--text)', fontWeight: 700, marginBottom: '0.25rem' }}>
-                    <AppIcon name="check" size={14} style={{ color: 'var(--success)', verticalAlign: 'text-bottom', marginRight: '0.25rem' }} />
+                  <p className="quiz-review-correct">
+                    <AppIcon name="check" size={14} className="quiz-review-correct-icon" />
                     Correct answer: {LETTERS[item.correct]}. {item.options[item.correct]}
                   </p>
                   {item.hint && (
-                    <p style={{ fontSize: '0.78rem', color: 'var(--text-subtle)', margin: 0 }}>
+                    <p className="quiz-review-hint">
                       {item.hint}
                     </p>
                   )}
@@ -1151,12 +1042,11 @@ export default function Quiz({ onExamActiveChange }) {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '2rem' }}>
+          <div className="quiz-finish-actions">
             <button
               type="button"
-              className="btn-quiz-next"
+              className="btn-quiz-next btn-quiz-primary"
               onClick={handleGenerateQuiz}
-              style={{ background: 'var(--brand)' }}
             >
               <AppIcon name="refresh" size={18} />
               New Quiz
@@ -1164,9 +1054,8 @@ export default function Quiz({ onExamActiveChange }) {
 
             <button
               type="button"
-              className="btn-quiz-next"
+              className="btn-quiz-next btn-quiz-whatsapp"
               onClick={handleShareResult}
-              style={{ background: '#10b981', color: '#0f172a' }}
             >
               <AppIcon name="share" size={18} />
               Share on WhatsApp
@@ -1174,9 +1063,8 @@ export default function Quiz({ onExamActiveChange }) {
 
             <button
               type="button"
-              className="btn-quiz-next"
+              className="btn-quiz-next btn-quiz-secondary"
               onClick={handleRestart}
-              style={{ background: 'var(--surface-2)', color: 'var(--text)', border: '1.5px solid var(--border)' }}
             >
               <AppIcon name="menu_book" size={18} />
               Change Subject

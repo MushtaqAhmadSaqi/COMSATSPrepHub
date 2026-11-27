@@ -128,14 +128,14 @@ export default function Auth({ onLoginSuccess = () => {} }) {
 
         {errorMsg && (
           <div className="auth-alert auth-alert-error" role="alert">
-            <AppIcon name="error" size={18} style={{ flexShrink: 0 }} />
+            <AppIcon name="error" size={18} className="auth-alert-icon" />
             {errorMsg}
           </div>
         )}
 
         {successMsg && (
           <div className="auth-alert auth-alert-success" role="status">
-            <AppIcon name="check_circle" size={18} style={{ flexShrink: 0 }} />
+            <AppIcon name="check_circle" size={18} className="auth-alert-icon" />
             {successMsg}
           </div>
         )}
@@ -149,7 +149,7 @@ export default function Auth({ onLoginSuccess = () => {} }) {
             tabIndex={-1}
             autoComplete="off"
             aria-hidden="true"
-            style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+            className="auth-honeypot"
           />
 
           {isSignUp && (
@@ -185,13 +185,13 @@ export default function Auth({ onLoginSuccess = () => {} }) {
 
           {!isReset && (
             <div className="auth-form-group">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="auth-label-row">
                 <label className="auth-label" htmlFor="page-auth-password">Password</label>
                 {!isSignUp && (
                   <button
                     type="button"
                     onClick={() => { setMode('reset'); setErrorMsg(''); setSuccessMsg(''); }}
-                    style={{ background: 'none', border: 'none', fontSize: '0.75rem', fontWeight: 600, color: 'var(--brand)', minHeight: '44px', padding: '0.25rem 0.5rem', cursor: 'pointer' }}
+                    className="auth-forgot-btn"
                   >
                     Forgot password?
                   </button>
@@ -201,13 +201,12 @@ export default function Auth({ onLoginSuccess = () => {} }) {
                 <input
                   id="page-auth-password"
                   type={showPassword ? 'text' : 'password'}
-                  className="auth-input"
+                  className="auth-input auth-input--with-eye"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete={isSignUp ? 'new-password' : 'current-password'}
                   required
-                  style={{ paddingRight: '3rem' }}
                 />
                 <button
                   type="button"
@@ -219,7 +218,7 @@ export default function Auth({ onLoginSuccess = () => {} }) {
                 </button>
               </div>
               {isSignUp && (
-                <span style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-subtle)', marginTop: '0.25rem' }}>
+                <span className="auth-password-hint">
                   Use 8+ characters with uppercase, lowercase, and a number.
                 </span>
               )}
@@ -244,7 +243,7 @@ export default function Auth({ onLoginSuccess = () => {} }) {
           <>
             <div className="auth-divider">or continue with</div>
             <button type="button" className="auth-google-btn" onClick={handleGoogleSignIn}>
-              <AppIcon name="account_circle" size={18} style={{ color: 'var(--brand)' }} />
+              <AppIcon name="account_circle" size={18} className="auth-google-icon" />
               Sign in with Google
             </button>
           </>

@@ -31,15 +31,23 @@ function SubjectCard({ subject, idx, searchQuery = '', onSelect }) {
     <motion.button
       type="button"
       className="subject-card"
-      onClick={() => onSelect(subject)}
+      onClick={(e) => {
+        if (typeof document !== 'undefined') {
+          document.querySelectorAll('[data-vt="subject-hero"]').forEach((el) => {
+            el.removeAttribute('data-vt');
+          });
+          e.currentTarget.setAttribute('data-vt', 'subject-hero');
+        }
+        onSelect(subject);
+      }}
       aria-label={`Browse ${subject.name} papers`}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22, delay: Math.min(idx * 0.02, 0.2) }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.625rem' }}>
+      <div className="subject-card__top">
         <div className="subject-code mono-code" translate="no">{subject.code}</div>
-        <span style={{ color: 'var(--brand)', opacity: 0.8 }}>
+        <span className="subject-card__icon">
           <AppIcon name={subject.icon || 'menu_book'} size={20} />
         </span>
       </div>
@@ -63,19 +71,6 @@ function DepartmentChip({ dept, isSelected, onClick }) {
       onClick={onClick}
       aria-pressed={isSelected}
       className={`department-chip ${isSelected ? 'selected' : ''}`}
-      style={{
-        padding: '0.45rem 1rem',
-        minHeight: '44px',
-        borderRadius: '9999px',
-        border: '1.5px solid var(--border)',
-        background: isSelected ? 'var(--brand)' : 'var(--surface)',
-        color: isSelected ? 'var(--on-brand)' : 'var(--text-muted)',
-        fontWeight: 700,
-        fontSize: '0.8125rem',
-        cursor: 'pointer',
-        transition: 'background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease',
-        boxShadow: isSelected ? 'var(--shadow-brand)' : 'none'
-      }}
     >
       {dept}
     </button>
@@ -293,7 +288,7 @@ export default function Subjects({ onSelectSubject = () => {}, onViewPaper = () 
       <PageHeader
         badge="Live catalog"
         title="Browse All Subjects"
-        subtitle="Search every past paper by course code, title, or teacher — or pick a subject to browse its full library."
+        subtitle="Search every past paper by course code, title, or teacher, or pick a subject to browse its full library."
       />
 
       {/* Filter tabs and search */}

@@ -61,110 +61,64 @@ export default function AdminGenerateQuizzes() {
       />
 
       {/* Admin Usage Stats Row */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: '1rem',
-          marginBottom: '1.75rem'
-        }}
-      >
-        <div className="admin-card" style={{ padding: '1.25rem' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-subtle)' }}>ACTIVE COURSES</span>
-          <strong style={{ display: 'block', fontSize: '1.75rem', fontWeight: 900, color: 'var(--brand)' }}>
+      <div className="admin-stats-grid">
+        <div className="admin-card admin-stat-card">
+          <span className="admin-stat-label">Active Courses</span>
+          <strong className="admin-stat-value admin-stat-value--brand tabular-nums">
             {DEFAULT_SUBJECTS.length}
           </strong>
         </div>
-        <div className="admin-card" style={{ padding: '1.25rem' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-subtle)' }}>PENDING MODERATION</span>
-          <strong style={{ display: 'block', fontSize: '1.75rem', fontWeight: 900, color: 'var(--warning)' }}>
+        <div className="admin-card admin-stat-card">
+          <span className="admin-stat-label">Pending Moderation</span>
+          <strong className="admin-stat-value admin-stat-value--warning tabular-nums">
             {pendingCount}
           </strong>
         </div>
-        <div className="admin-card" style={{ padding: '1.25rem' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-subtle)' }}>TOTAL SUBMISSIONS</span>
-          <strong style={{ display: 'block', fontSize: '1.75rem', fontWeight: 900, color: 'var(--text)' }}>
+        <div className="admin-card admin-stat-card">
+          <span className="admin-stat-label">Total Submissions</span>
+          <strong className="admin-stat-value tabular-nums">
             {submissions.length}
           </strong>
         </div>
       </div>
 
       {/* Moderation Queue */}
-      <section className="admin-card" style={{ marginBottom: '2rem' }} aria-label="Moderation queue">
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--text)' }}>
+      <section className="admin-card admin-queue-card" aria-label="Moderation queue">
+        <h2 className="admin-section-title">
           Moderation Queue (Uploads, Requests &amp; Reports)
         </h2>
-        <p style={{ fontSize: '0.875rem', color: 'var(--text-subtle)', marginBottom: '1rem' }}>
+        <p className="admin-section-desc">
           Review student-contributed past papers and problem reports before publishing.
         </p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div className="admin-queue-list">
           {submissions.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '0.75rem',
-                padding: '0.875rem 1rem',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border)',
-                background: 'var(--surface-2)'
-              }}
-            >
+            <div key={item.id} className="admin-queue-item">
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                  <span
-                    style={{
-                      fontSize: '0.7rem',
-                      fontWeight: 800,
-                      textTransform: 'uppercase',
-                      padding: '0.15rem 0.5rem',
-                      borderRadius: '9999px',
-                      background: 'var(--brand-soft)',
-                      color: 'var(--brand)'
-                    }}
-                  >
+                <div className="admin-queue-head">
+                  <span className="admin-queue-type">
                     {item.type}
                   </span>
-                  <strong style={{ fontSize: '0.9rem', color: 'var(--text)' }}>{item.title}</strong>
+                  <strong className="admin-queue-title">{item.title}</strong>
                 </div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-subtle)' }}>
+                <div className="admin-queue-meta">
                   By {item.contributor} · {item.createdAt} · Status: <strong>{item.status}</strong>
                   {item.details ? ` · ${item.details}` : ''}
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.4rem' }}>
+              <div className="admin-queue-actions">
                 <button
                   type="button"
                   onClick={() => handleModerationAction(item.id, 'approved')}
-                  style={{
-                    padding: '0.4rem 0.85rem',
-                    borderRadius: '9999px',
-                    border: 'none',
-                    background: '#059669',
-                    color: '#ffffff',
-                    fontSize: '0.75rem',
-                    fontWeight: 700
-                  }}
+                  className="admin-approve-btn"
                 >
                   Approve
                 </button>
                 <button
                   type="button"
                   onClick={() => handleModerationAction(item.id, 'rejected')}
-                  style={{
-                    padding: '0.4rem 0.85rem',
-                    borderRadius: '9999px',
-                    border: '1px solid var(--border)',
-                    background: 'var(--surface)',
-                    color: 'var(--danger)',
-                    fontSize: '0.75rem',
-                    fontWeight: 700
-                  }}
+                  className="admin-reject-btn"
                 >
                   Reject
                 </button>
@@ -176,7 +130,7 @@ export default function AdminGenerateQuizzes() {
 
       {/* Batch Quiz Generator */}
       <form className="admin-card" onSubmit={handleGenerate}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--text)' }}>
+        <h2 className="admin-section-title admin-section-title--spaced">
           Batch Course Quiz Generator
         </h2>
         <div className="ai-field">
@@ -188,12 +142,12 @@ export default function AdminGenerateQuizzes() {
             value={subject}
             spellCheck={false}
             onChange={(e) => setSubject(e.target.value)}
-            placeholder="e.g. CSC211 — Data Structures"
+            placeholder="e.g. CSC211 - Data Structures"
             required
           />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div className="admin-controls-grid">
           <div>
             <label className="ai-label" htmlFor="admin-difficulty">Difficulty</label>
             <select
@@ -230,31 +184,20 @@ export default function AdminGenerateQuizzes() {
         </button>
 
         {error && (
-          <p role="alert" style={{ marginTop: '1.25rem', fontWeight: 700, color: 'var(--danger)', textAlign: 'center' }}>
+          <p role="alert" className="admin-status-msg admin-status-msg--error">
             {error}
           </p>
         )}
 
         {status && (
-          <p role="status" style={{ marginTop: '1.25rem', fontWeight: 700, color: 'var(--brand)', textAlign: 'center' }}>
+          <p role="status" className="admin-status-msg admin-status-msg--ok">
             {status}
           </p>
         )}
 
         {generatedList.length > 0 && (
-          <div style={{ marginTop: '1.5rem' }}>
-            <pre
-              style={{
-                padding: '1rem',
-                borderRadius: 'var(--radius-md)',
-                background: 'var(--surface-2)',
-                border: '1px solid var(--border)',
-                color: 'var(--text)',
-                fontSize: '0.8125rem',
-                maxHeight: '300px',
-                overflowY: 'auto'
-              }}
-            >
+          <div className="admin-output-wrap">
+            <pre className="admin-output-pre">
               {JSON.stringify(generatedList, null, 2)}
             </pre>
           </div>

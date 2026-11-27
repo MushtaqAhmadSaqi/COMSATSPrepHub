@@ -31,8 +31,37 @@ function calculateScore(query, text) {
   return 0;
 }
 
+const RECENT_COURSES_KEY = 'pph_recent_courses';
+
+export function recordRecentCourse(subject) {
+  if (!subject || !subject.code || typeof localStorage === 'undefined') return;
+  try {
+    const raw = localStorage.getItem(RECENT_COURSES_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    const safeList = Array.isArray(list) ? list : [];
+    const next = [
+      { code: subject.code, name: subject.name || '', department: subject.department || '' },
+      ...safeList.filter((item) => item?.code !== subject.code)
+    ].slice(0, 5);
+    localStorage.setItem(RECENT_COURSES_KEY, JSON.stringify(next));
+  } catch {
+    // ignore storage quota errors
+  }
+}
+
+export function getRecentCourseCodes() {
+  if (typeof localStorage === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(RECENT_COURSES_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter((c) => c && c.code) : [];
+  } catch {
+    return [];
+  }
+}
+
 /**
- * Returns filtered and sorted command palette items across Subjects, Papers, Pages, and Actions.
+ * Returns filtered and sorted command palette items across Recent, Subjects, Papers, Pages, and Actions.
  */
 export function getCommandPaletteResults(
   query = '',
@@ -121,7 +150,31 @@ export function getCommandPaletteResults(
   const trimmed = query.trim();
 
   if (!trimmed) {
-    return allItems.filter((item) => item.group === 'Pages' || item.group === 'Actions').slice(0, 12);
+    const recentCodes = getRecentCourseCodes();
+    const recentItems = recentCodes
+      .map((entry) => {
+        const matched = subjectList.find((s) => s.code === entry.code) || {
+          code: entry.code,
+          name: entry.name || entry.code,
+          department: entry.department || 'COMSATS'
+        };
+        return {
+          id: `recent_${matched.code}`,
+          group: 'Recent',
+          label: `${matched.code} — ${matched.name}`,
+          meta: `${matched.department || 'COMSATS'} · Recent course`,
+          icon: matched.icon || 'history',
+          path: 'subject-papers',
+          subjectCode: matched.code,
+          subject: matched
+        };
+      })
+      .slice(0, 4);
+
+    const baseItems = allItems
+      .filter((item) => item.group === 'Pages' || item.group === 'Actions')
+      .slice(0, Math.max(8, 12 - recentItems.length));
+    return [...recentItems, ...baseItems];
   }
 
   const normalizedQuery = normalizeCourseCode(trimmed);

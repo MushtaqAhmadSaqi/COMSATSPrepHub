@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AppIcon from './AppIcon';
+import './StateDisplay.css';
 
 /**
  * OfflineBanner — Displays a friendly, non-intrusive banner when the device loses network connectivity.
@@ -38,21 +39,7 @@ export default function OfflineBanner() {
     <div
       role="status"
       aria-live="polite"
-      style={{
-        width: '100%',
-        padding: '0.5rem 1rem',
-        fontSize: '0.85rem',
-        fontWeight: 600,
-        textAlign: 'center',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '0.5rem',
-        zIndex: 9999,
-        background: isOffline ? '#ef4444' : '#10b981',
-        color: '#0f172a',
-        transition: 'background-color 0.25s ease, color 0.25s ease'
-      }}
+      className={`offline-banner ${isOffline ? 'offline-banner--offline' : 'offline-banner--online'}`}
     >
       <AppIcon name={isOffline ? 'wifi_off' : 'wifi'} size={18} />
       <span>

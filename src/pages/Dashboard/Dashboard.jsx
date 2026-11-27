@@ -255,16 +255,13 @@ export default function Dashboard({
     <div className="study-dashboard">
       <header className="study-dashboard__header">
         <div>
-          <p className="study-dashboard__eyebrow">
-            YOUR WORKSPACE · {prefs.campus?.toUpperCase() || 'ISLAMABAD'} CAMPUS · {prefs.department || 'CS & IT'}
-          </p>
           <h1>Welcome back, {displayName}.</h1>
           <p className="study-dashboard__intro">
             A little practice today. A little more confidence tomorrow.
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.625rem', flexWrap: 'wrap' }}>
+        <div className="study-dashboard__header-actions">
           <button
             type="button"
             className="study-dashboard__signout"
@@ -287,8 +284,7 @@ export default function Dashboard({
           ) : (
             <button
               type="button"
-              className="study-dashboard__primary"
-              style={{ marginTop: 0 }}
+              className="study-dashboard__primary study-dashboard__primary--flush"
               onClick={() => {
                 if (typeof onOpenAuth === 'function') onOpenAuth();
                 else onNavigate('auth');
@@ -317,9 +313,8 @@ export default function Dashboard({
       )}
 
       <section
-        className="study-dashboard__metrics"
+        className="study-dashboard__metrics study-dashboard__metrics--cards"
         aria-label="Study overview"
-        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}
       >
         {metrics.map((metric) => (
           <article
@@ -331,7 +326,7 @@ export default function Dashboard({
               <Icon name={metric.icon} />
             </div>
 
-            <strong className="study-dashboard__metric-value">
+            <strong className="study-dashboard__metric-value tabular-nums">
               {metric.value}
             </strong>
 
@@ -344,27 +339,12 @@ export default function Dashboard({
       {localStats.badges && localStats.badges.length > 0 && (
         <section
           aria-label="Earned study badges"
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '0.5rem',
-            marginBottom: '1.5rem'
-          }}
+          className="study-dashboard__badges"
         >
           {localStats.badges.map((b) => (
             <span
               key={b.id}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.35rem 0.85rem',
-                borderRadius: '9999px',
-                background: 'var(--sd-soft)',
-                color: 'var(--sd-brand)',
-                fontSize: '0.78rem',
-                fontWeight: 700
-              }}
+              className="study-dashboard__badge"
             >
               <Icon name={b.icon} />
               {b.label}
@@ -377,19 +357,16 @@ export default function Dashboard({
         <div className="study-dashboard__main">
           <section className="study-dashboard__feature">
             <div className="study-dashboard__feature-top">
-              <span className="study-dashboard__section-label">
-                THE PAPER LIBRARY
-              </span>
+              <h2>Start with the questions<br />that came before.</h2>
               <Icon name="library_books" />
             </div>
 
-            <h2>Start with the questions<br />that came before.</h2>
             <p>
               Explore past papers by subject. Get familiar with the format,
               revisit the difficult topics, and make your next study session count.
             </p>
 
-            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div className="study-dashboard__feature-actions">
               <button
                 type="button"
                 className="study-dashboard__primary"
@@ -401,71 +378,40 @@ export default function Dashboard({
 
               <button
                 type="button"
-                className="study-dashboard__signout"
-                style={{ marginTop: '22px' }}
+                className="study-dashboard__signout study-dashboard__signout--aligned"
                 onClick={() => onNavigate(destinations.studyHub)}
               >
                 <Icon name="local_fire_department" />
                 Daily Challenge &amp; Flashcards
               </button>
             </div>
-
-            <div className="study-dashboard__feature-foot">
-              <span>01 / Explore</span>
-              <span>02 / Understand</span>
-              <span>03 / Practice</span>
-            </div>
           </section>
 
           {/* Quiz History Chart & Weak Topics */}
           <section
-            className="study-dashboard__activity"
+            className="study-dashboard__activity study-dashboard__activity--spaced"
             aria-label="Quiz accuracy history and weak topics"
-            style={{ marginBottom: '24px' }}
           >
             <div className="study-dashboard__section-heading">
               <div>
-                <p className="study-dashboard__section-label">PERFORMANCE INSIGHTS</p>
                 <h2>Quiz History &amp; Weak-Topic Detection</h2>
               </div>
             </div>
 
             {quizHistory.length > 0 ? (
-              <div style={{ marginBottom: '1.25rem' }}>
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: `repeat(${quizHistory.length}, minmax(40px, 1fr))`,
-                    gap: '0.5rem',
-                    alignItems: 'end',
-                    height: '110px',
-                    padding: '0.75rem 0.25rem 0',
-                    borderBottom: '1px solid var(--sd-line)'
-                  }}
-                >
+              <div className="study-dashboard__chart-wrap">
+                <div className="study-dashboard__chart-grid">
                   {quizHistory.slice().reverse().map((q) => (
                     <div
                       key={q.id}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end',
-                        height: '100%',
-                        gap: '0.25rem'
-                      }}
+                      className="study-dashboard__chart-col"
                     >
-                      <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--sd-brand)' }}>
+                      <span className="study-dashboard__chart-pct tabular-nums">
                         {q.accuracy}%
                       </span>
                       <div
-                        style={{
-                          width: '100%',
-                          maxWidth: '38px',
-                          height: `${Math.max(12, q.accuracy)}%`,
-                          background: q.accuracy >= 70 ? '#10b981' : 'var(--sd-brand)',
-                          borderRadius: '6px 6px 0 0'
-                        }}
+                        className={`study-dashboard__chart-bar${q.accuracy >= 70 ? ' study-dashboard__chart-bar--high' : ''}`}
+                        style={{ '--bar-h': `${Math.max(12, q.accuracy)}%` }}
                         title={`${q.title}: ${q.accuracy}% (${q.dateLabel})`}
                       />
                     </div>
@@ -473,35 +419,25 @@ export default function Dashboard({
                 </div>
               </div>
             ) : (
-              <p style={{ fontSize: '0.875rem', color: 'var(--sd-muted)', marginBottom: '1rem' }}>
+              <p className="study-dashboard__chart-hint">
                 Complete your first practice or AI quiz to unlock your accuracy chart.
               </p>
             )}
 
             {weakTopics.length > 0 ? (
               <div>
-                <p style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--sd-muted)', marginBottom: '0.5rem' }}>
+                <p className="study-dashboard__weak-label">
                   Topics scoring under 75% (recommended for targeted drill):
                 </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div className="study-dashboard__weak-list">
                   {weakTopics.map((wt) => (
                     <div
                       key={wt.subject}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: '0.5rem',
-                        padding: '0.75rem 1rem',
-                        borderRadius: '12px',
-                        border: '1px solid var(--sd-line)',
-                        background: 'var(--sd-bg)'
-                      }}
+                      className="study-dashboard__weak-item"
                     >
                       <div>
-                        <strong style={{ fontSize: '0.875rem' }}>{wt.subject}</strong>
-                        <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--sd-muted)' }}>
+                        <strong className="study-dashboard__weak-title">{wt.subject}</strong>
+                        <span className="study-dashboard__weak-meta tabular-nums">
                           Avg accuracy: {wt.averageAccuracy}% across {wt.attempts} {wt.attempts === 1 ? 'attempt' : 'attempts'}
                         </span>
                       </div>
@@ -529,21 +465,20 @@ export default function Dashboard({
                 </div>
               </div>
             ) : (
-              <p style={{ fontSize: '0.8125rem', color: 'var(--sd-muted)' }}>
-                ✅ No weak topics detected below 75% accuracy yet. Keep up the momentum!
+              <p className="study-dashboard__weak-empty">
+                <Icon name="check_circle" />
+                <span>No weak topics detected below 75% accuracy yet. Keep up the momentum!</span>
               </p>
             )}
           </section>
 
           {/* Bookmarked Papers */}
           <section
-            className="study-dashboard__activity"
+            className="study-dashboard__activity study-dashboard__activity--spaced"
             aria-label="Bookmarked past papers"
-            style={{ marginBottom: '24px' }}
           >
             <div className="study-dashboard__section-heading">
               <div>
-                <p className="study-dashboard__section-label">SAVED COLLECTION</p>
                 <h2>Bookmarked Papers ({bookmarkedPapers.length})</h2>
               </div>
             </div>
@@ -581,8 +516,7 @@ export default function Dashboard({
                 </p>
                 <button
                   type="button"
-                  className="study-dashboard__signout"
-                  style={{ marginTop: '10px' }}
+                  className="study-dashboard__signout study-dashboard__empty-action"
                   onClick={() => onNavigate(destinations.papers)}
                 >
                   Browse Past Papers
@@ -597,7 +531,6 @@ export default function Dashboard({
           >
             <div className="study-dashboard__section-heading">
               <div>
-                <p className="study-dashboard__section-label">YOUR STUDY TRAIL</p>
                 <h2 id="study-activity-title">Recent activity</h2>
               </div>
 
@@ -646,7 +579,6 @@ export default function Dashboard({
 
         <aside className="study-dashboard__sidebar">
           <section className="study-dashboard__tools">
-            <p className="study-dashboard__section-label">KEEP MOVING</p>
             <h2>A good next step</h2>
 
             <button
@@ -712,10 +644,9 @@ export default function Dashboard({
 
           {/* Exam Countdown & Reminders Widget */}
           <section className="study-dashboard__tools" aria-label="Exam countdown reminders">
-            <p className="study-dashboard__section-label">EXAM COUNTDOWN</p>
             <h2>Upcoming Exams</h2>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.85rem' }}>
+            <div className="study-dashboard__exam-list">
               {exams.map((ex) => {
                 const days = getDaysRemaining(ex.date);
                 const isSample = String(ex.id || '').startsWith('exam-default-');
@@ -723,56 +654,24 @@ export default function Dashboard({
                 return (
                   <div
                     key={ex.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      padding: '0.6rem 0.75rem',
-                      borderRadius: '10px',
-                      border: '1px solid var(--sd-line)',
-                      background: 'var(--sd-bg)',
-                      fontSize: '0.8125rem',
-                      opacity: isPassed ? 0.75 : 1
-                    }}
+                    className={`study-dashboard__exam-item${isPassed ? ' study-dashboard__exam-item--passed' : ''}`}
                   >
-                    <div style={{ minWidth: 0 }}>
-                      <strong style={{ display: 'block', overflowWrap: 'anywhere' }}>{ex.course}</strong>
-                      <span style={{ fontSize: '0.72rem', color: 'var(--sd-muted)' }}>
+                    <div className="study-dashboard__exam-info">
+                      <strong className="study-dashboard__exam-course">{ex.course}</strong>
+                      <span className="study-dashboard__exam-date">
                         {ex.date}
-                        {isSample && ' · Sample reminder — edit or remove it'}
+                        {isSample && ' · Sample reminder: edit or remove it'}
                       </span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
-                      <span
-                        style={{
-                          padding: '0.2rem 0.55rem',
-                          borderRadius: '9999px',
-                          background: 'var(--sd-soft)',
-                          color: 'var(--sd-brand)',
-                          fontSize: '0.72rem',
-                          fontWeight: 800,
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
+                    <div className="study-dashboard__exam-actions">
+                      <span className="study-dashboard__exam-pill tabular-nums">
                         {days === null ? '—' : isPassed ? 'Passed' : days === 0 ? 'Today!' : `${days}d left`}
                       </span>
                       <button
                         type="button"
                         onClick={() => handleRemoveExam(ex.id)}
                         aria-label={`Remove ${ex.course} exam reminder`}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: 'var(--sd-muted)',
-                          width: '44px',
-                          height: '44px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: '8px',
-                          cursor: 'pointer'
-                        }}
+                        className="study-dashboard__exam-remove"
                       >
                         <Icon name="close" />
                       </button>
@@ -782,45 +681,26 @@ export default function Dashboard({
               })}
             </div>
 
-            <form onSubmit={handleAddExam} style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+            <form onSubmit={handleAddExam} className="study-dashboard__exam-form">
               <input
                 type="text"
                 placeholder="Course (e.g. CSC311 Final)"
                 value={newExamCourse}
                 onChange={(e) => setNewExamCourse(e.target.value)}
                 aria-label="Exam course title"
-                style={{
-                  minHeight: '44px',
-                  padding: '0.5rem 0.65rem',
-                  borderRadius: '8px',
-                  border: '1px solid var(--sd-line)',
-                  background: 'var(--sd-bg)',
-                  color: 'var(--sd-text)',
-                  fontSize: '0.8125rem'
-                }}
+                className="study-dashboard__exam-input"
               />
-              <div style={{ display: 'flex', gap: '0.4rem' }}>
+              <div className="study-dashboard__exam-row">
                 <input
                   type="date"
                   value={newExamDate}
                   onChange={(e) => setNewExamDate(e.target.value)}
                   aria-label="Exam date"
-                  style={{
-                    flex: 1,
-                    minHeight: '44px',
-                    minWidth: 0,
-                    padding: '0.5rem 0.65rem',
-                    borderRadius: '8px',
-                    border: '1px solid var(--sd-line)',
-                    background: 'var(--sd-bg)',
-                    color: 'var(--sd-text)',
-                    fontSize: '0.8125rem'
-                  }}
+                  className="study-dashboard__exam-date-input"
                 />
                 <button
                   type="submit"
-                  className="study-dashboard__signout"
-                  style={{ padding: '0.5rem 0.85rem' }}
+                  className="study-dashboard__signout study-dashboard__exam-add"
                 >
                   Add
                 </button>
@@ -830,7 +710,6 @@ export default function Dashboard({
 
           <section className="study-dashboard__note">
             <Icon name="edit_note" />
-            <p className="study-dashboard__section-label">A SMALL STUDY HABIT</p>
             <h2>Give one topic your full attention.</h2>
             <p>
               Pick something you find difficult. Review one paper, attempt a few

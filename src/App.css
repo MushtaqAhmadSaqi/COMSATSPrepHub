@@ -15,11 +15,7 @@
   width: 100%;
   padding-bottom: 6rem;
   position: relative;
-  z-index: 1;
-}
-
-.main-content:has([aria-modal="true"]) {
-  z-index: 1000;
+  z-index: var(--z-base);
 }
 
 @media (min-width: 1024px) {
@@ -30,4 +26,55 @@
 
 .app-container--exam .main-content {
   padding-bottom: 2rem;
+}
+
+.route-loading-grid {
+  max-width: 64rem;
+  margin: 2.5rem auto;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.guard-shell {
+  max-width: 40rem;
+  margin: 3rem auto;
+  padding: 0 1.5rem;
+}
+
+.guard-card {
+  padding: 2rem;
+}
+
+.guard-return-row {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.guard-return-btn {
+  background: none;
+  border: none;
+  color: var(--brand);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+}
+
+.notfound-shell {
+  max-width: 40rem;
+  margin: 4rem auto;
+  padding: 0 1.5rem;
+}
+
+.notfound-card {
+  padding: 2.5rem 2rem;
+}
+
+.main-motion-shell {
+  width: 100%;
 }

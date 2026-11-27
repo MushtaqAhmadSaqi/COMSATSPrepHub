@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { addModerationSubmission } from '../../utils/studyTracker';
 import { toast } from '../../utils/toast';
 import AppIcon from '../../components/ui/AppIcon';
+import './FaqContact.css';
 
 const FAQS = [
   {
@@ -64,53 +65,31 @@ export default function FaqContact() {
   };
 
   return (
-    <div style={{ maxWidth: '48rem', margin: '2rem auto', padding: '0 1rem', minHeight: '60vh' }}>
-      <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--brand)' }}>FAQ &amp; Contact Us</h1>
-        <p style={{ color: 'var(--text-subtle)', marginTop: '0.5rem' }}>
+    <div className="faq-container">
+      <div className="faq-header">
+        <h1 className="faq-title">FAQ &amp; Contact Us</h1>
+        <p className="faq-subtitle">
           Have questions or want to reach out to the COMSATSPrepHub team?
         </p>
       </div>
 
-      <section style={{ marginBottom: '3rem' }}>
-        <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>Frequently Asked Questions</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <section className="faq-section">
+        <h2 className="faq-section-title">Frequently Asked Questions</h2>
+        <div className="faq-list">
           {FAQS.map((faq, i) => (
-            <div
-              key={i}
-              style={{
-                background: 'var(--surface)',
-                borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--border)',
-                overflow: 'hidden',
-                boxShadow: 'var(--shadow-1)'
-              }}
-            >
+            <div key={i} className="faq-item">
               <button
                 type="button"
                 onClick={() => setOpenIdx(openIdx === i ? null : i)}
                 aria-expanded={openIdx === i}
                 aria-controls={`faq-answer-${i}`}
-                style={{
-                  width: '100%',
-                  padding: '1rem 1.25rem',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  color: 'var(--text)'
-                }}
+                className="faq-toggle-btn"
               >
                 <span>{faq.q}</span>
-                <AppIcon name="expand_more" size={20} style={{ transition: 'transform 0.2s', transform: openIdx === i ? 'rotate(180deg)' : 'none' }} />
+                <AppIcon name="expand_more" size={20} className={`faq-chevron${openIdx === i ? ' faq-chevron--open' : ''}`} />
               </button>
               {openIdx === i && (
-                <div id={`faq-answer-${i}`} style={{ padding: '0 1.25rem 1.25rem', color: 'var(--text-subtle)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                <div id={`faq-answer-${i}`} className="faq-answer">
                   {faq.a}
                 </div>
               )}
@@ -119,34 +98,34 @@ export default function FaqContact() {
         </div>
       </section>
 
-      <section style={{ background: 'var(--surface)', padding: '2rem', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-2)' }}>
-        <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Contact the Student Team</h2>
-        <p style={{ color: 'var(--text-subtle)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+      <section className="contact-card">
+        <h2 className="contact-heading">Contact the Student Team</h2>
+        <p className="contact-subtitle">
           Need help or want to report an issue? Send us a quick note.
         </p>
 
         {sent ? (
-          <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-            <AppIcon name="check_circle" size={48} style={{ color: 'var(--success)' }} />
-            <h3 style={{ margin: '0.5rem 0' }}>Thank you!</h3>
-            <p style={{ color: 'var(--text-subtle)' }}>Your message is in the support queue. You can also email us using the links in the footer.</p>
+          <div className="contact-success">
+            <AppIcon name="check_circle" size={48} className="contact-success-icon" />
+            <h3 className="contact-success-title">Thank you!</h3>
+            <p className="contact-success-desc">Your message is in the support queue. You can also email us using the links in the footer.</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} aria-busy={submitting} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <form onSubmit={handleSubmit} aria-busy={submitting} className="contact-form">
             <div>
-              <label htmlFor="contact-name" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Name</label>
+              <label htmlFor="contact-name" className="contact-label">Name</label>
               <input
                 id="contact-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your Name"
-                style={{ width: '100%', minHeight: '44px', padding: '0.625rem 0.875rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-strong)', background: 'var(--surface-2)', color: 'var(--text)' }}
+                className="contact-input"
                 required
               />
             </div>
             <div>
-              <label htmlFor="contact-email" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Email</label>
+              <label htmlFor="contact-email" className="contact-label">Email</label>
               <input
                 id="contact-email"
                 type="email"
@@ -154,36 +133,26 @@ export default function FaqContact() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="student@comsats.edu.pk"
-                style={{ width: '100%', minHeight: '44px', padding: '0.625rem 0.875rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-strong)', background: 'var(--surface-2)', color: 'var(--text)' }}
+                className="contact-input"
                 required
               />
             </div>
             <div>
-              <label htmlFor="contact-message" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Message</label>
+              <label htmlFor="contact-message" className="contact-label">Message</label>
               <textarea
                 id="contact-message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={4}
                 placeholder="How can we help?"
-                style={{ width: '100%', minHeight: '44px', padding: '0.625rem 0.875rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-strong)', background: 'var(--surface-2)', color: 'var(--text)' }}
+                className="contact-input"
                 required
               />
             </div>
             <button
               type="submit"
               disabled={submitting}
-              style={{
-                alignSelf: 'flex-start',
-                minHeight: '44px',
-                padding: '0.625rem 1.5rem',
-                borderRadius: '9999px',
-                background: 'var(--brand)',
-                color: 'var(--on-brand)',
-                border: 'none',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
+              className="contact-submit-btn"
             >
               {submitting ? 'Sending…' : 'Send Message'}
             </button>

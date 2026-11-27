@@ -5,6 +5,7 @@ import { updatePassword, validatePasswordStrength } from '../../services/auth';
 import { toast } from '../../utils/toast';
 import AppIcon from '../../components/ui/AppIcon';
 import Modal from '../../components/ui/Modal';
+import './Account.css';
 
 export default function Account({
   user,
@@ -105,45 +106,36 @@ export default function Account({
   };
 
   return (
-    <div style={{ maxWidth: '48rem', margin: '2rem auto', padding: '0 1rem', minHeight: '60vh' }}>
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--brand)' }}>Student Account &amp; Settings</h1>
-        <p style={{ color: 'var(--text-subtle)', marginTop: '0.5rem' }}>
+    <div className="account-container">
+      <div className="account-header">
+        <h1 className="account-title">Student Account &amp; Settings</h1>
+        <p className="account-subtitle">
           Manage your campus preferences, privacy controls, and data export.
         </p>
       </div>
 
-      <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-2)', marginBottom: '1.5rem' }}>
-        <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <AppIcon name="person" size={20} style={{ color: 'var(--brand)' }} />
+      <div className="account-card">
+        <h2 className="account-card-title">
+          <AppIcon name="person" size={20} className="account-card-icon" />
           Profile
         </h2>
         {user ? (
           <div>
             <p><strong>Signed in as:</strong> {user.email}</p>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-subtle)', marginTop: '0.25rem' }}>
+            <p className="account-note">
               Your activity feed is synced with your account. Bookmarks, notes, flashcards, GPA plans,
               and exam countdowns stay in this browser.
             </p>
           </div>
         ) : (
           <div>
-            <p style={{ color: 'var(--text-subtle)', marginBottom: '1rem' }}>
+            <p className="account-copy">
               You are using local guest mode. Sign in to sync your activity feed across devices; bookmarks, notes, and flashcards stay in this browser.
             </p>
             <button
               type="button"
               onClick={onOpenAuth}
-              style={{
-                minHeight: '44px',
-                padding: '0.625rem 1.25rem',
-                borderRadius: '9999px',
-                background: 'var(--brand)',
-                color: 'var(--on-brand)',
-                border: 'none',
-                cursor: 'pointer',
-                fontWeight: 600
-              }}
+              className="account-btn account-btn--primary"
             >
               Sign In / Register
             </button>
@@ -152,19 +144,19 @@ export default function Account({
       </div>
 
       {passwordRecovery && (
-        <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: 'var(--radius-xl)', border: '2px solid var(--brand)', boxShadow: 'var(--shadow-2)', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <AppIcon name="lock_reset" size={20} style={{ color: 'var(--brand)' }} />
+        <div className="account-card account-card--highlight">
+          <h2 className="account-card-title account-card-title--tight">
+            <AppIcon name="lock_reset" size={20} className="account-card-icon" />
             Set a New Password
           </h2>
 
           {user ? (
             <form onSubmit={handleSetNewPassword} noValidate>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-subtle)', marginBottom: '1rem' }}>
+              <p className="account-copy">
                 You reached this page from a password reset link. Choose a new password to finish recovery.
               </p>
 
-              <label htmlFor="account-new-password" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.35rem' }}>
+              <label htmlFor="account-new-password" className="account-label">
                 New password
               </label>
               <input
@@ -174,21 +166,10 @@ export default function Account({
                 onChange={(e) => setNewPassword(e.target.value)}
                 autoComplete="new-password"
                 required
-                style={{
-                  minHeight: '44px',
-                  width: '100%',
-                  maxWidth: '360px',
-                  padding: '0.625rem 1rem',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border-strong)',
-                  background: 'var(--surface-2)',
-                  color: 'var(--text)',
-                  fontSize: '1rem',
-                  marginBottom: '0.85rem'
-                }}
+                className="account-input"
               />
 
-              <label htmlFor="account-confirm-password" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.35rem' }}>
+              <label htmlFor="account-confirm-password" className="account-label">
                 Confirm new password
               </label>
               <input
@@ -198,72 +179,42 @@ export default function Account({
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 autoComplete="new-password"
                 required
-                style={{
-                  minHeight: '44px',
-                  width: '100%',
-                  maxWidth: '360px',
-                  padding: '0.625rem 1rem',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border-strong)',
-                  background: 'var(--surface-2)',
-                  color: 'var(--text)',
-                  fontSize: '1rem',
-                  marginBottom: '0.5rem'
-                }}
+                className="account-input account-input--last"
               />
 
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-subtle)', marginBottom: '1rem' }}>
+              <p className="account-hint">
                 Use 8+ characters with uppercase, lowercase, and a number.
               </p>
 
               <button
                 type="submit"
                 disabled={updatingPassword}
-                style={{
-                  minHeight: '44px',
-                  padding: '0.625rem 1.25rem',
-                  borderRadius: '9999px',
-                  background: 'var(--brand)',
-                  color: 'var(--on-brand)',
-                  border: 'none',
-                  cursor: updatingPassword ? 'default' : 'pointer',
-                  fontWeight: 600
-                }}
+                className="account-btn account-btn--primary"
               >
                 {updatingPassword ? 'Updating…' : 'Update Password'}
               </button>
             </form>
           ) : (
-            <p style={{ fontSize: '0.875rem', color: 'var(--danger)' }} role="alert">
+            <p className="account-alert" role="alert">
               This password reset link is invalid or has expired. Request a new reset email from the sign-in page.
             </p>
           )}
         </div>
       )}
 
-      <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-2)', marginBottom: '1.5rem' }}>
-        <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <AppIcon name="school" size={20} style={{ color: 'var(--brand)' }} />
+      <div className="account-card">
+        <h2 className="account-card-title">
+          <AppIcon name="school" size={20} className="account-card-icon" />
           Campus Preference
         </h2>
-        <label htmlFor="account-campus-select" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+        <label htmlFor="account-campus-select" className="account-label account-label--spaced">
           Primary COMSATS Campus:
         </label>
         <select
           id="account-campus-select"
           value={prefs.campus || 'Islamabad'}
           onChange={handleCampusChange}
-          style={{
-            minHeight: '44px',
-            padding: '0.625rem 1rem',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--border-strong)',
-            background: 'var(--surface-2)',
-            color: 'var(--text)',
-            fontSize: '1rem',
-            width: '100%',
-            maxWidth: '300px'
-          }}
+          className="account-select"
         >
           {['Islamabad', 'Lahore', 'Wah', 'Abbottabad', 'Attock', 'Sahiwal', 'Vehari', 'Virtual Campus'].map((c) => (
             <option key={c} value={c}>{c}</option>
@@ -271,16 +222,16 @@ export default function Account({
         </select>
       </div>
 
-      <div style={{ background: 'var(--surface)', padding: '2rem', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-2)' }}>
-        <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <AppIcon name="dataset" size={20} style={{ color: 'var(--brand)' }} />
+      <div className="account-card account-card--flush">
+        <h2 className="account-card-title">
+          <AppIcon name="dataset" size={20} className="account-card-icon" />
           Data &amp; Privacy Control
         </h2>
-        <p style={{ fontSize: '0.875rem', color: 'var(--text-subtle)', marginBottom: '1rem' }}>
+        <p className="account-copy">
           You retain complete ownership of your study history and notes. You can export or erase your data at any time.
         </p>
 
-        <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.875rem', fontWeight: 600, marginBottom: '1.25rem', cursor: 'pointer' }}>
+        <label className="account-checkbox-label">
           <input
             type="checkbox"
             checked={analyticsConsent === 'accepted'}
@@ -289,23 +240,11 @@ export default function Account({
           Allow optional anonymous analytics to help improve COMSATSPrepHub
         </label>
 
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+        <div className="account-actions">
           <button
             type="button"
             onClick={handleExport}
-            style={{
-              minHeight: '44px',
-              padding: '0.625rem 1.25rem',
-              borderRadius: '9999px',
-              border: '1px solid var(--border-strong)',
-              background: 'var(--surface-2)',
-              color: 'var(--text)',
-              cursor: 'pointer',
-              fontWeight: 600,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
+            className="account-btn account-btn--secondary"
           >
             <AppIcon name="download" size={18} />
             Export All Data (JSON)
@@ -313,19 +252,7 @@ export default function Account({
           <button
             type="button"
             onClick={handleClear}
-            className="account-clear-data"
-            style={{
-              minHeight: '44px',
-              padding: '0.625rem 1.25rem',
-              borderRadius: '9999px',
-              border: '1px solid var(--danger)',
-              background: 'transparent',
-              cursor: 'pointer',
-              fontWeight: 600,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
+            className="account-btn account-btn--outline-danger account-clear-data"
           >
             <AppIcon name="delete_forever" size={18} />
             Clear Local Data
@@ -338,25 +265,16 @@ export default function Account({
             }}
             title="Clear Study Data?"
           >
-            <p style={{ color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+            <p className="account-modal-copy">
               This permanently deletes all local study history, bookmarks, notes, flashcards, and quiz attempts
               {user ? ' (as well as your synced cloud study activity)' : ' stored on this device'}. This action cannot be undone.
             </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div className="account-modal-actions">
               <button
                 type="button"
                 onClick={() => setConfirmClearOpen(false)}
                 disabled={clearingData}
-                style={{
-                  minHeight: '44px',
-                  padding: '0.625rem 1.125rem',
-                  borderRadius: '9999px',
-                  border: '1px solid var(--border-strong)',
-                  background: 'var(--surface-2)',
-                  color: 'var(--text)',
-                  fontWeight: 600,
-                  cursor: clearingData ? 'not-allowed' : 'pointer'
-                }}
+                className="account-btn account-btn--secondary"
               >
                 Cancel
               </button>
@@ -364,19 +282,7 @@ export default function Account({
                 type="button"
                 onClick={confirmClearLocalData}
                 disabled={clearingData}
-                style={{
-                  minHeight: '44px',
-                  padding: '0.625rem 1.25rem',
-                  borderRadius: '9999px',
-                  border: 'none',
-                  background: 'var(--danger)',
-                  color: '#ffffff',
-                  fontWeight: 700,
-                  cursor: clearingData ? 'not-allowed' : 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.4rem'
-                }}
+                className="account-btn account-btn--danger"
               >
                 <AppIcon name={clearingData ? 'progress_activity' : 'delete_forever'} size={18} />
                 {clearingData ? 'Clearing…' : 'Yes, Clear Everything'}

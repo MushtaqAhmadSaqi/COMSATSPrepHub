@@ -1,104 +1,65 @@
 # COMSATSPrepHub Design System (`DESIGN.md`)
 
-> Academic precision for COMSATS University students preparing for Midterms and Terminals on mobile phones and campus Wi-Fi.
+## Brand Palette & Semantic Tokens (`src/index.css`)
+All UI components consume CSS custom properties defined in `:root` (light mode) and `html.dark` (dark mode). Hardcoded hex colors in component stylesheets are forbidden.
 
----
+### Core Brand & Surface Tokens
+- **Light Mode (`:root`)**
+  - Background (`--bg`): `#f7f8fa`
+  - Primary Surface (`--surface`): `#ffffff`
+  - Secondary Surface (`--surface-2`): `#f1f5f9`
+  - Elevated Control Surface (`--surface-3`): `#e2e8f0`
+  - Brand Navy (`--brand`): `#1e40af` (interactive blue `--brand-2`: `#2563eb`, sky highlight `--brand-light`: `#38bdf8`)
+  - On-Brand Ink (`--on-brand`): `#ffffff`
+  - Scholar Amber Accent (`--accent`): `#d97706`
+  - Text (`--text`): `#0f172a`, Muted (`--text-muted`): `#334155`, Subtle (`--text-subtle`): `#475569`
+- **Dark Mode (`html.dark`)**
+  - Background (`--bg`): `#090e1a`
+  - Primary Surface (`--surface`): `#111827`
+  - Secondary Surface (`--surface-2`): `#1e293b`
+  - Elevated Control Surface (`--surface-3`): `#334155`
+  - Brand Sky (`--brand`): `#60a5fa` (`--brand-2`: `#3b82f6`, `--brand-light`: `#93c5fd`)
+  - On-Brand Ink (`--on-brand`): `#0f172a`
+  - Scholar Amber Accent (`--accent`): `#fbbf24`
+  - Text (`--text`): `#f8fafc`, Muted (`--text-muted`): `#cbd5e1`, Subtle (`--text-subtle`): `#94a3b8`
+- **Semantic & Specialized Tokens**
+  - Status pairs: `--success` / `--success-soft` / `--success-ink`, `--warning` / `--warning-soft`, `--danger` / `--danger-soft` / `--danger-ink`
+  - Math, Diagram & Code surfaces: `--code-bg`, `--code-header-bg`, `--code-border`, `--code-text`, `--code-accent`, `--math-surface`, `--math-formula-bg`, `--math-formula-border`, `--math-formula-pill`, `--math-note-bg`, `--math-note-border`, `--math-note-text`, `--paper-ink`
+  - Backdrop & Shell surfaces: `--backdrop-scrim`, `--nav-glass-bg`, `--nav-pill-bg`, `--nav-mobile-bg`, `--footer-bg`, `--footer-bg-end`
 
-## 1. Design Philosophy & Visual Direction
+## Typography Scale & Rules
+- **Font Families**:
+  - `--font-display`: `'Space Grotesk', 'Inter', system-ui, sans-serif` (hero `<h1>`, major section `<h2>`, navbar wordmark)
+  - `--font-body`: `'Inter', system-ui, -apple-system, sans-serif`
+  - `--font-mono`: `'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace` (strictly course codes like `CSC211` and code blocks)
+  - `--font-urdu`: `'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif` (applied on `[dir="rtl"]` and `.urdu-text` with `line-height: 2.15`)
+- **Consolidated Body Type Scale**:
+  - `--fs-heading`: `1.25rem` (20px)
+  - `--fs-body`: `0.9375rem` (15px)
+  - `--fs-sm`: `0.875rem` (14px)
+  - `--fs-data`: `0.8125rem` (13px, strictly for dense GPA/Dashboard tables, metadata, and tabular counters)
+  - Exempt display hierarchy: Hero `<h1>` (`clamp(2.75rem, 6vw, 4.75rem)`), PageHeader `<h1>`, major KPI values, and navbar wordmark.
+  - Zero text smaller than `13px` (`0.8125rem`) above the fold.
+- **Numeric Precision**: Apply `.tabular-nums` (`font-variant-numeric: tabular-nums`) to all timers, scores, GPA/CGPA figures, paper counts, and progress metrics.
+- **Casing**: Use sentence case for UI labels, tabs, and table headers (`text-transform: uppercase` reserved strictly for course codes such as `CSC211`).
 
-COMSATSPrepHub is a **calm, authoritative academic workspace** — never a generic SaaS landing page. There are no purple neon gradients, bloated drop shadows, or floating decorative orbs. Every token, spacing rule, and interaction supports rapid retrieval and deep focus under exam pressure.
+## Z-Index & Top Layer Architecture
+All stacked UI uses a 5-tier scale in `:root`, while modals and palettes render natively in the browser Top Layer via `<dialog>.showModal()`:
+- `--z-base: 1` (page flow, sticky progress indicators)
+- `--z-sticky: 40` (sticky quiz/paper toolbars)
+- `--z-nav: 60` (top header and mobile bottom navigation)
+- `--z-popover: 80` (floating scroll-to-top button and anchored popovers)
+- `--z-toast: 100` (toast notifications, cookie consent, offline/install banners)
+- **Top Layer**: `Modal.jsx`, `AuthModal.jsx`, and `CommandPalette.jsx` use native `<dialog>` + `showModal()`, styled with `dialog::backdrop`, `@starting-style`, `transition-behavior: allow-discrete`, and scroll-locked via `body:has(dialog[open])`.
 
-### Surface Modes
-The interface adapts across three purposeful surface modes sharing one token vocabulary:
-
-1. **Persuade Mode — Landing Page (`/`):**
-   - Editorial academic-tech hierarchy with balanced display typography, crisp hairline borders, and high-trust proof points (`Works without an account — saved on this device`).
-   - Asymmetric bento grid where flagship modules (*Past Paper Library* and *Timed & AI Quizzes*) feature lightweight, functional UI micro-previews instead of uniform icon boxes.
-   - Unified instant course-code search (`CSC101`, `CSC211`, `MTH104`, `csc 103` alias handling) wired directly into the `Ctrl K` / `⌘ K` Command Palette flow.
-
-2. **Read Mode — Study Content (*Past Paper Library*, *Paper Viewer*, *Cheat Sheets*):**
-   - Warm-neutral paper-like light surface (`#f9fafb` / `#ffffff`) and low-glare slate dark surface (`#0b1120` / `#111827`) for late-night revision.
-   - Generous line measure (`max-width: 68ch–75ch`), crisp KaTeX math typesetting, dark-mode-aware Mermaid diagrams, and horizontal scroll scoped strictly to wide equations and truth/scheduling tables (`overflow-x: auto`).
-   - Zero decorative chrome competing with exam questions and collapsible model answers.
-
-3. **Operate Mode — Active Practice (*Timed Quizzes*, *AI Quiz Generator*, *Study Hub Flashcards*, *GPA Calculator*, *Student Dashboard*):**
-   - High scanability, tight feedback loops, keyboard-first shortcuts (`1–4` / `A–D`, `Enter`, `Space`, `←`/`→`), and distraction-free timed exam mode.
-   - Tabular numerals (`font-variant-numeric: tabular-nums`) on all timers, scores, SGPA/CGPA values, and live counters.
-
----
-
-## 2. Color System & Semantic Tokens
-
-### Brand & Accent Palette
-- **Primary Ink / Brand Accent (Academic Cobalt):**
-  - Light: `--brand: #1e40af` (hover `#1d4ed8`, ink `#1e3a8a`, deep `#172554`, soft `rgba(30, 64, 175, 0.08)`, soft-2 `rgba(30, 64, 175, 0.14)`, `--on-brand: #ffffff`)
-  - Dark: `--brand: #60a5fa` (hover `#93c5fd`, ink `#93c5fd`, deep `#dbeafe`, soft `rgba(96, 165, 250, 0.14)`, soft-2 `rgba(96, 165, 250, 0.24)`, `--on-brand: #0b1120`)
-- **Single Purposeful Accent (Scholar Ochre / Amber):**
-  - Light: `--accent: #b45309` (soft `rgba(180, 83, 9, 0.10)`) — used sparingly for streaks, flagged review items, and active highlights.
-  - Dark: `--accent: #fbbf24` (soft `rgba(251, 191, 36, 0.15)`)
-
-### Surfaces & Text (WCAG 2.2 AA Verified)
-| Token | Light Mode | Dark Mode (Low-Glare Exam Night) | Role |
-| :--- | :--- | :--- | :--- |
-| `--bg` | `#f7f8fa` | `#090e1a` | Page canvas |
-| `--surface` | `#ffffff` | `#111827` | Cards, panels, sheets |
-| `--surface-2` | `#f1f5f9` | `#1a2333` | Inset controls, subtle rows |
-| `--surface-3` | `#e2e8f0` | `#273247` | Pill tracks, hover chips |
-| `--border` | `#e2e8f0` | `rgba(255, 255, 255, 0.10)` | Hairline borders |
-| `--border-strong` | `#cbd5e1` | `rgba(255, 255, 255, 0.20)` | Form inputs, focused borders |
-| `--text` | `#0f172a` | `#f1f5f9` | Primary body & headings |
-| `--text-muted` | `#334155` | `#cbd5e1` | Secondary labels & prose |
-| `--text-subtle` | `#475569` | `#94a3b8` | Hints, metadata, captions |
-
-### Semantic Status Tokens
-- **Success (Mastery / Correct):** Light `#059669` / Dark `#34d399` (`--success-soft`)
-- **Warning (Flagged / Deadline < 7d):** Light `#d97706` / Dark `#fbbf24` (`--warning-soft`)
-- **Danger (Incorrect / Destructive):** Light `#dc2626` / Dark `#ef4444` (`--danger-soft`)
-- **Info:** Light `#1d4ed8` / Dark `#60a5fa`
-
-### Browser & OS Integration
-- `html` sets `color-scheme: light` or `color-scheme: dark` synchronously in `public/theme-init.js` and `src/App.jsx`.
-- `<meta name="theme-color">` dynamically syncs (`#f7f8fa` in light mode, `#090e1a` in dark mode).
-- Native `<select>` and `<option>` elements set explicit `background-color: var(--surface)` and `color: var(--text)` so Windows dark mode menus never render white-on-white or mismatched system popups.
-
----
-
-## 3. Typography & Hierarchy
-
-- **Display Font (`--font-display`):** `'Space Grotesk', 'Inter', system-ui, sans-serif` — tight tracking (`-0.03em` to `-0.04em`), `text-wrap: balance` on all major headings.
-- **UI & Reading Body (`--font-body`):** `'Inter', system-ui, -apple-system, sans-serif` — clean legibility on high-DPI mobile screens; `line-height: 1.5` for UI, `1.75` for Read Mode paper prose.
-- **Technical Monospace (`--font-mono`):** `'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace` — applied to all COMSATS course codes (`CSC101`, `CSC211`, `MTH104`), keyboard shortcut badges (`⌘ K` / `Ctrl K`), timers, SGPA/CGPA figures, and code blocks, paired with `font-variant-numeric: tabular-nums`.
-- **Urdu RTL Explanations (`--font-urdu`):** `'Noto Nastaliq Urdu', serif` with `line-height: 2.15` for bilingual step-by-step quiz explanations.
-- **Translation Protection:** Brand name (`COMSATSPrepHub`) and course codes carry `translate="no"`.
-
----
-
-## 4. Iconography (Zero-FOUT Campus Wi-Fi Standard)
-
-- External icon font ligatures (`Material Symbols Outlined`) are **eliminated** to prevent raw ligature strings (`menu_book`, `local_fire_department`, `auto_awesome`) from flashing on slow campus networks.
-- All UI icons use a single tree-shaken inline SVG component (`src/components/ui/AppIcon.jsx`) modeled after crisp 24×24 stroke geometry (`strokeWidth="1.85"`, `strokeLinecap="round"`, `strokeLinejoin="round"`, `aria-hidden="true"`).
-- Icon-only controls require an explicit `aria-label` and a minimum `44×44px` interactive hit area.
-
----
-
-## 5. Layout, Navigation & Elevation
-
-- **Single-Tier Desktop Navigation (`≥ 1024px`):**
-  - Sticky top bar (`height: 3.75rem`) with Brand mark, unified 6-link pill (`Home`, `Papers`, `AI Quiz`, `Study Hub`, `GPA Calc`, `Dashboard`), compact `Search (Ctrl K)` / `(⌘ K)` trigger, `EN / اردو` toggle, Light/Dark toggle, and Account / Sign In action.
-- **Mobile & Tablet Navigation (`< 1024px`):**
-  - Compact top utility bar (Brand, Search trigger, Language, Theme, Sign In/Account) + fixed bottom tab bar (`Papers`, `AI Quiz`, `Study Hub`, `GPA`, `Dashboard`) with `env(safe-area-inset-bottom)` clearance.
-  - Floating overlays (`CookieNotice`, `InstallPrompt`, `ToastContainer`) sit cleanly above the bottom bar (`bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px))`) and remain compact on mobile so CTAs and navigation stay unobstructed.
-- **Elevation & Borders:**
-  - Restraint over blur: rely on `1px solid var(--border)` hairlines and crisp background stepping (`--bg` → `--surface` → `--surface-2`), with subtle two-layer shadows reserved for floating popovers, command palette, and modals (`--shadow-1`, `--shadow-2`, `--shadow-3`).
-- **Back to Top Control:**
-  - Only one `Back to top` control is visible in the footer column (or floating `ScrollTop` exclusively above the footer when scrolled, avoiding duplicate adjacent `arrow_upward` controls).
-
----
-
-## 6. Motion, Accessibility & Performance Guardrails
-
-- **Compositor-Only Motion:** Animate `transform` and `opacity` only. **Zero `transition: all`** anywhere in stylesheets or inline styles.
-- **Reduced Motion:** Global `@media (prefers-reduced-motion: reduce)` disables non-essential motion; Framer Motion uses `<MotionConfig reducedMotion="user">`; programmatic `window.scrollTo` checks `prefers-reduced-motion`.
-- **Focus & Touch Targets:** Consistent `:focus-visible` ring (`2px solid var(--brand)` + `4px` `--ring` halo) on every interactive element. Non-inline controls enforce `min-height: 44px; min-width: 44px` and `touch-action: manipulation`.
-- **Containment & Virtualization:** Modals, drawers, and the `Ctrl K` Command Palette enforce `overscroll-behavior: contain`. Long course/paper catalogs apply `content-visibility: auto` and `contain-intrinsic-size` to avoid layout work off-screen.
-- **Single Source of Truth Data:** All landing page course/paper counters and command palette search indexes derive dynamically from `src/constants/subjects.js` + live `papersService` counts (`src/constants/platformStats.js`), eliminating conflicting hardcoded numbers.
+## Motion, Modern CSS & Accessibility Rules
+- **Progressive Web Platform Features**:
+  - View Transitions API (`document.startViewTransition`) with `view-transition-name` handoff from subject cards to `SubjectPapers` header.
+  - CSS Container Queries (`@container`) on Home bento grids, Subjects cards, SubjectPapers rows, Dashboard layout, and GPA workspace panels.
+  - CSS Scroll-Driven Animations (`animation-timeline: scroll(root block)` for `PaperView` progress bar; `animation-timeline: view()` for Home below-the-fold reveals, gated behind `@supports` and `prefers-reduced-motion: no-preference`).
+  - CSS Anchor Positioning (`anchor-name` / `position-anchor` / `position-try-fallbacks: flip-block`) inside `@supports` with absolute fallback for search/course popovers.
+  - `content-visibility: auto; contain-intrinsic-size: auto 180px;` on long lists of subjects, papers, questions, and quiz review items.
+- **Accessibility & Craft Guardrails**:
+  - WCAG 2.2 AA contrast (`>= 4.5:1` normal text, `>= 3:1` large text) in both light and dark modes, `44x44px` minimum touch targets, visible `:focus-visible` rings, full keyboard navigation across comboboxes, modals, quizzes, flashcards, and paper reader.
+  - Full `@media (prefers-reduced-motion: reduce)` parity across CSS, Framer Motion (`MotionConfig reducedMotion="user"`), programmatic scroll (`instant`), and Remotion (`ExamLoopPlayer` paused keyframe poster).
+  - **Zero Decorative Clutter**: Zero eyebrow/kicker labels above headings, zero decorative non-interactive pills/chips/badges, zero `STEP 01/02/03` numbering, zero `transition: all`, zero emoji used as UI icons (use `AppIcon` inline SVGs), and zero em-dashes in newly written UI copy.

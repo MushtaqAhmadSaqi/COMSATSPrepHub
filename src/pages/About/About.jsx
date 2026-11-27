@@ -28,7 +28,7 @@ export default function About() {
       <div className="founder-card">
         <img
           src="/My-image.webp"
-          alt="Mushtaq Ahmad Saqi — Founder & Lead Developer"
+          alt="Mushtaq Ahmad Saqi, Founder & Lead Developer"
           className="founder-avatar"
           width={FOUNDER_SIZE.width}
           height={FOUNDER_SIZE.height}
@@ -64,7 +64,7 @@ export default function About() {
           >
             <img
               src={c.image}
-              alt={`${c.name} — ${c.role}`}
+              alt={`${c.name}, ${c.role}`}
               className="contributor-avatar"
               width={PHOTO_SIZE.width}
               height={PHOTO_SIZE.height}

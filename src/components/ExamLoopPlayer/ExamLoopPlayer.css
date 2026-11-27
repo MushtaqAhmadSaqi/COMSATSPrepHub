@@ -1,0 +1,116 @@
+.exam-loop-section {
+  max-width: 64rem;
+  margin: 2.75rem auto 0;
+  text-align: left;
+}
+
+.exam-loop-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.exam-loop-title {
+  font-size: var(--fs-heading);
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin: 0 0 0.25rem;
+}
+
+.exam-loop-subtitle {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-subtle);
+}
+
+.exam-loop-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.exam-loop-chapter-btn,
+.exam-loop-play-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  padding: 0 0.9rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--fs-data);
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease),
+              background-color var(--dur-fast) var(--ease),
+              color var(--dur-fast) var(--ease);
+}
+
+.exam-loop-play-btn {
+  width: 44px;
+  padding: 0;
+}
+
+.exam-loop-chapter-btn:hover,
+.exam-loop-play-btn:hover {
+  border-color: var(--brand);
+  color: var(--text);
+}
+
+.exam-loop-chapter-btn.is-active {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.exam-loop-stage {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: var(--shadow-2);
+}
+
+.exam-loop-player {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.exam-loop-skeleton {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+@media (max-width: 640px) {
+  .exam-loop-section {
+    margin-top: 2rem;
+  }
+
+  .exam-loop-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .exam-loop-controls {
+    width: 100%;
+  }
+
+  .exam-loop-chapter-btn {
+    padding: 0 0.7rem;
+  }
+}

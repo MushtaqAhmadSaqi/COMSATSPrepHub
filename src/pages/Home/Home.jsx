@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useRef, useMemo, useEffect, useId, Suspense, lazy } from 'react';
 import { motion } from 'framer-motion';
 import { useCounter } from '../../utils/useCounter';
 import { DEFAULT_SUBJECTS } from '../../constants/subjects';
@@ -13,6 +13,8 @@ import {
 import AppIcon from '../../components/ui/AppIcon';
 import './Home.css';
 
+const ExamLoopPlayer = lazy(() => import('../../components/ExamLoopPlayer/ExamLoopPlayer'));
+
 /* ── Animated Stat Item ── */
 function StatItem({ num, label, suffix }) {
   const target = typeof num === 'number' ? num : parseInt(String(num).replace(/\D/g, ''), 10);
@@ -26,74 +28,54 @@ function StatItem({ num, label, suffix }) {
   );
 }
 
-/* ── Ripple helper ── */
-function addRipple(e) {
-  const btn = e.currentTarget;
-  const circle = document.createElement('span');
-  const rect = btn.getBoundingClientRect();
-  circle.className = 'ripple-circle';
-  circle.style.top = `${e.clientY - rect.top}px`;
-  circle.style.left = `${e.clientX - rect.left}px`;
-  btn.appendChild(circle);
-  circle.addEventListener('animationend', () => circle.remove());
-}
-
-/* ── Spotlight Card Effect with Magnetic Hover ── */
-function SpotlightCard({ children, className = '', delay = 0, onClick, ariaLabel }) {
+/* ── Spotlight Card Effect (rAF + CSS custom properties, 0 React re-renders) ── */
+function SpotlightCard({ children, className = '', onClick, ariaLabel }) {
   const cardRef = useRef(null);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [magneticOffset, setMagneticOffset] = useState({ x: 0, y: 0 });
+  const rafRef = useRef(null);
+
+  useEffect(() => () => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+  }, []);
 
   const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
-    if (typeof window !== 'undefined' && (
+    const el = cardRef.current;
+    if (!el || typeof window === 'undefined') return;
+    if (
       window.matchMedia('(hover: none)').matches ||
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    )) {
+    ) {
       return;
     }
-    const rect = cardRef.current.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    setMousePosition({ x: mouseX, y: mouseY });
-
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const dx = Math.max(-4, Math.min(4, ((mouseX - centerX) / centerX) * 4));
-    const dy = Math.max(-4, Math.min(4, ((mouseY - centerY) / centerY) * 4));
-    setMagneticOffset({ x: dx, y: dy });
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      if (!cardRef.current) return;
+      const rect = cardRef.current.getBoundingClientRect();
+      cardRef.current.style.setProperty('--mouse-x', `${Math.round(clientX - rect.left)}px`);
+      cardRef.current.style.setProperty('--mouse-y', `${Math.round(clientY - rect.top)}px`);
+    });
   };
 
   const handleMouseLeave = () => {
-    setMagneticOffset({ x: 0, y: 0 });
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    if (!cardRef.current) return;
+    cardRef.current.style.setProperty('--mouse-x', '50%');
+    cardRef.current.style.setProperty('--mouse-y', '50%');
   };
 
   return (
-    <motion.button
+    <button
       type="button"
       ref={cardRef}
       className={`spotlight-card ${className}`}
       onClick={onClick}
       aria-label={ariaLabel}
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.35, delay, ease: 'easeOut' }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      animate={{
-        x: magneticOffset.x,
-        y: magneticOffset.y
-      }}
-      style={{
-        '--mouse-x': `${mousePosition.x}px`,
-        '--mouse-y': `${mousePosition.y}px`,
-        cursor: 'pointer',
-        fontFamily: 'inherit'
-      }}
     >
       {children}
-    </motion.button>
+    </button>
   );
 }
 
@@ -116,33 +98,36 @@ function AnimatedButton({ children, onClick, variant = 'primary', className = ''
 
 const HOW_IT_WORKS_STEPS = [
   {
-    step: '01',
     icon: 'manage_search',
     title: 'Find Your Course',
     desc: 'Search by COMSATS course code (like CSC101, CSC211, MTH104) or filter by department to open verified past papers and model solutions.'
   },
   {
-    step: '02',
     icon: 'psychology',
     title: 'Practice & Drill Weak Topics',
     desc: 'Take timed or practice MCQs, generate custom AI quizzes on specific topics, or review spaced-repetition flashcards.'
   },
   {
-    step: '03',
     icon: 'trending_up',
     title: 'Track Mastery & Plan GPA',
     desc: 'Monitor your accuracy streak on the student dashboard and compute your exact COMSATS SGPA, CGPA, and target semester grades.'
   }
 ];
 
+const QUICK_JUMP_CODES = ['CSC211', 'MTH104', 'CSC241'];
+
 export default function Home({
   onNavigate = () => {},
   onSelectSubject = () => {},
-  user = null
+  user = null,
+  isDark = false
 }) {
   const [heroQuery, setHeroQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
+  const [escapeDismissed, setEscapeDismissed] = useState(false);
+  const [activeSuggestionIdx, setActiveSuggestionIdx] = useState(-1);
   const [subjects, setSubjects] = useState(DEFAULT_SUBJECTS);
+  const suggestionsListId = useId();
 
   useEffect(() => {
     let active = true;
@@ -162,7 +147,7 @@ export default function Home({
     {
       icon: 'picture_as_pdf',
       title: 'Past Paper Library',
-      desc: 'Search every COMSATS past paper by course code, teacher, or exam type — with model answers.',
+      desc: 'Search every COMSATS past paper by course code, teacher, or exam type, complete with model answers.',
       hint: `${platformStats.courseCount} courses · code search like "csc 211"`,
       path: 'subjects',
       wide: true
@@ -195,7 +180,7 @@ export default function Home({
       icon: 'dashboard',
       title: 'Dashboard',
       desc: 'Your streaks, accuracy, bookmarks, notes, and exam countdowns in one place.',
-      hint: 'Works without an account — saved on this device',
+      hint: 'Works without an account, saved on this device',
       path: 'dashboard',
       wide: true
     }
@@ -226,43 +211,60 @@ export default function Home({
 
   const handleHeroSearchSubmit = (e) => {
     e.preventDefault();
+    if (activeSuggestionIdx >= 0 && suggestions[activeSuggestionIdx]) {
+      onSelectSubject(suggestions[activeSuggestionIdx]);
+      return;
+    }
     const query = heroQuery.trim();
     onNavigate(query ? `subjects?q=${encodeURIComponent(query)}` : 'subjects');
+  };
+
+  const isSuggestionsOpen = !escapeDismissed && (searchFocused || heroQuery.trim().length > 0);
+  const activeSuggestionId =
+    isSuggestionsOpen && activeSuggestionIdx >= 0 && suggestions[activeSuggestionIdx]
+      ? `${suggestionsListId}-opt-${activeSuggestionIdx}`
+      : undefined;
+
+  const handleHeroSearchKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setEscapeDismissed(true);
+      setSearchFocused(false);
+      setActiveSuggestionIdx(-1);
+      return;
+    }
+    if (e.key === 'ArrowDown' && !isSuggestionsOpen) {
+      e.preventDefault();
+      setEscapeDismissed(false);
+      setSearchFocused(true);
+      setActiveSuggestionIdx(0);
+      return;
+    }
+    if (!isSuggestionsOpen || suggestions.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveSuggestionIdx((prev) => (prev + 1) % suggestions.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveSuggestionIdx((prev) => (prev <= 0 ? suggestions.length - 1 : prev - 1));
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setActiveSuggestionIdx(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setActiveSuggestionIdx(suggestions.length - 1);
+    }
   };
 
   return (
     <div className="home-page-wrapper">
       <section className="home-hero-section">
-        {/* Floating particles */}
-        <div className="home-particles" aria-hidden="true">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className={`particle particle-${i + 1}`} />
-          ))}
-        </div>
-
-        {/* Background Blobs */}
-        <div className="hero-blob hero-blob-1" aria-hidden="true" />
-        <div className="hero-blob hero-blob-2" aria-hidden="true" />
-
-        {/* Badge */}
-        <motion.div
-          className="home-badge-wrapper"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.08 }}
-        >
-          <div className="home-badge-pill">
-            <AppIcon name="school" size={15} />
-            Built for COMSATS Students
-          </div>
-        </motion.div>
-
         {/* Headline */}
         <motion.h1
           className="home-title"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
+          transition={{ duration: 0.45, delay: 0.08 }}
         >
           Ace Your Exams at <br />
           <span className="home-title-highlight" translate="no">COMSATS University</span>
@@ -273,123 +275,83 @@ export default function Home({
           className="home-subtitle"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.22 }}
+          transition={{ duration: 0.45, delay: 0.14 }}
         >
-          Past papers, practice quizzes, AI quiz generation, flashcards, and GPA tools —
-          all in one clean, student-first workspace built for mobile &amp; campus Wi-Fi.
+          Past papers, timed quizzes, custom AI practice, flashcards, and COMSATS GPA tools in one fast student workspace.
         </motion.p>
 
         {/* Global Course & Paper Search Bar with Instant Suggestions */}
         <div
           onFocusCapture={() => setSearchFocused(true)}
           onBlurCapture={(e) => {
-            if (!e.currentTarget.contains(e.relatedTarget)) setSearchFocused(false);
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+              setSearchFocused(false);
+              setActiveSuggestionIdx(-1);
+            }
           }}
-          style={{
-            maxWidth: '38rem',
-            margin: '0 auto 1.75rem',
-            position: 'relative',
-            zIndex: 10,
-            textAlign: 'left'
-          }}
+          className="home-search-wrap"
         >
           <form onSubmit={handleHeroSearchSubmit} role="search" aria-label="Search COMSATS courses and past papers">
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                background: 'var(--surface)',
-                border: '1.5px solid var(--border-strong)',
-                borderRadius: '9999px',
-                padding: '0.35rem 0.5rem 0.35rem 1rem',
-                boxShadow: 'var(--shadow-2)',
-                gap: '0.5rem'
-              }}
-            >
-              <AppIcon name="search" size={20} style={{ color: 'var(--brand)' }} />
+            <div className="home-search-box">
+              <AppIcon name="search" size={20} className="home-search-icon" />
               <input
                 type="search"
                 spellCheck={false}
                 value={heroQuery}
-                onChange={(e) => setHeroQuery(e.target.value)}
-                placeholder="Search by course code or subject (e.g. CSC211, OOP, MTH104)…"
-                aria-label="Search by course code or subject name"
-                style={{
-                  flex: 1,
-                  border: 'none',
-                  background: 'transparent',
-                  color: 'var(--text)',
-                  fontSize: '0.9375rem',
-                  outline: 'none',
-                  minWidth: 0,
-                  padding: '0.6rem 0'
+                onFocus={() => setEscapeDismissed(false)}
+                onChange={(e) => {
+                  setHeroQuery(e.target.value);
+                  setEscapeDismissed(false);
+                  setActiveSuggestionIdx(-1);
                 }}
+                onKeyDown={handleHeroSearchKeyDown}
+                placeholder="Search courses (CSC211, OOP)…"
+                aria-label="Search by course code or subject name"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded={isSuggestionsOpen}
+                aria-controls={suggestionsListId}
+                aria-activedescendant={activeSuggestionId}
+                className="home-search-input"
               />
               <button
                 type="submit"
-                style={{
-                  background: 'var(--brand)',
-                  color: 'var(--on-brand)',
-                  border: 'none',
-                  borderRadius: '9999px',
-                  padding: '0.55rem 1.1rem',
-                  fontSize: '0.8125rem',
-                  fontWeight: 700,
-                  minHeight: '44px'
-                }}
+                className="home-search-submit"
               >
                 Explore
               </button>
             </div>
           </form>
 
-          {(searchFocused || heroQuery.trim().length > 0) && (
+          {isSuggestionsOpen && (
             <div
-              role="group"
+              id={suggestionsListId}
+              role="listbox"
               aria-label="Course suggestions"
-              style={{
-                position: 'absolute',
-                top: 'calc(100% + 0.5rem)',
-                left: 0,
-                right: 0,
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-lg)',
-                boxShadow: 'var(--shadow-3)',
-                padding: '0.5rem',
-                zIndex: 30
-              }}
+              className="home-suggestions-panel"
             >
               {suggestions.length === 0 ? (
-                <div style={{ padding: '0.75rem 1rem', fontSize: '0.875rem', color: 'var(--text-subtle)' }}>
-                  No matching course found — press Explore to browse all subjects.
+                <div className="home-suggestions-empty">
+                  No matching course found. Press Explore to browse all subjects.
                 </div>
               ) : (
-                suggestions.map((subj) => (
+                suggestions.map((subj, idx) => (
                   <button
                     key={subj.code}
+                    id={`${suggestionsListId}-opt-${idx}`}
                     type="button"
+                    role="option"
+                    aria-selected={idx === activeSuggestionIdx}
+                    tabIndex={-1}
                     onClick={() => onSelectSubject(subj)}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '0.625rem 0.875rem',
-                      minHeight: '44px',
-                      borderRadius: 'var(--radius-sm)',
-                      border: 'none',
-                      background: 'transparent',
-                      color: 'var(--text)',
-                      textAlign: 'left',
-                      fontSize: '0.875rem'
-                    }}
+                    onMouseEnter={() => setActiveSuggestionIdx(idx)}
+                    className={`home-suggestion-btn${idx === activeSuggestionIdx ? ' is-active' : ''}`}
                   >
                     <span>
-                      <strong translate="no" style={{ color: 'var(--brand)', marginRight: '0.5rem' }}>{subj.code}</strong>
+                      <strong translate="no" className="home-suggestion-code">{subj.code}</strong>
                       {subj.name}
                     </span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-subtle)' }}>
+                    <span className="home-suggestion-count tabular-nums">
                       {subj.papers} papers →
                     </span>
                   </button>
@@ -399,40 +361,48 @@ export default function Home({
           )}
         </div>
 
-        {/* Primary CTA + Secondary Action */}
+        {/* Course quick-jump buttons */}
+        <div className="home-quick-jumps" role="group" aria-label="Popular COMSATS courses">
+          {QUICK_JUMP_CODES.map((code) => {
+            const matched = subjects.find((s) => s.code === code) || { code, name: code };
+            return (
+              <button
+                key={code}
+                type="button"
+                className="home-quick-jump-btn mono-code"
+                translate="no"
+                onClick={() => onSelectSubject(matched)}
+                aria-label={`Open ${code} ${matched.name} past papers`}
+              >
+                {code}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Primary CTA */}
         <motion.div
           className="home-cta-buttons"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.28 }}
+          transition={{ duration: 0.45, delay: 0.22 }}
         >
           <AnimatedButton
             variant="primary"
             icon="auto_stories"
-            onClick={(e) => { addRipple(e); onNavigate('subjects'); }}
-            className="btn-primary-pill ripple-host"
+            onClick={() => onNavigate('subjects')}
+            className="btn-primary-pill"
           >
             Browse Past Papers
           </AnimatedButton>
-          <AnimatedButton
-            variant="secondary"
-            icon="local_fire_department"
-            onClick={(e) => { addRipple(e); onNavigate('study-hub'); }}
-            className="btn-secondary-pill ripple-host"
-          >
-            {dailyChallenge.completedToday
-              ? `Daily Challenge (${dailyChallenge.todayScore})`
-              : 'Today’s 5-Q Challenge'}
-          </AnimatedButton>
         </motion.div>
 
-        {/* Bento destination grid — six study destinations with spotlight effect */}
+        {/* Bento destination grid */}
         <div className="home-features-grid">
-          {features.map((f, i) => (
+          {features.map((f) => (
             <SpotlightCard
               key={f.title}
               className={`home-feature-card ${f.wide ? 'home-feature-card--wide' : ''}`}
-              delay={i * 0.06}
               onClick={() => onNavigate(f.path)}
               ariaLabel={`Open ${f.title}: ${f.desc}`}
             >
@@ -446,57 +416,35 @@ export default function Home({
           ))}
         </div>
 
-        {/* Continue Where You Left Off / Recently Viewed (shown for logged-in users or returning visitors) */}
+        {/* Interactive Remotion Study Loop Preview (lazy-loaded) */}
+        <Suspense fallback={<div className="exam-loop-skeleton" aria-hidden="true" />}>
+          <ExamLoopPlayer isDark={isDark} />
+        </Suspense>
+
+        {/* Recently Studied (shown for logged-in users or returning visitors) */}
         {(user || recentActivity.length > 0 || recentPapers.length > 0) && (
           <section
-            aria-label="Continue where you left off"
-            style={{
-              maxWidth: '64rem',
-              margin: '2.75rem auto 0',
-              textAlign: 'left',
-              background: 'var(--surface)',
-              border: '1.5px solid var(--border)',
-              borderRadius: 'var(--radius-xl)',
-              padding: '1.5rem 1.75rem',
-              boxShadow: 'var(--shadow-1)'
-            }}
+            aria-label="Recently studied"
+            className="home-recent-section"
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
+            <div className="home-recent-head">
               <div>
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--brand)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                  CONTINUE WHERE YOU LEFT OFF
-                </span>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text)', marginTop: '0.15rem' }}>
+                <h2 className="home-recent-title">
                   {user ? 'Your recent study session' : 'Recently viewed on this device'}
                 </h2>
               </div>
               <button
                 type="button"
                 onClick={() => onNavigate('dashboard')}
-                style={{
-                  background: 'var(--brand-soft)',
-                  color: 'var(--brand)',
-                  border: 'none',
-                  borderRadius: '9999px',
-                  padding: '0.5rem 1rem',
-                  fontSize: '0.8125rem',
-                  fontWeight: 700,
-                  minHeight: '44px'
-                }}
+                className="home-recent-cta"
               >
                 Open Full Dashboard →
               </button>
             </div>
 
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))',
-                gap: '0.875rem'
-              }}
-            >
+            <div className="home-recent-grid">
               {(recentActivity.length > 0 ? recentActivity : [
-                { id: 'quick-1', title: 'CSC211 — Data Structures', description: 'Browse past papers & solutions', icon: 'description', type: 'paper', subjectCode: 'CSC211' },
+                { id: 'quick-1', title: 'CSC211: Data Structures', description: 'Browse past papers & solutions', icon: 'description', type: 'paper', subjectCode: 'CSC211' },
                 { id: 'quick-2', title: 'Daily 5-Question Challenge', description: 'Keep your study streak alive', icon: 'local_fire_department', type: 'daily' }
               ]).map((item) => (
                 <button
@@ -513,28 +461,18 @@ export default function Home({
                       onNavigate('subjects');
                     }
                   }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.875rem 1rem',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border)',
-                    background: 'var(--surface-2)',
-                    color: 'var(--text)',
-                    textAlign: 'left'
-                  }}
+                  className="home-recent-item"
                 >
                   <AppIcon
                     name={item.icon || 'history'}
                     size={22}
-                    style={{ color: 'var(--brand)', flexShrink: 0 }}
+                    className="home-recent-item__icon"
                   />
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.875rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div className="home-recent-item__body">
+                    <div className="home-recent-item__title">
                       {item.title}
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)' }}>
+                    <div className="home-recent-item__desc">
                       {item.description} {item.time ? `· ${item.time}` : ''}
                     </div>
                   </div>
@@ -547,49 +485,27 @@ export default function Home({
         {/* How It Works Section */}
         <section
           aria-label="How COMSATSPrepHub works"
-          style={{
-            maxWidth: '64rem',
-            margin: '3rem auto 1rem',
-            textAlign: 'left'
-          }}
+          className="home-how-section"
         >
-          <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--brand)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              HOW IT WORKS
-            </span>
-            <h2 style={{ fontSize: '1.625rem', fontWeight: 900, color: 'var(--text)', marginTop: '0.25rem', letterSpacing: '-0.02em' }}>
+          <div className="home-how-header">
+            <h2 className="home-how-title">
               A smarter study loop before every Midterm &amp; Terminal
             </h2>
           </div>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))',
-              gap: '1.25rem'
-            }}
-          >
+          <div className="home-how-grid">
             {HOW_IT_WORKS_STEPS.map((item) => (
               <div
-                key={item.step}
-                style={{
-                  background: 'var(--surface)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius-lg)',
-                  padding: '1.5rem',
-                  boxShadow: 'var(--shadow-1)'
-                }}
+                key={item.title}
+                className="home-how-card"
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--brand)', background: 'var(--brand-soft)', padding: '0.25rem 0.65rem', borderRadius: '9999px' }}>
-                    STEP {item.step}
-                  </span>
-                  <AppIcon name={item.icon} size={22} style={{ color: 'var(--brand)' }} />
+                <div className="home-how-card__top">
+                  <AppIcon name={item.icon} size={22} className="home-how-icon" />
                 </div>
-                <h3 style={{ fontSize: '1.0625rem', fontWeight: 800, color: 'var(--text)', marginBottom: '0.375rem' }}>
+                <h3 className="home-how-card__title">
                   {item.title}
                 </h3>
-                <p style={{ fontSize: '0.875rem', color: 'var(--text-subtle)', lineHeight: 1.6 }}>
+                <p className="home-how-card__desc">
                   {item.desc}
                 </p>
               </div>
@@ -597,14 +513,14 @@ export default function Home({
           </div>
         </section>
 
-        {/* Stats — Animated counters */}
+        {/* Stats: Animated counters */}
         <div className="home-stats-grid">
           {stats.map((s) => (
             <StatItem key={s.label} num={s.num} label={s.label} suffix={s.suffix} />
           ))}
         </div>
 
-        {/* ── Coming Soon Banner ────────────────────────────────────── */}
+        {/* Coming Soon Banner */}
         <ComingSoonBanner />
       </section>
     </div>
@@ -612,50 +528,38 @@ export default function Home({
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   COMING SOON — Upcoming features teaser section
+   COMING SOON: Upcoming features teaser section
 ───────────────────────────────────────────────────────────────── */
 const COMING_SOON_FEATURES = [
   {
     icon: 'smart_toy',
-    gradient: 'linear-gradient(135deg, var(--brand-2) 0%, var(--brand) 100%)',
-    glow: 'var(--brand-soft-2)',
+    variant: 'brand',
     label: 'AI Study Buddy',
     tag: 'AI',
-    tagColor: 'var(--brand)',
-    tagBg: 'var(--brand-soft)',
-    desc: 'Your personal 24/7 tutor — ask any COMSATS course question in plain Urdu or English and get step-by-step explanations, formula breakdowns, and past-paper hints instantly.',
+    desc: 'Your personal 24/7 tutor. Ask any COMSATS course question in plain Urdu or English and get step-by-step explanations, formula breakdowns, and past-paper hints instantly.',
     eta: 'Coming Q1 2027'
   },
   {
     icon: 'groups',
-    gradient: 'linear-gradient(135deg, var(--brand-light) 0%, var(--brand-2) 100%)',
-    glow: 'var(--brand-soft-2)',
+    variant: 'sky',
     label: 'Study Groups',
     tag: 'Social',
-    tagColor: 'var(--brand)',
-    tagBg: 'var(--brand-soft)',
     desc: 'Create or join private study rooms with your class batch. Share notes, quiz each other live, and tackle past papers together with real-time collaborative annotations.',
     eta: 'Coming Q1 2027'
   },
   {
     icon: 'auto_graph',
-    gradient: 'linear-gradient(135deg, var(--success) 0%, var(--brand-2) 100%)',
-    glow: 'var(--success-soft)',
+    variant: 'success',
     label: 'Smart Weak-Point Radar',
     tag: 'Analytics',
-    tagColor: 'var(--success)',
-    tagBg: 'var(--success-soft)',
-    desc: "Auto-detects your shakiest topics from quiz history and generates a targeted 7-day study schedule — so you spend zero time guessing what to revise.",
+    desc: 'Auto-detects your shakiest topics from quiz history and generates a targeted 7-day study schedule so you spend zero time guessing what to revise.',
     eta: 'Coming Q2 2027'
   },
   {
     icon: 'model_training',
-    gradient: 'linear-gradient(135deg, var(--accent) 0%, var(--danger) 100%)',
-    glow: 'var(--accent-soft)',
+    variant: 'accent',
     label: 'Mock Exam Simulator',
     tag: 'Exams',
-    tagColor: 'var(--accent)',
-    tagBg: 'var(--accent-soft)',
     desc: 'Full 3-hour timed midterm & terminal simulations with official COMSATS marking schemes. Get auto-graded, see your predicted grade, and compare with the class.',
     eta: 'Coming Q2 2027'
   },
@@ -677,51 +581,19 @@ function ComingSoonBanner() {
 
   return (
     <motion.section
+      className="home-coming-section"
       aria-label="Coming Soon Features"
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
-      style={{
-        maxWidth: '64rem',
-        margin: '4rem auto 1.5rem',
-        padding: '0 0.5rem'
-      }}
     >
       {/* Section header */}
-      <div style={{ textAlign: 'center', marginBottom: expanded ? '2.25rem' : '0' }}>
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            background: 'var(--brand-soft)',
-            border: '1px solid var(--brand-soft-2)',
-            borderRadius: '9999px',
-            padding: '0.35rem 1rem',
-            fontSize: '0.75rem',
-            fontWeight: 800,
-            color: 'var(--brand)',
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
-            marginBottom: '0.875rem'
-          }}
-        >
-          <AppIcon name="rocket_launch" size={15} />
-          What's Coming Next
-        </div>
-        <h2
-          style={{
-            fontSize: 'clamp(1.5rem, 3vw, 2rem)',
-            fontWeight: 900,
-            color: 'var(--text)',
-            letterSpacing: '-0.025em',
-            marginBottom: '0.5rem'
-          }}
-        >
+      <div className={`home-coming-head${expanded ? ' home-coming-head--expanded' : ''}`}>
+        <h2 className="home-coming-title">
           Big features are on the way
         </h2>
-        <p style={{ fontSize: '0.9375rem', color: 'var(--text-subtle)', maxWidth: '32rem', margin: '0 auto 1.25rem' }}>
+        <p className="home-coming-subtitle">
           We're building the most powerful exam-prep platform ever made for COMSATS students. Here's a sneak peek.
         </p>
         <button
@@ -729,21 +601,7 @@ function ComingSoonBanner() {
           onClick={() => setExpanded((value) => !value)}
           aria-expanded={expanded}
           aria-controls="coming-soon-panel"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            minHeight: '44px',
-            padding: '0.6rem 1.25rem',
-            borderRadius: '9999px',
-            border: '1.5px solid var(--border-strong)',
-            background: 'var(--surface)',
-            color: 'var(--brand)',
-            fontSize: '0.875rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            boxShadow: 'var(--shadow-1)'
-          }}
+          className="home-coming-toggle"
         >
           <AppIcon name={expanded ? 'expand_less' : 'expand_more'} size={18} />
           {expanded ? 'Hide upcoming features' : `Preview ${COMING_SOON_FEATURES.length} upcoming features`}
@@ -753,13 +611,7 @@ function ComingSoonBanner() {
       {expanded && (
         <div id="coming-soon-panel">
           {/* Feature cards grid */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
-              gap: '1.125rem'
-            }}
-          >
+          <div className="home-coming-grid">
             {COMING_SOON_FEATURES.map((f, i) => (
               <motion.div
                 key={f.label}
@@ -767,135 +619,30 @@ function ComingSoonBanner() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.07, ease: 'easeOut' }}
-                style={{
-                  position: 'relative',
-                  background: 'var(--surface)',
-                  borderRadius: 'var(--radius-xl)',
-                  border: '1px solid var(--border)',
-                  padding: '1.5rem',
-                  overflow: 'hidden',
-                  boxShadow: `0 4px 24px ${f.glow}, var(--shadow-1)`
-                }}
+                className={`home-coming-card home-coming-card--${f.variant}`}
               >
                 {/* Subtle glow blob behind icon */}
-                <div
-                  aria-hidden="true"
-                  style={{
-                    position: 'absolute',
-                    top: '-30px',
-                    right: '-20px',
-                    width: '120px',
-                    height: '120px',
-                    background: `radial-gradient(circle, ${f.glow} 0%, transparent 70%)`,
-                    pointerEvents: 'none'
-                  }}
-                />
+                <div aria-hidden="true" className="home-coming-card__glow" />
 
-                {/* Top row: icon + COMING SOON badge */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                  <div
-                    style={{
-                      width: '46px',
-                      height: '46px',
-                      borderRadius: 'var(--radius-md)',
-                      background: f.gradient,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                      boxShadow: `0 4px 12px ${f.glow}`
-                    }}
-                  >
-                    <AppIcon name={f.icon} size={22} style={{ color: 'var(--on-brand)' }} />
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem' }}>
-                    {/* Category tag */}
-                    <span
-                      style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 800,
-                        letterSpacing: '0.06em',
-                        textTransform: 'uppercase',
-                        color: f.tagColor,
-                        background: f.tagBg,
-                        border: '1px solid var(--border)',
-                        borderRadius: '9999px',
-                        padding: '0.2rem 0.55rem'
-                      }}
-                    >
-                      {f.tag}
-                    </span>
-                    {/* Coming soon pill */}
-                    <span
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.3rem',
-                        fontSize: '0.65rem',
-                        fontWeight: 800,
-                        letterSpacing: '0.05em',
-                        textTransform: 'uppercase',
-                        color: 'var(--text-subtle)',
-                        background: 'var(--surface-3)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '9999px',
-                        padding: '0.2rem 0.55rem'
-                      }}
-                    >
-                      <span
-                        style={{
-                          width: '6px',
-                          height: '6px',
-                          borderRadius: '50%',
-                          background: 'var(--accent)',
-                          animation: 'pulse 2s infinite',
-                          flexShrink: 0
-                        }}
-                      />
-                      Coming Soon
-                    </span>
+                {/* Top row: icon */}
+                <div className="home-coming-card__top">
+                  <div className="home-coming-card__icon-box">
+                    <AppIcon name={f.icon} size={22} className="home-coming-card__icon" />
                   </div>
                 </div>
 
                 {/* Title */}
-                <h3
-                  style={{
-                    fontSize: '1rem',
-                    fontWeight: 800,
-                    color: 'var(--text)',
-                    marginBottom: '0.4rem',
-                    letterSpacing: '-0.01em'
-                  }}
-                >
+                <h3 className="home-coming-card__title">
                   {f.label}
                 </h3>
 
                 {/* Description */}
-                <p
-                  style={{
-                    fontSize: '0.8125rem',
-                    color: 'var(--text-subtle)',
-                    lineHeight: 1.65,
-                    marginBottom: '1rem'
-                  }}
-                >
+                <p className="home-coming-card__desc">
                   {f.desc}
                 </p>
 
                 {/* ETA footer */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    color: 'var(--text-subtle)',
-                    borderTop: '1px solid var(--border)',
-                    paddingTop: '0.875rem'
-                  }}
-                >
+                <div className="home-coming-card__eta">
                   <AppIcon name="schedule" size={14} />
                   {f.eta}
                 </div>
@@ -904,22 +651,13 @@ function ComingSoonBanner() {
           </div>
 
           {/* Bottom CTA */}
-          <div
-            style={{
-              textAlign: 'center',
-              marginTop: '2rem',
-              padding: '1.5rem',
-              background: 'linear-gradient(135deg, var(--brand-soft) 0%, var(--accent-soft) 100%)',
-              borderRadius: 'var(--radius-xl)',
-              border: '1px dashed var(--border-strong)'
-            }}
-          >
-        <AppIcon name="campaign" size={28} style={{ color: 'var(--brand)', display: 'block', margin: '0 auto 0.5rem' }} />
-        <p style={{ fontWeight: 700, fontSize: '0.9375rem', color: 'var(--text)', marginBottom: '0.25rem' }}>
+          <div className="home-suggest-box">
+        <AppIcon name="campaign" size={28} className="home-suggest-icon" />
+        <p className="home-suggest-title">
           Want to shape what gets built next?
         </p>
-        <p style={{ fontSize: '0.8125rem', color: 'var(--text-subtle)' }}>
-          Share your ideas with the student team — every voice counts.
+        <p className="home-suggest-desc">
+          Share your ideas with the student team. Every voice counts.
         </p>
         <div className="home-suggest-actions">
           <a
@@ -940,7 +678,7 @@ function ComingSoonBanner() {
               height="17"
               viewBox="0 0 24 24"
               fill="currentColor"
-              style={{ flexShrink: 0 }}
+              className="home-wa-icon"
               aria-hidden="true"
             >
               <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>

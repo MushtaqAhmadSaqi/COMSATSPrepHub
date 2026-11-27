@@ -46,11 +46,11 @@
   color: var(--text-subtle);
   line-height: 1.7;
   margin-bottom: 2rem;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
 }
 
 .terms-section-title {
-  font-size: 1.25rem;
+  font-size: var(--fs-heading);
   font-weight: 800;
   color: var(--text);
   letter-spacing: -0.02em;
@@ -63,11 +63,11 @@
 
 .terms-section-title .material-symbols-outlined {
   color: var(--brand);
-  font-size: 20px;
+  font-size: var(--fs-heading);
 }
 
 .terms-body {
   color: var(--text-muted);
   line-height: 1.75;
-  font-size: 0.9375rem;
+  font-size: var(--fs-body);
 }

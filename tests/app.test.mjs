@@ -1309,12 +1309,17 @@ await runTest('UI: notes, report and admin textareas have explicit accessible na
 await runTest('UI: course suggestions stay available when focus moves inside search', () => {
   const source = readFileSync(new URL('../src/pages/Home/Home.jsx', import.meta.url), 'utf8');
   assert.ok(source.includes('onFocusCapture={() => setSearchFocused(true)}'));
-  assert.ok(source.includes('role="group"'));
-  assert.equal(source.includes('role="listbox"'), false);
+  assert.ok(source.includes('role="combobox"'));
+  assert.ok(source.includes('role="listbox"'));
+  assert.ok(source.includes('role="option"'));
+  assert.ok(source.includes('aria-activedescendant='));
   assert.equal(source.includes('onMouseDown={() => onSelectSubject(subj)}'), false);
-  const blurBody = source.match(/onBlurCapture=\{\(e\) => \{([\s\S]*?)\}\}/)[1];
+  const blurBody = source.match(/onBlurCapture=\{\(e\) => \{([\s\S]*?)\n\s*\}\}/)[1];
   let focused = true;
-  const handler = runInNewContext(`((e) => {${blurBody}})`, { setSearchFocused: (value) => { focused = value; } });
+  const handler = runInNewContext(`((e) => {${blurBody}})`, {
+    setSearchFocused: (value) => { focused = value; },
+    setActiveSuggestionIdx: () => {}
+  });
   const inside = {};
   const container = { contains: (target) => target === inside };
   handler({ currentTarget: container, relatedTarget: inside });
@@ -1397,9 +1402,13 @@ await runTest('UI: programmatic scrolling respects reduced motion', () => {
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)\s*\{\s*html\s*\{\s*scroll-behavior: auto;/);
 });
 
-await runTest('UI: report dialogs raise their existing main stacking context above navigation', () => {
-  const css = readFileSync(new URL('../src/App.css', import.meta.url), 'utf8');
-  assert.match(css, /\.main-content:has\(\[aria-modal="true"\]\)\s*\{\s*z-index: 1000;/);
+await runTest('UI: main stacking context uses token scale and index defines z-index tiers', () => {
+  const appCss = readFileSync(new URL('../src/App.css', import.meta.url), 'utf8');
+  const indexCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+  assert.match(appCss, /\.main-content\s*\{[^}]*z-index: var\(--z-base\);/);
+  for (const tier of ['--z-base', '--z-sticky', '--z-nav', '--z-popover', '--z-toast']) {
+    assert.ok(indexCss.includes(`${tier}:`), tier);
+  }
 });
 
 await runTest('UI: floating notices clear bottom navigation through tablet widths', () => {
@@ -1432,14 +1441,14 @@ await runTest('UI: brand control text preserves light colors and passes dark con
       assert.ok(contrastRatio(foreground, background) >= 4.5, `${foreground} on ${background}`);
     }
   }
-  for (const file of ['components/AuthModal/AuthModal.css', 'components/CookieNotice/CookieNotice.css', 'components/ScrollTop/ScrollTop.css', 'components/ui/EmptyState.jsx', 'pages/Home/Home.jsx', 'pages/Account/Account.jsx', 'pages/Subjects/Subjects.jsx', 'pages/Upload/Upload.jsx', 'pages/FaqContact/FaqContact.jsx', 'pages/StudyHub/StudyHub.jsx', 'pages/StudyHub/StudyHub.css', 'pages/Quiz/Quiz.css', 'pages/Quiz/Quiz.jsx', 'pages/TakeAiQuiz/TakeAiQuiz.css', 'pages/TakeAiQuiz/TakeAiQuiz.jsx', 'pages/PaperView/PaperView.css', 'pages/SubjectPapers/SubjectPapers.css', 'components/ErrorBoundary/ErrorBoundary.css', 'components/InstallPrompt/InstallPrompt.css', 'pages/AdminPaste/AdminPaste.css']) {
+  for (const file of ['components/AuthModal/AuthModal.css', 'components/CookieNotice/CookieNotice.css', 'components/ScrollTop/ScrollTop.css', 'components/ui/StateDisplay.css', 'pages/Home/Home.css', 'pages/Account/Account.css', 'pages/Subjects/Subjects.css', 'pages/Upload/Upload.css', 'pages/FaqContact/FaqContact.css', 'pages/StudyHub/StudyHub.css', 'pages/Quiz/Quiz.css', 'pages/TakeAiQuiz/TakeAiQuiz.css', 'pages/PaperView/PaperView.css', 'pages/SubjectPapers/SubjectPapers.css', 'components/ErrorBoundary/ErrorBoundary.css', 'components/InstallPrompt/InstallPrompt.css', 'pages/AdminPaste/AdminPaste.css']) {
     const source = readFileSync(new URL(`../src/${file}`, import.meta.url), 'utf8');
     assert.ok(source.includes('var(--on-brand)'), file);
   }
   const admin = readFileSync(new URL('../src/pages/AdminPaste/AdminPaste.css', import.meta.url), 'utf8');
   for (const selector of ['.btn-copy-prompt:hover', '.btn-parse:hover', '.btn-result-action.primary:hover']) {
     const rule = admin.slice(admin.indexOf(`${selector} {`)).split('}')[0];
-    assert.ok(rule.includes('color: #ffffff;'), selector);
+    assert.ok(rule.includes('color: var(--on-brand);'), selector);
   }
 });
 
@@ -1454,55 +1463,71 @@ await runTest('UI: AI generation and selected topic use contrast-safe brand text
   assert.ok(chip.includes('color: var(--on-brand);'));
 });
 
-await runTest('UI: active mobile labels retain their gradient with readable text', () => {
+await runTest('UI: active mobile labels retain their gradient token with readable text', () => {
   const css = readFileSync(new URL('../src/components/Navbar/Navbar.css', import.meta.url), 'utf8');
   const rule = css.slice(css.indexOf('.mobile-nav-item.active {')).split('}')[0];
-  assert.ok(rule.includes('background: linear-gradient(135deg, #0ea5e9, #0d9488);'));
-  assert.ok(rule.includes('color: #0f172a;'));
+  assert.ok(rule.includes('background: var(--nav-mobile-active-bg);'));
+  assert.ok(rule.includes('color: var(--nav-mobile-active-ink);'));
+  const indexCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+  const ink = indexCss.match(/--nav-mobile-active-ink:\s*(#[\da-f]{6});/)[1];
   for (const background of ['#0ea5e9', '#0d9488']) {
-    assert.ok(contrastRatio('#0f172a', background) >= 4.5);
+    assert.ok(contrastRatio(ink, background) >= 4.5);
   }
 });
 
-await runTest('UI: offline and reconnected banners retain their colors with readable text', () => {
+await runTest('UI: offline and reconnected banners retain their token colors with readable text', () => {
   const source = readFileSync(new URL('../src/components/ui/OfflineBanner.jsx', import.meta.url), 'utf8');
-  assert.ok(source.includes("background: isOffline ? '#ef4444' : '#10b981'"));
-  assert.ok(source.includes("color: '#0f172a'"));
-  for (const background of ['#ef4444', '#10b981']) {
-    assert.ok(contrastRatio('#0f172a', background) >= 4.5);
+  const stateCss = readFileSync(new URL('../src/components/ui/StateDisplay.css', import.meta.url), 'utf8');
+  const indexCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+  assert.ok(source.includes('offline-banner--offline'));
+  assert.ok(stateCss.includes('var(--banner-offline-bg)'));
+  assert.ok(stateCss.includes('var(--banner-online-bg)'));
+  assert.ok(stateCss.includes('var(--banner-ink)'));
+  const ink = indexCss.match(/--banner-ink:\s*(#[\da-f]{6});/)[1];
+  const offBg = indexCss.match(/--banner-offline-bg:\s*(#[\da-f]{6});/)[1];
+  const onBg = indexCss.match(/--banner-online-bg:\s*(#[\da-f]{6});/)[1];
+  for (const background of [offBg, onBg]) {
+    assert.ok(contrastRatio(ink, background) >= 4.5);
   }
 });
 
-await runTest('UI: enabled AI Next button retains its gradient with readable text', () => {
+await runTest('UI: enabled AI Next button retains its gradient token with readable text', () => {
   const source = readFileSync(new URL('../src/pages/TakeAiQuiz/TakeAiQuiz.jsx', import.meta.url), 'utf8');
-  assert.ok(source.includes("style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#0f172a' }}"));
+  const css = readFileSync(new URL('../src/pages/TakeAiQuiz/TakeAiQuiz.css', import.meta.url), 'utf8');
+  const indexCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+  assert.ok(source.includes('btn-quiz-finish-next'));
   assert.ok(source.includes('aria-label="Quiz progress"'));
+  assert.ok(css.includes('background: var(--success-gradient);'));
+  assert.ok(css.includes('color: var(--on-success);'));
+  const onSuccess = indexCss.match(/--on-success:\s*(#[\da-f]{6});/)[1];
   for (const background of ['#10b981', '#059669']) {
-    assert.ok(contrastRatio('#0f172a', background) >= 4.5);
+    assert.ok(contrastRatio(onSuccess, background) >= 4.5);
   }
 });
 
-await runTest('UI: dashboard guest preview reuses its dark surfaces', () => {
+await runTest('UI: dashboard guest preview reuses semantic surfaces with accessible dark contrast', () => {
   const css = readFileSync(new URL('../src/pages/Dashboard/Dashboard.css', import.meta.url), 'utf8');
-  assert.match(css, /html\.dark \.study-dashboard__preview\s*\{\s*background: linear-gradient\(110deg, var\(--sd-bg\), var\(--sd-surface\)\);\s*border-color: var\(--sd-line\);/);
-  assert.ok(css.includes('background: linear-gradient(110deg, #eff6ff, #f0fdfa);'));
-  const tokens = css.match(/html\.dark \.study-dashboard\s*\{([\s\S]*?)\n\}/)[1];
-  const foreground = tokens.match(/--sd-muted:\s*(#[\da-f]{6});/)[1];
+  const indexCss = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+  assert.ok(css.includes('border: 1px solid var(--preview-border);'));
+  assert.ok(css.includes('background: var(--preview-gradient);'));
+  const dark = indexCss.match(/html\.dark\s*\{([\s\S]*?)\n\}/)[1];
+  const foreground = dark.match(/--text-subtle:\s*(#[\da-f]{6});/)[1];
   for (const name of ['bg', 'surface']) {
-    const background = tokens.match(new RegExp(`--sd-${name}:\\s*(#[\\da-f]{6});`))[1];
+    const background = dark.match(new RegExp(`--${name}:\\s*(#[\\da-f]{6});`))[1];
     assert.ok(contrastRatio(foreground, background) >= 4.5);
   }
 });
 
-await runTest('UI: account clear-data text reuses brighter danger color only in dark mode', () => {
+await runTest('UI: account clear-data text reuses brighter danger token only in dark mode', () => {
   const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
   assert.match(css, /\.account-clear-data\s*\{\s*color: var\(--danger\);/);
-  assert.match(css, /html\.dark \.account-clear-data\s*\{\s*color: #ef4444;/);
+  assert.match(css, /html\.dark \.account-clear-data\s*\{\s*color: var\(--danger-bright\);/);
   const source = readFileSync(new URL('../src/pages/Account/Account.jsx', import.meta.url), 'utf8');
   const button = source.slice(source.indexOf('onClick={handleClear}')).split('</button>')[0];
-  assert.ok(button.includes('className="account-clear-data"'));
+  assert.ok(button.includes('account-clear-data'));
   assert.equal(button.includes("color: 'var(--danger)'"), false);
-  assert.ok(contrastRatio('#ef4444', '#111827') >= 4.5);
+  const bright = css.match(/--danger-bright:\s*(#[\da-f]{6});/)[1];
+  assert.ok(contrastRatio(bright, '#111827') >= 4.5);
   assert.ok(contrastRatio('#dc2626', '#ffffff') >= 4.5);
 });
 

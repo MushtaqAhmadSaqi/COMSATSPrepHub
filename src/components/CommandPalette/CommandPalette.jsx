@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useMemo, useId } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { getCommandPaletteResults } from '../../utils/fuzzySearch';
 import { fetchSubjectsFromSupabase, fetchAllPapersFromSupabase } from '../../services/papersService';
 import { DEFAULT_SUBJECTS } from '../../constants/subjects';
@@ -7,8 +6,21 @@ import { usePrefersReducedMotion } from '../../utils/usePrefersReducedMotion';
 import AppIcon from '../ui/AppIcon';
 import './CommandPalette.css';
 
+function renderHighlightedLabel(text, query) {
+  const q = String(query || '').trim();
+  if (!q || !text) return text;
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = String(text).split(new RegExp(`(${escaped})`, 'ig'));
+  if (parts.length === 1) return text;
+  return parts.map((part, i) =>
+    i % 2 === 1
+      ? <mark key={i} className="cmd-palette__mark">{part}</mark>
+      : part
+  );
+}
+
 /**
- * CommandPalette — Ctrl/Cmd+K quick switcher dialog.
+ * CommandPalette — Ctrl/Cmd+K quick switcher built on native Top-Layer <dialog>.
  */
 export default function CommandPalette({
   isOpen,
@@ -25,14 +37,11 @@ export default function CommandPalette({
   const [subjects, setSubjects] = useState(DEFAULT_SUBJECTS);
   const [papers, setPapers] = useState([]);
   const hasLoadedCatalog = useRef(false);
+  const dialogRef = useRef(null);
   const inputRef = useRef(null);
   const previousFocusRef = useRef(null);
   const listRef = useRef(null);
   const listId = useId();
-
-  const panelVariants = prefersReduced
-    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
-    : { initial: { opacity: 0, y: 8, scale: 0.98 }, animate: { opacity: 1, y: 0, scale: 1 }, exit: { opacity: 0, y: 8, scale: 0.98 } };
 
   useEffect(() => {
     if (!isOpen || hasLoadedCatalog.current) return undefined;
@@ -62,19 +71,26 @@ export default function CommandPalette({
   }, [query, results]);
 
   useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return undefined;
     if (isOpen) {
       previousFocusRef.current = document.activeElement;
-      document.body.style.overflow = 'hidden';
+      if (!dialog.open && typeof dialog.showModal === 'function') {
+        dialog.showModal();
+      }
       setQuery('');
       setSelectedIndex(0);
       const timer = setTimeout(() => {
         if (inputRef.current) inputRef.current.focus();
-      }, 50);
+      }, 20);
       return () => clearTimeout(timer);
     }
-    document.body.style.overflow = '';
+    if (dialog.open && typeof dialog.close === 'function') {
+      dialog.close();
+    }
     if (previousFocusRef.current && typeof previousFocusRef.current.focus === 'function') {
       previousFocusRef.current.focus();
+      previousFocusRef.current = null;
     }
     return undefined;
   }, [isOpen]);
@@ -161,29 +177,22 @@ export default function CommandPalette({
   }, [results]);
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          className="cmd-palette-overlay"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-          onClick={onClose}
-        >
-          <motion.div
-            className="cmd-palette-panel"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Command palette"
-            variants={panelVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={handleKeyDown}
-          >
+    <dialog
+      ref={dialogRef}
+      className="native-dialog cmd-palette-dialog"
+      aria-label="Command palette"
+      onCancel={(e) => {
+        e.preventDefault();
+        onClose();
+      }}
+      onClick={(e) => {
+        if (e.target === dialogRef.current) onClose();
+      }}
+    >
+      <div
+        className="cmd-palette-panel"
+        onKeyDown={handleKeyDown}
+      >
             {/* Input Row */}
             <div className="cmd-palette__input-row">
               <AppIcon name="search" className="cmd-palette__search-icon" size={20} />
@@ -235,10 +244,10 @@ export default function CommandPalette({
                           <AppIcon name={item.icon} className="cmd-palette__item-icon" size={18} />
                           <span className="cmd-palette__item-text">
                             <span className="cmd-palette__item-label" translate={item.subjectCode ? 'no' : undefined}>
-                              {item.label}
+                              {renderHighlightedLabel(item.label, query)}
                             </span>
                             {item.meta && (
-                              <span className="cmd-palette__item-meta">{item.meta}</span>
+                              <span className="cmd-palette__item-meta">{renderHighlightedLabel(item.meta, query)}</span>
                             )}
                           </span>
                           {isSelected && (
@@ -267,9 +276,7 @@ export default function CommandPalette({
                 <span>Close</span>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
+    </dialog>
   );
 }

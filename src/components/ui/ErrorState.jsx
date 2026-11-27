@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import AppIcon from './AppIcon';
+import './StateDisplay.css';
 
 /**
  * ErrorState — displayed when a fetch/operation fails. Includes retry button.
@@ -12,22 +13,18 @@ import AppIcon from './AppIcon';
 export default function ErrorState({ message = 'Something went wrong. Please try again.', onRetry }) {
   return (
     <motion.div
-      className="error-state"
+      className="error-state ui-state-error"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.35 }}
-      style={{
-        textAlign: 'center',
-        padding: '3rem 1.5rem',
-      }}
     >
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem', color: 'var(--danger)' }}>
+      <div className="ui-state-icon ui-state-icon--danger">
         <AppIcon name="error_outline" size={46} />
       </div>
-      <p style={{ fontWeight: 700, fontSize: '1.125rem', color: 'var(--text)', marginBottom: '0.375rem' }}>
-        Oops! Something went wrong
+      <p className="ui-state-title ui-state-title--error">
+        Something went wrong
       </p>
-      <p style={{ fontSize: '0.875rem', color: 'var(--text-subtle)', marginBottom: '1.5rem', maxWidth: '360px', margin: '0 auto 1.5rem' }}>
+      <p className="ui-state-desc ui-state-desc--spaced">
         {message}
       </p>
       {onRetry && (
@@ -36,20 +33,7 @@ export default function ErrorState({ message = 'Something went wrong. Please try
           onClick={onRetry}
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.625rem 1.5rem',
-            minHeight: '44px',
-            borderRadius: '9999px',
-            border: '1.5px solid var(--border)',
-            background: 'var(--surface)',
-            color: 'var(--text)',
-            fontWeight: 700,
-            fontSize: '0.875rem',
-            cursor: 'pointer',
-          }}
+          className="ui-state-retry"
         >
           <AppIcon name="refresh" size={18} />
           Try Again

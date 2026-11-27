@@ -49,7 +49,7 @@ export default class ErrorBoundary extends Component {
             </div>
             <h2 className="error-boundary__title">Something went wrong</h2>
             <p className="error-boundary__message">
-              An unexpected error occurred. Don&apos;t worry — your study data is safe.
+              An unexpected error occurred. Don&apos;t worry, your study data is safe.
               Try recovering the view, reloading the page, or returning home.
             </p>
             {isDev && this.state.error && (
