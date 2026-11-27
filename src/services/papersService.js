@@ -34,9 +34,10 @@ export function clearPapersCache() {
  * Sanitizes user/route input before interpolating into PostgREST .or() filters
  * to prevent filter syntax injection.
  */
-function sanitizeFilterValue(val) {
+export function sanitizeFilterValue(val) {
   return String(val || '')
-    .replace(/[,()*%\\]/g, ' ')
+    .replace(/[.,()"'*%_\\]/g, ' ')
+    .replace(/[^A-Za-z0-9\s-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, 80);

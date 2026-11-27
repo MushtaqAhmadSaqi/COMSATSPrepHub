@@ -27,7 +27,7 @@ export function validatePasswordStrength(password = '') {
 /**
  * Normalizes auth error messages without enabling account enumeration.
  */
-function getReadableAuthError(error, mode = 'login') {
+export function getReadableAuthError(error, mode = 'login') {
   if (!error) return 'An error occurred. Please try again.';
   const raw = String(error.message || error).toLowerCase();
 

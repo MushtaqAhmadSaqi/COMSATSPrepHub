@@ -63,9 +63,25 @@ await runTest('GPA Engine: Sessional & Lab weighted calculation', () => {
 await runTest('Security Sanitize: Redirect & PDF URL validation blocks open redirects and untrusted hosts', () => {
   assert.equal(isSafeRedirectUrl('/dashboard', 'https://comsatsprephub.vercel.app'), true);
   assert.equal(isSafeRedirectUrl('//evil.example.com', 'https://comsatsprephub.vercel.app'), false);
+  assert.equal(isSafeRedirectUrl('/\\evil.example.com', 'https://comsatsprephub.vercel.app'), false);
   assert.equal(isSafeRedirectUrl('https://evil.example.com/phish', 'https://comsatsprephub.vercel.app'), false);
-  assert.equal(isSafePdfUrl('https://abcxyz.supabase.co/storage/v1/object/public/papers/csc211.pdf'), true);
-  assert.equal(isSafePdfUrl('http://abcxyz.supabase.co/insecure.pdf'), false);
+  assert.equal(
+    isSafePdfUrl(
+      'https://abcxyz.supabase.co/storage/v1/object/public/papers/csc211.pdf',
+      'https://comsatsprephub.vercel.app',
+      'https://abcxyz.supabase.co'
+    ),
+    true
+  );
+  assert.equal(
+    isSafePdfUrl(
+      'https://otherproj.supabase.co/storage/v1/object/public/papers/csc211.pdf',
+      'https://comsatsprephub.vercel.app',
+      'https://abcxyz.supabase.co'
+    ),
+    false
+  );
+  assert.equal(isSafePdfUrl('http://abcxyz.supabase.co/insecure.pdf', 'https://comsatsprephub.vercel.app', 'https://abcxyz.supabase.co'), false);
   assert.equal(isSafePdfUrl('https://untrusted-site.org/malware.pdf'), false);
 });
 

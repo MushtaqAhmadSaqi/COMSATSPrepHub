@@ -29,6 +29,69 @@ export function sendError(res, status, error, extra = {}) {
   return res.status(status).json({ error, ...extra });
 }
 
+/**
+ * Verifies the Origin header (when supplied by a browser) against trusted app origins.
+ * Rejects untrusted cross-site origins and null origins with HTTP 403.
+ */
+export function verifyTrustedOrigin(req) {
+  const rawOrigin = req?.headers?.origin || req?.headers?.Origin;
+  if (!rawOrigin) {
+    return { ok: true };
+  }
+
+  const origin = String(rawOrigin).trim();
+  if (!origin || origin === 'null') {
+    return { ok: false, status: 403, error: 'Untrusted request origin.' };
+  }
+
+  let parsed;
+  try {
+    parsed = new URL(origin);
+  } catch {
+    return { ok: false, status: 403, error: 'Untrusted request origin.' };
+  }
+
+  const allowedOrigins = new Set(['https://comsatsprephub.vercel.app']);
+  const envUrls = [
+    process.env.VITE_APP_URL,
+    process.env.SITE_URL,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '',
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : '',
+    ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [])
+  ];
+
+  for (const candidate of envUrls) {
+    const trimmed = String(candidate || '').trim();
+    if (!trimmed) continue;
+    try {
+      allowedOrigins.add(new URL(trimmed).origin);
+    } catch {
+      // Ignore invalid env URL
+    }
+  }
+
+  const isLoopback =
+    parsed.protocol === 'http:' &&
+    (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1');
+
+  const reqHost = String(req?.headers?.host || '').trim().toLowerCase();
+  const isTrustedDeploymentHost =
+    reqHost === 'comsatsprephub.vercel.app' ||
+    (reqHost.endsWith('.vercel.app') && !reqHost.includes('..'));
+  const matchesHost =
+    isTrustedDeploymentHost &&
+    parsed.protocol === 'https:' &&
+    parsed.host.toLowerCase() === reqHost;
+
+  if (allowedOrigins.has(parsed.origin) || isLoopback || matchesHost) {
+    return { ok: true };
+  }
+
+  return { ok: false, status: 403, error: 'Untrusted request origin.' };
+}
+
 export function isRateLimitConfigured() {
   return Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
 }

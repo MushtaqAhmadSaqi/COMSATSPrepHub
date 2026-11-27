@@ -3,6 +3,7 @@
 
 import {
   sanitizeField,
+  verifyTrustedOrigin,
   checkRateLimit,
   requireUser,
   sendError
@@ -102,6 +103,11 @@ export function validateOcrPayload(raw) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return sendError(res, 405, 'Method not allowed');
+  }
+
+  const originCheck = verifyTrustedOrigin(req);
+  if (!originCheck.ok) {
+    return sendError(res, originCheck.status, originCheck.error);
   }
 
   const image = parseImageDataUrl(req.body?.imageBase64);

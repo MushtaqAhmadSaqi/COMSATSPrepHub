@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useId } from 'react';
+import DOMPurify from 'dompurify';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import { resolveDisplayMath } from './mathRenderSafety.js';
@@ -52,7 +53,10 @@ export function renderKaTeX(formula, isDisplay = false) {
     return katex.renderToString(normalizedFormula, {
       displayMode: isDisplay,
       throwOnError: true,
-      strict: false
+      strict: false,
+      trust: false,
+      maxSize: 10,
+      maxExpand: 1000
     });
   } catch {
     return null;
@@ -261,6 +265,7 @@ function DisplayMath({ html, formula }) {
  * Component to render a Mermaid diagram SVG cleanly with fallback.
  */
 function MermaidDiagram({ chart }) {
+  const reactId = useId();
   const containerRef = useRef(null);
   const [svgContent, setSvgContent] = useState('');
   const [renderFailed, setRenderFailed] = useState(false);
@@ -279,13 +284,17 @@ function MermaidDiagram({ chart }) {
 
   useEffect(() => {
     let isMounted = true;
-    const uniqueId = `mermaid-svg-${Math.random().toString(36).slice(2, 9)}`;
+    const safeReactSuffix = reactId.replace(/[^a-zA-Z0-9_-]/g, '');
+    const uniqueId = `mermaid-svg-${safeReactSuffix}`;
 
     getMermaid(isDark)
       .then((mermaid) => mermaid.render(uniqueId, chart.trim()))
       .then(({ svg }) => {
         if (isMounted) {
-          setSvgContent(svg);
+          const sanitizedSvg = DOMPurify.sanitize(svg, {
+            USE_PROFILES: { svg: true, svgFilters: true }
+          });
+          setSvgContent(sanitizedSvg);
           setRenderFailed(false);
         }
       })

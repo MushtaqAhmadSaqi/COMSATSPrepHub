@@ -3,11 +3,6 @@ import { logger } from '../../utils/logger';
 import AppIcon from '../ui/AppIcon';
 import './ErrorBoundary.css';
 
-const isDev =
-  typeof import.meta !== 'undefined' &&
-  import.meta.env &&
-  Boolean(import.meta.env.DEV);
-
 /**
  * ErrorBoundary — catches React rendering errors and shows a friendly fallback.
  * Uses class component since getDerivedStateFromError is only available in classes.
@@ -52,7 +47,7 @@ export default class ErrorBoundary extends Component {
               An unexpected error occurred. Don&apos;t worry, your study data is safe.
               Try recovering the view, reloading the page, or returning home.
             </p>
-            {isDev && this.state.error && (
+            {import.meta.env.DEV && this.state.error && (
               <details className="error-boundary__details">
                 <summary>Developer error details</summary>
                 <pre>{String(this.state.error?.message || this.state.error)}</pre>

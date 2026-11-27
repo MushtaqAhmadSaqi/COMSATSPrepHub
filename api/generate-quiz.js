@@ -3,6 +3,7 @@
 
 import {
   sanitizeField,
+  verifyTrustedOrigin,
   checkRateLimit,
   requireUser,
   reserveAiQuizUsage,
@@ -134,13 +135,59 @@ export default async function handler(req, res) {
     return sendError(res, 405, 'Method not allowed');
   }
 
-  const body = req.body && typeof req.body === 'object' ? req.body : {};
+  const originCheck = verifyTrustedOrigin(req);
+  if (!originCheck.ok) {
+    return sendError(res, originCheck.status, originCheck.error);
+  }
+
+  if (req.body !== undefined && (typeof req.body !== 'object' || req.body === null || Array.isArray(req.body))) {
+    return sendError(res, 400, 'Invalid JSON request payload.');
+  }
+
+  const body = req.body || {};
+  if (body.subject !== undefined && typeof body.subject !== 'string') {
+    return sendError(res, 400, 'Invalid subject format.');
+  }
+  if (typeof body.subject === 'string' && body.subject.length > 200) {
+    return sendError(res, 400, 'Subject exceeds maximum length.');
+  }
+  if (body.subjectCode !== undefined && typeof body.subjectCode !== 'string') {
+    return sendError(res, 400, 'Invalid subjectCode format.');
+  }
+  if (typeof body.subjectCode === 'string' && body.subjectCode.length > 40) {
+    return sendError(res, 400, 'Subject code exceeds maximum length.');
+  }
+  const rawTopic = body.topic ?? body.topics;
+  if (rawTopic !== undefined && typeof rawTopic !== 'string') {
+    return sendError(res, 400, 'Invalid topic format.');
+  }
+  if (typeof rawTopic === 'string' && rawTopic.length > 300) {
+    return sendError(res, 400, 'Topic exceeds maximum length.');
+  }
+  if (body.questionType !== undefined && !ALLOWED_QUESTION_TYPES.has(body.questionType)) {
+    return sendError(res, 400, 'Invalid questionType.');
+  }
+  if (body.difficulty !== undefined && !ALLOWED_DIFFICULTIES.has(body.difficulty)) {
+    return sendError(res, 400, 'Invalid difficulty.');
+  }
+
+  let safeQuestionCount = 10;
+  if (body.questionCount !== undefined && body.questionCount !== null) {
+    const parsedCount =
+      typeof body.questionCount === 'string' && body.questionCount.trim() === ''
+        ? NaN
+        : Number(body.questionCount);
+    if (!Number.isInteger(parsedCount) || parsedCount < 1 || parsedCount > 20) {
+      return sendError(res, 400, 'questionCount must be an integer between 1 and 20.');
+    }
+    safeQuestionCount = parsedCount;
+  }
+
   const subject = sanitizeField(body.subject, 120);
   const subjectCode = sanitizeField(body.subjectCode, 20);
-  const topic = sanitizeField(body.topic || body.topics, 140);
-  const questionType = ALLOWED_QUESTION_TYPES.has(body.questionType) ? body.questionType : 'mcq';
-  const difficulty = ALLOWED_DIFFICULTIES.has(body.difficulty) ? body.difficulty : 'Medium';
-  const safeQuestionCount = Math.min(Math.max(Number(body.questionCount) || 10, 1), 20);
+  const topic = sanitizeField(rawTopic, 140);
+  const questionType = body.questionType || 'mcq';
+  const difficulty = body.difficulty || 'Medium';
 
   if (!subject) {
     return sendError(res, 400, 'Subject is required.');
